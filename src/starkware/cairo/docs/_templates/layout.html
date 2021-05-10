@@ -1,0 +1,19 @@
+{% extends "!layout.html" %}
+
+{% set theme_show_relbar_bottom = true %}
+
+{%- block extrahead %}
+{{ super() }}
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0ZJLBV4KE2"></script>
+<script>
+    $(document).ready(function () {
+        $('h1.logo > a').attr({ href: 'https://cairo-lang.org/' });
+    });
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-0ZJLBV4KE2');
+</script>
+{% endblock %}

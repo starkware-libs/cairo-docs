@@ -1,5 +1,6 @@
 add_subdirectory(apps)
 add_subdirectory(bootloader)
 add_subdirectory(common)
+add_subdirectory(docs)
 add_subdirectory(lang)
 add_subdirectory(sharp)

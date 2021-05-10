@@ -1,5 +1,164 @@
 [
     {
+        "dependencies": [
+            {
+                "installed_version": "2021.1",
+                "key": "pytz",
+                "package_name": "pytz",
+                "required_version": ">=2015.7"
+            }
+        ],
+        "package": {
+            "installed_version": "2.9.1",
+            "key": "babel",
+            "package_name": "Babel"
+        }
+    },
+    {
+        "dependencies": [
+            {
+                "installed_version": "1.1.1",
+                "key": "markupsafe",
+                "package_name": "MarkupSafe",
+                "required_version": ">=0.23"
+            }
+        ],
+        "package": {
+            "installed_version": "2.11.3",
+            "key": "jinja2",
+            "package_name": "Jinja2"
+        }
+    },
+    {
+        "dependencies": [],
+        "package": {
+            "installed_version": "1.1.1",
+            "key": "markupsafe",
+            "package_name": "MarkupSafe"
+        }
+    },
+    {
+        "dependencies": [],
+        "package": {
+            "installed_version": "2.9.0",
+            "key": "pygments",
+            "package_name": "Pygments"
+        }
+    },
+    {
+        "dependencies": [
+            {
+                "installed_version": "2.11.3",
+                "key": "jinja2",
+                "package_name": "Jinja2",
+                "required_version": ">=2.3"
+            },
+            {
+                "installed_version": "2.9.0",
+                "key": "pygments",
+                "package_name": "Pygments",
+                "required_version": ">=2.0"
+            },
+            {
+                "installed_version": "0.7.12",
+                "key": "alabaster",
+                "package_name": "alabaster",
+                "required_version": ">=0.7,<0.8"
+            },
+            {
+                "installed_version": "2.9.1",
+                "key": "babel",
+                "package_name": "babel",
+                "required_version": ">=1.3"
+            },
+            {
+                "installed_version": "0.16",
+                "key": "docutils",
+                "package_name": "docutils",
+                "required_version": ">=0.12,<0.17"
+            },
+            {
+                "installed_version": "1.2.0",
+                "key": "imagesize",
+                "package_name": "imagesize",
+                "required_version": null
+            },
+            {
+                "installed_version": "20.4",
+                "key": "packaging",
+                "package_name": "packaging",
+                "required_version": null
+            },
+            {
+                "installed_version": "2.25.1",
+                "key": "requests",
+                "package_name": "requests",
+                "required_version": ">=2.5.0"
+            },
+            {
+                "installed_version": "47.1.1",
+                "key": "setuptools",
+                "package_name": "setuptools",
+                "required_version": null
+            },
+            {
+                "installed_version": "2.1.0",
+                "key": "snowballstemmer",
+                "package_name": "snowballstemmer",
+                "required_version": ">=1.1"
+            },
+            {
+                "installed_version": "1.0.2",
+                "key": "sphinxcontrib-applehelp",
+                "package_name": "sphinxcontrib-applehelp",
+                "required_version": null
+            },
+            {
+                "installed_version": "1.0.2",
+                "key": "sphinxcontrib-devhelp",
+                "package_name": "sphinxcontrib-devhelp",
+                "required_version": null
+            },
+            {
+                "installed_version": "1.0.3",
+                "key": "sphinxcontrib-htmlhelp",
+                "package_name": "sphinxcontrib-htmlhelp",
+                "required_version": null
+            },
+            {
+                "installed_version": "1.0.1",
+                "key": "sphinxcontrib-jsmath",
+                "package_name": "sphinxcontrib-jsmath",
+                "required_version": null
+            },
+            {
+                "installed_version": "1.0.3",
+                "key": "sphinxcontrib-qthelp",
+                "package_name": "sphinxcontrib-qthelp",
+                "required_version": null
+            },
+            {
+                "installed_version": "1.1.4",
+                "key": "sphinxcontrib-serializinghtml",
+                "package_name": "sphinxcontrib-serializinghtml",
+                "required_version": null
+            }
+        ],
+        "package": {
+            "installed_version": "3.5.4",
+            "key": "sphinx",
+            "package_name": "Sphinx"
+        }
+    },
+    {
+        "dependencies": [],
+        "package": {
+            "installed_version": "0.7.12",
+            "key": "alabaster",
+            "package_name": "alabaster"
+        }
+    },
+    {
         "dependencies": [],
         "package": {
             "installed_version": "20.2.0",
@@ -52,6 +211,14 @@
             "installed_version": "0.11.0",
             "key": "cytoolz",
             "package_name": "cytoolz"
+        }
+    },
+    {
+        "dependencies": [],
+        "package": {
+            "installed_version": "0.16",
+            "key": "docutils",
+            "package_name": "docutils"
         }
     },
     {
@@ -302,6 +469,14 @@
         }
     },
     {
+        "dependencies": [],
+        "package": {
+            "installed_version": "1.2.0",
+            "key": "imagesize",
+            "package_name": "imagesize"
+        }
+    },
+    {
         "dependencies": [
             {
                 "installed_version": "3.4.0",
@@ -343,6 +518,14 @@
             "installed_version": "0.7.0a1",
             "key": "ipfshttpclient",
             "package_name": "ipfshttpclient"
+        }
+    },
+    {
+        "dependencies": [],
+        "package": {
+            "installed_version": "4.3.21",
+            "key": "isort",
+            "package_name": "isort"
         }
     },
     {
@@ -697,6 +880,14 @@
         }
     },
     {
+        "dependencies": [],
+        "package": {
+            "installed_version": "2021.1",
+            "key": "pytz",
+            "package_name": "pytz"
+        }
+    },
+    {
         "dependencies": [
             {
                 "installed_version": "2020.12.5",
@@ -758,6 +949,62 @@
             "installed_version": "1.15.0",
             "key": "six",
             "package_name": "six"
+        }
+    },
+    {
+        "dependencies": [],
+        "package": {
+            "installed_version": "2.1.0",
+            "key": "snowballstemmer",
+            "package_name": "snowballstemmer"
+        }
+    },
+    {
+        "dependencies": [],
+        "package": {
+            "installed_version": "1.0.2",
+            "key": "sphinxcontrib-applehelp",
+            "package_name": "sphinxcontrib-applehelp"
+        }
+    },
+    {
+        "dependencies": [],
+        "package": {
+            "installed_version": "1.0.2",
+            "key": "sphinxcontrib-devhelp",
+            "package_name": "sphinxcontrib-devhelp"
+        }
+    },
+    {
+        "dependencies": [],
+        "package": {
+            "installed_version": "1.0.3",
+            "key": "sphinxcontrib-htmlhelp",
+            "package_name": "sphinxcontrib-htmlhelp"
+        }
+    },
+    {
+        "dependencies": [],
+        "package": {
+            "installed_version": "1.0.1",
+            "key": "sphinxcontrib-jsmath",
+            "package_name": "sphinxcontrib-jsmath"
+        }
+    },
+    {
+        "dependencies": [],
+        "package": {
+            "installed_version": "1.0.3",
+            "key": "sphinxcontrib-qthelp",
+            "package_name": "sphinxcontrib-qthelp"
+        }
+    },
+    {
+        "dependencies": [],
+        "package": {
+            "installed_version": "1.1.4",
+            "key": "sphinxcontrib-serializinghtml",
+            "package_name": "sphinxcontrib-serializinghtml"
         }
     },
     {

@@ -17,11 +17,3 @@ RUN ctest -V
 
 WORKDIR /app/
 RUN src/starkware/cairo/lang/package_test/run_test.sh
-
-# Build the Visual Studio Code extension.
-WORKDIR /app/src/starkware/cairo/lang/ide/vscode-cairo
-RUN npm install -g vsce
-RUN npm install
-RUN vsce package
-
-WORKDIR /app/
