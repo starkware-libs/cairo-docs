@@ -35,4 +35,5 @@ of "How Cairo Works").
 
     hello_cairo/index
     how_cairo_works/index
+    reference/index
     sharp
