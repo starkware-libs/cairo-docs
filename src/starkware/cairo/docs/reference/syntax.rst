@@ -137,3 +137,21 @@ Option (3) unpacks the return value into ``ret1`` and ``ret2``.
 
 Option (4) is a tail recursion -- after ``foo`` returns, the calling function returns the
 same return value.
+
+Comments
+--------
+
+Text can be inserted into the body of Cairo programs to document notes about the code. 
+The commented text is flagged with the ``#`` symbol. Text after this symbol is ignored by the compiler and will not be executed.
+
+.. code-block:: cairo
+
+    # Comments can be placed before, after or within code blocks.
+    func main():
+        # The hash symbol signals that this line is a comment.
+        # This line will also not run as code. The next line will.
+        let x = 9
+        return ()
+    end
+
+Comments must be contained within a single line, multiline comments are not enabled.
