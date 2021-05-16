@@ -1,8 +1,8 @@
 import os
 
+from starkware.cairo.common.cairo_function_runner import CairoFunctionRunner
 from starkware.cairo.common.dict import DictManager
 from starkware.cairo.common.small_merkle_tree import MerkleTree
-from starkware.cairo.common.test_utils import CairoFunctionRunner
 from starkware.cairo.lang.builtins.hash.hash_builtin_runner import CELLS_PER_HASH
 from starkware.cairo.lang.compiler.cairo_compile import compile_cairo_files
 from starkware.native_crypto.native_crypto import pedersen_hash
@@ -29,13 +29,13 @@ def test_cairo_merkle_multi_update():
     dict_tracker.data[3] = 31
 
     runner.run(
-        'small_merkle_tree', runner.hash_builtin.base, squashed_dict_start, squashed_dict_end,
+        'small_merkle_tree', runner.pedersen_builtin.base, squashed_dict_start, squashed_dict_end,
         MERKLE_HEIGHT, hint_locals=dict(__dict_manager=dict_manager))
     hash_ptr, prev_root, new_root = runner.get_return_values(3)
     N_MERKLE_TREES = 2
     N_HASHES_PER_TREE = 3
     assert hash_ptr == \
-        runner.hash_builtin.base + N_MERKLE_TREES * N_HASHES_PER_TREE * CELLS_PER_HASH
+        runner.pedersen_builtin.base + N_MERKLE_TREES * N_HASHES_PER_TREE * CELLS_PER_HASH
     assert prev_root == pedersen_hash(pedersen_hash(0, 10), pedersen_hash(20, 30))
     assert new_root == pedersen_hash(pedersen_hash(0, 11), pedersen_hash(20, 31))
 

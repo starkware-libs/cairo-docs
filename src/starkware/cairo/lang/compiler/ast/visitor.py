@@ -37,6 +37,7 @@ class Visitor:
                 implicit_arguments=elm.implicit_arguments,
                 returns=elm.returns,
                 code_block=self.visit(elm.code_block),
+                decorators=elm.decorators,
             )
 
     def visit_CairoModule(self, module: CairoModule):
@@ -66,7 +67,8 @@ class Visitor:
         """
         Default behavior for visitor if 'obj' type isn't handled. By default, raise exception.
         """
-        raise NotImplementedError(f'No handler found for type {type(obj).__name__}.')
+        raise NotImplementedError(
+            f'No handler found for type {type(obj).__name__} in {type(self).__name__}.')
 
     @contextmanager
     def scoped(self, new_scope: ScopedName, parent: Optional[AstNode]):
