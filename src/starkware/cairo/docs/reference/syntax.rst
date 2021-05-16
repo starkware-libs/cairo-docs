@@ -11,7 +11,7 @@ Text can be inserted into the body of Cairo programs to document notes about the
 The commented text is annotated with the ``#`` character. Text after this character is ignored by 
 the compiler.
 
-.. tested-code:: cairo
+.. tested-code:: cairo syntax_comments
 
     # Comments can be placed before, after or within code blocks.
     func main():
