@@ -137,3 +137,25 @@ Option (3) unpacks the return value into ``ret1`` and ``ret2``.
 
 Option (4) is a tail recursion -- after ``foo`` returns, the calling function returns the
 same return value.
+
+Library imports
+---------------
+
+Library functions are imported at the top of the file, below ``Builtins`` if they are used. The 
+statement describes where in the library the function is ``from`` and which function to ``import``.
+Multiple functions the same library can be separated by commas. Functions from different libraries 
+are imported on a new line.
+
+.. tested-code:: cairo syntax_library_imports
+
+    # Builtins would be included here
+    from starkware.cairo.common.math import assert_not_zero, assert_not_equal
+    from starkware.cairo.common.registers import get_ap
+
+    func main():
+        assert_not_zero(10)
+        assert_not_equal(2,3)
+        let empty_memory_slot = get_ap()
+        return ()
+    end
+
