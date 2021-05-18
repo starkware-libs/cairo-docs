@@ -4,6 +4,26 @@ Syntax
 This page summarizes the syntax of Cairo. For more information, refer to the "Hello, Cairo"
 and "How Cairo Works" tutorials.
 
+Comments
+--------
+
+Text can be inserted into the body of Cairo programs to document notes about the code.
+The commented text is annotated with the ``#`` character. Text after this character is ignored by
+the compiler.
+
+.. tested-code:: cairo syntax_comments
+
+    # Comments can be placed before, after or within code blocks.
+    func main():
+        # The hash character signals that this line is a comment.
+        # This line will also not run as code. The next line will.
+        let x = 9
+        return ()
+    end
+
+Each comment spreads until the end of the line. In order to write a multiline comment, prefix all
+the comment lines with ``#``.
+
 Type system
 -----------
 
