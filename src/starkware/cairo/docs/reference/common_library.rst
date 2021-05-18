@@ -1,9 +1,37 @@
 Common Library
 ==============
 
-This page summarizes library functions available within Cairo. 
+This page summarizes library functions available within Cairo.
 
-Where a library function requires an implicit argument, passing the 
+The library functions are arranged alphabetically and cover the
+following topics:
+
+- dictionary
+    - :ref:`common_library_dict_access`
+    - :ref:`common_library_dict`
+    - :ref:`common_library_default_dict`
+    - :ref:`common_library_squash_dict`
+- array
+    - :ref:`common_library_find_element`
+- math
+    - :ref:`common_library_math`
+- hash
+    - :ref:`common_library_hash`
+    - :ref:`common_library_hash_chain`
+    - :ref:`common_library_hash_state`
+    - :ref:`common_library_small_merkle_tree`
+    - :ref:`common_library_merkle_update`
+    - :ref:`common_library_merkle_multi_update`
+- signature
+    - :ref:`common_library_signature`
+- memory and state
+    - :ref:`common_library_alloc`
+    - :ref:`common_library_registers`
+    - :ref:`common_library_cairo_builtins`
+    - :ref:`common_library_memcpy`
+    - :ref:`common_library_serialize`
+
+Where a library function requires an implicit argument, passing the
 argument is only required if the function lacks that argument. Example
 implicit arguments might be ``range_check_ptr`` or ``dict_ptr``.
 
@@ -53,7 +81,7 @@ Import from this library by replacing ``*`` with the function name.
 ``HashBuiltin`` function
 ************************
 
-Returns a representation of a ``HashBuiltin struct``, specifying the 
+Returns a representation of a ``HashBuiltin struct``, specifying the
 hash builtin memory structure.
 
 .. tested-code:: cairo library_builtins_hashbuiltin
@@ -63,8 +91,8 @@ hash builtin memory structure.
 
 ``SignatureBuiltin`` function
 *****************************
-    
-Returns a representation of a ``SignatureBuiltin struct``, specifying 
+
+Returns a representation of a ``SignatureBuiltin struct``, specifying
 the signature builtin memory structure.
 
 .. tested-code:: cairo library_builtins_signaturebuiltin
@@ -74,8 +102,8 @@ the signature builtin memory structure.
 
 ``CheckpointsBuiltin`` function
 *******************************
-    
-Returns a representation of a ``CheckpointsBuiltin struct``, specifying 
+
+Returns a representation of a ``CheckpointsBuiltin struct``, specifying
 the checkpoint builtin memory structure.
 
 .. tested-code:: cairo library_builtins_checkpointsbuiltin
@@ -97,7 +125,7 @@ Import from this library by replacing ``*`` with the function name.
 ``default_dict_new()`` function
 *******************************
 
-Returns a new dictionary, with a default value. Must be followed by a 
+Returns a new dictionary, with a default value. Must be followed by a
 call to ``default_dict_finalize()``.
 
 .. tested-code:: cairo library_default_dict_new
@@ -137,7 +165,7 @@ Returns a new dictionary.
 ``dict_read()`` function
 ************************
 
-Returns the value of a dictionary read. Must be passed an implicit 
+Returns the value of a dictionary read. Must be passed an implicit
 argument pointing to the most recent version of the dictionary.
 
 .. tested-code:: cairo library_dict_read
@@ -147,37 +175,37 @@ argument pointing to the most recent version of the dictionary.
 ``dict_write()`` function
 *************************
 
-Writes a value to the dictionary, overriding the existing value. Must 
-be passed an implicit argument pointing to the most recent version of 
-the dictionary. No values are returned. 
+Writes a value to the dictionary, overriding the existing value. Must
+be passed an implicit argument pointing to the most recent version of
+the dictionary. No values are returned.
 
 .. tested-code:: cairo library_dict_write
 
     dict_write{dict_ptr : DictAccess*}(
-        key : felt, 
+        key : felt,
         new_value : felt)
 
 ``dict_update()`` function
 **************************
 
-Updates the value of a particular key in a dictionary. The old value 
-must be provided. Must be passed an implicit argument pointing to 
+Updates the value of a particular key in a dictionary. The old value
+must be provided. Must be passed an implicit argument pointing to
 the most recent version of the dictionary. No values are returned.
 
 .. tested-code:: cairo library_dict_update
 
     dict_update{dict_ptr : DictAccess*}(
-        key : felt, 
-        prev_value : felt, 
+        key : felt,
+        prev_value : felt,
         new_value : felt)
 
 ``dict_squash()`` function
 **************************
 
 Returns a dictionary that represents the the final state of an altered
-dictionary. A dictionary that has been updated and that has had all 
-intermediate steps removed. The squashed dict contains one value per 
-key. The function requires a range check pointer as an implicit 
+dictionary. A dictionary that has been updated and that has had all
+intermediate steps removed. The squashed dict contains one value per
+key. The function requires a range check pointer as an implicit
 argument.
 
 .. tested-code:: cairo library_dict_squash
@@ -185,7 +213,7 @@ argument.
     let (squashed_dict_start, squashed_dict_end) = dict_squash(
         dict_accesses_start : DictAccess*
         dict_accesses_end : DictAccess*)
-    
+
 .. _common_library_dict:
 
 
@@ -324,7 +352,7 @@ Returns TODO
 .. tested-code:: cairo library_hash_update_single
 
     TODO
-    
+
 .. _common_library_hash_state:
 
 ``math`` library
@@ -339,128 +367,178 @@ Import from this library by replacing ``*`` with the function name.
 ``assert_not_zero()`` function
 ******************************
 
-Returns TODO
+Verifies that value != 0. The proof will fail otherwise.
 
 .. tested-code:: cairo library_assert_not_zero
 
-    TODO
+    assert_not_zero(value)
 
 ``assert_not_equal()`` function
 *******************************
 
-Returns TODO
+Verifies that a != b. The proof will fail otherwise.
 
 .. tested-code:: cairo library_assert_not_equal
 
-    TODO
+    assert_not_zero(a, b)
 
 ``assert_nn()`` function
 ************************
 
-Returns TODO
+Verifies that a >= 0 (or more precisely 0 <= a < RANGE_CHECK_BOUND).
+Informally, that a is non-negative ("nn"). The proof will fail
+otherwise. The function requires the implicit argument
+``range_check_ptr``.
 
 .. tested-code:: cairo library_assert_nn
 
-    TODO
+    assert_nn(a):
 
 ``assert_le()`` function
 ************************
 
-Returns TODO
+Verifies that a <= b (or more precisely 0 <= b - a < RANGE_CHECK_BOUND).
+Informally, that a is less than or equal to ("le") b. The proof will
+fail otherwise. The function requires the implicit argument
+``range_check_ptr``.
 
 .. tested-code:: cairo library_assert_le
 
-    TODO
+    assert_le(a, b)
 
 ``assert_lt()`` function
 ************************
 
-Returns TODO
+# Verifies that a <= b - 1 (or more precisely 0 <= b - 1 - a <
+RANGE_CHECK_BOUND). Informally, the a is less than ("lt") b. The proof
+will fail otherwise. The function requires the implicit argument
+``range_check_ptr``.
 
 .. tested-code:: cairo library_assert_lt
 
-    TODO
+    assert_lt(a, b)
 
 ``assert_nn_le()`` function
 ***************************
 
-Returns TODO
+Verifies that 0 <= a <= b. Informally that a and b are non-negative
+("nn") and that a is less than or equal to b. The proof will fail
+otherwise. The function requires the implicit argument
+``range_check_ptr``.
 
 .. tested-code:: cairo library_assert_nn_le
 
-    TODO
+    assert_nn_le(a, b)
 
 ``assert_in_range()`` function
 ******************************
 
-Returns TODO
+Verifies that value is in the range [lower, upper). Informally, that
+value is both greater than or equal to lower and less than upper. The
+proof will fail otherwise. The function requires the implicit argument
+``range_check_ptr``.
 
 .. tested-code:: cairo library_assert_in_range
 
-    TODO
+    assert_in_range(value, upper, lower)
 
 ``assert_le_250_bit()`` function
 ********************************
 
-Returns TODO
+Verifies that a and b are in the range [0, 2**250). Informally, that
+both a and b are non-negative and less that the largest number possible
+in a binary system with 250 bits. The proof will fail otherwise. The
+function requires the implicit argument ``range_check_ptr``.
 
 .. tested-code:: cairo library_assert_le_250_bit
 
-    TODO
+    assert_le_250_bit(a, b)
 
 ``split_felt()`` function
 *************************
 
-Returns TODO
+Splits the unsigned integer lift of a field element into the higher 128
+bit and lower 128 bit and returns both numbers. The unsigned integer
+lift is the unique integer in the range [0, PRIME) that represents the
+field element.
+
+Informally, the function accepts a value and returns two numbers that
+uniquely represent that value within the field element system that
+Cairo uses.
+
+For example, if ``value`` = 17 * 2^128 + 8, then ``high`` = 17 and
+``low`` = 8.
+
+The function requires the implicit argument ``range_check_ptr``.
 
 .. tested-code:: cairo library_split_felt
 
-    TODO
+    let (high, low) = split_felt(value)
 
 ``assert_le_felt()`` function
 *****************************
 
-Returns TODO
+Verifies that the unsigned integer lift (as a number in the range
+[0, PRIME)) of a is lower than or equal to that of b. Informally,
+that the integer of the larger component of the field element is less
+than the integer of the smaller component. The proof will fail
+otherwise. The function requires the implicit argument
+``range_check_ptr``.
+
+For example, the proof for assert_le_felt(17 * 2^128 + 8) would faile
+because because 17>8.
 
 .. tested-code:: cairo library_assert_le_felt
 
-    TODO
+    assert_le_felt(value)
 
 ``abs_value()`` function
 ************************
 
-Returns TODO
+Returns the absolute value of a value. Informally, the function returns
+the value provided with any negative sign removed. The function requires
+the implicit argument ``range_check_ptr``.
+
 
 .. tested-code:: cairo library_abs_value
 
-    TODO
+    abs_value(value)
 
 ``sign()`` function
 *******************
 
-Returns TODO
+Returns the sign of value: -1, 0 or 1. Informally, for positive numbers
+the function returns 1, for negative numbers the function returns -1 and
+for zero the function returns 0. The function requires the implicit
+argument ``range_check_ptr``.
 
 .. tested-code:: cairo library_sign
 
-    TODO
+    let value_sign = sign(value)
 
 ``unsigned_div_rem()`` function
 *******************************
 
-Returns TODO
+Returns q and r such that 0 <= q < rc_bound, 0 <= r < div and value
+= q * div + r. Informally, the function returns the quotient and
+remainder for a value and divisor, ignoring negative values. The
+function requires the implicit argument ``range_check_ptr``.
 
 .. tested-code:: cairo library_unsigned_div_rem
 
-    TODO
+    let (unsigned_quotient, remainder) = unsigned_div_rem(value, divisor)
 
 ``signed_div_rem()`` function
 *****************************
 
-Returns TODO
+Returns q and r such that 0 <= q < rc_bound, 0 <= r < div and value
+= q * div + r. Informally, the function returns the quotient and
+remainder for a value and divisor, ignoring negative values. The
+function requires the implicit argument ``range_check_ptr``.
 
 .. tested-code:: cairo library_signed_div_rem
 
-    TODO
+    let (signed_quotient, remainder) = unsigned_div_rem(value, divisor)
 
 .. _common_library_math:
 
@@ -550,7 +628,7 @@ Returns TODO
 .. tested-code:: cairo library_get_ap
 
     TODO
-    
+
 ``get_label_location()`` function
 *********************************
 
