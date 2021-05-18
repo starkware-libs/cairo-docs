@@ -7,8 +7,8 @@ and "How Cairo Works" tutorials.
 Comments
 --------
 
-Text can be inserted into the body of Cairo programs to document notes about the code. 
-The commented text is annotated with the ``#`` character. Text after this character is ignored by 
+Text can be inserted into the body of Cairo programs to document notes about the code.
+The commented text is annotated with the ``#`` character. Text after this character is ignored by
 the compiler.
 
 .. tested-code:: cairo syntax_comments
@@ -21,7 +21,7 @@ the compiler.
         return ()
     end
 
-Comments must be contained within a single line. In order to write a multiline comment, prefix all 
+Each comment spreads until the end of the line. In order to write a multiline comment, prefix all
 the comment lines with ``#``.
 
 Type system
