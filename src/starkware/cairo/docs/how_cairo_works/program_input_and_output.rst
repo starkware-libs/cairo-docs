@@ -18,6 +18,8 @@ because the verifier has to see what is n.
 Removing n from the output will result in a proof of the statement
 "I know that some fibonacci number is Y".
 
+.. _program_inputs:
+
 Program input
 -------------
 
@@ -77,6 +79,8 @@ Now compile and run the following program (run with ``--program_input=input.json
 
     Modify ``simple_fibonacci.cairo`` so that the first two values,
     and the length of the sequence will be given by the program input.
+
+.. _program_outputs:
 
 Program output
 --------------

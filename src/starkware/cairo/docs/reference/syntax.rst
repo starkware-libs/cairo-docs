@@ -252,10 +252,11 @@ same return value.
 
 
 Literals
----------------
+--------
 
-Python code can be invoked with the ``%[ %]``block, where all contained code will be converted to
-memory at compile time and cannot be modified during proof construction. see :ref:`literals`
+Python code can be invoked with the ``%[`` ``%]`` block, where all contained code will be converted
+to memory at compile time and cannot be modified during proof construction. See :ref:`literals` for
+more information.
 
 .. tested-code:: cairo syntax_literals
 
@@ -268,8 +269,8 @@ memory at compile time and cannot be modified during proof construction. see :re
 Hints
 -----
 
-Python code can be invoked with the ``%{ %}``block, where all contained code will be available to be
-modified during proof construction. See :ref:`hints` for more information.
+Python code can be invoked with the ``%{`` ``%}`` block, where all contained code will be available
+to be modified during proof construction. See :ref:`hints` for more information.
 
 .. tested-code:: cairo syntax_hints
 
@@ -295,12 +296,13 @@ expression.
         ids.a = b # cairo expression a is modified.
     %}
 
-Program inputs
---------------
+Program input
+-------------
 
-Program inputs are declared within Hints with the expression ``program_input['']``. The term within
-the single quotes identifies the key of a key/value pair specified in the .json document provided
-when the Cairo program is run. See :ref:`program_inputs` for more information.
+Program inputs are declared within Hints with the expression program_input['']. The term within
+the square brackets is an expression in single quotes that identifies the key of a key/value pair.
+Thekey/value pair are specified in the .json document provided when the Cairo program is run.
+See :ref:`program_inputs` for more information.
 
 .. tested-code:: cairo syntax_program_inputs
 
@@ -309,13 +311,13 @@ when the Cairo program is run. See :ref:`program_inputs` for more information.
         a = program_input['user_ids']
     %}
 
-Program outputs
----------------
+Program output
+--------------
 
 Cairo programs can produce outputs that a smart contract can verify. These outputs require the
-``output`` builtin. The program can product multiple outputs with calls to the serialize_word()
-function. Outputs can also be structs that are saved to an output file. See :ref:`program_outputs`
-or more information.
+``output`` builtin. The program can product multiple outputs with calls to the ``serialize_word()``
+function. Outputs can also be structs that are saved to an output file.
+See :ref:`program_outputs` for more information.
 
 The following program outputs two values, 7 and 13.
 
