@@ -127,6 +127,37 @@ and the return value ``(ret1 : felt, fet2 : felt)`` are optional.
 
 For more information about functions see :ref:`functions` and :ref:`implicit_arguments`.
 
+Function inputs
+---------------
+
+A function can accept arguments as inputs. Arguments may be either positional or named, where
+positional arguments are identified by the order they appear in the calling function. Positional
+arguments must appear before named arguments.
+
+.. tested-code:: cairo syntax_function_inputs
+
+func second_function(a,b):
+    return()
+end
+
+func main():
+    # Permitted
+    second_function(2,b=3) # positional, named
+    second_function(2,3) # positional, positional
+    second_function(a=2,b=3) # named, named
+
+    # Not permitted
+    # second_function(a=2,3) # named, positional
+    return()
+end
+
+Functions can specify that an input be of a certain type. The function below accepts two arguments,
+``a``, a value of type ``felt`` and b, the address of a felt value.
+
+.. tested-code:: cairo syntax_function_inputs_typed
+
+    func my_function(a:felt,b:felt*):
+
 Return statement
 ----------------
 
@@ -135,7 +166,6 @@ A function must end with a ``return`` statement, which takes the following form:
 .. tested-code:: cairo syntax_function_return
 
    return (ret1=val1, ret2=val2)
-
 
 Call statement
 --------------
@@ -202,11 +232,12 @@ Implicit arguments
 ------------------
 
 Implicit arguments are specified as part of the function expression and are designated by curly
-braces. Expressions within the curly braces are passed between functions.
+braces ``{}``. Expressions within the curly braces are passed between functions. If no implicit
+arguments are required the curly braces can be omitted.
 
 .. tested-code:: cairo syntax_implicit_arguments
 
-    % builtlins output
+    % builtins output
 
     func main{output_ptr}():
         return ()
