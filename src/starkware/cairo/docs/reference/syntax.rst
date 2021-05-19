@@ -39,6 +39,8 @@ The characters used in Cairo are described below:
         operation is being performed on the allocation pointer.
     * ``++`` Double plus. An increment on a register, e.g. ``ap++`` increments the allocation
         pointer by one.
+    * ``%[%]`` Identifies python literals.
+    * ``%{%}`` Identifies python hints.
 
 Type system
 -----------
@@ -251,10 +253,26 @@ Option (3) unpacks the return value into ``ret1`` and ``ret2``.
 Option (4) is a tail recursion -- after ``foo`` returns, the calling function returns the
 same return value.
 
-Hints
+
+Python literals
+---------------
+
+Python code can be invoked with the ``%[ %]``, where all contained code will be converted to memory
+at compile time and cannot be modified during proof construction.
+
+.. tested-code:: cairo syntax_literals
+
+    %[ a = 2 * 2 %]
+
+Python hints
 -----
 
+Python code can be invoked with the ``%{ %}``, where all contained code will be available to be
+modified during proof construction.
 
+.. tested-code:: cairo syntax_hints
+
+    %{ a = 2 * 2 %}
 
 Builtins
 --------
