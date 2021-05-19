@@ -158,12 +158,31 @@ Option (3) unpacks the return value into ``ret1`` and ``ret2``.
 Option (4) is a tail recursion -- after ``foo`` returns, the calling function returns the
 same return value.
 
+Builtins
+--------
+
+Builtins are included at the top of the cairo code file. They are invoked with the  ``%builtins``
+directive followed by the name of the builtin. Additional builtins can be included on the same
+line with each new builtin separated by a space.
+
+.. tested-code:: cairo syntax_builtins
+
+    %builtins output pedersen
+
+    function main():
+        return()
+    end
+
+
+For more informaiton about builtins see :ref:`builtins`
+
+
 Library imports
 ---------------
 
-Library functions are imported at the top of the file, below ``Builtins`` if they are used. The 
+Library functions are imported at the top of cairo code file, below ``Builtins`` if they are used. The
 statement describes where in the library the function is ``from`` and which function to ``import``.
-Multiple functions the same library can be separated by commas. Functions from different libraries 
+Multiple functions the same library can be separated by commas. Functions from different libraries
 are imported on a new line.
 
 .. tested-code:: cairo syntax_library_imports
