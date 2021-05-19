@@ -144,15 +144,15 @@ Look at the memory values after running the program above:
 .. tested-code:: none memory_table
 
     Address  Value
-    17       17
-    18       7
-    19       1000
-    20       17
-    21       9
-    22       1000
-    23       17
-    24       11
-    25       1000
+    13       13
+    14       3
+    15       1000
+    16       13
+    17       5
+    18       1000
+    19       13
+    20       7
+    21       1000
 
 .. test::
 
@@ -182,10 +182,10 @@ Look at the memory values after running the program above:
             assert actual_output_lines[i].split() == expected_output_lines[i].split()
 
 
-When main starts, the value of ``fp`` is 17, and the program calls the first invocation of ``foo``,
-writing the current value of ``fp`` (17) and value of the program counter to return to (7).
+When main starts, the value of ``fp`` is 13, and the program calls the first invocation of ``foo``,
+writing the current value of ``fp`` (13) and value of the program counter to return to (3).
 ``foo`` writes 1000 to the memory.
-The instruction ``ret`` restores the value of ``fp`` back to 17 and then jumps to ``pc = 7``.
+The instruction ``ret`` restores the value of ``fp`` back to 13 and then jumps to ``pc = 3``.
 Then ``foo`` is called a second time.
 Make sure you understand the rest of the memory values.
 

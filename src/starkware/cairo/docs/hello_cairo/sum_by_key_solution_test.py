@@ -1,6 +1,6 @@
 import os
 
-from starkware.cairo.common.test_utils import CairoFunctionRunner
+from starkware.cairo.common.cairo_function_runner import CairoFunctionRunner
 from starkware.cairo.lang.compiler.cairo_compile import compile_cairo_files
 
 CAIRO_FILE = os.path.join(os.path.dirname(__file__), 'sum_by_key_solution.cairo')
