@@ -21,6 +21,8 @@ which is equivalent to
 The line ``const value = 1234`` is not translated to a Cairo instruction;
 it is just used by the compiler to replace ``value`` with ``1234`` in the following instructions.
 
+.. _literals:
+
 Python literals
 ---------------
 

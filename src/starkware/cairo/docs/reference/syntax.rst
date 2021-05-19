@@ -28,19 +28,15 @@ Characters
 ----------
 
 The characters used in Cairo are described below:
-    * ``()`` Parentheses: Also known as round brackets. Used in function declaration.
-    * ``{}`` Braces: Also known as curly braces or curly brackets. Used in declaration of implicit
-        arguments
-    * ``[]`` Brackets: Also known as square brackets. Identifies a particular register, e.g.
-        the allocation pointer ``[ap]``.
+    * ``(`` ``)`` Parentheses: Also known as round brackets. Used in function declaration.
+    * ``{`` ``}`` Braces: Also known as curly braces or curly brackets. Used in declaration of implicit arguments
+    * ``[`` ``]`` Brackets: Also known as square brackets. Identifies a particular register, e.g. the allocation pointer ``[ap]``.
     * ``*`` Single asterisk. Refers to the pointer of an expression.
     * ``**`` Double asterisk. Refers to the pointer of a ``felt*`` expression.
-    * ``;`` Semicolon. Used to designate a register instruction, e.g. ``[ap];`` indicates that an
-        operation is being performed on the allocation pointer.
-    * ``++`` Double plus. An increment on a register, e.g. ``ap++`` increments the allocation
-        pointer by one.
-    * ``%[%]`` Identifies python literals.
-    * ``%{%}`` Identifies python hints.
+    * ``;`` Semicolon. Used to designate a register instruction, e.g. ``[ap];`` indicates that an operation is being performed on the allocation pointer.
+    * ``++`` Double plus. An increment on a register, e.g. ``ap++`` increments the allocation pointer by one.
+    * ``%[`` ``%]`` Identifies python literals.
+    * ``%{`` ``%}`` Identifies python hints.
 
 Type system
 -----------
@@ -170,20 +166,20 @@ arguments must appear before named arguments.
 
 .. tested-code:: cairo syntax_function_inputs
 
-func my_function(a,b):
-    return()
-end
+    func my_function(a,b):
+        return()
+    end
 
-func main():
-    # Permitted
-    my_function(2,b=3) # positional, named
-    my_function(2,3) # positional, positional
-    my_function(a=2,b=3) # named, named
+    func main():
+        # Permitted
+        my_function(2,b=3) # positional, named
+        my_function(2,3) # positional, positional
+        my_function(a=2,b=3) # named, named
 
-    # Not permitted
-    # my_function(a=2,3) # named, positional
-    return()
-end
+        # Not permitted
+        # my_function(a=2,3) # named, positional
+        return()
+    end
 
 Functions can specify that an input be of a certain type. The function below accepts two arguments,
 ``a``, a value of type ``felt`` and ``b``, the address of a felt value.
@@ -212,18 +208,18 @@ before named arguments.
 
 .. tested-code:: cairo syntax_function_outputs
 
-func my_function() -> (a, b):
-    # Permitted
-    return (2, b=3) # positional, named
+    func my_function() -> (a, b):
+        # Permitted
+        return (2, b=3) # positional, named
 
-    # Not permitted
-    # return (a=2, 3) # named, positional
-end
+        # Not permitted
+        # return (a=2, 3) # named, positional
+    end
 
-func main():
-    let (val_a, val_b) = my_function()
-    return()
-end
+    func main():
+        let (val_a, val_b) = my_function()
+        return()
+    end
 
 Functions can specify that an output be of a certain type. The function below returns two arguments,
 ``a``, a value of type ``felt`` and ``b``, the address of a felt value.
@@ -254,25 +250,49 @@ Option (4) is a tail recursion -- after ``foo`` returns, the calling function re
 same return value.
 
 
-Python literals
+Literals
 ---------------
 
-Python code can be invoked with the ``%[ %]``, where all contained code will be converted to memory
-at compile time and cannot be modified during proof construction.
+Python code can be invoked with the ``%[ %]``block, where all contained code will be converted to
+memory at compile time and cannot be modified during proof construction. see :ref:`literals`
 
 .. tested-code:: cairo syntax_literals
 
-    %[ a = 2 * 2 %]
+    let a = %[ 2 * 2 %] # a = 2 x 2 = 4
 
-Python hints
+    let b = %[ pow(8,2) %] # b = 8 to the power 3 = 512
+
+    let c = %[ len([6,7,8,9] %] # c = length of the list [6,7,8,9] = 4
+
+Hints
 -----
 
-Python code can be invoked with the ``%{ %}``, where all contained code will be available to be
-modified during proof construction.
+Python code can be invoked with the ``%{ %}``block, where all contained code will be available to be
+modified during proof construction. See :ref:`hints` for more information.
 
 .. tested-code:: cairo syntax_hints
 
     %{ a = 2 * 2 %}
+
+Hints may span multiple lines.
+
+.. tested-code:: cairo syntax_hints_multiline
+
+    %{
+        a = 2 * 2
+        b = a * 5
+    %}
+
+Hints may access and modify Cairo expressions that preceed the hints block with the ``ids.``
+expression.
+
+.. tested-code:: cairo syntax_hints_multiline
+
+    let a = 4
+    %{
+        b = 100 * ids.a # cairo expression a is accessed.
+        ids.a = b # cairo expression a is modified.
+    %}
 
 Builtins
 --------
