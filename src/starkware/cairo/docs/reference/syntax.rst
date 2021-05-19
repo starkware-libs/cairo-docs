@@ -35,8 +35,9 @@ The characters used in Cairo are described below:
     * ``**`` Double asterisk. Refers to the pointer of a ``felt*`` expression.
     * ``;`` Semicolon. Used to designate a register instruction, e.g. ``[ap];`` indicates that an operation is being performed on the allocation pointer.
     * ``++`` Double plus. An increment on a register, e.g. ``ap++`` increments the allocation pointer by one.
-    * ``%[`` ``%]`` Identifies python literals.
-    * ``%{`` ``%}`` Identifies python hints.
+    * ``%`` Percent sign. Used as part of the ``%builtins`` directive.
+    * ``%[`` ``%]`` Percent sign and brackets block. Identifies python literals.
+    * ``%{`` ``%}`` Percent sign and braces block. Identifies python hints.
 
 Type system
 -----------
@@ -293,6 +294,65 @@ expression.
         b = 100 * ids.a # cairo expression a is accessed.
         ids.a = b # cairo expression a is modified.
     %}
+
+Program inputs
+--------------
+
+Program inputs are declared within Hints with the expression ``program_input['']``. The term within
+the single quotes identifies the key of a key/value pair specified in the .json document provided
+when the Cairo program is run. See :ref:`program_inputs` for more information.
+
+.. tested-code:: cairo syntax_program_inputs
+
+    %{
+        # Sets the python varible a to a list of user_ids provided in the .json file.
+        a = program_input['user_ids']
+    %}
+
+Program outputs
+---------------
+
+Cairo programs can produce outputs that a smart contract can verify. These outputs require the
+``output`` builtin. The program can product multiple outputs with calls to the serialize_word()
+function. Outputs can also be structs that are saved to an output file. See :ref:`program_outputs`
+or more information.
+
+The following program outputs two values, 7 and 13.
+
+.. tested-code:: cairo syntax_program_output
+
+    %builtins output
+
+    from starkware.cairo.common.serialize import serialize_word
+
+    func main{output_ptr: felt*}():
+        let a = 7
+        let b = 13
+        serialize_word(a)
+        serialize_word(b)
+        return()
+    end
+
+The following program excerpt outlines how a program may output a struct by referencing its size
+and location in memory.
+
+.. tested-code:: cairo syntax_program_output_struct
+
+    %builtins output
+
+    # Code defining the struct goes here
+
+    func main{output_ptr: felt*}():
+        # Code defining the struct contents goes here
+
+        let output = cast(output_ptr, MyStruct*)
+        let output_ptr = output_ptr + Mystruct.SIZE
+
+        return()
+    end
+
+
+
 
 Builtins
 --------
