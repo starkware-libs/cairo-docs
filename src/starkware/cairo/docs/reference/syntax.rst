@@ -198,3 +198,18 @@ are imported on a new line.
         return ()
     end
 
+Implicit arguments
+------------------
+
+Implicit arguments are specified as part of the function expression and are designated by curly
+braces. Expressions within the curly braces are passed between functions.
+
+.. tested-code:: cairo syntax_implicit_arguments
+
+    % builtlins output
+
+    func main{output_ptr}():
+        return ()
+    end
+
+For more informaiton about builtins see :ref:`implicit_arguments`
