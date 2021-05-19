@@ -24,6 +24,17 @@ the compiler.
 Each comment spreads until the end of the line. In order to write a multiline comment, prefix all
 the comment lines with ``#``.
 
+Characters
+----------
+
+The characters used in Cairo are described below:
+    * ``()`` Parentheses: Also known as round brackets. Used in function declaration.
+    * ``{}`` Braces: Also known as curly braces or curly brackets. Used in declaration of implicit
+        arguments
+    * ``[]`` Brackets: Also known as square brackets. Identifies a particular register.
+    * ``*`` Single asterisk. Refers to the pointer of an expression.
+    * ``**`` Double asterisk. Refers to the pointer of a ``felt*`` expression.
+
 Type system
 -----------
 
@@ -59,7 +70,7 @@ An expression in Cairo is one of the following:
 .. _syntax_const:
 
 Type declaration
-------------------
+----------------
 
 An expression can be declared to be of a certain :ref:`type <syntax_type>` by using a colon in the
 format ``<expression> : <type>``. In the code below, ``a``, ``b`` and ``c`` are declared to be three
@@ -278,9 +289,9 @@ are imported on a new line.
 Implicit arguments
 ------------------
 
-Implicit arguments are specified as part of the function expression and are designated by curly
-braces ``{}``. Expressions within the curly braces are passed between functions. If no implicit
-arguments are required the curly braces can be omitted.
+Implicit arguments are specified as part of the function expression and are designated by
+braces ``{}``. Expressions within the braces are passed between functions. If no implicit
+arguments are required the braces can be omitted.
 
 .. tested-code:: cairo syntax_implicit_arguments
 
