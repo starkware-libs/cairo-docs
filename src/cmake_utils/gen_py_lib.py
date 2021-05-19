@@ -33,10 +33,11 @@ from typing import List
 
 def extract_licenses(filename: str) -> List[str]:
     prefix = 'License: '
-    with open(filename, encoding='utf8') as fp:
-        for line in fp.readlines():
-            if line.startswith(prefix):
-                return line.strip()[len(prefix):].split(',')
+    if os.path.isfile(filename):
+        with open(filename, encoding='utf8') as fp:
+            for line in fp.readlines():
+                if line.startswith(prefix):
+                    return line.strip()[len(prefix):].split(',')
     return []
 
 
