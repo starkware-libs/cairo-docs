@@ -34,6 +34,8 @@ Cairo have the following types:
 * ``T*`` where ``T`` is any type -- a pointer to type ``T``. For example: ``MyStruct*`` or
   ``felt**``.
 
+.. _syntax_type:
+
 Expressions
 -----------
 
@@ -55,6 +57,20 @@ An expression in Cairo is one of the following:
   to a ``MyStruct`` instance.
 
 .. _syntax_const:
+
+Type declaration
+------------------
+
+An expression can be declared to be of a certain :ref:`type <syntax_type>` by using a colon in the
+format ``<expression> : <type>``. In the code below, ``a``, ``b`` and ``c`` are declared to be three
+different types.
+
+.. tested-code:: cairo syntax_type_declaration
+
+    alloc_locals
+    local a : felt # felt
+    local b : MyStruct # Struct
+    local c : MyStruct* # Pointer to a struct
 
 Constants
 ---------
