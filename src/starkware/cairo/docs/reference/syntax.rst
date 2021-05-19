@@ -136,23 +136,23 @@ arguments must appear before named arguments.
 
 .. tested-code:: cairo syntax_function_inputs
 
-func second_function(a,b):
+func my_function(a,b):
     return()
 end
 
 func main():
     # Permitted
-    second_function(2,b=3) # positional, named
-    second_function(2,3) # positional, positional
-    second_function(a=2,b=3) # named, named
+    my_function(2,b=3) # positional, named
+    my_function(2,3) # positional, positional
+    my_function(a=2,b=3) # named, named
 
     # Not permitted
-    # second_function(a=2,3) # named, positional
+    # my_function(a=2,3) # named, positional
     return()
 end
 
 Functions can specify that an input be of a certain type. The function below accepts two arguments,
-``a``, a value of type ``felt`` and b, the address of a felt value.
+``a``, a value of type ``felt`` and ``b``, the address of a felt value.
 
 .. tested-code:: cairo syntax_function_inputs_typed
 
@@ -166,6 +166,37 @@ A function must end with a ``return`` statement, which takes the following form:
 .. tested-code:: cairo syntax_function_return
 
    return (ret1=val1, ret2=val2)
+
+Function outputs
+----------------
+
+A function can return arguments to the parent function that called it. The arguments expected are
+designated by the ``-> ()`` expression. The value of the arguments are defined in the return
+statement of the function. Arguments may be either positional or named, where positional arguments
+are identified by the order they appear in the calling function. Positional arguments must appear
+before named arguments.
+
+.. tested-code:: cairo syntax_function_outputs
+
+func my_function() -> (a, b):
+    # Permitted
+    return (2, b=3) # positional, named
+
+    # Not permitted
+    # return (a=2, 3) # named, positional
+end
+
+func main():
+    let (val_a, val_b) = my_function()
+    return()
+end
+
+Functions can specify that an output be of a certain type. The function below returns two arguments,
+``a``, a value of type ``felt`` and ``b``, the address of a felt value.
+
+.. tested-code:: cairo syntax_function_outputs_typed
+
+    func my_function() -> (a : felt, b : felt*):
 
 Call statement
 --------------
