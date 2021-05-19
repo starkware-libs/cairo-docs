@@ -31,9 +31,14 @@ The characters used in Cairo are described below:
     * ``()`` Parentheses: Also known as round brackets. Used in function declaration.
     * ``{}`` Braces: Also known as curly braces or curly brackets. Used in declaration of implicit
         arguments
-    * ``[]`` Brackets: Also known as square brackets. Identifies a particular register.
+    * ``[]`` Brackets: Also known as square brackets. Identifies a particular register, e.g.
+        the allocation pointer ``[ap]``.
     * ``*`` Single asterisk. Refers to the pointer of an expression.
     * ``**`` Double asterisk. Refers to the pointer of a ``felt*`` expression.
+    * ``;`` Semicolon. Used to designate a register instruction, e.g. ``[ap];`` indicates that an
+        operation is being performed on the allocation pointer.
+    * ``++`` Double plus. An increment on a register, e.g. ``ap++`` increments the allocation
+        pointer by one.
 
 Type system
 -----------
@@ -245,6 +250,11 @@ Option (3) unpacks the return value into ``ret1`` and ``ret2``.
 
 Option (4) is a tail recursion -- after ``foo`` returns, the calling function returns the
 same return value.
+
+Hints
+-----
+
+
 
 Builtins
 --------
