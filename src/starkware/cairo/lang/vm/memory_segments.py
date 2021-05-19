@@ -22,6 +22,8 @@ class MemorySegmentManager:
         # A map from segment index to a list of pairs (offset, page_id) that constitute the
         # public memory. Note that the offset is absolute (not based on the page_id).
         self.public_memory_offsets: Dict[int, List[Tuple[int, int]]] = {}
+        # The number of temporary segments, see 'add_temp_segment' for more details.
+        self.n_temp_segments = 0
 
     def add(self, size: Optional[int] = None) -> RelocatableValue:
         """
@@ -33,6 +35,19 @@ class MemorySegmentManager:
         self.n_segments += 1
         if size is not None:
             self.finalize(segment_index, size)
+        return RelocatableValue(segment_index=segment_index, offset=0)
+
+    def add_temp_segment(self) -> RelocatableValue:
+        """
+        Adds a new temporary segment and returns its starting location as a RelocatableValue.
+
+        A temporary segment is a segment that is relocated before the cairo pie is produced.
+        """
+
+        self.n_temp_segments += 1
+        # Temporary segments have negative segment indices that start from -1.
+        segment_index = -self.n_temp_segments
+
         return RelocatableValue(segment_index=segment_index, offset=0)
 
     def finalize(

@@ -12,6 +12,7 @@ python_lib(cairo_common_lib
     hash_chain.py
     hash_state.cairo
     hash.cairo
+    invoke.cairo
     math_utils.py
     math.cairo
     memcpy.cairo
@@ -19,10 +20,12 @@ python_lib(cairo_common_lib
     merkle_update.cairo
     registers.cairo
     serialize.cairo
+    set.cairo
     signature.cairo
     small_merkle_tree.cairo
     small_merkle_tree.py
     squash_dict.cairo
+    uint256.cairo
     ${CAIRO_COMMON_LIB_ADDITIONAL_FILES}
 
     LIBS
@@ -31,11 +34,11 @@ python_lib(cairo_common_lib
     ${CAIRO_COMMON_LIB_ADDITIONAL_LIBS}
 )
 
-python_lib(cairo_common_test_utils_lib
+python_lib(cairo_function_runner_lib
     PREFIX starkware/cairo/common
 
     FILES
-    ${CAIRO_COMMON_TEST_UTILS_LIBS_ADDITONAL_FILES}
+    cairo_function_runner.py
 
     LIBS
     cairo_common_lib
@@ -43,5 +46,6 @@ python_lib(cairo_common_test_utils_lib
     cairo_run_builtins_lib
     cairo_run_lib
     cairo_tracer_lib
+    cairo_vm_crypto_lib
     cairo_vm_lib
 )

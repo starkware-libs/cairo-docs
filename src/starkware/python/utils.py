@@ -1,10 +1,14 @@
 import asyncio
+import itertools
+import logging
 import os
 import random
 import re
 import subprocess
 from collections import UserDict
-from typing import List, Optional
+from typing import Any, Iterable, List, Optional
+
+logger = logging.getLogger(__name__)
 
 
 def get_package_path():
@@ -190,3 +194,15 @@ async def cancel_futures(*futures: asyncio.Future):
             await future
         except asyncio.CancelledError:
             pass
+
+
+def safe_zip(*iterables: Iterable[Any]) -> Iterable:
+    """
+    Zips iterables. Makes sure length of all iterables is equal.
+    """
+    sentinel = object()
+    for combo in itertools.zip_longest(*iterables, fillvalue=sentinel):
+        if sentinel in combo:
+            raise AssertionError('Iterables to safe_zip are not equal in length.')
+
+        yield combo

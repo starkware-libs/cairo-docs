@@ -67,7 +67,7 @@ class StrippedProgram(ProgramBase):
             'Invalid main() address.'
 
 
-@marshmallow_dataclass.dataclass
+@marshmallow_dataclass.dataclass(repr=False)
 class Program(ProgramBase):
     prime: int
     data: List[int]
@@ -91,11 +91,15 @@ class Program(ProgramBase):
         )
 
     def get_identifier(
-            self, name: Union[str, ScopedName], expected_type: Type[IdentifierDefinition]):
+            self, name: Union[str, ScopedName], expected_type: Type[IdentifierDefinition],
+            full_name_lookup: Optional[bool] = None):
         scoped_name = name if isinstance(name, ScopedName) else ScopedName.from_string(name)
-        result = self.identifiers.search(
-            accessible_scopes=[self.main_scope],
-            name=scoped_name)
+        if full_name_lookup is True:
+            result = self.identifiers.root.get(scoped_name)
+        else:
+            result = self.identifiers.search(
+                accessible_scopes=[self.main_scope],
+                name=scoped_name)
         result.assert_fully_parsed()
         identifier_definition = result.identifier_definition
         assert isinstance(identifier_definition, expected_type), (
@@ -103,11 +107,13 @@ class Program(ProgramBase):
             f'found {identifier_definition.TYPE}.')  # type: ignore
         return identifier_definition
 
-    def get_label(self, name: Union[str, ScopedName]):
-        return self.get_identifier(name, LabelDefinition).pc
+    def get_label(self, name: Union[str, ScopedName], full_name_lookup: Optional[bool] = None):
+        return self.get_identifier(
+            name=name, expected_type=LabelDefinition, full_name_lookup=full_name_lookup).pc
 
-    def get_const(self, name: Union[str, ScopedName]):
-        return self.get_identifier(name, ConstDefinition).value
+    def get_const(self, name: Union[str, ScopedName], full_name_lookup: Optional[bool] = None):
+        return self.get_identifier(
+            name=name, expected_type=ConstDefinition, full_name_lookup=full_name_lookup).value
 
     def get_reference_binds(self, name: Union[str, ScopedName]) -> List[Reference]:
         """
