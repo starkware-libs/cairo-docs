@@ -164,18 +164,12 @@ func main{
         ecdsa_ptr : SignatureBuiltin*}():
     alloc_locals
 
-    let output = cast(output_ptr, BatchOutput*)
-    let output_ptr = output_ptr + BatchOutput.SIZE
-
     let (votes, n_votes) = get_claimed_votes()
     let (state) = init_voting_state()
     process_votes{state=state}(votes=votes, n_votes=n_votes)
+    local state : VotingState = state  # Handle revoked reference
     local pedersen_ptr : HashBuiltin* = pedersen_ptr
     local ecdsa_ptr : SignatureBuiltin* = ecdsa_ptr
-
-    # Write the "yes" and "no" counts to the output.
-    assert output.n_yes_votes = state.n_yes_votes
-    assert output.n_no_votes = state.n_no_votes
 
     # Squash the dict.
     let (squashed_dict_start, squashed_dict_end) = dict_squash(
@@ -189,9 +183,10 @@ func main{
         squashed_dict_end=squashed_dict_end,
         height=LOG_N_VOTERS)
 
-    # Write the Merkle roots to the output.
-    assert output.public_keys_root_before = root_before
-    assert output.public_keys_root_after = root_after
+    # Write the "yes" and "no" counts and merkle roots to the output.
+    let output : BatchOutput = BatchOutput(
+        state.n_yes_votes, state.n_no_votes, root_before, root_after)
+    # let output_ptr = output_ptr + BatchOutput.SIZE # This fails
 
     return ()
 end
