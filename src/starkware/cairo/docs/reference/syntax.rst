@@ -29,7 +29,7 @@ Punctuation
 
 The punctuation marks used in Cairo are described below:
 
-* ``(`` ``)`` Parentheses: Also known as round brackets. Used in function declaration.
+* ``(`` ``)`` Parentheses: Also known as round brackets. Used in function declaration and in tuple declaration.
 * ``{`` ``}`` Braces: Also known as curly braces or curly brackets. Used in declaration of implicit arguments
 * ``[`` ``]`` Brackets: Also known as square brackets. Identifies the value at a particular address register, e.g. the allocation pointer ``[ap]``.
 * ``*`` Single asterisk. Refers to the pointer of an expression.
@@ -42,6 +42,8 @@ The punctuation marks used in Cairo are described below:
 * ``<`` ``>`` Chevrons: Also known as angle brackets. Used in Cairo documentation to identify a single element, as in ``<one placeholder element>``. Not used in Cairo code.
 * ``_`` Underscore: Also known as underline. A placeholder to handle values not used, such as an unused function returned value.
 
+.. _syntax_type:
+
 Type system
 -----------
 
@@ -51,8 +53,6 @@ Cairo have the following types:
 * ``MyStruct`` where ``MyStruct`` is a :ref:`struct <syntax_structs>` name.
 * ``T*`` where ``T`` is any type -- a pointer to type ``T``. For example: ``MyStruct*`` or
   ``felt**``.
-
-.. _syntax_type:
 
 Expressions
 -----------
@@ -74,8 +74,6 @@ An expression in Cairo is one of the following:
   the type is changed to ``T``. For example, ``cast(10, MyStruct*)`` is ``10``, thought as a pointer
   to a ``MyStruct`` instance.
 
-.. _syntax_const:
-
 Type declaration
 ----------------
 
@@ -90,6 +88,7 @@ different types.
     local b : MyStruct # Struct
     local c : MyStruct* # Pointer to a struct
 
+.. _syntax_const:
 
 Constants
 ---------
@@ -194,6 +193,44 @@ the second is assigned offset according to the size of the first member and so o
 The offset can be retrieved using ``MyStruct.member_name``.
 For example, ``MyStruct.first_member == 0`` and ``MyStruct.second_member == 1``
 (since the size of ``felt`` is 1).
+
+Tuples
+------
+
+Finite ordered lists called tuples contain elements within a pair of parentheses ``(`` ``)``.
+Elements may any combination of valid :ref:`types <syntax_type>`, for example, a ``felt`` and two
+structs. They cannot be modified after declaration and are defined using a local variable as
+follows:
+
+.. tested-code:: cairo syntax_tuples
+
+    # A tuple with two elements
+    local TupleOne = (7, 9)
+
+    # A tuple with three elements
+    local TupleTwo = (7, 9, 13)
+
+A tuple may be named and defined by the elements it contains. This may be useful where a function
+has arguments in the form of a tuple. Below function returns a tuple defined with two ``felt``
+expressions.
+
+.. tested-code:: cairo syntax_tuple_empty
+
+    func MyFunc() -> (TupleResult : (felt, felt)):
+        alloc_locals
+        let a = 3
+        let b = 9
+        local MyTuple = (a, b)
+        return (TupleResult = MyTuple)
+    end
+
+Tuple values may be accessed as follows:
+
+.. tested-code:: cairo syntax_tuple_assignment
+
+    local TupleOne = (7, 9)
+    let a = TupleOne.0 # Equivalent to: let a = 7.
+    let b = TupleOne.1 # Equivalent to: let b = 9.
 
 Pointers
 --------
