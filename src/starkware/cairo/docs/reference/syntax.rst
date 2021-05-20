@@ -24,20 +24,21 @@ the compiler.
 Each comment spreads until the end of the line. In order to write a multiline comment, prefix all
 the comment lines with ``#``.
 
-Characters
-----------
+Punctuation
+-----------
 
-The characters used in Cairo are described below:
+The punctuation marks used in Cairo are described below:
     * ``(`` ``)`` Parentheses: Also known as round brackets. Used in function declaration.
     * ``{`` ``}`` Braces: Also known as curly braces or curly brackets. Used in declaration of implicit arguments
-    * ``[`` ``]`` Brackets: Also known as square brackets. Identifies a particular register, e.g. the allocation pointer ``[ap]``.
+    * ``[`` ``]`` Brackets: Also known as square brackets. Identifies the value at a particular address register, e.g. the allocation pointer ``[ap]``.
     * ``*`` Single asterisk. Refers to the pointer of an expression.
     * ``**`` Double asterisk. Refers to the pointer of a ``felt*`` expression.
-    * ``;`` Semicolon. Used to designate a register instruction, e.g. ``[ap];`` indicates that an operation is being performed on the allocation pointer.
-    * ``++`` Double plus. An increment on a register, e.g. ``ap++`` increments the allocation pointer by one.
+    * ``;`` Semicolon. Used to designate an address register instruction, e.g. ``[ap];`` indicates that an operation is being performed on the allocation pointer.
+    * ``++`` Double plus. An increment on an address register, e.g. ``ap++`` increments the allocation pointer by one.
     * ``%`` Percent sign. Used as part of the ``%builtins`` directive.
     * ``%[`` ``%]`` Percent sign and brackets block. Identifies python literals.
     * ``%{`` ``%}`` Percent sign and braces block. Identifies python hints.
+    * ``<`` ``>`` Chevrons: Also known as angle brackets. Used in Cairo documentation to identify a single element, as in ``<one placeholder element>``. Not used in Cairo code.
 
 Type system
 -----------
@@ -72,6 +73,37 @@ An expression in Cairo is one of the following:
   to a ``MyStruct`` instance.
 
 .. _syntax_const:
+
+Pointers
+--------
+
+The address of an expression is accessed using a pointer. An address may exist before a value has
+been stored at that expression. For example, where a function accepts an argument of a certain type,
+a pointer to that type allows the compiler to allocate memory appropriately.
+
+Consider the following expressions defined some Cairo program:
+- ``MyFelt``: A field element with a particular value, such as ``7``.
+- ``MyStruct``: A struct with defined members (not outlined here)
+- ``MyExp``: An expression whose type will be defined with ``MyExp : <type>`` in the examples below. From the phrase "My Expression".
+
+Expressions, pointers and their interpretation are outlined below:
+- ``felt``. A value. ``MyExp : felt`` reads as "MyExp is a felt and in practice, an integer".
+- ``felt*``. A pointer to a value. ``MyExp : felt*`` reads as "MyExp is the location where one or more felts are stored, which can be used to define a list".
+- ``felt**``. A pointer to a pointer. ``MyExp : felt**`` reads as "MyExp is is the location where one or more pointers are stored, which can be used to define a list of lists".
+- ``MyFelt``. A value, in this instance ``7``. The code ``MyExp : MyFelt`` is not used because ``MyExp`` type cannot be assigned to a particular felt instance.
+- ``MyFelt*``. A pointer to the value ``7``. ``MyExp : MyFelt*`` reads as "MyExp is the location where MyFelt is stored, which may be used if MyFelt is extended to a list with ``7`` as the first value".
+- ``MyFelt**``. A pointer to a pointer. ``MyExp : MyFelt**`` reads as "MyExp is the location where the MyFelt* pointer is stored, which can be used to construct a list of lists".
+- ``[MyFelt]``. A value at address ``MyFelt``. This expression is not used because ``MyFelt`` is a value, not an address. It follows that the expression ``MyExp : [MyFelt]`` is not used.
+- ``[MyFelt*]``. A value at the pointer ``MyFelt*``. A somewhat circular expression, which reads as "The value at the pointer which points to the value".  ``MyExp : [MyFelt*]`` is not used because ``[MyFelt*]`` is a value.
+- ``[MyFelt* + 1]``. A value at the pointer one slot after ``MyFelt*``. If MyFelt* is being used to define a list, this statement reads as "The value of the second item in the list which starts at ``Myfelt*``.
+- ``MyStruct``. A value, in this instance a struct with particular members with particular values. The code ``MyExp : MyStruct`` is not used because ``MyExp`` type cannot be assigned to a particular struct instance.
+- ``MyStruct*``. A pointer to a struct value. ``MyExp : MyStruct*`` reads as "MyExp is of type MyStruct. MyExp points to where MyStruct is stored and has the same member structure as MyStruct. MyExp has members may be populated with values".
+- ``MyStruct**`` . A pointer (to a pointer). ``MyExp : MyStruct**`` reads as "MyExp is a pointer to where MyStruct* pointers are store, and can be used to represent a list of structs". See :ref:`transaction_loop_list.`.
+- ``[MyStruct]``. A value at the struct ``MyStruct``. This expression is not used because structs occupy multiple memory slots which can be addressed individually.
+- ``[MyStruct*]``. A value at the pointer to the first memory address of ``MyStruct*``. Reads as "The value at the first memory slot that MyStruct occupies". ``MyExp : [MyStruct*]`` is not used because [MyStruct*] is a particular value.
+- ``[MyStruct* + 1]``. A value at the pointer to the second memory address of ``MyStruct*``. Reads as "The value at the second memory slot that MyStruct occupies".
+- ``[MyStruct**]``. A value at the pointer to the first memory address of the pointer ``MyStruct**``. Reads as "The pointer to the first struct in the list of structs. This pointer can be used to reference the values within that first struct.". ``MyExp : [MyStruct**]`` Is not used because [MyStruct**] is a particular value.
+- ``[MyStruct** + 1]``. A value at the pointer to the second memory address of the pointer ``MyStruct**``. Reads as "The pointer to the second struct in the list of structs. This pointer can be used to reference the values within that second struct".
 
 Type declaration
 ----------------
@@ -250,7 +282,6 @@ Option (3) unpacks the return value into ``ret1`` and ``ret2``.
 Option (4) is a tail recursion -- after ``foo`` returns, the calling function returns the
 same return value.
 
-
 Literals
 --------
 
@@ -353,9 +384,6 @@ and location in memory.
         return()
     end
 
-
-
-
 Builtins
 --------
 
@@ -371,9 +399,7 @@ line with each new builtin separated by a space.
         return()
     end
 
-
 For more informaiton about builtins see :ref:`builtins`
-
 
 Library imports
 ---------------
