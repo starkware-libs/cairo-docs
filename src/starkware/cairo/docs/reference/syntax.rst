@@ -28,18 +28,19 @@ Punctuation
 -----------
 
 The punctuation marks used in Cairo are described below:
-    * ``(`` ``)`` Parentheses: Also known as round brackets. Used in function declaration.
-    * ``{`` ``}`` Braces: Also known as curly braces or curly brackets. Used in declaration of implicit arguments
-    * ``[`` ``]`` Brackets: Also known as square brackets. Identifies the value at a particular address register, e.g. the allocation pointer ``[ap]``.
-    * ``*`` Single asterisk. Refers to the pointer of an expression.
-    * ``**`` Double asterisk. Refers to the pointer of a ``felt*`` expression.
-    * ``;`` Semicolon. Used to designate an address register instruction, e.g. ``[ap];`` indicates that an operation is being performed on the allocation pointer.
-    * ``++`` Double plus. An increment on an address register, e.g. ``ap++`` increments the allocation pointer by one.
-    * ``%`` Percent sign. Used as part of the ``%builtins`` directive.
-    * ``%[`` ``%]`` Percent sign and brackets block. Identifies python literals.
-    * ``%{`` ``%}`` Percent sign and braces block. Identifies python hints.
-    * ``<`` ``>`` Chevrons: Also known as angle brackets. Used in Cairo documentation to identify a single element, as in ``<one placeholder element>``. Not used in Cairo code.
-    * ``_`` Underscore: Also known as underline. A placeholder to handle values not used, such as an unused function returned value.
+
+* ``(`` ``)`` Parentheses: Also known as round brackets. Used in function declaration.
+* ``{`` ``}`` Braces: Also known as curly braces or curly brackets. Used in declaration of implicit arguments
+* ``[`` ``]`` Brackets: Also known as square brackets. Identifies the value at a particular address register, e.g. the allocation pointer ``[ap]``.
+* ``*`` Single asterisk. Refers to the pointer of an expression.
+* ``**`` Double asterisk. Refers to the pointer of a ``felt*`` expression.
+* ``;`` Semicolon. Used to designate an address register instruction, e.g. ``[ap];`` indicates that an operation is being performed on the allocation pointer.
+* ``++`` Double plus. An increment on an address register, e.g. ``ap++`` increments the allocation pointer by one.
+* ``%`` Percent sign. Used as part of the ``%builtins`` directive.
+* ``%[`` ``%]`` Percent sign and brackets block. Identifies python literals.
+* ``%{`` ``%}`` Percent sign and braces block. Identifies python hints.
+* ``<`` ``>`` Chevrons: Also known as angle brackets. Used in Cairo documentation to identify a single element, as in ``<one placeholder element>``. Not used in Cairo code.
+* ``_`` Underscore: Also known as underline. A placeholder to handle values not used, such as an unused function returned value.
 
 Type system
 -----------
@@ -97,28 +98,55 @@ been stored at that expression. For example, where a function accepts an argumen
 a pointer to that type allows the compiler to allocate memory appropriately.
 
 Consider the following expressions defined some Cairo program:
-- ``MyFelt``: A field element with a particular value, such as ``7``.
-- ``MyStruct``: A struct with defined members (not outlined here)
-- ``MyExp``: An expression whose type will be defined with ``MyExp : <type>`` in the examples below. From the phrase "My Expression".
+
+* ``MyFelt``: A field element with a particular value, such as ``7``.
+* ``MyStruct``: A struct with defined members (not outlined here)
+* ``MyExp``: An expression whose type will be defined with ``MyExp : <type>`` in the examples below. ``MyExp`` may be read as "My Expression".
 
 Expressions, pointers and their interpretation are outlined below:
-- ``felt``. A value. ``MyExp : felt`` reads as "MyExp is a felt and in practice, an integer".
-- ``felt*``. A pointer to a value. ``MyExp : felt*`` reads as "MyExp is the location where one or more felts are stored, which can be used to define a list".
-- ``felt**``. A pointer to a pointer. ``MyExp : felt**`` reads as "MyExp is is the location where one or more pointers are stored, which can be used to define a list of lists".
-- ``MyFelt``. A value, in this instance ``7``. The code ``MyExp : MyFelt`` is not used because ``MyExp`` type cannot be assigned to a particular felt instance.
-- ``MyFelt*``. A pointer to the value ``7``. ``MyExp : MyFelt*`` reads as "MyExp is the location where MyFelt is stored, which may be used if MyFelt is extended to a list with ``7`` as the first value".
-- ``MyFelt**``. A pointer to a pointer. ``MyExp : MyFelt**`` reads as "MyExp is the location where the MyFelt* pointer is stored, which can be used to construct a list of lists".
-- ``[MyFelt]``. A value at address ``MyFelt``. This expression is not used because ``MyFelt`` is a value, not an address. It follows that the expression ``MyExp : [MyFelt]`` is not used.
-- ``[MyFelt*]``. A value at the pointer ``MyFelt*``. A somewhat circular expression, which reads as "The value at the pointer which points to the value".  ``MyExp : [MyFelt*]`` is not used because ``[MyFelt*]`` is a value.
-- ``[MyFelt* + 1]``. A value at the pointer one slot after ``MyFelt*``. If MyFelt* is being used to define a list, this statement reads as "The value of the second item in the list which starts at ``Myfelt*``.
-- ``MyStruct``. A value, in this instance a struct with particular members with particular values. The code ``MyExp : MyStruct`` is not used because ``MyExp`` type cannot be assigned to a particular struct instance.
-- ``MyStruct*``. A pointer to a struct value. ``MyExp : MyStruct*`` reads as "MyExp is of type MyStruct. MyExp points to where MyStruct is stored and has the same member structure as MyStruct. MyExp has members may be populated with values".
-- ``MyStruct**`` . A pointer (to a pointer). ``MyExp : MyStruct**`` reads as "MyExp is a pointer to where MyStruct* pointers are store, and can be used to represent a list of structs". See :ref:`transaction_loop_list.`.
-- ``[MyStruct]``. A value at the struct ``MyStruct``. This expression is not used because structs occupy multiple memory slots which can be addressed individually.
-- ``[MyStruct*]``. A value at the pointer to the first memory address of ``MyStruct*``. Reads as "The value at the first memory slot that MyStruct occupies". ``MyExp : [MyStruct*]`` is not used because [MyStruct*] is a particular value.
-- ``[MyStruct* + 1]``. A value at the pointer to the second memory address of ``MyStruct*``. Reads as "The value at the second memory slot that MyStruct occupies".
-- ``[MyStruct**]``. A value at the pointer to the first memory address of the pointer ``MyStruct**``. Reads as "The pointer to the first struct in the list of structs. This pointer can be used to reference the values within that first struct.". ``MyExp : [MyStruct**]`` Is not used because [MyStruct**] is a particular value.
-- ``[MyStruct** + 1]``. A value at the pointer to the second memory address of the pointer ``MyStruct**``. Reads as "The pointer to the second struct in the list of structs. This pointer can be used to reference the values within that second struct".
+
+* ``felt``. A value.
+    * ``MyExp : felt`` reads as "``MyExp`` is a ``felt`` and in practice, an integer".
+* ``felt*``. A pointer to a value.
+    * ``MyExp : felt*`` reads as "``MyExp`` is the location where one or more ``felt`` s are stored, which can be used to define a list".
+* ``felt**``. A pointer to a pointer.
+    * ``MyExp : felt**`` reads as "``MyExp`` is is the location where one or more pointers are stored, which can be used to define a list of lists".
+* ``MyFelt``. A value, in this instance ``7``.
+    * The code ``MyExp : MyFelt`` is not used because ``MyExp`` type cannot be assigned to a particular ``felt`` instance.
+* ``MyFelt*``. A pointer to the value ``7``.
+    * ``MyExp : MyFelt*`` reads as "``MyExp`` is the location where ``MyFelt`` is stored, which may be used if ``MyFelt`` is extended to a list with ``7`` as the first value".
+* ``MyFelt**``. A pointer to a pointer.
+    * ``MyExp : MyFelt**`` reads as "``MyExp`` is the location where the ``MyFelt*`` pointer is stored, which can be used to construct a list of lists".
+* ``[MyFelt]``. A value at address ``MyFelt``.
+    * This expression is not used because ``MyFelt`` is a value, not an address.
+    * It follows that the expression ``MyExp : [MyFelt]`` is not used.
+* ``[MyFelt*]``. A value at the pointer ``MyFelt*``.
+    * If MyFelt* is being used to define a list, this statement reads as "The value of the first item in the list which starts at ``Myfelt*``.
+    * ``MyExp : [MyFelt*]`` is not used because ``[MyFelt*]`` is a value.
+* ``[MyFelt* + 1]``. A value at the pointer one slot after ``MyFelt*``.
+    * If ``MyFelt*`` is being used to define a list, this statement reads as "The value of the second item in the list which starts at ``Myfelt*``.
+* ``MyStruct``. A value, in this instance a struct with defined values.
+    * The code ``MyExp : MyStruct`` is not used because ``MyExp`` type cannot be assigned to a particular struct instance.
+* ``MyStruct*``. A pointer to a struct value.
+    * ``MyExp : MyStruct*`` reads as "``MyExp`` is of type ``MyStruct``".
+    * ``MyExp`` points to where ``MyStruct`` is stored and has the same member structure as ``MyStruct``.
+    * ``MyExp`` has members may be populated with values.
+* ``MyStruct**`` . A pointer (to a pointer).
+    * ``MyExp : MyStruct**`` reads as "``MyExp`` is a pointer to where ``MyStruct*`` pointers are stored, and can be used to represent a list of structs". See :ref:`transaction_loop_list`.
+* ``[MyStruct]``. A value at the struct ``MyStruct``.
+    * This expression is not used because structs occupy multiple memory slots which can be addressed individually.
+* ``[MyStruct*]``. A value at the pointer to the first memory address of ``MyStruct*``.
+    * Reads as "The value at the first memory slot that ``MyStruct`` occupies".
+    * ``MyExp : [MyStruct*]`` is not used because ``[MyStruct*]`` is a particular value not a type.
+* ``[MyStruct* + 1]``. A value at the pointer to the second memory address of ``MyStruct*``.
+    * Reads as "The value at the second memory slot that ``MyStruct`` occupies".
+* ``[MyStruct**]``. A value at the pointer to the first memory address of the pointer ``MyStruct**``.
+    * Reads as "The pointer to the first struct in the list of structs."
+    * This pointer can be used to reference the values within that first struct.
+    * ``MyExp : [MyStruct**]`` is not used because ``[MyStruct**]`` is a particular value.
+* ``[MyStruct** + 1]``. A value at the pointer to the second memory address of the pointer ``MyStruct**``.
+    * Reads as "The pointer to the second struct in the list of structs".
+    * This pointer can be used to reference the values within that second struct.
 
 Constants
 ---------
@@ -184,7 +212,7 @@ Locals
 ------
 
 Local expressions are defined with the term ``local``. Local variables cannot be revoked, unlike
-references. See :ref:`locals` for more information.
+references. See :ref:`local_vars` for more information.
 
 .. tested-code:: cairo syntax_local
 
@@ -543,8 +571,9 @@ segment. Segments are designated by the colon ``:`` character and some examples 
 See :ref:`segments` for more information.
 
 Memory segments and their interpretation:
-- ``0:3``: Memory address 3 within segment 0.
-- ``1:7``: Memory address 7 within segment 1.
-- ``2:12``: Memory address 12 within segment 2.
-- ``3:2``: Memory address 2 within segment 3.
-- ``4:0``: Memory address 0 within segment 4.
+
+* ``0:3``: Memory address 3 within segment 0.
+* ``1:7``: Memory address 7 within segment 1.
+* ``2:12``: Memory address 12 within segment 2.
+* ``3:2``: Memory address 2 within segment 3.
+* ``4:0``: Memory address 0 within segment 4.

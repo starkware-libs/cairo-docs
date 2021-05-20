@@ -247,7 +247,7 @@ Let's isolate b (as the rest of the values are known):
         return (state=new_state)
     end
 
-.. _transaction_loop_list.
+.. _transaction_loop_list:
 
 The transaction loop
 --------------------
