@@ -439,6 +439,30 @@ arguments are required the braces can be omitted.
 
 For more informaiton about builtins see :ref:`implicit_arguments`
 
+Jumps
+-----
+
+Cairo programs can include special branch points in code called jumps. The Prover may choose to
+follow the jump instructions to arrive at a valid proof more readily, but they do not necessarily
+have to do so. Jumps contain all of the following: A ``jump`` expression, a ``case_not_met`` name,
+a ``case_met_name`` and an ``if`` statement.
+
+.. tested-code:: cairo syntax_jumps
+
+    func MyFunction() -> (result):
+        let a = 2
+
+        jump case_true if a == 3
+
+        case_false:
+        return(result = 0)
+
+        case_true:
+        return(result = 1)
+    end
+
+See :ref:`non_deterministic_jumps` for more information.
+
 Segments
 --------
 
