@@ -31,7 +31,7 @@ The punctuation marks used in Cairo are described below:
 
 * ``(`` ``)`` Parentheses: Also known as round brackets. Used in function declaration and in tuple declaration.
 * ``{`` ``}`` Braces: Also known as curly braces or curly brackets. Used in declaration of implicit arguments
-* ``[`` ``]`` Brackets: Also known as square brackets. Identifies the value at a particular address register, e.g. the allocation pointer ``[ap]``.
+* ``[`` ``]`` Brackets: Also known as square brackets. Identifies the value at a particular address register, e.g. the allocation pointer ``[ap]`` and to access a tuple value by index.
 * ``*`` Single asterisk. Refers to the pointer of an expression.
 * ``**`` Double asterisk. Refers to the pointer of a ``felt*`` expression.
 * ``;`` Semicolon. Used to designate an address register instruction, e.g. ``[ap];`` indicates that an operation is being performed on the allocation pointer.
@@ -224,13 +224,14 @@ expressions.
         return (TupleResult = MyTuple)
     end
 
-Tuple values may be accessed as follows:
+Tuple values may be accessed with a zero-based index brackets ``[index]`` as follows:
 
 .. tested-code:: cairo syntax_tuple_assignment
 
-    local TupleOne = (7, 9)
-    let a = TupleOne.0 # Equivalent to: let a = 7.
-    let b = TupleOne.1 # Equivalent to: let b = 9.
+    local TupleOne = (7, 9, 3, 8)
+    let a = TupleOne[0] # Equivalent to: let a = 7.
+    let b = TupleOne[1] # Equivalent to: let b = 9.
+    let b = TupleOne[3] # Equivalent to: let c = 8.
 
 Pointers
 --------
