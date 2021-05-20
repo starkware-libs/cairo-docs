@@ -438,3 +438,18 @@ arguments are required the braces can be omitted.
     end
 
 For more informaiton about builtins see :ref:`implicit_arguments`
+
+Segments
+--------
+
+During debugging, the memory that different components occupy may be exposed. Memory is separated
+into different sections called segments. For example, each builtin occupies a different memory
+segment. Segments are designated by the colon ``:`` character and some examples are listed below.
+See :ref:`segments` for more information.
+
+Memory segments and their interpretation:
+- ``0:3``: Memory address 3 within segment 0.
+- ``1:7``: Memory address 7 within segment 1.
+- ``2:12``: Memory address 12 within segment 2.
+- ``3:2``: Memory address 2 within segment 3.
+- ``4:0``: Memory address 0 within segment 4.
