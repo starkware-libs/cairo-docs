@@ -229,9 +229,9 @@ as follows:
 
 .. tested-code:: cairo typed_references1
 
-    let ptr : MyStruct* = cast([fp], MyStruct*)
+    let ptr : MyStruct* = MyStruct([fp])
     assert ptr.y = 10
-    # This will compile to [ptr + MyStruct.y],
+    # This will compile to cast([fp], MyStruct*),
     # which will subsequently compile to [[fp] + 1].
 
 In general, the syntax ``refname.membername``, where ``refname`` is a typed reference
@@ -242,7 +242,7 @@ You may omit the type and write (the Cairo compiler will deduce the type from th
 
 .. tested-code:: cairo typed_references2
 
-    let ptr = cast([fp], MyStruct*)
+    let ptr = MyStruct([fp])
 
 .. test::
     from starkware.cairo.lang.compiler.cairo_compile import compile_cairo
