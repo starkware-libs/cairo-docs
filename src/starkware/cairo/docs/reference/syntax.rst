@@ -182,13 +182,29 @@ expression at different points branched code, the reference becomes unavailable.
 Locals
 ------
 
+Local variables are defined with the term ``local``. Local variables cannot be revoked, unlike
+references. See :ref:`locals` for more information.
+
+.. tested-code:: cairo syntax_local
+
+    local a = 3
+
+The instruction ``alloc_locals`` must be placed at the start of any function that uses locals.
+
+.. tested-code:: cairo syntax_alloc_locals
+
+    func foo():
+        alloc_locals
+        local a = 3
+        return ()
+    end
 
 Structs
 -------
 
 You can define a struct as follows:
 
-.. tested-code:: cairo structs
+.. tested-code:: cairo syntax_structs
 
     struct MyStruct:
         member first_member : felt
