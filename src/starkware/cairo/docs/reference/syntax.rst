@@ -51,8 +51,11 @@ Cairo have the following types:
 
 * ``felt`` -- a field element (see :ref:`field_elements`).
 * ``MyStruct`` where ``MyStruct`` is a :ref:`struct <syntax_structs>` name.
+* ``MyTuple`` where ``MyTuple`` is a tuple name.
 * ``T*`` where ``T`` is any type -- a pointer to type ``T``. For example: ``MyStruct*`` or
   ``felt**``.
+
+.. todo add link to tuple section when done (:ref:`tuples`)
 
 Expressions
 -----------
@@ -199,8 +202,8 @@ Tuples
 
 Finite ordered lists called tuples contain elements within a pair of parentheses ``(`` ``)``.
 Elements may any combination of valid :ref:`types <syntax_type>`, for example, a ``felt`` and two
-structs. They cannot be modified after declaration and are defined using a local variable as
-follows:
+structs. They cannot be modified after declaration and are defined using a local variable. Tuples
+with one element must contain either an assignment, or a trailing comma as shown below.
 
 .. tested-code:: cairo syntax_tuples
 
@@ -209,6 +212,10 @@ follows:
 
     # A tuple with three elements
     local TupleTwo = (7, 9, 13)
+
+    # Tuples with one element
+    local TupleThree = (5,) # (5) is not a valid tuple.
+    local TupleFour = (a=5) # An assignment does not require a trailing comma.
 
 A tuple may be named and defined by the elements it contains. This may be useful where a function
 has arguments in the form of a tuple. Below function returns a tuple defined with two ``felt``
