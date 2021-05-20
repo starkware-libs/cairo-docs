@@ -74,6 +74,20 @@ An expression in Cairo is one of the following:
 
 .. _syntax_const:
 
+Type declaration
+----------------
+
+An expression can be declared to be of a certain :ref:`type <syntax_type>` by using a colon in the
+format ``<expression> : <type>``. In the code below, ``a``, ``b`` and ``c`` are declared to be three
+different types.
+
+.. tested-code:: cairo syntax_type_declaration
+
+    alloc_locals
+    local a : felt # felt
+    local b : MyStruct # Struct
+    local c : MyStruct* # Pointer to a struct
+
 Pointers
 --------
 
@@ -105,20 +119,6 @@ Expressions, pointers and their interpretation are outlined below:
 - ``[MyStruct**]``. A value at the pointer to the first memory address of the pointer ``MyStruct**``. Reads as "The pointer to the first struct in the list of structs. This pointer can be used to reference the values within that first struct.". ``MyExp : [MyStruct**]`` Is not used because [MyStruct**] is a particular value.
 - ``[MyStruct** + 1]``. A value at the pointer to the second memory address of the pointer ``MyStruct**``. Reads as "The pointer to the second struct in the list of structs. This pointer can be used to reference the values within that second struct".
 
-Type declaration
-----------------
-
-An expression can be declared to be of a certain :ref:`type <syntax_type>` by using a colon in the
-format ``<expression> : <type>``. In the code below, ``a``, ``b`` and ``c`` are declared to be three
-different types.
-
-.. tested-code:: cairo syntax_type_declaration
-
-    alloc_locals
-    local a : felt # felt
-    local b : MyStruct # Struct
-    local c : MyStruct* # Pointer to a struct
-
 Constants
 ---------
 
@@ -126,7 +126,7 @@ You can define a constant value as follows:
 
 .. tested-code:: cairo syntax_consts
 
-   const CONSTANT_NAME = const_value
+    const CONSTANT_NAME = const_value
 
 ``const_value`` must be an expression that evaluates to an integer (field element) at compile time.
 For example: ``5`` or ``4 + 2 * VAL`` where ``VAL`` is another constant.
@@ -140,13 +140,48 @@ A reference can be defined as follows:
 
 .. tested-code:: cairo syntax_reference
 
-   let ref_name : ref_type = ref_expr
+    let ref_name : ref_type = ref_expr
 
 where ``ref_type`` is a type and ``ref_expr`` is some Cairo expression.
 
-Reference can be rebound, which means that TODO.
+Reference can be rebound, which means that an expression can be reassigned to a different value.
+See :ref:`reference_rebinding`.
+
+.. tested-code:: cairo syntax_reference_rebinding
+
+    let a = 7 # A is initially bound to the value 7.
+    let a = 8 # A is now bound to the value 8.
+
+References can be revoked, which means that if there is a conflict between the value assigned to an
+expression at different points branched code, the reference becomes unavailable. See
+:ref:`revoked_references`. for more information.
+
+.. tested-code:: cairo syntax_revoked_references
+
+    func foo():
+        let x == 0
+        let a = 7 # A is initially bound to the value 7.
+
+        jmp case_2 if x == 0
+
+        case_1:
+        let a = 23
+        jump common_final_path:
+
+        case_2:
+        let a = 8
+
+        common_final_path:
+        # A cannot be accessed, because it has conflicting values: 23 vs 8.
+
+        return()
+    end
 
 .. _syntax_structs:
+
+Locals
+------
+
 
 Structs
 -------
@@ -155,10 +190,10 @@ You can define a struct as follows:
 
 .. tested-code:: cairo structs
 
-   struct MyStruct:
-       member first_member : felt
-       member second_member : MyStruct*
-   end
+    struct MyStruct:
+        member first_member : felt
+        member second_member : MyStruct*
+    end
 
 Each member is defined using the syntax ``member <member_name> : <member_type>``.
 
@@ -179,11 +214,11 @@ You can define a function as follows:
 
 .. tested-code:: cairo syntax_function
 
-   func func_name{implicit_arg1 : felt, implicit_arg2 : felt*}(
-           arg1 : felt, arg2 : MyStruct*) -> (
-           ret1 : felt, fet2 : felt):
-       # Function body.
-   end
+    func func_name{implicit_arg1 : felt, implicit_arg2 : felt*}(
+            arg1 : felt, arg2 : MyStruct*) -> (
+            ret1 : felt, fet2 : felt):
+        # Function body.
+    end
 
 The implicit argument part ``{implicit_arg1 : felt, implicit_arg2 : felt*}``
 and the return value ``(ret1 : felt, fet2 : felt)`` are optional.
