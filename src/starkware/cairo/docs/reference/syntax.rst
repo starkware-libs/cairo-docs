@@ -24,6 +24,24 @@ the compiler.
 Each comment spreads until the end of the line. In order to write a multiline comment, prefix all
 the comment lines with ``#``.
 
+Punctuation
+-----------
+
+The punctuation marks used in Cairo are described below:
+
+* ``(`` ``)`` Parentheses: Also known as round brackets. Used in function declaration and in tuple declaration.
+* ``{`` ``}`` Braces: Also known as curly braces or curly brackets. Used in declaration of implicit arguments
+* ``[`` ``]`` Brackets: Also known as square brackets. Identifies the value at a particular address register (such as the allocation pointer, ``[ap]``) and to access a tuple value by index.
+* ``*`` Single asterisk. Refers to the pointer of an expression.
+* ``**`` Double asterisk. Refers to the pointer of a ``felt*`` expression.
+* ``;`` Semicolon. Used to designate an address register instruction, e.g. ``[ap];`` indicates that an operation is being performed on the allocation pointer.
+* ``++`` Double plus. An increment on an address register, e.g. ``ap++`` increments the allocation pointer by one.
+* ``%`` Percent sign. Used as part of the ``%builtins`` directive.
+* ``%[`` ``%]`` Percent sign and brackets block. Identifies python literals.
+* ``%{`` ``%}`` Percent sign and braces block. Identifies python hints.
+* ``<`` ``>`` Chevrons: Also known as angle brackets. Used in Cairo documentation to identify a single element, as in ``<one placeholder element>``. Not used in Cairo code.
+* ``_`` Underscore: Also known as underline. A placeholder to handle values not used, such as an unused function return value.
+
 Type system
 -----------
 
