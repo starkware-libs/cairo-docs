@@ -157,3 +157,28 @@ Option (3) unpacks the return value into ``ret1`` and ``ret2``.
 
 Option (4) is a tail recursion -- after ``foo`` returns, the calling function returns the
 same return value.
+
+Jumps
+-----
+
+Cairo programs can include special branch points in code called jumps. The Prover may choose to
+follow the jump instructions to arrive at a valid proof more readily, but they do not necessarily
+have to do so. Jumps contain a ``jump`` expression and a ``destination``. Jumps may be conditional.
+A conditional jump contains all of the following: A ``jump`` expression, a ``case_not_met`` name,
+a ``case_met_name`` and an ``if`` statement.
+
+.. tested-code:: cairo syntax_jumps
+
+    func MyFunction() -> (result):
+        let a = 2
+
+        jump case_true if a == 3
+
+        case_false:
+        return(result = 0)
+
+        case_true:
+        return(result = 1)
+    end
+
+See :ref:`non_deterministic_jumps` for more information.
