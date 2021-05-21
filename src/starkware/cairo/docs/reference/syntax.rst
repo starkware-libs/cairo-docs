@@ -157,3 +157,33 @@ Option (3) unpacks the return value into ``ret1`` and ``ret2``.
 
 Option (4) is a tail recursion -- after ``foo`` returns, the calling function returns the
 same return value.
+
+Hints
+-----
+
+Python code can be invoked with the ``%{`` ``%}`` block, where all contained code will be available
+to be modified during proof construction. See :ref:`hints` for more information.
+
+.. tested-code:: cairo syntax_hints
+
+    %{ a = 2 * 2 %}
+
+Hints may span multiple lines.
+
+.. tested-code:: cairo syntax_hints_multiline
+
+    %{
+        a = 2 * 2
+        b = a * 5
+    %}
+
+The ``ids`` expression allows a hint to access and modify Cairo expressions that preceed the hints
+block.
+
+.. tested-code:: cairo syntax_hints_multiline
+
+    let a = 4
+    %{
+        b = 100 * ids.a # cairo expression a is accessed.
+        ids.a = b # cairo expression a is modified.
+    %}
