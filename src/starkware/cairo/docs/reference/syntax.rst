@@ -136,6 +136,36 @@ A function must end with a ``return`` statement, which takes the following form:
 
    return (ret1=val1, ret2=val2)
 
+Function outputs
+----------------
+
+A function can return arguments to the parent function that called it. The arguments expected are
+designated by the ``-> ()`` expression. The argument type(s) are defined in the return statement of
+the function. Arguments may be either positional or named, where positional arguments are identified
+by the order they appear in the calling function. Positional arguments must appear before named
+arguments.
+
+.. tested-code:: cairo syntax_function_outputs
+
+    func my_function() -> (a, b):
+        # Permitted
+        return (2, b=3) # positional, named
+
+        # Not permitted
+        # return (a=2, 3) # named, positional
+    end
+
+    func main():
+        let (val_a, val_b) = my_function()
+        return()
+    end
+
+Functions can specify that an output be of a certain type. The function below returns two arguments,
+``a``, a value of type ``felt`` and ``b``, the address of a felt value.
+
+.. tested-code:: cairo syntax_function_outputs_typed
+
+    func my_function() -> (a : felt, b : felt*):
 
 Call statement
 --------------
