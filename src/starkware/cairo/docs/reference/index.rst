@@ -9,4 +9,3 @@ Brief descriptions and implementation details for commonly used components in Ca
    :maxdepth: 2
 
    syntax
-   builtins
