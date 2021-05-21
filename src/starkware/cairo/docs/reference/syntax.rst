@@ -161,20 +161,19 @@ same return value.
 Library imports
 ---------------
 
-Library functions are imported at the top of the file, below ``Builtins`` if they are used. The
-statement describes where in the library the function is ``from`` and which function to ``import``.
-Multiple functions the same library can be separated by commas. Functions from different libraries
-are imported on a new line.
+Library functions are imported at the top of the file, below ``%builtins`` directive if they are
+used. The statement consists of the module name and the functions to ``import`` from it. Multiple
+functions from the same library can be separated by commas. Functions from different libraries
+are imported on different lines. Cairo searches for each library in a default directory path and in
+any additional paths specified at compile time. See :ref:`import_search_path` for more information.
 
 .. tested-code:: cairo syntax_library_imports
 
-    # Builtins would be included here
+    %builtins output pedersen
     from starkware.cairo.common.math import assert_not_zero, assert_not_equal
     from starkware.cairo.common.registers import get_ap
 
-    func main():
-        assert_not_zero(10)
-        assert_not_equal(2,3)
-        let empty_memory_slot = get_ap()
-        return ()
-    end
+    assert_not_zero(10)
+    assert_not_equal(2,3)
+    let empty_memory_slot = get_ap()
+    return ()
