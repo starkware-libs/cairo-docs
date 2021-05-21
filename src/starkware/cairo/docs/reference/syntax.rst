@@ -157,3 +157,20 @@ Option (3) unpacks the return value into ``ret1`` and ``ret2``.
 
 Option (4) is a tail recursion -- after ``foo`` returns, the calling function returns the
 same return value.
+
+Implicit arguments
+------------------
+
+Implicit arguments are specified as part of the function expression and are designated by
+braces ``{}``. Expressions within the braces are passed between functions. If no implicit
+arguments are required the braces can be omitted.
+
+.. tested-code:: cairo syntax_implicit_arguments
+
+    %builtins output
+
+    func main{output_ptr}():
+        return ()
+    end
+
+For more information about builtins see :ref:`implicit_arguments`
