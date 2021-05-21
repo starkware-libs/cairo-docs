@@ -157,3 +157,45 @@ Option (3) unpacks the return value into ``ret1`` and ``ret2``.
 
 Option (4) is a tail recursion -- after ``foo`` returns, the calling function returns the
 same return value.
+
+Program output
+--------------
+
+Cairo programs can produce outputs that a smart contract can verify. These outputs require the
+``output`` builtin. The program can product multiple outputs with calls to the ``serialize_word()``
+function. Outputs can also be structs that are saved to an output file.
+See :ref:`program_output` for more information.
+
+The following program outputs two values, 7 and 13.
+
+.. tested-code:: cairo syntax_program_output
+
+    %builtins output
+
+    from starkware.cairo.common.serialize import serialize_word
+
+    func main{output_ptr: felt*}():
+        let a = 7
+        let b = 13
+        serialize_word(a)
+        serialize_word(b)
+        return()
+    end
+
+The following program excerpt outlines how a program may output a struct by referencing its size
+and location in memory.
+
+.. tested-code:: cairo syntax_program_output_struct
+
+    %builtins output
+
+    # Code defining the struct goes here
+
+    func main{output_ptr: felt*}():
+        # Code defining the struct contents goes here
+
+        let output = cast(output_ptr, MyStruct*)
+        let output_ptr = output_ptr + Mystruct.SIZE
+
+        return()
+    end
