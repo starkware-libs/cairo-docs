@@ -83,6 +83,26 @@ where ``ref_type`` is a type and ``ref_expr`` is some Cairo expression.
 
 Reference can be rebound, which means that TODO.
 
+Locals
+------
+
+Local expressions are defined with the term ``local``. Local variables cannot be revoked, unlike
+references. See :ref:`local_vars` for more information.
+
+.. tested-code:: cairo syntax_local
+
+    local a = 3
+
+The instruction ``alloc_locals`` must be placed at the start of any function that uses locals.
+
+.. tested-code:: cairo syntax_alloc_locals
+
+    func foo():
+        alloc_locals
+        local a = 3
+        return ()
+    end
+
 .. _syntax_structs:
 
 Structs
