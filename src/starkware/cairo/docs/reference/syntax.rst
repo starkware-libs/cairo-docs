@@ -157,3 +157,22 @@ Option (3) unpacks the return value into ``ret1`` and ``ret2``.
 
 Option (4) is a tail recursion -- after ``foo`` returns, the calling function returns the
 same return value.
+
+Unpacking
+---------
+
+The values returned by a function can be ignored or bound to either a reference or local expression.
+The ``_`` character is used to handle returned values that are ignored. Consider function ``foo()``
+that returns two values, ``7`` and ``5`` in that order.
+
+.. tested-code:: cairo syntax_unpacking
+
+    let (a, b) = foo() # Two references bound (a=7, b=5).
+
+    let (_, b) = foo() # One reference bound (b=5).
+
+    let (local a, local b) = foo() # Two locals bound (a=7, b=5)
+
+    let (local a, _) = foo() # One local bound (a=7)
+
+For more information see :ref:`return_values_unpacking`.
