@@ -31,6 +31,7 @@ Cairo have the following types:
 
 * ``felt`` -- a field element (see :ref:`field_elements`).
 * ``MyStruct`` where ``MyStruct`` is a :ref:`struct <syntax_structs>` name.
+* ``MyTuple`` where ``MyTuple`` is a tuple name.
 * ``T*`` where ``T`` is any type -- a pointer to type ``T``. For example: ``MyStruct*`` or
   ``felt**``.
 
@@ -108,6 +109,49 @@ the second is assigned offset according to the size of the first member and so o
 The offset can be retrieved using ``MyStruct.member_name``.
 For example, ``MyStruct.first_member == 0`` and ``MyStruct.second_member == 1``
 (since the size of ``felt`` is 1).
+
+Tuples
+------
+
+Finite ordered lists called tuples contain elements within a pair of parentheses ``(`` ``)``.
+Elements may be any combination of valid :ref:`types <syntax_type>`, for example, a ``felt`` and two
+structs. They cannot be modified after declaration and are defined using a local variable. Tuples
+with one element must contain either an assignment, or a trailing comma as shown below.
+
+.. tested-code:: cairo syntax_tuples
+
+    # A tuple with two elements
+    local TupleOne = (7, 9)
+
+    # A tuple with three elements
+    local TupleTwo = (7, 9, 13)
+
+    # Tuples with one element
+    local TupleThree = (5,) # (5) is not a valid tuple.
+    local TupleFour = (a=5) # An assignment does not require a trailing comma.
+
+A tuple may be named and defined by the elements it contains. This may be useful where a function
+has arguments in the form of a tuple. Below function returns a tuple defined with two ``felt``
+expressions.
+
+.. tested-code:: cairo syntax_tuple_empty
+
+    func MyFunc() -> (TupleResult : (felt, felt)):
+        alloc_locals
+        let a = 3
+        let b = 9
+        local MyTuple = (a, b)
+        return (TupleResult = MyTuple)
+    end
+
+Tuple values may be accessed with a zero-based index brackets ``[index]`` as follows:
+
+.. tested-code:: cairo syntax_tuple_assignment
+
+    local TupleOne = (7, 9, 3, 8)
+    let a = TupleOne[0] # Equivalent to: let a = 7.
+    let b = TupleOne[1] # Equivalent to: let b = 9.
+    let b = TupleOne[3] # Equivalent to: let c = 8.
 
 Functions
 ---------
