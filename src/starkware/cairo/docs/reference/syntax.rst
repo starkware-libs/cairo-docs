@@ -161,7 +161,7 @@ same return value.
 Library imports
 ---------------
 
-Library functions are imported at the top of the file, below ``%builtins`` directive if they are
+Library functions are imported at the top of the file, below the ``%builtins`` directive if it is
 used. The statement consists of the module name and the functions to ``import`` from it. Multiple
 functions from the same library can be separated by commas. Functions from different libraries
 are imported on different lines. Cairo searches for each library in a default directory path and in
