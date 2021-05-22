@@ -74,11 +74,11 @@ Now compile and run the following program (run with ``--program_input=input.json
 
 .. only:: internal
 
-Exercise
-********
+    Exercise
+    ********
 
-Modify ``simple_fibonacci.cairo`` so that the first two values,
-and the length of the sequence will be given by the program input.
+    Modify ``simple_fibonacci.cairo`` so that the first two values,
+    and the length of the sequence will be given by the program input.
 
 .. _program_output:
 
