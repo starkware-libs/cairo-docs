@@ -47,3 +47,44 @@ function lacks that argument. Example implicit arguments might be ``range_check_
     function():
         # Implicit argument required
         library_function{implicit_argument}()
+
+``cairo_builtins`` library
+--------------------------
+
+Import from this library by replacing ``*`` with the function name.
+
+.. tested-code:: cairo library_cairo_builtins
+
+    from starkware.cairo.common.cairo_builtins import *
+
+``HashBuiltin`` function
+************************
+
+Returns a representation of a ``HashBuiltin struct``, specifying the hash builtin memory structure.
+
+.. tested-code:: cairo library_builtins_hashbuiltin
+
+    alloc_locals
+    local new_hash : HashBuiltin
+
+``SignatureBuiltin`` function
+*****************************
+
+Returns a representation of a ``SignatureBuiltin struct``, specifying the signature builtin memory
+structure.
+
+.. tested-code:: cairo library_builtins_signaturebuiltin
+
+    alloc_locals
+    local new_signature : SignatureBuiltin
+
+``CheckpointsBuiltin`` function
+*******************************
+
+Returns a representation of a ``CheckpointsBuiltin struct``, specifying
+the checkpoint builtin memory structure.
+
+.. tested-code:: cairo library_builtins_checkpointsbuiltin
+
+    alloc_locals
+    local new_checkpoint : CheckpointsBuiltin
