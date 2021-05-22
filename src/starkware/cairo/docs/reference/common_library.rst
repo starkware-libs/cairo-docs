@@ -47,3 +47,21 @@ function lacks that argument. Example implicit arguments might be ``range_check_
     function():
         # Implicit argument required
         library_function{implicit_argument}()
+
+``alloc`` library
+-----------------
+
+Import from this library by replacing ``*`` with the function name.
+
+.. tested-code:: cairo library_alloc
+
+    from starkware.cairo.common.alloc import *
+
+``alloc()`` function
+********************
+
+Returns a newly allocated memory segment.
+
+.. tested-code:: cairo alloc_alloc
+
+    let new_slot = alloc()
