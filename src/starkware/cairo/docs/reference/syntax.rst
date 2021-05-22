@@ -172,8 +172,3 @@ any additional paths specified at compile time. See :ref:`import_search_path` fo
     %builtins output pedersen
     from starkware.cairo.common.math import assert_not_zero, assert_not_equal
     from starkware.cairo.common.registers import get_ap
-
-    assert_not_zero(10)
-    assert_not_equal(2,3)
-    let empty_memory_slot = get_ap()
-    return ()
