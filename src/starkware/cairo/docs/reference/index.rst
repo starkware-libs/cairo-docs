@@ -7,3 +7,4 @@ Reference
    :maxdepth: 2
 
    syntax
+   common_library
