@@ -68,7 +68,7 @@ The use of a struct is good practice where multiple elements are being used beca
 allow code to be easy to write and read. In the example of tile location there are only two elements
 and they can instead be represented as a ``tile`` tuple with ``(row, column)``. Multiple tiles can
 be managed as a tuple of ``tiles`` with structure ``(tile0, tile1, tile2)``. Tile information can
-then be addressed with tiles[<tile_index>][<tile_attribute_index>], where ``tiles[0][0]`` is the row
+then be addressed with ``tiles[<tile_index>][<tile_attribute_index>]``, where ``tiles[0][0]`` is the row
 of first tile.
 
 Verifying the validity of a single location
@@ -95,7 +95,6 @@ containing two ``felt`` elements.
 This means that it will expect that the value of the memory at address
 ``loc[0]`` is the row of the location,
 and the value at address ``loc[1]`` is the column.
-Cairo lets us address the two values using ``loc.row`` and ``loc.col``.
 
 Next we see a definition of a temporary variable.
 We have mentioned above that Cairo memory is immutable, so the name
