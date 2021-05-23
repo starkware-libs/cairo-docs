@@ -556,3 +556,57 @@ To stress this last point, consider the following code.
     assert [runner.vm_memory[runner.initial_ap + i] for i in range(2)] == [1, 2]
 
 This code will return either ``[1, 2]``, or ``[1, 3]``.
+
+.. _tuples:
+
+Tuples
+------
+
+Tuples are a feature to allow convenient referencing of an ordered collection of elements. The
+references cannot be revoked because they are constructed from local variables, which use the
+``fp`` register. Tuples may contain any combination of valid types, including other tuples. The
+compiler handles tuple elements with a reference to ``fp`` which for each element is incremented.
+If the first element is ``[fp + 1]``, the second is ``[fp + 2]``.
+
+Tuple are represented as comma-separated elements bounded by parentheses. Tuple elements are
+accessed with the tuple expression followed by brackets containing a zero-based index to the
+element.
+
+Consider the following assert statement:
+
+.. tested-code:: cairo tuples0
+
+    assert (x, y) = (1, 2)
+
+This may be re-written in the form:
+
+.. tested-code:: cairo tuples1
+
+    let tuple_a = (x, y)
+    let tuple_b = (1, 2)
+    assert tuple_a = tuple_b
+
+Tuples are the same if their elements are the same. The compiler ensures that the element at each
+index is the same. In other words:
+
+.. tested-code:: cairo tuples2
+
+    assert tuple_a[0] = tuple_b[0]
+    assert tuple_a[1] = tuple_b[1]
+
+Which the compiler then enforces by binding the ``x`` and ``y`` expressions to ``1`` and ``2``
+respectively. Tuples are constructed from local variables and the assert statement ultimately is
+compiled to two local variable assignments. Both ``x`` and ``y`` are accessed by a pointer to
+reference to `fp`, such as [fp + z], where ``z`` is an integer that the compiler tracks based on the
+other local variables already used. The original assert statement is therefore equivalent to:
+
+.. tested-code:: cairo tuples3
+
+    local x = 1
+    local y = 2
+
+Tuples with a single element are unique in that they must features a trailing comma after the first
+element ``(a,)``. Single element tuples that contain an expression do not require this comma
+``(a=2)``. Access to nested tuples is achieved by using additional indices starting with the
+outer-most tuple, where ``MyTuple[2][4][3][1]`` first accesses index 2 of ``MyTuple``, a tuple whose
+value at index 4 is another tuple, and so on.
