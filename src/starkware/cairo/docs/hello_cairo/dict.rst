@@ -117,7 +117,7 @@ Here we chose to go with option (2).
             dict=dict + DictAccess.SIZE)
     end
 
-The function gets a pointer to the list of locations, a pointer to the list of tiles
+The function gets a pointer to the list of locations, a tuple containing tiles
 (unlike the list of locations, this is a list of simple field elements, not structs),
 the number of steps in the solution and a pointer called ``dict``.
 The function writes its new dict entries starting from ``dict``, and returns the "updated"
@@ -213,7 +213,7 @@ Putting it all together
     from starkware.cairo.common.alloc import alloc
 
     func check_solution{output_ptr : felt*, range_check_ptr}(
-            loc_list : Location*, tile_list : felt*, n_steps):
+            loc_list : Location*, tile_list, n_steps):
         alloc_locals
 
         # Start by verifying that loc_list is valid.
