@@ -256,49 +256,35 @@ main function):
     func main():
         alloc_locals
 
-        local loc0 : Location
-        assert loc0.row = 0
-        assert loc0.col = 2
-        local loc1 : Location
-        assert loc1.row = 1
-        assert loc1.col = 2
-        local loc2 : Location
-        assert loc2.row = 1
-        assert loc2.col = 3
-        local loc3 : Location
-        assert loc3.row = 2
-        assert loc3.col = 3
-        local loc4 : Location
-        assert loc4.row = 3
-        assert loc4.col = 3
+        # A tuple containg (row, column) tuples for each location.
+        let locs = ((0, 2), (1, 2), (1, 3), (2, 3), (3, 3))
 
-        # Get the value of the frame pointer register (fp) so that
-        # we can use the address of loc0.
+        # locs[0][0] first location row
+        # locs[1][0] second location row
+        # locs[2][1] third location column
+
+        # Get the value of the frame pointer register (fp)
+        # so that we can get the address of the locs tuple.
         let (__fp__, _) = get_fp_and_pc()
-        # Since the variables are next to each other we can use the
-        # address of loc0 as a pointer to the 5 locations.
-        verify_location_list(loc_list=&loc0, n_steps=4)
+
+        verify_location_list(loc_list=&locs, n_steps=4)
         return ()
     end
 
-In the beginning of the function we allocate 5 locations, using typed local variables.
-Cairo looks for the constant ``Location.SIZE`` to find how much cells are
-required for each of the variables, and then allocates them in the order of definition.
-Each ``Location`` instance is assigned some coordinates (according to the example above).
+In the beginning of the function we allocate 5 locations, using tuples.
+Cairo looks at each tuple to find how many cells are required for each of the variables, and then
+allocates them in the order of definition. Each tuple instance is assigned some coordinates
+(according to the example above).
 
-Since ``verify_location_list`` requires a pointer to a list of locations,
-we pass ``&loc0``, which represents the address in memory of ``loc0``, and is of type
-``Location*``.
+Since ``verify_location_list`` requires a pointer to a list of locations, we pass ``&locs``, which
+represents the address in memory of ``locs``, a pointer to the outer tuple.
 
-For technical reasons, when Cairo needs to retrieve the address of a local variable (``&loc0``),
-it needs to be told the value of the frame pointer register, ``fp``
-(see :ref:`fp_register`).
-This can be done by the statement ``let (__fp__, _) = get_fp_and_pc()``
-which calls the library function ``get_fp_and_pc()`` to retrieve ``fp``.
-The result is named ``__fp__`` which is the name Cairo looks for
-when it has to know ``fp``.
-If you forget to write this line, you may get an error of the form:
-``Using the value of fp directly, requires defining a variable named __fp__.``
+For technical reasons, when Cairo needs to retrieve the address of a local variable (``&locs``),
+it needs to be told the value of the frame pointer register, ``fp`` (see :ref:`fp_register`).
+This can be done by the statement ``let (__fp__, _) = get_fp_and_pc()`` which calls the library
+function ``get_fp_and_pc()`` to retrieve ``fp``. The result is named ``__fp__`` which is the name
+Cairo looks for when it has to know ``fp``. If you forget to write this line, you may get an error
+of the form: ``Using the value of fp directly, requires defining a variable named __fp__.``
 
 Again, don't forget to return at the end!
 
