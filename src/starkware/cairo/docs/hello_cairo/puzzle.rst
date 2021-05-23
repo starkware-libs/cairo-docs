@@ -218,27 +218,28 @@ variable instead.
 Verifying the list of locations
 -------------------------------
 
-Let's wrap it in a loop (recursion, to be precise) that calls those two functions
-on the entire location list.
+Let's wrap it in a loop (recursion, to be precise) that calls those two functions on the entire
+location list. The function first checks the location at index 4 (n_steps=4), then verifies that the
+locations index 4 and 3 are adjacent. Then the first recursion call happens and index 3 (n_steps=3)
+becomes the target of the valid location check. Once index 0 is reached (n_steps=0), all locations
+have been checked and the function returns, ending the recursion.
 
 .. tested-code:: cairo verify_location_list
 
-    func verify_location_list(loc_list : Location*, n_steps):
-        # Always verify that the location is valid, even if
-        # n_steps = 0 (remember that there is always one more
-        # location than steps).
-        verify_valid_location(loc=loc_list)
+    func verify_location_list(loc_list, n_steps):
+        # Always verify that the location is valid, even if n_steps = 0.
+        # Index 0 is the first location.
+        verify_valid_location(loc=loc_list[n_steps])
 
         if n_steps == 0:
             return ()
         end
 
         verify_adjacent_locations(
-            loc0=loc_list, loc1=loc_list + Location.SIZE)
+            loc0=loc_list[n_steps], loc1=loc_list[n_steps - 1])
 
         # Call verify_location_list recursively.
-        verify_location_list(
-            loc_list=loc_list + Location.SIZE, n_steps=n_steps - 1)
+        verify_location_list(loc_list=loc_list, n_steps=n_steps - 1)
         return ()
     end
 
@@ -251,8 +252,6 @@ main function):
 
 .. tested-code:: cairo dummy_main
 
-    from starkware.cairo.common.registers import get_fp_and_pc
-
     func main():
         alloc_locals
 
@@ -263,11 +262,7 @@ main function):
         # locs[1][0] second location row
         # locs[2][1] third location column
 
-        # Get the value of the frame pointer register (fp)
-        # so that we can get the address of the locs tuple.
-        let (__fp__, _) = get_fp_and_pc()
-
-        verify_location_list(loc_list=&locs, n_steps=4)
+        verify_location_list(loc_list=locs, n_steps=4)
         return ()
     end
 
@@ -276,7 +271,11 @@ Cairo looks at each tuple to find how many cells are required for each of the va
 allocates them in the order of definition. Each tuple instance is assigned some coordinates
 (according to the example above).
 
-Since ``verify_location_list`` requires a pointer to a list of locations, we pass ``&locs``, which
+Since ``verify_location_list`` requires a tuple, we can pass that directly.
+
+Again, don't forget to return at the end!
+
+If we had instead elected to pass pointer to a list of locations, we would pass ``&locs``, which
 represents the address in memory of ``locs``, a pointer to the outer tuple.
 
 For technical reasons, when Cairo needs to retrieve the address of a local variable (``&locs``),
@@ -285,8 +284,6 @@ This can be done by the statement ``let (__fp__, _) = get_fp_and_pc()`` which ca
 function ``get_fp_and_pc()`` to retrieve ``fp``. The result is named ``__fp__`` which is the name
 Cairo looks for when it has to know ``fp``. If you forget to write this line, you may get an error
 of the form: ``Using the value of fp directly, requires defining a variable named __fp__.``
-
-Again, don't forget to return at the end!
 
 Exercise
 ********
