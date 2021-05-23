@@ -153,6 +153,15 @@ Tuple values may be accessed with a zero-based index brackets ``[index]`` as fol
     let b = TupleOne[1] # Equivalent to: let b = 9.
     let b = TupleOne[3] # Equivalent to: let c = 8.
 
+Tuples may be nested and accessed as follows:
+
+.. tested-code:: cairo syntax_tuple_nested
+
+    local TupleOne = (3, 6, 8)
+    local TupleTwo = (1, TupleOne, 5)
+    local TupleThree = (TupleTwo, 2, 11)
+    let a = TupleThree[0][1][2] # Equivalent to: let a = 8.
+
 Functions
 ---------
 
