@@ -298,7 +298,7 @@ Exercise
 Play with the values of the location coordinates and make sure the program fails
 if they represent illegal values.
 
-For example, try to change ``loc0.row`` from 0 to 10.
+For example, try to change ``locs[0][0]`` (the first element in the first tuple), from 0 to 10.
 You should see that the assert in ``verify_valid_location`` fails.
 Or you can change this value to 1, which will make the first transition
 illegal (the empty tile cannot stay in the same place).
