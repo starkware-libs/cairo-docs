@@ -597,16 +597,20 @@ index is the same. In other words:
 Which the compiler then enforces by binding the ``x`` and ``y`` expressions to ``1`` and ``2``
 respectively. Tuples are constructed from local variables and the assert statement ultimately is
 compiled to two local variable assignments. Both ``x`` and ``y`` are accessed by a pointer to
-reference to `fp`, such as [fp + z], where ``z`` is an integer that the compiler tracks based on the
-other local variables already used. The original assert statement is therefore equivalent to:
+reference to ``fp``, such as ``[fp + z]``, where ``z`` is an integer that the compiler tracks based
+on the other local variables already used. The original assert statement is therefore equivalent to:
 
 .. tested-code:: cairo tuples3
 
     local x = 1
     local y = 2
 
-Tuples with a single element are unique in that they must features a trailing comma after the first
+Tuples with a single element are unique in that they must feature a trailing comma after the first
 element ``(a,)``. Single element tuples that contain an expression do not require this comma
 ``(a=2)``. Access to nested tuples is achieved by using additional indices starting with the
-outer-most tuple, where ``MyTuple[2][4][3][1]`` first accesses index 2 of ``MyTuple``, a tuple whose
-value at index 4 is another tuple, and so on.
+outer-most tuple. For example, ``MyTuple[2][4][3][1]`` first accesses index 2 of ``MyTuple``, a
+tuple whose value at index 4 is another tuple, and so on.
+
+As with local variables, tuple declaration does not automatically advance ``ap``. If direct use of
+``ap`` is required, care must be taken to manually increment using the auto-generated constant
+``SIZEOF_LOCALS``, as described in :ref:`local_vars`.
