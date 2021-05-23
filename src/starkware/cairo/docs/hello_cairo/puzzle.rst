@@ -144,10 +144,10 @@ and indeed ``(0, 2) - (1, 2) = (-1, 0)``.
 .. tested-code:: cairo verify_adjacent_locations
 
     func verify_adjacent_locations(
-            loc0 : Location*, loc1 : Location*):
+            loc0 : (felt, felt), loc1 : (felt, felt)):
         alloc_locals
-        local row_diff = loc0.row - loc1.row
-        local col_diff = loc0.col - loc1.col
+        local row_diff = loc0[0] - loc1[0]
+        local col_diff = loc0[1] - loc1[1]
 
         if row_diff == 0:
             # The row coordinate is the same. Make sure the difference
