@@ -89,7 +89,7 @@ Here we chose to go with option (2).
     from starkware.cairo.common.squash_dict import squash_dict
 
     func build_dict(
-            loc_list : Location*, tile_list : felt*, n_steps,
+            loc_list : Location*, tile_list, n_steps,
             dict : DictAccess*) -> (dict : DictAccess*):
         if n_steps == 0:
             # When there are no more steps, just return the dict
@@ -98,7 +98,7 @@ Here we chose to go with option (2).
         end
 
         # Set the key to the current tile being moved.
-        assert dict.key = [tile_list]
+        assert dict.key = tile_list[n_steps - 1]
 
         # Its previous location should be where the empty tile is
         # going to be.
@@ -112,7 +112,7 @@ Here we chose to go with option (2).
         # Call build_dict recursively.
         return build_dict(
             loc_list=next_loc,
-            tile_list=tile_list + 1,
+            tile_list=tile_list,
             n_steps=n_steps - 1,
             dict=dict + DictAccess.SIZE)
     end
