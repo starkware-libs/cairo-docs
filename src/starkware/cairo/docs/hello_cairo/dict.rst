@@ -213,7 +213,7 @@ Putting it all together
     from starkware.cairo.common.alloc import alloc
 
     func check_solution{output_ptr : felt*, range_check_ptr}(
-            loc_list : Location*, tile_list : felt*, n_steps):
+            loc_list, tile_list, n_steps):
         alloc_locals
 
         # Start by verifying that loc_list is valid.
@@ -249,7 +249,7 @@ Putting it all together
         output_initial_values(squashed_dict=squashed_dict, n=15)
 
         # Output the initial location of the empty tile.
-        serialize_word(4 * loc_list.row + loc_list.col)
+        serialize_word(4 * loc_list[0] + loc_list[0])
 
         # Output the number of steps.
         serialize_word(n_steps)
