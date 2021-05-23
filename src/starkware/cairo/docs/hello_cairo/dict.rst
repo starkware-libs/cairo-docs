@@ -89,7 +89,7 @@ Here we chose to go with option (2).
     from starkware.cairo.common.squash_dict import squash_dict
 
     func build_dict(
-            loc_list : Location*, tile_list : felt*, n_steps,
+            loc_list, tile_list, n_steps,
             dict : DictAccess*) -> (dict : DictAccess*):
         if n_steps == 0:
             # When there are no more steps, just return the dict
@@ -98,27 +98,26 @@ Here we chose to go with option (2).
         end
 
         # Set the key to the current tile being moved.
-        assert dict.key = [tile_list]
+        assert dict.key = tile_list[n_steps - 1]
 
         # Its previous location should be where the empty tile is
         # going to be.
-        let next_loc : Location* = loc_list + Location.SIZE
-        assert dict.prev_value = 4 * next_loc.row + next_loc.col
+        let next_loc : (felt, felt) = loc_list[n_steps - 1]
+        assert dict.prev_value = 4 * next_loc[0] + next_loc[1]
 
         # Its next location should be where the empty tile is
         # now.
-        assert dict.new_value = 4 * loc_list.row + loc_list.col
+        assert dict.new_value = 4 * loc_list[n_steps][0] + loc_list[n_steps][1]
 
         # Call build_dict recursively.
         return build_dict(
             loc_list=next_loc,
-            tile_list=tile_list + 1,
+            tile_list=tile_list,
             n_steps=n_steps - 1,
             dict=dict + DictAccess.SIZE)
     end
 
-The function gets a pointer to the list of locations, a pointer to the list of tiles
-(unlike the list of locations, this is a list of simple field elements, not structs),
+The function gets a list of locations, a list of tiles,
 the number of steps in the solution and a pointer called ``dict``.
 The function writes its new dict entries starting from ``dict``, and returns the "updated"
 ``dict`` pointer -- the pointer to the next address to write if you want to add more entries
@@ -126,7 +125,7 @@ to the list. This way we can concatenate functions writing DictAccess lists.
 This pattern, of getting a pointer, reading/writing entries from that pointer and returning
 an updated pointer is very common in Cairo.
 
-The line ``let next_loc : Location* = ...`` defines a :ref:`reference <references>` --
+The line ``let next_loc : (felt, felt) = ...`` defines a :ref:`reference <references>` --
 unlike tempvar/local, this does not allocate a memory cell. Instead, every time we
 refer to ``next_loc`` it will be replaced by ``loc_list + Location.SIZE``.
 Thus, the scope of the reference is simply the scope of its expression.
