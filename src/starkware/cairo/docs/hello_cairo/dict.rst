@@ -323,15 +323,12 @@ and use ``--layout=small`` to ``cairo-run`` due to the usage of builtins):
         assert loc4.row = 3
         assert loc4.col = 3
 
-        local tile0 = 3
-        local tile1 = 7
-        local tile2 = 8
-        local tile3 = 12
+        let tiles = (3, 7, 8, 12)
 
         # Get the value of the frame pointer register (fp) so that
         # we can use the address of loc0.
         let (__fp__, _) = get_fp_and_pc()
-        check_solution(loc_list=&loc0, tile_list=&tile0, n_steps=4)
+        check_solution(loc_list=&loc0, tile_list=tiles, n_steps=4)
         return ()
     end
 
