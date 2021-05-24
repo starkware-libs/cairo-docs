@@ -18,10 +18,10 @@ below, the function will identify the fist element that has a first field value 
 ``search_sorted()`` function
 ****************************
 
-Returns the pointer to the first element in the array whose first field is exactly key and a success
-parameter. The array elements must be sorted by first field (from smallest to largest). If no such
-item exists, returns an undefined pointer, and success=0. The function requires the implicit
-argument ``range_check_ptr``.
+Returns both the pointer to the first element in the array whose first field is exactly ``key`` and
+a value reflecting the success of the search. The array elements must be sorted by first field (from
+smallest to largest). If no such item exists, returns an undefined pointer, and ``success=0``. The
+function requires the implicit argument ``range_check_ptr``.
 
 The function behaves similarly to ``find_element()`` and accepts the same arguments. In the example
 below, the function will identify the fist element that has a first field value of ``95``. If such
