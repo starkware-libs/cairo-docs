@@ -103,7 +103,7 @@ See :ref:`revoked_references` for more information.
 
     func foo():
         let x == 0
-        let a = 7 # A is initially bound to the value 7.
+        let a = 7 # a is initially bound to the value 7.
 
         # The Prover may choose to enter the if or the else statement.
         if x == 0:
