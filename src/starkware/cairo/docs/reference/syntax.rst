@@ -33,10 +33,10 @@ The punctuation marks used in Cairo are described below:
 * ``{`` ``}`` Braces, curly braces or curly brackets. Used in declaration of implicit arguments
 * ``[`` ``]`` Brackets or square brackets. Standalone brackets represent the value at a particular address location (such as the allocation pointer, ``[ap]``). Brackets also act as a subscript operator, where ``x[2]`` represents the element in tuple ``x`` with the index ``2``.
 * ``*`` Single asterisk. Refers to the pointer of an expression.
-* ``; ap++`` Semicolon and double plus operator which increments the allocation pointer ``ap`` by one after the preceeding instruction has finished.
+* ``; ap++`` Used to increment the allocation pointer ``ap`` by one after the preceeding instruction has finished.
 * ``%`` Percent sign. Appears at the start of directives, such as ``%builtins`` or ``%lang``.
-* ``%[`` ``%]`` Percent sign and brackets block. Represents python literals.
-* ``%{`` ``%}`` Percent sign and braces block. Represents python hints.
+* ``%[`` ``%]`` Represents python literals.
+* ``%{`` ``%}`` Represents python hints.
 * ``<`` ``>`` Chevrons: Also known as angle brackets. Used in Cairo documentation to identify a single element, as in ``<one placeholder element>``. Not used in Cairo code.
 * ``_`` Underscore: Also known as underline. A placeholder to handle values not used, such as an unused function return value.
 
