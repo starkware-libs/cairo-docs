@@ -113,10 +113,11 @@ For example, ``MyStruct.first_member == 0`` and ``MyStruct.second_member == 1``
 Tuples
 ------
 
-Finite ordered lists called tuples contain elements within a pair of parentheses ``(`` ``)``.
-Elements may be any combination of valid :ref:`types <syntax_type>`, for example, a ``felt`` and two
-structs. They cannot be modified after declaration and are defined using a local variable. Tuples
-with one element must contain either an assignment, or a trailing comma as shown below.
+A tuple is a finite, ordered, unchangeable list of elements. It is represented by a list of elements
+separated by commas within round brackets ``(`` ``)``. Tuples are defined as a local variable. Their
+elements may be any combination of valid :ref:`types <syntax_type>`, for example, a ``felt`` and two
+structs. A tuple that contains only one element must be defined in one of the two following ways:
+the element is defined with an assignment or with a trailing comma, as shown below.
 
 .. tested-code:: cairo syntax_tuples
 
