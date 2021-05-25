@@ -86,8 +86,8 @@ reference. See :ref:`reference_rebinding`. For example:
 
 .. tested-code:: cairo syntax_reference_rebinding
 
-    let a = 7 # a is initially bound to the expression 7.
-    let a = 8 # a is now bound to the expression 8.
+    let a = 7  # a is initially bound to the expression 7.
+    let a = 8  # a is now bound to the expression 8.
 
 References can be revoked, which means that either:
 
