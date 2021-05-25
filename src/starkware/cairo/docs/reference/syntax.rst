@@ -132,8 +132,8 @@ the element is defined with an assignment or with a trailing comma, as shown bel
     local TupleFour = (a=5) # An assignment does not require a trailing comma.
 
 A tuple may be named and defined by the elements it contains. This may be useful where a function
-has arguments in the form of a tuple. Below function returns a tuple defined with two ``felt``
-expressions.
+has arguments in the form of a tuple. For example, the following function returns a tuple defined
+with two ``felt`` expressions.
 
 .. tested-code:: cairo syntax_tuple_empty
 
