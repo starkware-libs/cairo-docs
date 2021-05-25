@@ -89,9 +89,15 @@ reference. See :ref:`reference_rebinding`. For example:
     let a = 7 # A is initially bound to the expression 7.
     let a = 8 # A is now bound to the expression 8.
 
-References can be revoked, which means that if there is a conflict between the value assigned to an
-expression at different points branched code, the reference becomes unavailable. See
-:ref:`revoked_references`. for more information.
+References can be revoked, which means that either:
+
+*   There is a conflict between the value assigned to an expression at different points branched
+    code, the reference becomes unavailable (see example below).
+*   The reference is is ``ap``-based (e.g. temporary variables or return values from a function
+    call), and the change in ap (between the definition and usage) cannot be deduced at compile
+    time.
+
+See :ref:`revoked_references`. for more information.
 
 .. tested-code:: cairo syntax_revoked_references
 
