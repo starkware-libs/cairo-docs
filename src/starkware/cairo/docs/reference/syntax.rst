@@ -38,7 +38,7 @@ The punctuation marks used in Cairo are described below:
 *   ``*`` Single asterisk. Refers to the pointer of an expression.
 *   ``; ap++`` Used to increment the allocation pointer ``ap`` by one after the preceeding
     instruction has finished.
-*   ``%`` Percent sign. Appears at the start of directives, such as ``%builtins`` or ``%lang``.
+*   ``%`` Percent sign. Appears at the start of a directive, such as ``%builtins`` or ``%lang``.
 *   ``%[`` ``%]`` Represents python literals.
 *   ``%{`` ``%}`` Represents python hints.
 *   ``_`` Underscore or underline. A placeholder to handle values not used, such as an unused
