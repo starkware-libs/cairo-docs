@@ -29,15 +29,20 @@ Punctuation
 
 The punctuation marks used in Cairo are described below:
 
-* ``(`` ``)`` Parentheses or round brackets. Used in function declaration and in tuple declaration.
-* ``{`` ``}`` Braces, curly braces or curly brackets. Used in declaration of implicit arguments
-* ``[`` ``]`` Brackets or square brackets. Standalone brackets represent the value at a particular address location (such as the allocation pointer, ``[ap]``). Brackets also act as a subscript operator, where ``x[2]`` represents the element in tuple ``x`` with the index ``2``.
-* ``*`` Single asterisk. Refers to the pointer of an expression.
-* ``; ap++`` Used to increment the allocation pointer ``ap`` by one after the preceeding instruction has finished.
-* ``%`` Percent sign. Appears at the start of directives, such as ``%builtins`` or ``%lang``.
-* ``%[`` ``%]`` Represents python literals.
-* ``%{`` ``%}`` Represents python hints.
-* ``_`` Underscore: Also known as underline. A placeholder to handle values not used, such as an unused function return value.
+*   ``(`` ``)`` Parentheses or round brackets. Used in function declaration and in tuple
+    declaration.
+*   ``{`` ``}`` Braces, curly braces or curly brackets. Used in declaration of implicit arguments.
+*   ``[`` ``]`` Brackets or square brackets. Standalone brackets represent the value at a particular
+    address location (such as the allocation pointer, ``[ap]``). Brackets also act as a subscript
+    operator, where ``x[2]`` represents the tuple element with index ``2`` in tuple ``x``.
+*   ``*`` Single asterisk. Refers to the pointer of an expression.
+*   ``; ap++`` Used to increment the allocation pointer ``ap`` by one after the preceeding
+    instruction has finished.
+*   ``%`` Percent sign. Appears at the start of directives, such as ``%builtins`` or ``%lang``.
+*   ``%[`` ``%]`` Represents python literals.
+*   ``%{`` ``%}`` Represents python hints.
+*   ``_`` Underscore: Also known as underline. A placeholder to handle values not used, such as an
+    unused function return value.
 
 Type system
 -----------
