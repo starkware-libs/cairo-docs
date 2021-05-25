@@ -82,7 +82,7 @@ A reference can be defined as follows:
 where ``ref_type`` is a type and ``ref_expr`` is some Cairo expression.
 
 Reference can be rebound, which means that different expressions may be assigned to the same
-reference. See :ref:`reference_rebinding`.
+reference. See :ref:`reference_rebinding`. For example:
 
 .. tested-code:: cairo syntax_reference_rebinding
 
