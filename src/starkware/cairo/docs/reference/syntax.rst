@@ -97,7 +97,7 @@ References can be revoked, which means that either:
     call), and the change in ap (between the definition and usage) cannot be deduced at compile
     time.
 
-See :ref:`revoked_references`. for more information.
+See :ref:`revoked_references` for more information.
 
 .. tested-code:: cairo syntax_revoked_references
 
