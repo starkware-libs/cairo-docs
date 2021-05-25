@@ -105,7 +105,7 @@ See :ref:`revoked_references` for more information.
 .. tested-code:: cairo syntax_revoked_references
 
     func foo():
-        let x == 0
+        let x = 0
 
         # The Prover may choose to enter the if or the else statement.
         if x == 0:
@@ -116,7 +116,7 @@ See :ref:`revoked_references` for more information.
 
         # A cannot be accessed, because it has conflicting values: 23 vs 8.
 
-        return()
+        return ()
     end
 
 .. _syntax_structs:
