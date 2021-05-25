@@ -158,6 +158,21 @@ Option (3) unpacks the return value into ``ret1`` and ``ret2``.
 Option (4) is a tail recursion -- after ``foo`` returns, the calling function returns the
 same return value.
 
+Library imports
+---------------
+
+Library functions are imported at the top of the file or right below the ``%builtins`` directive if
+it is used. The statement consists of the module name and the functions to ``import`` from it.
+Multiple functions from the same library can be separated by commas. Functions from different libraries
+are imported on different lines. Cairo searches each module in a default directory path and in
+any additional paths specified at compile time. See :ref:`import_search_path` for more information.
+
+.. tested-code:: cairo syntax_library_imports
+
+    %builtins output pedersen
+    from starkware.cairo.common.math import assert_not_zero, assert_not_equal
+    from starkware.cairo.common.registers import get_ap
+
 Program input
 -------------
 
@@ -172,3 +187,4 @@ See :ref:`program_inputs` for more information.
         # Sets the python varible a to a list of user_ids provided in the .json file.
         a = program_input['user_ids']
     %}
+
