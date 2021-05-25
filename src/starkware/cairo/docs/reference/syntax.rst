@@ -35,8 +35,8 @@ The punctuation marks used in Cairo are described below:
     arguments.
 *   ``[`` ``]`` (brackets or square brackets). Standalone brackets represent the value at a
     particular address location (such as the allocation pointer, ``[ap]``). Brackets following a
-    tuple act as a subscript operator, where ``x[2]`` represents the tuple element with index ``2``
-    in tuple ``x``.
+    pointer or a tuple act as a subscript operator, where ``x[2]`` represents the element with
+    index ``2`` in ``x``.
 *   ``*`` Single asterisk. Refers to the pointer of an expression.
 *   ``; ap++`` Used to increment the allocation pointer ``ap`` by one after the preceeding
     instruction has finished.
