@@ -31,7 +31,7 @@ The punctuation marks used in Cairo are described below:
 
 *   ``(`` ``)`` Parentheses or round brackets. Used in function declaration and in tuple
     declaration.
-*   ``{`` ``}`` Braces, curly braces or curly brackets. Used in declaration of implicit arguments.
+*   ``{`` ``}`` Braces, curly braces or curly brackets. Used in a declaration of implicit arguments.
 *   ``[`` ``]`` Brackets or square brackets. Standalone brackets represent the value at a particular
     address location (such as the allocation pointer, ``[ap]``). Brackets following a tuple act as a
     subscript operator, where ``x[2]`` represents the tuple element with index ``2`` in tuple ``x``.
