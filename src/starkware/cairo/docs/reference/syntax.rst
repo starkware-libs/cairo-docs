@@ -41,8 +41,8 @@ The punctuation marks used in Cairo are described below:
 *   ``%`` Percent sign. Appears at the start of directives, such as ``%builtins`` or ``%lang``.
 *   ``%[`` ``%]`` Represents python literals.
 *   ``%{`` ``%}`` Represents python hints.
-*   ``_`` Underscore: Also known as underline. A placeholder to handle values not used, such as an
-    unused function return value.
+*   ``_`` Underscore or underline. A placeholder to handle values not used, such as an unused
+    function return value.
 
 Type system
 -----------
