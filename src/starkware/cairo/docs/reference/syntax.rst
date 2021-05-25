@@ -105,16 +105,13 @@ See :ref:`revoked_references` for more information.
         let x == 0
         let a = 7 # A is initially bound to the value 7.
 
-        jmp case_2 if x == 0
+        # The Prover may choose to enter the if or the else statement.
+        if x == 0:
+            let a = 23
+        else:
+            let a = 8
+        end
 
-        case_1:
-        let a = 23
-        jump common_final_path:
-
-        case_2:
-        let a = 8
-
-        common_final_path:
         # A cannot be accessed, because it has conflicting values: 23 vs 8.
 
         return()
