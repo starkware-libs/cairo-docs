@@ -5,7 +5,7 @@ This page outlines the structure of the code examples used in Cairo by Example.
 
 ..
     **Documentation Development notes:**
-    1. Find and replace all instances of the word **template** with a unique string.
+    1. Replace the word **template** below with a unique string.
     2. Modify the contents of the ``.json`` code block with custom data using the JSON schema.
     3. Modify the contents of the ``.cairo`` code block with a custom program.
     4. Modify the contents of the output block. The ``.cairo`` code block will be executed during
@@ -13,9 +13,11 @@ This page outlines the structure of the code examples used in Cairo by Example.
        match the test output exactly.
     5. Remove this section
 
+.. |Progname| replace:: template
+
 Create a file called ``MyProgram.cairo`` with the following contents:
 
-.. tested-code:: cairo example_template_code
+.. tested-code:: cairo example_|Progname|_code
 
     %builtins output
 
@@ -36,7 +38,7 @@ Create a file called ``MyProgram.cairo`` with the following contents:
 
 Create an ``input.json`` file in the same directory as the Cairo code with the following contents.
 
-.. tested-code:: json example_template_input
+.. tested-code:: json example_|Progname|_input
 
     {
         "secret": 1234
@@ -44,13 +46,13 @@ Create an ``input.json`` file in the same directory as the Cairo code with the f
 
 Now compile the program to produce ``MyProgram_compiled.json``:
 
-.. tested-code:: none example_template_compile
+.. tested-code:: none example_|Progname|_compile
 
     cairo-compile MyProgram.cairo --output MyProgram_compiled.json
 
 Now run the program, using the compiled ``MyProgram_compiled.json`` file:
 
-.. tested-code:: none example_template_run
+.. tested-code:: none example_|Progname|_run
 
     cairo-run \
     --program=MyProgram_compiled.json --print_output \
@@ -58,7 +60,7 @@ Now run the program, using the compiled ``MyProgram_compiled.json`` file:
 
 Confirm that the program output matches the output below:
 
-.. tested-code:: none example_template_output0
+.. tested-code:: none example_|Progname|_output
 
     Program output:
     7
@@ -69,7 +71,7 @@ To explore the program structure and to debug, visit the tracer at http://localh
 The program can be sent to a public Ethereum testnet (Ropsten) using SHARP. Run the following
 command to send the programto SHARP for proof generation and fact registration:
 
-.. tested-code:: none example_template_sharp
+.. tested-code:: none example_|Progname|_sharp
 
     cairo-sharp submit --source MyProgram.cairo \
     --program_input input.json
@@ -84,13 +86,18 @@ command to send the programto SHARP for proof generation and fact registration:
     import tempfile
 
     with tempfile.TemporaryDirectory() as tmpdir:
+        # Change this name for each unique program, e.g. 'iterator'. The name should match
+        # that used in the code descriptions above (e.g. 'example_iterator_code')
+
+        prog_name = 'example_|Progname|'  # e.g. 'iterator'
+
         # Define a virtual environment for running both cairo-compile and cairo-run.
         site_dir = os.path.abspath(os.path.join(os.path.dirname(sys.executable), '..')) + '-site'
         path = os.path.join(site_dir, 'starkware/cairo/lang/scripts') + ':' + os.environ['PATH']
         env = {'PATH': path}
 
-        open(os.path.join(tmpdir, 'MyProgram.cairo'), 'w').write(codes['example_template_code'])
-        open(os.path.join(tmpdir, 'input.json'), 'w').write(codes['example_template_input'])
+        open(os.path.join(tmpdir, 'MyProgram.cairo'), 'w').write(codes[f'{prog_name}_code'])
+        open(os.path.join(tmpdir, 'input.json'), 'w').write(codes[f'{prog_name}_input'])
         output = subprocess.check_output(
             'cairo-compile MyProgram.cairo --output MyProgram_compiled.json\n'
             'cairo-run --program=MyProgram_compiled.json --print_output '
@@ -98,9 +105,8 @@ command to send the programto SHARP for proof generation and fact registration:
             shell=True, cwd=tmpdir, env=env).decode('utf8')
 
         actual_output_lines = [line.strip() for line in output.splitlines() if line.strip()]
-        expected_output = '\n'.join([codes[f'example_template_output{i}'] for i in range(1)])
+        expected_output = codes[f'{prog_name}_output']
         expected_output_lines = [
             line.strip() for line in expected_output.splitlines() if line.strip()
         ]
-
         assert actual_output_lines == expected_output_lines
