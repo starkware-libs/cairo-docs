@@ -567,8 +567,6 @@ combination of valid types, including other tuples. The compiler handles tuple e
 reference to ``fp`` which for each element is incremented.
 
 Tuple are represented as comma-separated elements enclosed in parentheses. For example: ``(3, x)``.
-Tuple elements are accessed with the tuple expression followed by brackets containing a zero-based
-index to the element.
 
 Consider the following assert statement:
 
@@ -584,8 +582,9 @@ This may be re-written in the form:
     let tuple_b = (1, 2)
     assert tuple_a = tuple_b
 
-Tuples are the same if their elements are the same. The compiler ensures that the element at each
-index is the same. In other words:
+Tuple elements are accessed with the tuple expression followed by brackets containing a zero-based
+index to the element. Tuples are the same if their elements are the same. The compiler ensures that
+the element at each index is the same. In other words:
 
 .. tested-code:: cairo tuples2
 
