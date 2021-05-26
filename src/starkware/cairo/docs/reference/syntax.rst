@@ -93,7 +93,7 @@ References can be revoked, which means that either:
 
 *   There is a conflict between the expression assigned to a reference at two different places in
     the code (for example, due to an ``if`` statement. See example below).
-*   The reference is ``ap``-based (e.g. temporary variables or return values from a function
+*   The reference is ``ap``-based (e.g., temporary variables or return values from a function
     call), and the change in ap (between the definition and usage) cannot be deduced at compile
     time.
 
