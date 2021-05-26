@@ -581,6 +581,12 @@ The above statement compiles to:
     assert x = 1
     assert y = 2
 
+Which the compiler then enforces by binding the ``x`` and ``y`` expressions to ``1`` and ``2``
+respectively. Tuples are constructed from local variables and the assert statement ultimately is
+compiled to two local variable assignments. Both ``x`` and ``y`` are accessed by a pointer to
+reference to ``fp``, such as ``[fp + z]``, where ``z`` is an integer that the compiler tracks based
+on the other local variables already used. The original assert statement is therefore equivalent to:
+
 Tuple elements are accessed with the tuple expression followed by brackets containing a zero-based
 index to the element.
 
@@ -588,11 +594,6 @@ index to the element.
 
     let a = (7, 6, 5)[2]  # let a=5
 
-Which the compiler then enforces by binding the ``x`` and ``y`` expressions to ``1`` and ``2``
-respectively. Tuples are constructed from local variables and the assert statement ultimately is
-compiled to two local variable assignments. Both ``x`` and ``y`` are accessed by a pointer to
-reference to ``fp``, such as ``[fp + z]``, where ``z`` is an integer that the compiler tracks based
-on the other local variables already used. The original assert statement is therefore equivalent to:
 
 .. tested-code:: cairo tuples3
 
