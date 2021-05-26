@@ -48,7 +48,7 @@ Now compile program to produce ``MyProgram_compiled.json``:
 
 .. tested-code:: none example_template_compile
 
-    cairo-compile MyProgram --output='MyProgram_compiled.json'
+    cairo-compile MyProgram.cairo --output MyProgram_compiled.json
 
 Now run the program, using the compiled ``MyProgram_compiled.json`` file:
 
@@ -62,6 +62,7 @@ Confirm that the program output matches the output below:
 
 .. tested-code:: none example_template_output0
 
+    Program output:
     7
     1234
 
@@ -93,7 +94,7 @@ Finally, programs can be sent to public Ethereum testnet (Ropsten).
             'cairo-compile MyProgram.cairo --output MyProgram_compiled.json\n'
             'cairo-run --program=MyProgram_compiled.json --print_output '
             '--program_input=input.json --layout=small',
-            shell=True, cwd=tmpdir, env=env).decode('utf8').replace('Program output:','')
+            shell=True, cwd=tmpdir, env=env).decode('utf8')
 
         actual_output_lines = [line.strip() for line in output.splitlines() if line.strip()]
         expected_output = '\n'.join([codes[f'example_template_output{i}'] for i in range(1)])
