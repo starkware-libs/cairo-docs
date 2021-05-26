@@ -566,9 +566,9 @@ Tuples allow convenient referencing of an ordered collection of elements. Tuples
 combination of valid types, including other tuples. The compiler handles tuple elements with a
 reference to ``fp`` which for each element is incremented.
 
-Tuple are represented as comma-separated elements enclosed by parentheses. Tuple elements are
-accessed with the tuple expression followed by brackets containing a zero-based index to the
-element.
+Tuple are represented as comma-separated elements enclosed in parentheses. For example: ``(3, x)``.
+Tuple elements are accessed with the tuple expression followed by brackets containing a zero-based
+index to the element.
 
 Consider the following assert statement:
 
