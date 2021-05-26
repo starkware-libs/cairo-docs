@@ -562,7 +562,7 @@ This code will return either ``[1, 2]``, or ``[1, 3]``.
 Tuples
 ------
 
-Tuples allow convenient referencing of an ordered collection of elements. Tuples may contain any
+Tuples allow convenient referencing of an ordered collection of elements. Tuples consist of any
 combination of valid types, including other tuples. The compiler handles tuple elements with a
 reference to ``fp`` which for each element is incremented. If the first element is ``[fp + 1]``, the
 second is ``[fp + 2]``.
