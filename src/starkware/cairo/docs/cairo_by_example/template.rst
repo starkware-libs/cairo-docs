@@ -1,5 +1,7 @@
 Template
 --------
+..
+    This page is a demonstration of [...]
 
 This page outlines the structure of the code examples used in Cairo by Example.
 
@@ -11,13 +13,12 @@ This page outlines the structure of the code examples used in Cairo by Example.
     4. Modify the contents of the output block. The ``.cairo`` code block will be executed during
        documentation testing and will raise an error if the contents of the output block do not
        match the test output exactly.
-    5. Remove this section
-
-.. |Progname| replace:: template
+    5. Check that the path to deploy_notes.rst is correct (../deploy_notes.rst)
+    6. Remove this section
 
 Create a file called ``MyProgram.cairo`` with the following contents:
 
-.. tested-code:: cairo example_|Progname|_code
+.. tested-code:: cairo example_TEMPLATE_code
 
     %builtins output
 
@@ -38,7 +39,7 @@ Create a file called ``MyProgram.cairo`` with the following contents:
 
 Create an ``input.json`` file in the same directory as the Cairo code with the following contents.
 
-.. tested-code:: json example_|Progname|_input
+.. tested-code:: json example_TEMPLATE_input
 
     {
         "secret": 1234
@@ -46,13 +47,13 @@ Create an ``input.json`` file in the same directory as the Cairo code with the f
 
 Now compile the program to produce ``MyProgram_compiled.json``:
 
-.. tested-code:: none example_|Progname|_compile
+.. tested-code:: none example_TEMPLATE_compile
 
     cairo-compile MyProgram.cairo --output MyProgram_compiled.json
 
 Now run the program, using the compiled ``MyProgram_compiled.json`` file:
 
-.. tested-code:: none example_|Progname|_run
+.. tested-code:: none example_TEMPLATE_run
 
     cairo-run \
     --program=MyProgram_compiled.json --print_output \
@@ -60,7 +61,7 @@ Now run the program, using the compiled ``MyProgram_compiled.json`` file:
 
 Confirm that the program output matches the output below:
 
-.. tested-code:: none example_|Progname|_output
+.. tested-code:: none example_TEMPLATE_output
 
     Program output:
     7
@@ -71,7 +72,7 @@ To explore the program structure and to debug, visit the tracer at http://localh
 The program can be sent to a public Ethereum testnet (Ropsten) using SHARP. Run the following
 command to send the programto SHARP for proof generation and fact registration:
 
-.. tested-code:: none example_|Progname|_sharp
+.. tested-code:: none example_TEMPLATE_sharp
 
     cairo-sharp submit --source MyProgram.cairo \
     --program_input input.json
@@ -89,7 +90,9 @@ command to send the programto SHARP for proof generation and fact registration:
         # Change this name for each unique program, e.g. 'iterator'. The name should match
         # that used in the code descriptions above (e.g. 'example_iterator_code')
 
-        prog_name = 'example_|Progname|'  # e.g. 'iterator'
+        unique_name = 'TEMPLATE'  # e.g. 'iterator'
+
+        prog_name = f'example_{unique_name}'  # e.g. 'example_iterator'
 
         # Define a virtual environment for running both cairo-compile and cairo-run.
         site_dir = os.path.abspath(os.path.join(os.path.dirname(sys.executable), '..')) + '-site'
