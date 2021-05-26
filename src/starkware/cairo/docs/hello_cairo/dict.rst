@@ -222,7 +222,7 @@ Putting it all together
     from starkware.cairo.common.alloc import alloc
 
     func check_solution{output_ptr : felt*, range_check_ptr}(
-            loc_list=cast(&loc_tuple, Location*), tile_list : felt*, n_steps):
+            loc_list : Location*, tile_list : felt*, n_steps):
         alloc_locals
 
         # Start by verifying that loc_list is valid.
@@ -329,7 +329,7 @@ and use ``--layout=small`` to ``cairo-run`` due to the usage of builtins):
         # Get the value of the frame pointer register (fp) so that
         # we can use the address of loc0.
         let (__fp__, _) = get_fp_and_pc()
-        check_solution(loc_list=&loc0, tile_list=tiles, n_steps=4)
+        check_solution(loc_list = cast(&loc_tuple, Location*), tile_list=tiles, n_steps=4)
         return ()
     end
 
