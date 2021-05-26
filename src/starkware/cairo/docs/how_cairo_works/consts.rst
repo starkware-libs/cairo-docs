@@ -562,11 +562,11 @@ This code will return either ``[1, 2]``, or ``[1, 3]``.
 Tuples
 ------
 
-Tuples are a feature to allow convenient referencing of an ordered collection of elements. The
-references cannot be revoked because they are constructed from local variables, which use the
-``fp`` register. Tuples may contain any combination of valid types, including other tuples. The
-compiler handles tuple elements with a reference to ``fp`` which for each element is incremented.
-If the first element is ``[fp + 1]``, the second is ``[fp + 2]``.
+Tuples allow convenient referencing of an ordered collection of elements. The references cannot be
+revoked because they are constructed from local variables, which use the ``fp`` register. Tuples may
+contain any combination of valid types, including other tuples. The compiler handles tuple elements
+with a reference to ``fp`` which for each element is incremented. If the first element is
+``[fp + 1]``, the second is ``[fp + 2]``.
 
 Tuple are represented as comma-separated elements bounded by parentheses. Tuple elements are
 accessed with the tuple expression followed by brackets containing a zero-based index to the
