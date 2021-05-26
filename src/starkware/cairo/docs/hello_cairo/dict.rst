@@ -222,7 +222,7 @@ Putting it all together
     from starkware.cairo.common.alloc import alloc
 
     func check_solution{output_ptr : felt*, range_check_ptr}(
-            loc_list : Location*, tile_list : felt*, n_steps):
+            loc_list=cast(&loc_tuple, Location*), tile_list : felt*, n_steps):
         alloc_locals
 
         # Start by verifying that loc_list is valid.
