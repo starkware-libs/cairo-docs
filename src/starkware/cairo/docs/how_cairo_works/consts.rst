@@ -585,7 +585,7 @@ Which the compiler then enforces by binding the ``x`` and ``y`` expressions to `
 respectively. Tuples are constructed from local variables and the assert statement ultimately is
 compiled to two local variable assignments. Both ``x`` and ``y`` are accessed by a pointer to
 reference to ``fp``, such as ``[fp + z]``, where ``z`` is an integer that the compiler tracks based
-on the other local variables already used. The original assert statement is therefore equivalent to:
+on the other local variables already used.
 
 Tuple elements are accessed with the tuple expression followed by brackets containing a zero-based
 index to the element.
@@ -593,12 +593,6 @@ index to the element.
 .. tested-code:: cairo tuples2
 
     let a = (7, 6, 5)[2]  # let a=5
-
-
-.. tested-code:: cairo tuples3
-
-    local x = 1
-    local y = 2
 
 Tuples with a single element are unique in that they must feature a trailing comma after the first
 element ``(a,)``. Single element tuples that contain an expression do not require this comma
