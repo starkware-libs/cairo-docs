@@ -1,5 +1,3 @@
-.. _cairo_by_example:
-
 Cairo by Example
 ================
 
