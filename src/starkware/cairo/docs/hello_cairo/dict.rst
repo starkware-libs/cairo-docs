@@ -126,7 +126,7 @@ Here we chose to go with option (2).
             dict=dict + DictAccess.SIZE)
     end
 
-The function gets a pointer to the list of locations, a tuple containing tiles
+The function gets a pointer to the list of locations, a pointer to the list of tiles
 (unlike the list of locations, this is a list of simple field elements, not structs),
 the number of steps in the solution and a pointer called ``dict``.
 The function writes its new dict entries starting from ``dict``, and returns the "updated"
