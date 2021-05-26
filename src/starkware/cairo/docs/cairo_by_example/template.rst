@@ -92,7 +92,7 @@ An application can be built by designing and deploying an Ethereum contract that
   - Accepts the outputs that come from that Cairo program.
   - Uses those values in some way.
 
-That application contract needs to have a Write function that:
+That application contract needs to have a write method that:
 
   - Accepts program ``outputs``.
   - Computes the ``output_hash`` (``Keccak(outputs)``).
