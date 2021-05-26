@@ -9,3 +9,4 @@ Short, complete examples of basic constructs.
     :maxdepth: 2
 
     example_variables
+    example_locals
