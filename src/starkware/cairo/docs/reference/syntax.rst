@@ -91,11 +91,8 @@ reference. See :ref:`reference_rebinding`. For example:
 
 References can be revoked, which means that either:
 
-*   There is a conflict between the value assigned to an expression at two different places within
-    reachable code (recalling that the Prover decides how to execute hints and ``if`` statements).
-    References are revoked where the Prover could elect to have one of two different values because
-    from the perspective of the compiler, the reference is ambiguous. The reference unavailable in
-    that situation and cannot be accessed (see example below).
+*   There is a conflict between the expression assigned to a reference at two different places in
+    the code (for example, due to an ``if`` statement. See example below).
 *   The reference is ``ap``-based (e.g. temporary variables or return values from a function
     call), and the change in ap (between the definition and usage) cannot be deduced at compile
     time.
