@@ -98,7 +98,7 @@ Here we chose to go with option (2).
     from starkware.cairo.common.squash_dict import squash_dict
 
     func build_dict(
-            loc_list : Location*, tile_list, n_steps,
+            loc_list : Location*, tile_list : felt*, n_steps,
             dict : DictAccess*) -> (dict : DictAccess*):
         if n_steps == 0:
             # When there are no more steps, just return the dict
