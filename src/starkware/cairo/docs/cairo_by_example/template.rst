@@ -4,24 +4,14 @@ Template
 This page outlines the structure of the code examples used in Cairo by Example.
 
 ..
-
-    **Documentation Developer notes:**
-
- 1. Find and replace all instances of the word `template` with a unique string.
- 2. Modify the contents of the ``.json`` code block with custom data using the JSON schema.
- 3. Modify the contents of the ``.cairo`` code block with a custom program.
- 4. Modify the contents of the output block. The ``.cairo`` code block will be executed during
-    documentation testing and will raise an error if the contents of the output block do not match
-    the test output exactly.
- 5. Remove this section
-
-Create an ``input.json`` file in the same directory as the cairo code with the following contents.
-
-.. tested-code:: json example_template_input
-
-    {
-        "secret": 1234
-    }
+    **Documentation Development notes:**
+    1. Find and replace all instances of the word **template** with a unique string.
+    2. Modify the contents of the ``.json`` code block with custom data using the JSON schema.
+    3. Modify the contents of the ``.cairo`` code block with a custom program.
+    4. Modify the contents of the output block. The ``.cairo`` code block will be executed during
+       documentation testing and will raise an error if the contents of the output block do not
+       match the test output exactly.
+    5. Remove this section
 
 Create a file called ``MyProgram.cairo`` with the following contents:
 
@@ -44,7 +34,15 @@ Create a file called ``MyProgram.cairo`` with the following contents:
         return ()
     end
 
-Now compile program to produce ``MyProgram_compiled.json``:
+Create an ``input.json`` file in the same directory as the Cairo code with the following contents.
+
+.. tested-code:: json example_template_input
+
+    {
+        "secret": 1234
+    }
+
+Now compile the program to produce ``MyProgram_compiled.json``:
 
 .. tested-code:: none example_template_compile
 
@@ -66,14 +64,45 @@ Confirm that the program output matches the output below:
     7
     1234
 
-To explore the program structure and debug, visit the tracer at http://localhost:8100/.
+To explore the program structure and to debug, visit the tracer at http://localhost:8100/.
 
-Finally, programs can be sent to public Ethereum testnet (Ropsten).
+The program can be sent to a public Ethereum testnet (Ropsten) using SHARP. Run the following
+command to send the programto SHARP for proof generation and fact registration:
 
 .. tested-code:: none example_template_sharp
 
     cairo-sharp submit --source MyProgram.cairo \
     --program_input input.json
+
+The above command will produce a ``Fact`` (a hash of the outputs and the program hash). Any Ropsten
+application contract or user can now query the ``isValid(Fact)`` read method of the deployed
+`Fact Registry`_.
+
+.. _Fact Registry: https://ropsten.etherscan.io/address/
+    0xf0EC41069A89595ADf5f27A4a90ff2DF30D83d2E#readContract
+
+If the result is ``True``, then that application contract or user can be confident that:
+
+  - The Cairo program has computational integrity (validity).
+  - The inputs used in that program truly produced those outputs (correctness).
+
+An application can be built by designing and deploying an Ethereum contract that:
+
+  - Stores the ``program_hash`` permanently to be able to recognise this unique Cairo program.
+  - Accepts the outputs that come from that Cairo program.
+  - Uses those values in some way.
+
+That application contract needs to have a Write function that:
+
+  - Accepts program ``outputs``.
+  - Computes the ``output_hash`` (``Keccak(outputs)``).
+  - Computes the ``Fact`` (``Keccak(program_hash, outputs)``).
+  - Calls the `Fact Registry`_ read method ``isValid(Fact)``.
+  - Interprets the response: either ``True`` or ``False``.
+  - If ``True``, applies the ``outputs`` for some application logic.
+
+In this way, a user may interact with a Cairo program to ultimately execute a change on Ethereum
+without using large amounts of expensive storage or computation.
 
 .. test::
 
