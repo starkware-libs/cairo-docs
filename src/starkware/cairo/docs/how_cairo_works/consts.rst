@@ -582,13 +582,11 @@ The above statement compiles to:
     assert y = 2
 
 Tuple elements are accessed with the tuple expression followed by brackets containing a zero-based
-index to the element. Tuples are the same if their elements are the same. The compiler ensures that
-the element at each index is the same. In other words:
+index to the element.
 
 .. tested-code:: cairo tuples2
 
-    assert tuple_a[0] = tuple_b[0]
-    assert tuple_a[1] = tuple_b[1]
+    let a = (7, 6, 5)[2]  # let a=5
 
 Which the compiler then enforces by binding the ``x`` and ``y`` expressions to ``1`` and ``2``
 respectively. Tuples are constructed from local variables and the assert statement ultimately is
