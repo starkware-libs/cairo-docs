@@ -594,11 +594,11 @@ index to the element.
 
     let a = (7, 6, 5)[2]  # let a=5
 
-Tuples with a single element are unique in that they must feature a trailing comma after the first
-element ``(a,)``. Single element tuples that contain an expression do not require this comma
-``(a=2)``. Access to nested tuples is achieved by using additional indices starting with the
-outer-most tuple. For example, ``MyTuple[2][4][3][1]`` first accesses index 2 of ``MyTuple``, a
-tuple whose value at index 4 is another tuple, and so on.
+Cairo requires a trailing comma for single-element tuples, to distinguish it from regular
+parentheses. For example ``(5,)`` is a single-element tuple. Single element tuples that contain an
+expression do not require this comma ``(a=2)``. Access to nested tuples is achieved by using
+additional indices starting with the outer-most tuple. For example, ``MyTuple[2][4][3][1]`` first
+accesses index 2 of ``MyTuple``, a tuple whose value at index 4 is another tuple, and so on.
 
 As with local variables, tuple declaration does not automatically advance ``ap``. If direct use of
 ``ap`` is required, care must be taken to manually increment using the auto-generated constant
