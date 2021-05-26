@@ -574,13 +574,12 @@ Consider the following assert statement:
 
     assert (x, y) = (1, 2)
 
-This may be re-written in the form:
+The above statement compiles to:
 
 .. tested-code:: cairo tuples1
 
-    let tuple_a = (x, y)
-    let tuple_b = (1, 2)
-    assert tuple_a = tuple_b
+    assert x = 1
+    assert y = 2
 
 Tuple elements are accessed with the tuple expression followed by brackets containing a zero-based
 index to the element. Tuples are the same if their elements are the same. The compiler ensures that
