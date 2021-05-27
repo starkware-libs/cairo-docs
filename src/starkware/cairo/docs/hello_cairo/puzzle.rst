@@ -265,11 +265,13 @@ main function):
             )
 
         # Get the value of the frame pointer register (fp) so that
-        # we can use the address of loc0.
+        # we can use the address of loc_tuple.
         let (__fp__, _) = get_fp_and_pc()
         # Since the variables are next to each other we can use the
-        # address of loc0 as a pointer to the 5 locations.
-        verify_location_list(loc_list=&loc0, n_steps=4)
+        # address of loc_tuple as a pointer to the 5 locations.
+        verify_location_list(loc_list=cast(
+            &loc_tuple, Location*),
+            n_steps=4)
         return ()
     end
 
@@ -279,11 +281,11 @@ required for each of the variables, and then allocates them in the order of defi
 Each ``Location`` instance is assigned some coordinates (according to the example above).
 
 Since ``verify_location_list`` requires a pointer to a list of locations,
-we pass ``&loc0``, which represents the address in memory of ``loc0``, and is of type
-``Location*``.
+we pass ``&loc_tuple``, which represents the address in memory of ``loc_tuple``, and is of type
+``Location*``. The ``cast`` operation declares that ``&loc_tuple`` is of type ``Location*``.
 
-For technical reasons, when Cairo needs to retrieve the address of a local variable (``&loc0``),
-it needs to be told the value of the frame pointer register, ``fp``
+For technical reasons, when Cairo needs to retrieve the address of a local variable
+(``&loc_tuple``), it needs to be told the value of the frame pointer register, ``fp``
 (see :ref:`fp_register`).
 This can be done by the statement ``let (__fp__, _) = get_fp_and_pc()``
 which calls the library function ``get_fp_and_pc()`` to retrieve ``fp``.
