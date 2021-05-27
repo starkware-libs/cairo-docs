@@ -611,8 +611,8 @@ first accesses index 2 of ``MyTuple``. This value is accessed at index 4, and so
             return ()
         end
         """
-        return(compile_cairo(code, PRIME))
-    # Generate compiled programs from each example
+        return compile_cairo(code, PRIME)
+    # Generate compiled programs for each example.
     programs = [compiled_program(i) for i in range(2)]
-    # Verify that their compiled data are identical
+    # Verify that the compiled programs are identical.
     assert programs[0].data == programs[1].data
