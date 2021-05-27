@@ -315,10 +315,7 @@ and use ``--layout=small`` to ``cairo-run`` due to the usage of builtins):
             Location(row=3, col=3),
             )
 
-        local tile0 = 3
-        local tile1 = 7
-        local tile2 = 8
-        local tile3 = 12
+        local tiles : (felt, felt, felt, felt) = (3, 7, 8, 12)
 
         # Get the value of the frame pointer register (fp) so that
         # we can use the address of loc0.
