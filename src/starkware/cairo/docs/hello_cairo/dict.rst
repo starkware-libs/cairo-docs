@@ -107,7 +107,7 @@ Here we chose to go with option (2).
         end
 
         # Set the key to the current tile being moved.
-        assert dict.key = tile_list[n_steps - 1]
+        assert dict.key = [tile_list]
 
         # Its previous location should be where the empty tile is
         # going to be.
@@ -121,7 +121,7 @@ Here we chose to go with option (2).
         # Call build_dict recursively.
         return build_dict(
             loc_list=next_loc,
-            tile_list=tile_list,
+            tile_list=tile_list + 1,
             n_steps=n_steps - 1,
             dict=dict + DictAccess.SIZE)
     end
