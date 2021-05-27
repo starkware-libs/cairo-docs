@@ -582,7 +582,7 @@ The above statement compiles to:
     assert y = 2
 
 Tuple elements are accessed with the tuple expression followed by brackets containing a zero-based
-index to the element.
+index to the element. The index must be known at compile time.
 
 .. tested-code:: cairo tuples2
 
