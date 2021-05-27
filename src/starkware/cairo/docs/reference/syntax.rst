@@ -118,52 +118,68 @@ a pointer to that type allows the compiler to allocate memory appropriately.
 
 Consider the following expressions defined some Cairo program:
 
-* ``MyFelt``: A field element with a particular value, such as ``7``.
-* ``MyStruct``: A struct with defined members (not outlined here)
-* ``MyExp``: An expression whose type will be defined with ``MyExp : <type>`` in the examples below. ``MyExp`` may be read as "My Expression".
+*  ``MyFelt``: A field element with a particular value, such as ``7``.
+*  ``MyStruct``: A struct with defined members (not outlined here)
+*  ``MyExp``: An expression whose type will be defined with ``MyExp : <type>`` in the examples below.
+   ``MyExp`` may be read as "My Expression".
 
-Expressions, pointers and their interpretation are outlined below:
+Expressions, pointers and their interpretation are outlined below. While it is usually not necessary
+to use the expressions with square brackets, they are included for completeness in the event they
+are encountered in documentation elsewhere.
 
-* ``felt``. A value.
+*   ``felt``. A value.
     * ``MyExp : felt`` reads as "``MyExp`` is a ``felt`` and in practice, an integer".
-* ``felt*``. A pointer to a value.
-    * ``MyExp : felt*`` reads as "``MyExp`` is the location where one or more ``felt`` s are stored, which can be used to define a list".
-* ``felt**``. A pointer to a pointer.
-    * ``MyExp : felt**`` reads as "``MyExp`` is is the location where one or more pointers are stored, which can be used to define a list of lists".
-* ``MyFelt``. A value, in this instance ``7``.
-    * The code ``MyExp : MyFelt`` is not used because ``MyExp`` type cannot be assigned to a particular ``felt`` instance.
-* ``MyFelt*``. A pointer to the value ``7``.
-    * ``MyExp : MyFelt*`` reads as "``MyExp`` is the location where ``MyFelt`` is stored, which may be used if ``MyFelt`` is extended to a list with ``7`` as the first value".
-* ``MyFelt**``. A pointer to a pointer.
-    * ``MyExp : MyFelt**`` reads as "``MyExp`` is the location where the ``MyFelt*`` pointer is stored, which can be used to construct a list of lists".
-* ``[MyFelt]``. A value at address ``MyFelt``.
+*   ``felt*``. A pointer to a value.
+    * ``MyExp : felt*`` reads as "``MyExp`` is the location where one or more ``felt`` expressions
+    are stored, which can be used to define a list".
+*   ``felt**``. A pointer to a pointer.
+    * ``MyExp : felt**`` reads as "``MyExp`` is is the location where one or more pointers are
+    stored, which can be used to define a list of lists".
+*   ``MyFelt``. A value, in this instance ``7``.
+    * The code ``MyExp : MyFelt`` is not used because ``MyExp`` type cannot be assigned to a
+    particular ``felt`` instance.
+*   ``MyFelt*``. A pointer to the value ``7``.
+    * ``MyExp : MyFelt*`` reads as "``MyExp`` is the location where ``MyFelt`` is stored, which may
+    be used if ``MyFelt`` is extended to a list with ``7`` as the first value".
+*   ``MyFelt**``. A pointer to a pointer.
+    * ``MyExp : MyFelt**`` reads as "``MyExp`` is the location where the ``MyFelt*`` pointer is
+    stored, which can be used to construct a list of lists".
+*   ``[MyFelt]``. A value at address ``MyFelt``.
     * This expression is not used because ``MyFelt`` is a value, not an address.
     * It follows that the expression ``MyExp : [MyFelt]`` is not used.
-* ``[MyFelt*]``. A value at the pointer ``MyFelt*``.
-    * If MyFelt* is being used to define a list, this statement reads as "The value of the first item in the list which starts at ``Myfelt*``.
+*   ``[MyFelt*]``. A value at the pointer ``MyFelt*``.
+    * If MyFelt* is being used to define a list, this statement reads as "The value of the first
+    item in the list which starts at ``Myfelt*``.
     * ``MyExp : [MyFelt*]`` is not used because ``[MyFelt*]`` is a value.
-* ``[MyFelt* + 1]``. A value at the pointer one slot after ``MyFelt*``.
-    * If ``MyFelt*`` is being used to define a list, this statement reads as "The value of the second item in the list which starts at ``Myfelt*``.
-* ``MyStruct``. A value, in this instance a struct with defined values.
-    * The code ``MyExp : MyStruct`` is not used because ``MyExp`` type cannot be assigned to a particular struct instance.
-* ``MyStruct*``. A pointer to a struct value.
+*   ``[MyFelt* + 1]``. A value at the pointer one slot after ``MyFelt*``.
+    * If ``MyFelt*`` is being used to define a list, this statement reads as "The value of the
+    second item in the list which starts at ``Myfelt*``.
+*   ``MyStruct``. A value, in this instance a struct with defined values.
+    * The code ``MyExp : MyStruct`` is not used because ``MyExp`` type cannot be assigned to a
+    particular struct instance.
+*   ``MyStruct*``. A pointer to a struct value.
     * ``MyExp : MyStruct*`` reads as "``MyExp`` is of type ``MyStruct``".
-    * ``MyExp`` points to where ``MyStruct`` is stored and has the same member structure as ``MyStruct``.
+    * ``MyExp`` points to where ``MyStruct`` is stored and has the same member structure as
+    ``MyStruct``.
     * ``MyExp`` has members may be populated with values.
-* ``MyStruct**`` . A pointer (to a pointer).
-    * ``MyExp : MyStruct**`` reads as "``MyExp`` is a pointer to where ``MyStruct*`` pointers are stored, and can be used to represent a list of structs". See :ref:`transaction_loop_list`.
-* ``[MyStruct]``. A value at the struct ``MyStruct``.
-    * This expression is not used because structs occupy multiple memory slots which can be addressed individually.
-* ``[MyStruct*]``. A value at the pointer to the first memory address of ``MyStruct*``.
+*   ``MyStruct**`` . A pointer (to a pointer).
+    * ``MyExp : MyStruct**`` reads as "``MyExp`` is a pointer to where ``MyStruct*`` pointers are
+    stored, and can be used to represent a list of structs". See :ref:`transaction_loop_list`.
+*   ``[MyStruct]``. A value at the struct ``MyStruct``.
+    * This expression is not used because structs occupy multiple memory slots which can be
+    addressed individually.
+*   ``[MyStruct*]``. A value at the pointer to the first memory address of ``MyStruct*``.
     * Reads as "The value at the first memory slot that ``MyStruct`` occupies".
     * ``MyExp : [MyStruct*]`` is not used because ``[MyStruct*]`` is a particular value not a type.
-* ``[MyStruct* + 1]``. A value at the pointer to the second memory address of ``MyStruct*``.
+*   ``[MyStruct* + 1]``. A value at the pointer to the second memory address of ``MyStruct*``.
     * Reads as "The value at the second memory slot that ``MyStruct`` occupies".
-* ``[MyStruct**]``. A value at the pointer to the first memory address of the pointer ``MyStruct**``.
+*   ``[MyStruct**]``. A value at the pointer to the first memory address of the pointer
+    ``MyStruct**``.
     * Reads as "The pointer to the first struct in the list of structs."
     * This pointer can be used to reference the values within that first struct.
     * ``MyExp : [MyStruct**]`` is not used because ``[MyStruct**]`` is a particular value.
-* ``[MyStruct** + 1]``. A value at the pointer to the second memory address of the pointer ``MyStruct**``.
+*   ``[MyStruct** + 1]``. A value at the pointer to the second memory address of the pointer
+    ``MyStruct**``.
     * Reads as "The pointer to the second struct in the list of structs".
     * This pointer can be used to reference the values within that second struct.
 
