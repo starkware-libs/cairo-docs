@@ -127,7 +127,7 @@ an updated pointer is very common in Cairo.
 
 The line ``let next_loc : (felt, felt) = ...`` defines a :ref:`reference <references>` --
 unlike tempvar/local, this does not allocate a memory cell. Instead, every time we
-refer to ``next_loc`` it will be replaced by ``loc_list[n_steps - 1]``.
+refer to ``next_loc`` it will be replaced by ``loc_list + Location.SIZE``.
 Thus, the scope of the reference is simply the scope of its expression.
 
 The line ``return build_dict(...)`` is a tail recursion call: a recursion which ends with returning
