@@ -99,11 +99,44 @@ A reference can be defined as follows:
 
 .. tested-code:: cairo syntax_reference
 
-   let ref_name : ref_type = ref_expr
+    let ref_name : ref_type = ref_expr
 
 where ``ref_type`` is a type and ``ref_expr`` is some Cairo expression.
 
-Reference can be rebound, which means that TODO.
+A reference can be rebound, which means that different expressions may be assigned to the same
+reference. See :ref:`reference_rebinding`. For example:
+
+.. tested-code:: cairo syntax_reference_rebinding
+
+    let a = 7  # a is initially bound to the expression 7.
+    let a = 8  # a is now bound to the expression 8.
+
+References can be revoked, which means that either:
+
+*   There is a conflict between the expression assigned to a reference at two different places in
+    the code (for example, due to an ``if`` statement. See example below).
+*   The reference is ``ap``-based (e.g., temporary variables or return values from a function
+    call), and the change in ap (between the definition and usage) cannot be deduced at compile
+    time.
+
+See :ref:`revoked_references` for more information.
+
+.. tested-code:: cairo syntax_revoked_references
+
+    func foo():
+        let x = 0
+
+        # The Prover may choose to enter the if or the else statement.
+        if x == 0:
+            let a = 23
+        else:
+            let a = 8
+        end
+
+        # A cannot be accessed, because it has conflicting values: 23 vs 8.
+
+        return ()
+    end
 
 .. _syntax_structs:
 
