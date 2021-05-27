@@ -189,5 +189,6 @@ any additional paths specified at compile time. See :ref:`import_search_path` fo
 .. tested-code:: cairo syntax_library_imports
 
     %builtins output pedersen
-    from starkware.cairo.common.math import assert_not_zero, assert_not_equal
+    from starkware.cairo.common.math import (
+        assert_not_zero, assert_not_equal)
     from starkware.cairo.common.registers import get_ap
