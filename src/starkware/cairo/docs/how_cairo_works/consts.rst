@@ -586,9 +586,9 @@ index to the element. The index must be known at compile time.
 
 .. tested-code:: cairo tuples2
 
-    let a = (7, 6, 5)[2]  # let a=5
+    let a = (7, 6, 5)[2]  # let a = 5
 
-Cairo requires a trailing comma for single-element tuples, to distinguish it from regular
+Cairo requires a trailing comma for single-element tuples, to distinguish them from regular
 parentheses. For example ``(5,)`` is a single-element tuple. Access to nested tuples is achieved by
 using additional indices starting with the outer-most tuple. For example, ``MyTuple[2][4][3][1]``
 first accesses index 2 of ``MyTuple``. This value is accessed at index 4, and so on.
