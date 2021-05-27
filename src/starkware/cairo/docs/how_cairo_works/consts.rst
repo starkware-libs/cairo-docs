@@ -598,3 +598,27 @@ Cairo requires a trailing comma for single-element tuples, to distinguish it fro
 parentheses. For example ``(5,)`` is a single-element tuple. Access to nested tuples is achieved by
 using additional indices starting with the outer-most tuple. For example, ``MyTuple[2][4][3][1]``
 first accesses index 2 of ``MyTuple``. This value is accessed at index 4, and so on.
+
+.. test::
+
+    from starkware.cairo.lang.compiler.cairo_compile import compile_cairo
+
+    PRIME = 2**64 + 13
+
+    # Wrap code inside function to allow locals
+    def compiled_program(index):
+        case = codes[f'tuples{index}']
+        code = f"""
+        func foo():
+            alloc_locals
+            local x : felt
+            local y : felt
+            {case}
+            return ()
+        end
+        """
+        return(compile_cairo(code, PRIME))
+    # Generate compiled programs from each example.
+    programs = [compiled_program(i) for i in range(2)]
+    # Verify that their compiled data is identical
+    assert programs[0].data == programs[1].data
