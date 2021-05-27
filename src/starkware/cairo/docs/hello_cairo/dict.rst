@@ -1,15 +1,6 @@
 The 15-puzzle - cont.
 =====================
 
-Tuples in Cairo
----------------
-
-The second list is an ordered collection of elements, the tiles being moved. This list can be
-represented with a tuple, which is useful for known-length collections where values are accessed by
-an index. The tuple ``tile_list`` will contain the ordered tile values in the form
-``(3, 7, 8, 12)``, where the third tile being moved (a ``felt`` of value ``8``) is accessed at index
-number 2 (``tile_list[2]``).
-
 .. _dicts_in_cairo:
 
 Dictionaries/maps in Cairo
