@@ -109,6 +109,25 @@ The offset can be retrieved using ``MyStruct.member_name``.
 For example, ``MyStruct.first_member == 0`` and ``MyStruct.second_member == 1``
 (since the size of ``felt`` is 1).
 
+Struct constructor
+------------------
+
+Once a struct has been defined, a constructor can be used to declare an instance of that struct as
+follows:
+
+.. tested-code:: cairo struct-constructor0
+
+    let struct_instance = MyStruct(
+        first_member=value0, second_member=value1)
+
+Members must be declared in order of appearance. Struct constructors may nested as follows:
+
+.. tested-code:: cairo struct-constructor1
+
+    let struct1 = A(x=value0, y=B(x=value1, y=value2))
+
+Where ``A`` and ``B`` are structs and ``x`` and ``y`` are members defined in each of those structs.
+
 Functions
 ---------
 
