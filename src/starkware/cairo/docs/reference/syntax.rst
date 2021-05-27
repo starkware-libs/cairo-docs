@@ -164,7 +164,7 @@ are encountered in documentation elsewhere.
     * ``MyExp`` has members may be populated with values.
 *   ``MyStruct**`` . A pointer (to a pointer).
     * ``MyExp : MyStruct**`` reads as "``MyExp`` is a pointer to where ``MyStruct*`` pointers are
-    stored, and can be used to represent a list of structs". See :ref:`transaction_loop_list`.
+    stored, and can be used to represent a list of structs".
 *   ``[MyStruct]``. A value at the struct ``MyStruct``.
     * This expression is not used because structs occupy multiple memory slots which can be
     addressed individually.
