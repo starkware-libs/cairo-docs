@@ -563,8 +563,7 @@ Tuples
 ------
 
 Tuples allow convenient referencing of an ordered collection of elements. Tuples consist of any
-combination of valid types, including other tuples. The compiler handles tuple elements with a
-reference to ``fp`` which for each element is incremented.
+combination of valid types, including other tuples.
 
 Tuple are represented as comma-separated elements enclosed in parentheses. For example: ``(3, x)``.
 
