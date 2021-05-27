@@ -109,6 +109,29 @@ The offset can be retrieved using ``MyStruct.member_name``.
 For example, ``MyStruct.first_member == 0`` and ``MyStruct.second_member == 1``
 (since the size of ``felt`` is 1).
 
+Arrays
+------
+
+Arrays are defined as with a pointer (``felt*``) to the first element. As an array is populated,
+the elements take up contiguous slots in memory.
+
+.. tested-code:: cairo array
+
+    local MyFeltArray : felt*  # an array of integers
+
+    let MyStructArray = cast(MyStruct, felt*)  # an array of structs
+
+Elements each use the same quantity of memory and may be accessed by a zero based index as follows:
+
+.. tested-code:: cairo array_index
+
+    assert MyFeltArray[2] = 85  # (2)
+
+    let a = MyStructArray[1].first_member  # (1)
+
+Where: (1) sets the third element in the array to the ``felt`` ``85``, and (2) assigns ``a`` to a
+value in the second struct in the array of structs.
+
 Functions
 ---------
 
