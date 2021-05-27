@@ -269,9 +269,8 @@ main function):
         let (__fp__, _) = get_fp_and_pc()
         # Since the variables are next to each other we can use the
         # address of loc_tuple as a pointer to the 5 locations.
-        verify_location_list(loc_list=cast(
-            &loc_tuple, Location*),
-            n_steps=4)
+        verify_location_list(
+            loc_list=cast(&loc_tuple, Location*), n_steps=4)
         return ()
     end
 
