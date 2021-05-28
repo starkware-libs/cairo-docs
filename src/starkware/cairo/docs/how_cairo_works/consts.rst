@@ -601,13 +601,13 @@ first accesses index 2 of ``MyTuple``. This value is accessed at index 4, and so
 
     # Wrap code inside function to allow locals
     def compiled_program(index):
-        case = codes[f'tuples{index}']
+        test_code = codes[f'tuples{index}']
         code = f"""
         func foo():
             alloc_locals
             local x : felt
             local y : felt
-            {case}
+            {test_code}
             return ()
         end
         """
