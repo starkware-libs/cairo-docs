@@ -322,7 +322,7 @@ and use ``--layout=small`` to ``cairo-run`` due to the usage of builtins):
         let (__fp__, _) = get_fp_and_pc()
         check_solution(
             loc_list=cast(&loc_tuple, Location*),
-            tile_list=&tiles,
+            tile_list=cast(&tiles, felt*),
             n_steps=4)
         return ()
     end
