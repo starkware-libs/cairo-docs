@@ -275,11 +275,11 @@ main function):
     end
 
 A tuple is used to define and store the list of ``Location`` elements. Tuples are ordered, finite
-lists that can contain any combination of valid types, for example, five ``Location`` structs. Each
-element may be accessed with a zero-based index (e.g., ``loc_tuple[2]`` is the third element
-(see :ref:`tuples`).
+lists that can contain any combination of valid types, for example, five ``Location`` structs.
+Each element may be accessed with a zero-based index (e.g., ``loc_tuple[2]`` is the third element.
+See :ref:`tuples`).
 
-In the beginning of the function we allocate 5 locations, using typed local variables.
+In the beginning of the function we allocate 5 locations, using a typed local variable.
 Cairo looks for the constant ``Location.SIZE`` to find how many cells are
 required for each of the variables, and then allocates them in the order of definition.
 Since ``loc_tuple`` is a tuple of 5 locations, Cairo allocates ``5 * Location.SIZE`` memory
@@ -288,7 +288,7 @@ cells. Each ``Location`` instance is assigned some coordinates (according to the
 Since ``verify_location_list`` requires a pointer to a list of locations,
 we pass ``&loc_tuple``, which represents the address in memory of ``loc_tuple``.  Since the type
 of ``&loc_tuple`` is a pointer to a tuple rather than ``Location*``, we need the cast operation
-to instruct to the compiler to treat this address as ``Location*``. See :ref:`casting` for
+to instruct the compiler to treat this address as ``Location*``. See :ref:`casting` for
 more information.
 
 For technical reasons, when Cairo needs to retrieve the address of a local variable
