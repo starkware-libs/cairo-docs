@@ -106,9 +106,9 @@ variables.
         return ()
     end
 
-If the address of a local variable is needed, the value of the frame point register ``fp`` must be
-set. This can be done by the statement ``let (__fp__, _) = get_fp_and_pc()``. See
-:ref:`retrieving_registers` for more information.
+If the address of a local variable is needed, the value of a reference named ``fp`` must be set to
+the value of the frame pointer. This can be done by the statement
+``let (__fp__, _) = get_fp_and_pc()``. See :ref:`retrieving_registers` for more information.
 
 .. _syntax_structs:
 
