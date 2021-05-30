@@ -119,26 +119,20 @@ A tuple is a finite, ordered, unchangeable list of elements. They are represente
 comma-separated list of elements enclosed by parentheses (e.g., ``(3, x)``).
 Their elements may be of any combination of valid :ref:`types <syntax_type>`. A tuple
 that contains only one element must be defined in one of the two following ways: the element is
-a named tuple or with a trailing comma, as shown below.
+a named tuple or with a trailing comma. When a tuple is passed as an argument, the type of each
+element may be specified on a per-element basis (e.g., ``my_tuple : (felt, felt, MyStruct)``).
+Tuple values may be accessed with a zero-based index in brackets ``[index]``, including access to
+nested tuple elements as shown below.
 
 .. tested-code:: cairo syntax_tuples
 
     local tuple_one = (7, 9, 13)  # A tuple with three elements.
     local tuple_two = (5,)  # (5) is not a valid tuple.
-    local tuple_three = (a=5)  # An assignment does not require a trailing comma.
-
-Where a tuple is passed as an argument, the type of each element may be specified, for example,
-``MyTuple : (felt, felt, MyStruct)``. Tuple values may be accessed with a zero-based index brackets
-``[index]``, including access to nested tuple elements as shown below.
-
-.. tested-code:: cairo syntax_tuple_nested
-
-    local tuple_one = (3, 6, 8)
-    local tuple_two = (1, tuple_one, 5)  # Tuple contains another tuple.
-    local tuple_three = (tuple_two, 2, 11)
-
-    let a = tuple_one[2]  # a = 8.
-    let b = tuple_three[0][1][2]  # a = 8.
+    local tuple_three : (felt) = (a=5)  # A named tuple does not require a trailing comma.
+    local tuple_four = (1, tuple_one, 5)  # Tuple contains another tuple.
+    local tuple_five = (tuple_four, 2, 11)
+    let a = tuple_one[2]  # a = 13.
+    let b = tuple_five[0][1][2]  # a = 13.
 
 Functions
 ---------
