@@ -267,21 +267,30 @@ main function):
         # Get the value of the frame pointer register (fp) so that
         # we can use the address of loc_tuple.
         let (__fp__, _) = get_fp_and_pc()
-        # Since the variables are next to each other we can use the
+        # Since the tuple elements are next to each other we can use the
         # address of loc_tuple as a pointer to the 5 locations.
         verify_location_list(
             loc_list=cast(&loc_tuple, Location*), n_steps=4)
         return ()
     end
 
+A tuple is used to define and store the list of ``Location`` elements. Tuples are ordered, finite
+lists that can contain any combination of valid types, for example, five ``Location`` structs. Each
+element may be accessed with a zero-based index (e.g., ``loc_tuple[2]`` is the third element.
+
+.. TODO: Add Reference to How Cairo Works - Tuples once PR #26 is merged (perama, 30/5/21).
+
 In the beginning of the function we allocate 5 locations, using typed local variables.
-Cairo looks for the constant ``Location.SIZE`` to find how much cells are
+Cairo looks for the constant ``Location.SIZE`` to find how many cells are
 required for each of the variables, and then allocates them in the order of definition.
-Each ``Location`` instance is assigned some coordinates (according to the example above).
+Since ``loc_tuple`` is a tuple of 5 locations, Cairo allocates ``5 * Location.SIZE`` memory
+cells. Each ``Location`` instance is assigned some coordinates (according to the example above).
 
 Since ``verify_location_list`` requires a pointer to a list of locations,
-we pass ``&loc_tuple``, which represents the address in memory of ``loc_tuple``, and is of type
-``Location*``. The ``cast`` operation declares that ``&loc_tuple`` is of type ``Location*``.
+we pass ``&loc_tuple``, which represents the address in memory of ``loc_tuple``.  Since the type
+of ``&loc_tuple`` is a pointer to a tuple rather than ``Location*``, we need the cast operation
+to instruct to the compiler to treat this address as ``Location*``. See :ref:`casting` for
+more information.
 
 For technical reasons, when Cairo needs to retrieve the address of a local variable
 (``&loc_tuple``), it needs to be told the value of the frame pointer register, ``fp``
