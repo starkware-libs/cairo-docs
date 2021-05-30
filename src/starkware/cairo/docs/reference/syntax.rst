@@ -94,7 +94,7 @@ information.
 
     local a = 3
 
-Any function that uses local variable, must have the ``alloc_locals`` instruction at the beginning
+Any function that uses a local variable, must have the ``alloc_locals`` instruction at the beginning
 of the function. This instruction is responsible for allocating the memory cells used by the local
 variables.
 
