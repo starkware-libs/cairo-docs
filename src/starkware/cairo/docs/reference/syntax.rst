@@ -120,11 +120,11 @@ follows:
     let struct_instance = MyStruct(
         first_member=value0, second_member=value1)
 
-Members must be declared in order of appearance. Struct constructors may nested as follows:
+Members must be declared in order of appearance. Struct constructors may be nested as follows:
 
 .. tested-code:: cairo struct-constructor1
 
-    let struct1 = A(x=value0, y=B(x=value1, y=value2))
+    let struct1 = A(v=value0, w=B(x=value1, y=value2))
 
 Where ``A`` and ``B`` are structs and ``x`` and ``y`` are members defined in each of those structs.
 
