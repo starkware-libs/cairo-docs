@@ -31,7 +31,7 @@ Cairo have the following types:
 
 * ``felt`` -- a field element (see :ref:`field_elements`).
 * ``MyStruct`` where ``MyStruct`` is a :ref:`struct <syntax_structs>` name.
-* ``MyTuple`` where ``MyTuple`` is a tuple name.
+* A tuple -- For example ``(a, b) `` where ``a`` and ``b`` are types (see :ref:`syntax_tuples`).
 * ``T*`` where ``T`` is any type -- a pointer to type ``T``. For example: ``MyStruct*`` or
   ``felt**``.
 
@@ -110,58 +110,35 @@ The offset can be retrieved using ``MyStruct.member_name``.
 For example, ``MyStruct.first_member == 0`` and ``MyStruct.second_member == 1``
 (since the size of ``felt`` is 1).
 
+.. _syntax_tuples:
+
 Tuples
 ------
 
 A tuple is a finite, ordered, unchangeable list of elements. It is represented by a list of elements
-separated by commas within round brackets ``(`` ``)``. Tuples are defined as a local variable. Their
-elements may be any combination of valid :ref:`types <syntax_type>`, for example, a ``felt`` and two
-structs. A tuple that contains only one element must be defined in one of the two following ways:
-the element is defined with an assignment or with a trailing comma, as shown below.
+separated by commas within round brackets ``(`` ``)`` and is defined as a local variable. Their
+elements may be any combination of valid :ref:`types <syntax_type>`. A tuple that contains only one
+element must be defined in one of the two following ways: the element is defined with an assignment
+or with a trailing comma, as shown below.
 
 .. tested-code:: cairo syntax_tuples
 
-    # A tuple with two elements
-    local TupleOne = (7, 9)
+    local TupleOne = (7, 9, 13) # A tuple with three elements.
+    local TupleTwo = (5,) # (5) is not a valid tuple.
+    local TupleThree = (a=5) # An assignment does not require a trailing comma.
 
-    # A tuple with three elements
-    local TupleTwo = (7, 9, 13)
-
-    # Tuples with one element
-    local TupleThree = (5,) # (5) is not a valid tuple.
-    local TupleFour = (a=5) # An assignment does not require a trailing comma.
-
-A tuple may be named and defined by the elements it contains. This may be useful where a function
-has arguments in the form of a tuple. For example, the following function returns a tuple defined
-with two ``felt`` expressions.
-
-.. tested-code:: cairo syntax_tuple_empty
-
-    func MyFunc() -> (TupleResult : (felt, felt)):
-        alloc_locals
-        let a = 3
-        let b = 9
-        local MyTuple = (a, b)
-        return (TupleResult = MyTuple)
-    end
-
-Tuple values may be accessed with a zero-based index brackets ``[index]`` as follows:
-
-.. tested-code:: cairo syntax_tuple_assignment
-
-    local TupleOne = (7, 9, 3, 8)
-    let a = TupleOne[0] # Equivalent to: let a = 7.
-    let b = TupleOne[1] # Equivalent to: let b = 9.
-    let b = TupleOne[3] # Equivalent to: let c = 8.
-
-Tuples may be nested and accessed as follows:
+Where a tuple is passed as an argument, the type of each element may be specified, for example,
+``MyTuple : (felt, felt, MyStruct)``. Tuple values may be accessed with a zero-based index brackets
+``[index]``, including access to nested tuple elements as shown below.
 
 .. tested-code:: cairo syntax_tuple_nested
 
     local TupleOne = (3, 6, 8)
-    local TupleTwo = (1, TupleOne, 5)
+    local TupleTwo = (1, TupleOne, 5)  # Tuple contains another tuple.
     local TupleThree = (TupleTwo, 2, 11)
-    let a = TupleThree[0][1][2] # Equivalent to: let a = 8.
+
+    let a = TupleOne[2]  # a = 8
+    let b = TupleThree[0][1][2] # a = 8.
 
 Functions
 ---------
