@@ -115,17 +115,17 @@ For example, ``MyStruct.first_member == 0`` and ``MyStruct.second_member == 1``
 Tuples
 ------
 
-A tuple is a finite, ordered, unchangeable list of elements. It is represented by a list of elements
-separated by commas within round brackets ``(`` ``)`` and is defined as a local variable. Their
-elements may be any combination of valid :ref:`types <syntax_type>`. A tuple that contains only one
-element must be defined in one of the two following ways: the element is defined with an assignment
-or with a trailing comma, as shown below.
+A tuple is a finite, ordered, unchangeable list of elements. They are represented as a
+comma-separated list of elements enclosed by parenthesess (e.g., ``(3, x)``).
+Their elements may be any combination of valid :ref:`types <syntax_type>`. A tuple
+that contains only one element must be defined in one of the two following ways: the element is
+defined with an assignment or with a trailing comma, as shown below.
 
 .. tested-code:: cairo syntax_tuples
 
-    local TupleOne = (7, 9, 13) # A tuple with three elements.
-    local TupleTwo = (5,) # (5) is not a valid tuple.
-    local TupleThree = (a=5) # An assignment does not require a trailing comma.
+    local TupleOne = (7, 9, 13)  # A tuple with three elements.
+    local TupleTwo = (5,)  # (5) is not a valid tuple.
+    local TupleThree = (a=5)  # An assignment does not require a trailing comma.
 
 Where a tuple is passed as an argument, the type of each element may be specified, for example,
 ``MyTuple : (felt, felt, MyStruct)``. Tuple values may be accessed with a zero-based index brackets
@@ -137,8 +137,8 @@ Where a tuple is passed as an argument, the type of each element may be specifie
     local TupleTwo = (1, TupleOne, 5)  # Tuple contains another tuple.
     local TupleThree = (TupleTwo, 2, 11)
 
-    let a = TupleOne[2]  # a = 8
-    let b = TupleThree[0][1][2] # a = 8.
+    let a = TupleOne[2]  # a = 8.
+    let b = TupleThree[0][1][2]  # a = 8.
 
 Functions
 ---------
