@@ -126,7 +126,9 @@ Members must be declared in order of appearance. Struct constructors may be nest
 
     let struct1 = A(v=value0, w=B(x=value1, y=value2))
 
-Where ``A`` and ``B`` are structs and ``x`` and ``y`` are members defined in each of those structs.
+Where ``A`` is a struct with members ``v`` and ``w`` and ``B`` is a struct with members ``x`` and
+``y``.
+
 
 Functions
 ---------
