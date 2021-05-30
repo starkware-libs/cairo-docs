@@ -86,14 +86,17 @@ Reference can be rebound, which means that TODO.
 Locals
 ------
 
-Local expressions are defined with the term ``local``. Local variables cannot be revoked, unlike
-references. See :ref:`local_vars` for more information.
+Local variables are defined using the keyword ``local``. Cairo places local variables relative to
+the frame pointer (fp), and thus their values will not be revoked. See :ref:`local_vars` for more
+information.
 
 .. tested-code:: cairo syntax_local
 
     local a = 3
 
-The instruction ``alloc_locals`` must be placed at the start of any function that uses locals.
+Any function that uses local variable, must have the ``alloc_locals`` instruction at the beginning
+of the function. This instruction is responsible for allocating the memory cells used by the local
+variables.
 
 .. tested-code:: cairo syntax_alloc_locals
 
@@ -102,6 +105,10 @@ The instruction ``alloc_locals`` must be placed at the start of any function tha
         local a = 3
         return ()
     end
+
+If the address of a local variable is needed, the value of the frame point register ``fp`` must be
+set. This can be done by the statement ``let (__fp__, _) = get_fp_and_pc()``. See
+:ref:`retrieving_registers` for more information.
 
 .. _syntax_structs:
 
