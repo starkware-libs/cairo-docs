@@ -276,9 +276,8 @@ main function):
 
 A tuple is used to define and store the list of ``Location`` elements. Tuples are ordered, finite
 lists that can contain any combination of valid types, for example, five ``Location`` structs. Each
-element may be accessed with a zero-based index (e.g., ``loc_tuple[2]`` is the third element.
-
-.. TODO: Add Reference to How Cairo Works - Tuples once PR #26 is merged (perama, 30/5/21).
+element may be accessed with a zero-based index (e.g., ``loc_tuple[2]`` is the third element
+(see :ref:`tuples`).
 
 In the beginning of the function we allocate 5 locations, using typed local variables.
 Cairo looks for the constant ``Location.SIZE`` to find how many cells are
