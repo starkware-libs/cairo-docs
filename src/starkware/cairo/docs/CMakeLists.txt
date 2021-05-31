@@ -16,9 +16,9 @@ python_venv(cairo_docs_venv
     PYTHON python3.7
 
     LIBS
-    cairo_common_test_utils_lib
     cairo_common_lib
     cairo_docs_lib
+    cairo_function_runner_lib
     cairo_run_lib
     cairo_script_lib
     cairo_syntax_highlighting_lib
@@ -75,7 +75,7 @@ full_python_test(cairo_docs_additional_tests
 
     LIBS
     cairo_common_lib
-    cairo_common_test_utils_lib
     cairo_compile_lib
+    cairo_function_runner_lib
     pip_pytest
 )
