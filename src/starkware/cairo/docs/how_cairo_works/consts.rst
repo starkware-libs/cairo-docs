@@ -278,8 +278,8 @@ For simple expressions, with at most one operation, this is equivalent to:
 
 .. tested-code:: cairo temp_var1
 
-    let var_name = [ap]
-    var_name = <expr>; ap++
+    [ap] = <expr>; ap++
+    let var_name = [ap - 1]
 
 :ref:`Compound expressions <compound_expressions>` are also supported, in which case the command
 may be compiled to more than one Cairo instruction.

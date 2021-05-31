@@ -8,7 +8,7 @@ configuration, in which the numbers are ordered.
 
 Below you can see an example of solving a very simple initial scenario.
 The first step is to slide 3 up into the hole, then 7, 8 and 12, which brings
-us to the "solved" configuration in which the empty tile in on the bottom-right corner
+us to the "solved" configuration in which the empty tile is on the bottom-right corner
 and the numbers are sorted.
 
 .. image:: 15puzzle.png

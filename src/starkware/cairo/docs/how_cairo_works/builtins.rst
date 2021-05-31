@@ -407,7 +407,6 @@ The ``small`` layout (``--layout=small``) includes the following builtins:
     Pedersen        8
     Range check     8
     ECDSA           512
-    Checkpoints     -
 
 .. test::
 
