@@ -126,13 +126,22 @@ nested tuple elements as shown below.
 
 .. tested-code:: cairo syntax_tuples
 
-    local tuple_one = (7, 9, 13)  # A tuple with three elements.
-    local tuple_two = (5,)  # (5) is not a valid tuple.
+    local tuple_one : (felt, felt, felt) = (7, 9, 13)  # A tuple with three elements.
+    local tuple_two : (felt) = (5,)  # (5) is not a valid tuple.
     local tuple_three : (felt) = (a=5)  # A named tuple does not require a trailing comma.
-    local tuple_four = (1, tuple_one, 5)  # Tuple contains another tuple.
-    local tuple_five = (tuple_four, 2, 11)
+    local tuple_four : (felt, (felt, felt, felt), felt) = (1, tuple_one, 5)  # Tuple contains another tuple.
+    local tuple_five : ((felt, (felt, felt, felt), felt), felt, felt) = (tuple_four, 2, 11)
     let a = tuple_one[2]  # a = 13.
     let b = tuple_five[0][1][2]  # a = 13.
+
+.. test::
+
+    from starkware.cairo.lang.compiler.cairo_compile import compile_cairo
+
+    PRIME = 2**64 + 13
+    code = codes['syntax_tuples']
+    code = f'func main():\n alloc_locals \n {code}\n ret \n end'
+    compile_cairo(code, PRIME)
 
 Functions
 ---------
