@@ -2,7 +2,8 @@
 ``dict`` library
 ----------------
 
-Import from this library by replacing ``*`` with the function name.
+Import from this library by replacing ``*`` with the function name. See :ref:`dicts_in_cairo` for
+more information about dictionaries.
 
 .. tested-code:: cairo library_dict
 
