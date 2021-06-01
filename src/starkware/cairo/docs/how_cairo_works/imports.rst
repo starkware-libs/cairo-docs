@@ -20,6 +20,8 @@ syntax:
 
     from a.b import c as d, e, f
 
+.. _import_search_path:
+
 Import search paths
 -------------------
 
