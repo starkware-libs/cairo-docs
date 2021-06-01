@@ -8,5 +8,5 @@ Short, complete examples of basic constructs.
 .. toctree::
     :maxdepth: 2
 
-    example_variables
+    example_inputs
     example_locals
