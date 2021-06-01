@@ -58,12 +58,29 @@ Confirm that the program output matches the output below:
 
 To explore the program structure and debug, visit the tracer at http://localhost:8100/.
 
-Finally, programs can be sent to public Ethereum testnet (Ropsten).
+Next, the programs can be sent to public Ethereum testnet (Ropsten). SHARP
+crates the proof and saves it in a compact format it the Fact Registry contract as CALLDATA.
 
 .. tested-code:: none example_variables_sharp
 
     cairo-sharp submit --source MyProgram.cairo \
     --program_input input.json
+
+Once the transaction has been mined, a solidity contract can be deployed to interact with
+the program above. An example contract format in the Ethereum smart contract language Solidity
+might take the following form:
+
+.. none
+
+    contract NumberLogger {
+        bytes constant public myCairoProgram = hex'0x315e1280c95a7310985b71130986150723';
+
+        function approve_value(uint a) {
+            # Compute hashes
+            # Call isValid
+            # Do some action
+        }
+    }
 
 .. test::
 
