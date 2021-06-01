@@ -176,9 +176,9 @@ any additional paths specified at compile time. See :ref:`import_search_path` fo
 Unpacking
 ---------
 
-The values returned by a function can be ignored or bound to either a reference or local expression.
-The ``_`` character is used to handle returned values that are ignored. Consider function ``foo()``
-that returns two values, ``7`` and ``5`` in that order.
+The values returned by a function can be ignored, or bound, to either a reference or local expression.
+The ``_`` character is used to handle returned values that are ignored. Consider the function
+``foo()`` that returns two values, ``7`` and ``5`` in that order.
 
 .. tested-code:: cairo syntax_unpacking
 
