@@ -141,9 +141,9 @@ Function outputs
 
 A function can return arguments to the parent function that called it. The arguments expected are
 designated by the ``-> ()`` expression. The argument type(s) are defined in the return statement of
-the function. Arguments may be either positional or named, where positional arguments are identified
-by the order they appear in the calling function. Positional arguments must appear before named
-arguments.
+the function. Arguments may either be positional or named, where positional arguments are identified
+by the order in which they appear in the calling function. Positional arguments must appear before
+named arguments.
 
 .. tested-code:: cairo syntax_function_outputs
 
@@ -160,7 +160,7 @@ arguments.
         return()
     end
 
-Functions can specify that an output be of a certain type. The function below returns two arguments,
+Functions can specify that an output be of a specific type. The function below returns two arguments,
 ``a``, a value of type ``felt`` and ``b``, the address of a felt value.
 
 .. tested-code:: cairo syntax_function_outputs_typed
