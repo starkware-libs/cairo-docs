@@ -3,7 +3,7 @@ import json
 import os
 import sys
 import time
-from typing import List, Optional, Sequence, Set, Tuple, Union
+from typing import Callable, List, Optional, Sequence, Set, Tuple, Union
 
 from starkware.cairo.lang.cairo_constants import DEFAULT_PRIME
 from starkware.cairo.lang.compiler.assembler import assemble
@@ -15,15 +15,13 @@ from starkware.cairo.lang.compiler.module_reader import ModuleReader
 from starkware.cairo.lang.compiler.preprocessor.default_pass_manager import default_pass_manager
 from starkware.cairo.lang.compiler.preprocessor.pass_manager import PassManager
 from starkware.cairo.lang.compiler.preprocessor.preprocess_codes import preprocess_codes
+from starkware.cairo.lang.compiler.preprocessor.preprocessor import PreprocessedProgram
 from starkware.cairo.lang.compiler.program import Program
 from starkware.cairo.lang.compiler.scoped_name import ScopedName
 from starkware.cairo.lang.version import __version__
 
 
-def main():
-    start_time = time.time()
-
-    parser = argparse.ArgumentParser(description='A tool to compile Cairo code.')
+def cairo_compile_add_common_args(parser: argparse.ArgumentParser):
     parser.add_argument('-v', '--version', action='version', version=f'%(prog)s {__version__}')
     parser.add_argument('files', metavar='file', type=str, nargs='+', help='File names')
     parser.add_argument(
@@ -47,64 +45,53 @@ def main():
         '--debug_info_with_source', action='store_true',
         help='Include debug information with a copy of the source code.')
     parser.add_argument(
-        '--proof_mode', action='store_true', default=False,
-        help='Add instructions to call main() at the beginning of the program. This should be used '
-        'if the program is proven directly (without the bootloader).')
-    parser.add_argument(
-        '--no_proof_mode', dest='proof_mode', action='store_false',
-        help='Disable proof mode (see --proof_mode).')
-    parser.add_argument(
         '--cairo_dependencies', type=str,
         help='Output a list of the Cairo source files used during the compilation as a CMake file.')
     parser.add_argument(
         '--no_opt_unused_functions', dest='opt_unused_functions', action='store_false',
         default=True, help='Disables unused function optimization.')
 
-    args = parser.parse_args()
+
+def cairo_compile_common(
+    args: argparse.Namespace,
+    pass_manager_factory: Callable[[argparse.Namespace, ModuleReader], PassManager]) -> \
+        PreprocessedProgram:
+    start_time = time.time()
     debug_info = args.debug_info or args.debug_info_with_source
 
-    source_files = set()
-    erred: bool = False
     try:
         codes = get_codes(args.files)
-        if args.proof_mode:
+        if getattr(args, 'proof_mode', False):
             codes = add_start_code(codes)
         out = args.output if args.output is not None else sys.stdout
 
-        cairo_path = list(filter(
+        cairo_path: List[str] = list(filter(
             None, args.cairo_path.split(':') + os.getenv(LIBS_DIR_ENVVAR, '').split(':')))
         module_reader = get_module_reader(cairo_path=cairo_path)
-        pass_manager = default_pass_manager(
-            prime=args.prime,
-            read_module=module_reader.read,
-            opt_unused_functions=args.opt_unused_functions)
+
+        pass_manager = pass_manager_factory(args, module_reader)
 
         if args.preprocess:
             preprocessed = preprocess_codes(
                 codes=codes,
                 pass_manager=pass_manager,
                 main_scope=MAIN_SCOPE)
-            source_files = module_reader.source_files
             print(preprocessed.format(with_locations=debug_info), end='', file=out)
         else:
-            program = compile_cairo(
+            program, preprocessed = compile_cairo_ex(
                 codes, debug_info=debug_info, pass_manager=pass_manager)
             if args.debug_info_with_source:
+                assert program.debug_info is not None, 'program.debug_info is missing.'
                 for source_file in module_reader.source_files | set(args.files):
                     program.debug_info.file_contents[source_file] = open(source_file).read()
             json.dump(Program.Schema().dump(program), out, indent=4, sort_keys=True)
             # Print a new line at the end.
             print(file=out)
-
-    except LocationError as err:
-        print(err, file=sys.stderr)
-        erred = True
-
-    if args.cairo_dependencies:
-        generate_cairo_dependencies_file(
-            args.cairo_dependencies, source_files | set(args.files), start_time)
-
-    return 1 if erred else 0
+        return preprocessed
+    finally:
+        if args.cairo_dependencies:
+            generate_cairo_dependencies_file(
+                args.cairo_dependencies, module_reader.source_files | set(args.files), start_time)
 
 
 def get_module_reader(cairo_path: List[str]) -> ModuleReader:
@@ -146,15 +133,14 @@ def compile_cairo_files(
         pass_manager=pass_manager, main_scope=main_scope)
 
 
-def compile_cairo(
+def compile_cairo_ex(
         code: Union[str, Sequence[Tuple[str, str]]], prime: Optional[int] = None,
         cairo_path: List[str] = [], debug_info: bool = False,
         pass_manager: Optional[PassManager] = None,
-        add_start: bool = False, main_scope: Optional[ScopedName] = None) -> Program:
+        add_start: bool = False, main_scope: Optional[ScopedName] = None) -> \
+        Tuple[Program, PreprocessedProgram]:
     """
-    Compiles a single code represented by a string, or a list codes.
-    The codes in the list are joined with file names, used for indicative
-    compilation errors.
+    Same as compile_cairo, but returns the preprocessed program as well.
     """
     file_contents_for_debug_info = {}
 
@@ -190,6 +176,23 @@ def compile_cairo(
 
     check_main_args(program)
 
+    return program, preprocessed_program
+
+
+def compile_cairo(
+        code: Union[str, Sequence[Tuple[str, str]]], prime: Optional[int] = None,
+        cairo_path: List[str] = [], debug_info: bool = False,
+        pass_manager: Optional[PassManager] = None,
+        add_start: bool = False, main_scope: Optional[ScopedName] = None) -> Program:
+    """
+    Compiles a single code represented by a string, or a list codes.
+    The codes in the list are joined with file names, used for indicative
+    compilation errors.
+    Returns the program.
+    """
+    program, _ = compile_cairo_ex(
+        code=code, prime=prime, cairo_path=cairo_path, debug_info=debug_info,
+        pass_manager=pass_manager, add_start=add_start, main_scope=main_scope)
     return program
 
 
@@ -266,6 +269,32 @@ def generate_cairo_dependencies_file(dependencies_path: str, files: Set[str], st
     # Change the modification time of the file to make sure it is older than the generated
     # files.
     os.utime(dependencies_path, (start_time, start_time))
+
+
+def main():
+    parser = argparse.ArgumentParser(description='A tool to compile Cairo code.')
+    parser.add_argument(
+        '--proof_mode', action='store_true', default=False,
+        help='Add instructions to call main() at the beginning of the program. This should be used '
+        'if the program is proven directly (without the bootloader).')
+    parser.add_argument(
+        '--no_proof_mode', dest='proof_mode', action='store_false',
+        help='Disable proof mode (see --proof_mode).')
+
+    def pass_manager_factory(args: argparse.Namespace, module_reader: ModuleReader) -> PassManager:
+        return default_pass_manager(
+            prime=args.prime,
+            read_module=module_reader.read,
+            opt_unused_functions=args.opt_unused_functions)
+
+    try:
+        cairo_compile_add_common_args(parser)
+        args = parser.parse_args()
+        cairo_compile_common(args=args, pass_manager_factory=pass_manager_factory)
+    except LocationError as err:
+        print(err, file=sys.stderr)
+        return 1
+    return 0
 
 
 if __name__ == '__main__':
