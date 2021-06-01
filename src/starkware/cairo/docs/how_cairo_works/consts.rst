@@ -253,6 +253,8 @@ You may omit the type and write (the Cairo compiler will deduce the type from th
     compile_cairo(codes['typed_references0'] + '\n' + codes['typed_references1'], PRIME)
     compile_cairo(codes['typed_references0'] + '\n' + codes['typed_references2'], PRIME)
 
+.. _casting:
+
 Casting
 -------
 
