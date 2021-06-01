@@ -279,7 +279,7 @@ ordered, finite lists that can contain any combination of valid types, for examp
 ``Location`` structs. Each element may be accessed with a zero-based index (e.g., ``loc_tuple[2]``
 is the third element. See :ref:`tuples`).
 
-In the beginning of the function we allocate 5 locations, using a typed local variable.
+At the beginning of the function we allocate 5 locations, using a typed local variable.
 Cairo looks for the constant ``Location.SIZE`` to find how many cells are
 required for each of the variables, and then allocates them in the order of definition.
 Since ``loc_tuple`` is a tuple of 5 locations, Cairo allocates ``5 * Location.SIZE`` memory
