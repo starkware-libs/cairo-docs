@@ -178,7 +178,7 @@ Program output
 
 Cairo programs can produce outputs that a smart contract can verify. These outputs require the
 ``output`` builtin. The program can product multiple outputs with calls to the ``serialize_word()``
-function. Outputs can also be structs that are saved to an output file.
+function. Outputs can also be structs which are saved to an output file.
 See :ref:`program_output` for more information.
 
 The following program outputs two values, 7 and 13.
