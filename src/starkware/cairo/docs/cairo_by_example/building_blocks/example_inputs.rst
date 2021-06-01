@@ -1,25 +1,38 @@
-Variables
----------
+Inputs
+------
 
-Below is an example usage of different variables.
+This is a short example of a system that involves a smart contract interacting
+with a Cairo program. The example highlights how Cairo programs and their proofs
+can interact with the Ethereum blockchain.
+
+The user provides a special number to a Cairo program. A proof is generated and
+integrated into the Ethereum blockchain. A smart contract checks the proof and
+then accepts the special number and executes some function using that number.
 
 Create an ``input.json`` file in the same directory as the cairo code with the following contents.
 
 .. tested-code:: json example_variables_input
 
-    {}
+    {'special_number': 556}
 
 Create a file called ``MyProgram.cairo`` with the following contents:
 
 .. tested-code:: cairo example_variables_code
 
     %builtins output
-
     from starkware.cairo.common.serialize import serialize_word
 
     func main{output_ptr : felt*}():
-        let a = 500
-        serialize_word(a)
+        alloc_locals
+        local a_special_number : felt  # A local variable (a felt/integer)
+
+        # A hint
+        %{
+            # Python code that processes the .json file
+            num = program_input['special_number']
+            idx.a_special_number = num
+        %}
+        serialize_word(a_special_number)  # Produce number as an output
         return ()
     end
 
@@ -41,7 +54,7 @@ Confirm that the program output matches the output below:
 
 .. tested-code:: none example_variables_output0
 
-    500
+    556
 
 To explore the program structure and debug, visit the tracer at http://localhost:8100/.
 
