@@ -138,6 +138,33 @@ See :ref:`revoked_references` for more information.
         return ()
     end
 
+Locals
+------
+
+Local variables are defined using the keyword ``local``. Cairo places local variables relative to
+the frame pointer (fp), and thus their values will not be revoked. See :ref:`local_vars` for more
+information.
+
+.. tested-code:: cairo syntax_local
+
+    local a = 3
+
+Any function that uses a local variable, must have the ``alloc_locals`` instruction at the beginning
+of the function. This instruction is responsible for allocating the memory cells used by the local
+variables.
+
+.. tested-code:: cairo syntax_alloc_locals
+
+    func foo():
+        alloc_locals
+        local a = 3
+        return ()
+    end
+
+If the address of a local variable is needed, the value of a reference named ``fp`` must be set to
+the value of the frame pointer. This can be done by the statement
+``let (__fp__, _) = get_fp_and_pc()``. See :ref:`retrieving_registers` for more information.
+
 .. _syntax_structs:
 
 Structs
@@ -163,6 +190,27 @@ the second is assigned offset according to the size of the first member and so o
 The offset can be retrieved using ``MyStruct.member_name``.
 For example, ``MyStruct.first_member == 0`` and ``MyStruct.second_member == 1``
 (since the size of ``felt`` is 1).
+
+Struct constructor
+------------------
+
+Once a struct has been defined, a constructor can be used to declare an instance of that struct as
+follows:
+
+.. tested-code:: cairo struct-constructor0
+
+    let struct_instance = MyStruct(
+        first_member=value0, second_member=value1)
+
+Members must be declared in order of appearance. Struct constructors may be nested as follows:
+
+.. tested-code:: cairo struct-constructor1
+
+    let struct1 = A(v=value0, w=B(x=value1, y=value2))
+
+Where ``A`` is a struct with members ``v`` and ``w`` and ``B`` is a struct with members ``x`` and
+``y``.
+
 
 Functions
 ---------
@@ -225,5 +273,6 @@ any additional paths specified at compile time. See :ref:`import_search_path` fo
 .. tested-code:: cairo syntax_library_imports
 
     %builtins output pedersen
-    from starkware.cairo.common.math import assert_not_zero, assert_not_equal
+    from starkware.cairo.common.math import (
+        assert_not_zero, assert_not_equal)
     from starkware.cairo.common.registers import get_ap

@@ -65,13 +65,14 @@ class MemorySegmentManager:
         """
         Finalizes all segments that were not finalized yet, by computing their current used size.
         """
+        segment_index_to_max_offset = get_segment_index_to_max_offset(memory=self.memory)
         for segment_index in range(self.n_segments):
             if segment_index in self.segment_sizes:
                 # Segment was already finalized.
                 continue
 
             assert segment_index not in self.public_memory_offsets
-            self.segment_sizes[segment_index] = get_segment_used_size(segment_index, self.memory)
+            self.segment_sizes[segment_index] = segment_index_to_max_offset[segment_index] + 1
             self.public_memory_offsets[segment_index] = []
 
     def relocate_segments(self) -> Dict[int, int]:
@@ -158,10 +159,24 @@ def get_segment_used_size(segment_index: int, memory: MemoryDict) -> int:
     was accessed.
     """
     max_offset = -1
-    for addr in memory.keys():
+    for addr in memory:
         assert isinstance(addr, RelocatableValue), \
             f'Expected memory address to be relocatable value. Found: {addr}.'
         if addr.segment_index != segment_index:
             continue
         max_offset = max(max_offset, addr.offset)
     return max_offset + 1
+
+
+def get_segment_index_to_max_offset(memory: MemoryDict) -> Dict[int, int]:
+    """
+    Returns a mapping between the segment indices and the maximal offset that
+    was accessed in each segment.
+    """
+    segment_index_to_max_offset: Dict[int, int] = defaultdict(lambda: -1)
+    for addr in memory:
+        assert isinstance(addr, RelocatableValue), \
+            f'Expected memory address to be relocatable value. Found: {addr}.'
+        previous_max_offset = segment_index_to_max_offset[addr.segment_index]
+        segment_index_to_max_offset[addr.segment_index] = max(previous_max_offset, addr.offset)
+    return segment_index_to_max_offset

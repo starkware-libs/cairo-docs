@@ -30,8 +30,8 @@ end
 # range_check_ptr - updated range check builtin pointer.
 # squashed_dict - end pointer to squashed_dict.
 func squash_dict_inner(
-        range_check_ptr, dict_accesses : DictAccess*, dict_accesses_end_minus1 : DictAccess*,
-        min_key, remaining_accesses, squashed_dict : DictAccess*) -> (
+        range_check_ptr, dict_accesses : DictAccess*, dict_accesses_end_minus1 : felt*, min_key,
+        remaining_accesses, squashed_dict : DictAccess*) -> (
         range_check_ptr, squashed_dict : DictAccess*):
     # Exit recursion when done.
     if remaining_accesses == 0:
@@ -135,7 +135,7 @@ func squash_dict_inner(
 
     # Check if address is out of bounds.
     %{ assert len(current_access_indices) == 0 %}
-    [ap] = dict_accesses_end_minus1 - last_loop_locals.access_ptr
+    [ap] = dict_accesses_end_minus1 - cast(last_loop_locals.access_ptr, felt)
     [ap] = [last_loop_locals.range_check_ptr]; ap++
     tempvar range_check_diff = last_loop_locals.range_check_ptr - range_check_ptr
     tempvar n_used_accesses = range_check_diff - 1
