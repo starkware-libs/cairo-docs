@@ -274,7 +274,7 @@ main function):
         return ()
     end
 
-This function uses a Tuple to define and store the list of ``Location`` elements. Tuples are
+This function uses a tuple to define and store the list of ``Location`` elements. Tuples are
 ordered, finite lists that can contain any combination of valid types, for example, five
 ``Location`` structs. Each element may be accessed with a zero-based index (e.g., ``loc_tuple[2]``
 is the third element. See :ref:`tuples`).
