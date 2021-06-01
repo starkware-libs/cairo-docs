@@ -11,6 +11,10 @@ from starkware.python.expression_string import ExpressionString
 
 @dataclasses.dataclass
 class ExprFuncCall(Expression):
+    """
+    Represents an expression of the form "<func_name>(<arguments>)". For example, "foo(1, 2, z=3)".
+    """
+
     rvalue: RvalueFuncCall
     location: Optional[Location] = LocationField
 

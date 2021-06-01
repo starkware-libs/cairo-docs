@@ -96,9 +96,9 @@ class VisitorStage(Stage):
         self.modify_ast = modify_ast
 
     def run(self, context: PassManagerContext):
-        identifier_collector = self.visitor_factory(context)
+        visitor = self.visitor_factory(context)
         modified_modules = []
         for module in context.modules:
-            modified_modules.append(identifier_collector.visit(module))
+            modified_modules.append(visitor.visit(module))
         if self.modify_ast:
             context.modules = modified_modules
