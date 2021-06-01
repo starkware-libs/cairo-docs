@@ -194,27 +194,41 @@ For example, ``MyStruct.first_member == 0`` and ``MyStruct.second_member == 1``
 Pointers
 --------
 
-A pointer is used to signify the starting point of an element's memory block. A statement or
+A pointer is used to signify the address of the first byte in memory of an element. A statement or
 function may define some expression in terms of a pointer, which occupies a single memory slot.
-An expression defined by a pointer is able to be located in memory. For example:
+For example, an expression defined by a pointer represents a memory address. The following
+example shows how to use this type of expression to access a tuple element:
 
 .. tested-code:: cairo pointer
 
-    # foo accepts a pointer called MyTuple
-    func foo(MyTuple : felt*):
-        # MyTuple points to the numbers tuple
-        let a = MyTuple[1]  # a = 2
+    from starkware.cairo.common.registers import get_fp_and_pc
+
+    # foo accepts a pointer called my_tuple
+    func foo(my_tuple : felt*):
+        # 'my_tuple' points to the 'numbers' tuple
+        let a = my_tuple[1]  # a = 2
+        return ()
     end
 
     func main():
         alloc_locals
-        numbers = (1, 2, 3, 4)
-        foo(numbers)
+        let (__fp__, _) = get_fp_and_pc()  # Reveal 'fp' to the compiler
+        local numbers : (felt, felt, felt) = (1, 2, 3)  # Define tuple
+        foo(&numbers)  # Send the address of the 'numbers' tuple
+        return ()
     end
+
+.. test::
+
+    from starkware.cairo.lang.compiler.cairo_compile import compile_cairo
+
+    PRIME = 2**64 + 13
+    code = codes['pointer']
+    compile_cairo(code, PRIME)
 
 The above example shows how ``foo`` accepts a pointer, which is then used to access the tuple.
 Cairo programs have permanent memory, so a pointer to an element is a common pattern to access that
-element in a another context.
+element in another context.
 
 Struct constructor
 ------------------
