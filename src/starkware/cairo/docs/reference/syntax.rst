@@ -176,15 +176,15 @@ any additional paths specified at compile time. See :ref:`import_search_path` fo
 Program input
 -------------
 
-Program inputs are declared within Hints with the expression ``program_input``. The term within
-the square brackets is an expression in single quotes that identifies the key of a key/value pair.
+Program inputs are declared within hints with the expression ``program_input``. The term within
+the square brackets is an expression in single quotes which identifies the key of a key/value pair.
 The key/value pair are specified in the .json document provided when the Cairo program is run.
 See :ref:`program_inputs` for more information.
 
 .. tested-code:: cairo syntax_program_inputs
 
     %{
-        # Sets the python varible a to a list of user_ids provided in the .json file.
+        # Sets the python varible `a` to a list of user_ids provided in the .json file.
         a = program_input['user_ids']
     %}
 
