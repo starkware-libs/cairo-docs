@@ -176,7 +176,7 @@ any additional paths specified at compile time. See :ref:`import_search_path` fo
 Hints
 -----
 
-Python code can be invoked with the ``%{`` ``%}`` block, where all contained code will be available
+Python code can be invoked with the ``%{`` ``%}`` block, where all contained code is available
 to be modified during proof construction. See :ref:`hints` for more information.
 
 .. tested-code:: cairo syntax_hints
