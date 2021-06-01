@@ -233,9 +233,8 @@ nested tuple elements as shown below.
     local tuple_three : (felt) = (a=5)  # A named tuple does not require a trailing comma.
     local tuple_four : (felt, (felt, felt, felt), felt) = (1, tuple_one, 5)  # Tuple contains another tuple.
     local tuple_five : ((felt, (felt, felt, felt), felt), felt, felt) = (tuple_four, 2, 11)
-
-In the above examples, ``let a = tuple_one[2]`` is equivalent to ``let a = 13`` and
-``let b = tuple_five[0][1][2]`` is equivalent to ``let b = 13``.
+    let a = tuple_one[2]  # let a = 13.
+    let b = tuple_five[0][1][2]  # let b = 13.
 
 .. test::
 
