@@ -36,3 +36,4 @@ of "How Cairo Works").
     hello_cairo/index
     how_cairo_works/index
     sharp
+    hello_starknet/index
