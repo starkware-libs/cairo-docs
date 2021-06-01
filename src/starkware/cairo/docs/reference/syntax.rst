@@ -46,6 +46,8 @@ The punctuation marks used in Cairo are described below:
 *   ``_`` (underscore, underline). A placeholder to handle values that are not used, such as an
     unused function return value.
 
+.. _syntax_type:
+
 Type system
 -----------
 
