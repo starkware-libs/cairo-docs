@@ -138,6 +138,33 @@ See :ref:`revoked_references` for more information.
         return ()
     end
 
+Locals
+------
+
+Local variables are defined using the keyword ``local``. Cairo places local variables relative to
+the frame pointer (fp), and thus their values will not be revoked. See :ref:`local_vars` for more
+information.
+
+.. tested-code:: cairo syntax_local
+
+    local a = 3
+
+Any function that uses a local variable, must have the ``alloc_locals`` instruction at the beginning
+of the function. This instruction is responsible for allocating the memory cells used by the local
+variables.
+
+.. tested-code:: cairo syntax_alloc_locals
+
+    func foo():
+        alloc_locals
+        local a = 3
+        return ()
+    end
+
+If the address of a local variable is needed, the value of a reference named ``fp`` must be set to
+the value of the frame pointer. This can be done by the statement
+``let (__fp__, _) = get_fp_and_pc()``. See :ref:`retrieving_registers` for more information.
+
 .. _syntax_structs:
 
 Structs
