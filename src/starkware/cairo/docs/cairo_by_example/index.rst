@@ -8,4 +8,8 @@ self-contained Cairo programs that can be executed without modification.
     :maxdepth: 2
 
     building_blocks/index
+
+.. toctree::
+    :hidden:
+
     template

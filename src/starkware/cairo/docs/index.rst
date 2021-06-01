@@ -37,5 +37,5 @@ of "How Cairo Works").
     how_cairo_works/index
     reference/index
     sharp
-    cairo_by_example/index
     hello_starknet/index
+    cairo_by_example/index
