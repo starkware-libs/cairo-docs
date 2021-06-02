@@ -7,13 +7,16 @@ can interact with the Ethereum blockchain.
 
 The user provides a special number to a Cairo program. A proof is generated and
 integrated into the Ethereum blockchain. A smart contract checks the proof and
-then accepts the special number and executes some function using that number.
+then accepts the special number and performs an action using that number.
 
 Create an ``input.json`` file in the same directory as the cairo code with the following contents.
 
 .. tested-code:: json example_variables_input
 
-    {'special_number': 556}
+    {
+        'current_number': 300,
+        'special_number': 556
+    }
 
 Create a file called ``MyProgram.cairo`` with the following contents:
 
@@ -24,14 +27,17 @@ Create a file called ``MyProgram.cairo`` with the following contents:
 
     func main{output_ptr : felt*}():
         alloc_locals
-        local a_special_number : felt  # A local variable (a felt/integer)
-
+        local original_number : felt  # A local variable (a felt/integer)
+        local a_special_number : felt
         # A hint
         %{
             # Python code that processes the .json file
-            num = program_input['special_number']
-            idx.a_special_number = num
+            num = program_input['current_number']
+            ids.original_number = num
+            new_num = program_input['special_number']
+            ids.a_special_number = new_num
         %}
+        serialize_word(original_number)  # Produce number as an output
         serialize_word(a_special_number)  # Produce number as an output
         return ()
     end
@@ -54,12 +60,13 @@ Confirm that the program output matches the output below:
 
 .. tested-code:: none example_variables_output0
 
+    300
     556
 
 To explore the program structure and debug, visit the tracer at http://localhost:8100/.
 
-Next, the programs can be sent to public Ethereum testnet (Ropsten). SHARP
-crates the proof and saves it in a compact format it the Fact Registry contract as CALLDATA.
+Next, the program can be sent to public Ethereum testnet (Ropsten). SHARP
+creates the proof and saves it in a compact format in the Fact Registry contract as CALLDATA.
 
 .. tested-code:: none example_variables_sharp
 
@@ -68,17 +75,60 @@ crates the proof and saves it in a compact format it the Fact Registry contract 
 
 Once the transaction has been mined, a solidity contract can be deployed to interact with
 the program above. An example contract format in the Ethereum smart contract language Solidity
-might take the following form:
+might take the following form. This SpecialNumber contract stores a number. The number can
+be updated if the proof is verified. The proof demonstrates that the Cairo program was not
+modified and that the input contained the current number and a new, different number.
 
 .. none
 
-    contract NumberLogger {
-        bytes constant public myCairoProgram = hex'0x315e1280c95a7310985b71130986150723';
+    pragma solidity ^0.5.2;
 
-        function approve_value(uint a) {
-            # Compute hashes
-            # Call isValid
-            # Do some action
+    contract IFactRegistry {
+        /*
+        Returns true if the given fact was previously registered in the contract.
+        */
+        function isValid(bytes32 fact)
+            external view
+            returns(bool);
+    }
+
+    contract SpecialNumber {
+
+        // The current special number
+        uint256 currentNumber_;
+
+        // The Cairo program hash.
+        uint256 cairoProgramHash_;
+
+        // The Cairo verifier.
+        IFactRegistry cairoVerifier_;
+
+        constructor(
+            uint256 cairoProgramHash,
+            address cairoVerifier,
+            uint256 initialNumber)
+            public
+        {
+            currentNumber_ = initialNumber;
+            cairoProgramHash_ = cairoProgramHash;
+            cairoVerifier_ = IFactRegistry(cairoVerifier);
+        }
+
+        function updateNumber(uint256[] memory programOutput)
+            public
+        {
+            // Ensure that a corresponding proof was verified.
+            bytes32 outputHash = keccak256(abi.encodePacked(programOutput));
+            bytes32 fact = keccak256(abi.encodePacked(cairoProgramHash_, outputHash));
+            require(cairoVerifier_.isValid(fact), "MISSING_CAIRO_PROOF");
+
+            // Ensure the output consistency with current system state.
+            require(programOutput.length == 2, "INVALID_PROGRAM_OUTPUT");
+            require(currentNumber_ == programOutput[0], "NEED_TO_PROVIDE_ORIGINAL_NUMBER");
+            require(currentNumber_ != programOutput[1], "NEED_TO_PROVIDE_DIFFERENT_NUMBER");
+
+            // Update the stored number to the one provided by the user.
+            currentNumber_ = programOutput[1];
         }
     }
 
