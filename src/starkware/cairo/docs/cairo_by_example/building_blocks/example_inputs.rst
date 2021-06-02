@@ -85,7 +85,7 @@ modified and that the program was exectuted properly to produce the two outputs.
 
     contract IFactRegistry {
         /*
-        Returns true if the given fact was previously registered in the contract.
+        Returns true if the given fact was previously registered.
         */
         function isValid(bytes32 fact)
             external view
@@ -118,14 +118,16 @@ modified and that the program was exectuted properly to produce the two outputs.
             public
         {
             // Ensure that a corresponding proof was verified.
-            bytes32 outputHash = keccak256(abi.encodePacked(programOutput));
-            bytes32 fact = keccak256(abi.encodePacked(cairoProgramHash_, outputHash));
+            bytes32 outputHash = keccak256(
+                abi.encodePacked(programOutput));
+            bytes32 fact = keccak256(
+                abi.encodePacked(cairoProgramHash_, outputHash));
             require(cairoVerifier_.isValid(fact), "MISSING_CAIRO_PROOF");
 
             // Ensure the output consistency with current system state.
             require(programOutput.length == 2, "INVALID_PROGRAM_OUTPUT");
-            require(currentNumber_ == programOutput[0], "NEED_TO_PROVIDE_ORIGINAL_NUMBER");
-            require(currentNumber_ != programOutput[1], "NEED_TO_PROVIDE_DIFFERENT_NUMBER");
+            require(currentNumber_ == programOutput[0], "MISSING_ORIGINAL");
+            require(currentNumber_ != programOutput[1], "NEED_DIFFERENT");
 
             // Update the stored number to the one provided by the user.
             currentNumber_ = programOutput[1];
