@@ -231,26 +231,24 @@ Then, we check that we got the correct key, and that the index is in range
     func get_value_by_key{range_check_ptr}(
             list : KeyValue*, size, key) -> (value):
         alloc_locals
-        local idx
+        # Create an array of KeyValue structs.
+        local key_val_arr = cast(KeyValue, felt*)
+        local idx : felt  # A variable to store an index
         %{
-            # Populate idx using a hint.
-            ENTRY_SIZE = ids.KeyValue.SIZE
-            KEY_OFFSET = ids.KeyValue.key
-            VALUE_OFFSET = ids.KeyValue.value
-            for i in range(ids.size):
-                addr = ids.list.address_ + ENTRY_SIZE * i + \
-                    KEY_OFFSET
-                if memory[addr] == ids.key:
-                    ids.idx = i
-                    break
-            else:
-                raise Exception(
-                    f'Key {ids.key} was not found in the list.')
+            # Iterate through the array using a hint.
+            try:
+                for i in range(ids.size):
+                    # If array element key matches requested key
+                    if ids.key_val_arr[i].key == key:
+                        # Store the index of that array element
+                        ids.idx = i
+                        break
+                if ids.idx == None:
+                    raise Exception(
+                        f'Key {ids.key} was not found in the list.')
         %}
-
         # Verify that we have the correct key.
-        let item : KeyValue* = list + KeyValue.SIZE * idx
-        assert item.key = key
+        assert key_val_arr[idx] = key
 
         # Verify that the index is in range (0 <= idx <= size - 1).
         assert_nn_le(a=idx, b=size - 1)
