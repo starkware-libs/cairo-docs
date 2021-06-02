@@ -626,19 +626,13 @@ first accesses index 2 of ``MyTuple``. This value is accessed at index 4, and so
 Arrays
 ------
 
-Arrays allow convenient referencing of an ordered collection of homogeneous elements, where the
-elements are of any valid type. They are represented as a pointer such as ``felt*`` using a
-local variable. Where the elements are not of type ``felt``, the ``alloc()`` function from the
-Cairo common library is used to reserve memory cells.
+In order to represent an array (an ordered collection of homogeneous elements) in Cairo, one may
+use a pointer to the beginning of the array. The standard library function ``alloc()`` may
+be used to "dynamically" allocate a new array.
 
-For example, ``let (local struct_array : MyStruct*) = alloc()`` allocates memory cells according
-to the value of ``MyStruct.SIZE``. The expression ``struct_array[index]`` is used to access the
-memory cell ``n`` cells after ``struct_array[0]``, where ``n = index * MyStruct.SIZE``.
+For example, ``let (local struct_array : MyStruct*) = alloc()`` allocates a new memory segment and
+treats it as a pointer to ``MyStruct`` cells according to the value of ``MyStruct.SIZE``.
 
-The value of an array at an index can be declared with a statement of the form:
-``assert my_array[index] = expression``. The following code shows the
-memory cells corresponding to the first element in an array being used to store a struct:
-
-.. tested-code:: cairo hello_arrays
-
-    assert struct_array[0] = MyStruct(member1=5, member2=7)
+The expression ``struct_array[n]`` is used to access the n-th element of the array,
+where n=0 is the first element. ``struct_array[index]`` is compiled to
+``[struct_array + index * MyStruct.SIZE]``, and it is of type ``MyStruct``.
