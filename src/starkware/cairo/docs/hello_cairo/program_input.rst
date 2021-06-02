@@ -248,14 +248,23 @@ Then, we check that we got the correct key, and that the index is in range
                         f'Key {ids.key} was not found in the list.')
         %}
         # Verify that we have the correct key.
-        assert key_val_arr[idx] = key
+        assert key_val_arr[idx].key = key
 
         # Verify that the index is in range (0 <= idx <= size - 1).
         assert_nn_le(a=idx, b=size - 1)
 
         # Return the corresponding value.
-        return (value=item.value)
+        return (value=key_val_arr[idx].value)
     end
+
+.. test::
+
+    from starkware.cairo.lang.compiler.cairo_compile import compile_cairo
+
+    PRIME = 2**64 + 13
+    code = codes['get_value_by_key']
+    code = f'''{code} \n func main(): \n let a = get_value_by_key() \n ret \n end'''
+    compile_cairo(code, PRIME)
 
 Array index access
 ******************
