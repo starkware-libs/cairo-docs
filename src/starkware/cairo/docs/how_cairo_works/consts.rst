@@ -620,3 +620,25 @@ first accesses index 2 of ``MyTuple``. This value is accessed at index 4, and so
     programs = [compiled_program(i) for i in range(2)]
     # Verify that the compiled programs are identical.
     assert programs[0].data == programs[1].data
+
+.. _arrays:
+
+Arrays
+------
+
+Arrays allow convenient referencing of an ordered collection of homogeneous elements, where the
+elements are of any valid type. They are represented as a pointer such as ``felt*`` using a
+local variable. Where the elements are not of type ``felt``, the ``alloc()`` function from the
+Cairo common library is used to reserve memory cells.
+
+For example, ``let (local struct_array : MyStruct*) = alloc()`` allocates memory cells according
+to the value of ``MyStruct.SIZE``. The expression ``struct_array[index]`` is used to access the
+memory cell ``n`` cells after ``struct_array[0]``, where ``n = index * MyStruct.SIZE``.
+
+The value of an array at an index can be declared with a statement of the form:
+``assert my_array[index] = expression``. The following code shows the
+memory cells corresponding to the first element in an array being used to store a struct:
+
+.. tested-code:: cairo hello_arrays
+
+    assert struct_array[0] = MyStruct(member1=5, member2=7)
