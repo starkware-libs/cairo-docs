@@ -14,8 +14,8 @@ Create an ``input.json`` file in the same directory as the cairo code with the f
 .. tested-code:: json example_variables_input
 
     {
-        'current_number': 300,
-        'special_number': 556
+        "current_number": 300,
+        "special_number": 556
     }
 
 Create a file called ``MyProgram.cairo`` with the following contents:
