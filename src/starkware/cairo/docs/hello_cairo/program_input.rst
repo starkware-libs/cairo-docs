@@ -216,7 +216,7 @@ Take a moment to think how to write such a function.
 The naive solution takes ``O(N)`` Cairo instructions. It turns out that using non-determinism
 it can be done with a constant number of instructions!
 All we have to do is find the right index using a hint.
-Then, we check that we got the correct key, and that the index is in range
+Then, we check that we got the correct key, and that the index is in range:
 
 .. tested-code:: cairo get_value_by_key
 
@@ -258,27 +258,6 @@ Then, we check that we got the correct key, and that the index is in range
         # Return the corresponding value.
         return (value=item.value)
     end
-
-.. test::
-
-    from starkware.cairo.lang.compiler.cairo_compile import compile_cairo
-
-    PRIME = 2**64 + 13
-    code = codes['get_value_by_key']
-    code = f'''%builtins range_check
-        \n from starkware.cairo.common.registers import get_fp_and_pc
-        \n {code}
-        \n func main{{range_check_ptr}}():
-        \n alloc_locals
-        \n local struct_array : KeyValue*
-        \n assert struct_array[0] = KeyValue(key=7, val=1)
-        \n assert struct_array[1] = KeyValue(key=4, val=5)
-        \n assert struct_array[2] = KeyValue(key=10, val=20)
-        \n assert struct_array[3] = KeyValue(key=8, val=3)
-        \n let (__fp__, _) = get_fp_and_pc()
-        \n let a = get_value_by_key(struct_array, 4, 10)
-        \n ret \n end'''
-    compile_cairo(code, PRIME)
 
 Array index access
 ******************
