@@ -232,29 +232,31 @@ Then, we check that we got the correct key, and that the index is in range
             list : KeyValue*, size, key) -> (value):
         alloc_locals
         # Create an array of KeyValue structs.
-        local key_val_arr : KeyValue* = list
+
         local idx : felt  # A variable to store an index
         %{
-            # Iterate through the array using a hint.
-
-            for i in range(ids.size - 1):
-                # If array element key matches requested key
-                if ids.key_val_arr[i].key == ids.key:
-                    # Store the index of that array element
+            # Populate idx using a hint.
+            ENTRY_SIZE = ids.KeyValue.SIZE
+            KEY_OFFSET = ids.KeyValue.key
+            VALUE_OFFSET = ids.KeyValue.value
+            for i in range(ids.size):
+                addr = ids.list.address_ + ENTRY_SIZE * i + \
+                    KEY_OFFSET
+                if memory[addr] == ids.key:
                     ids.idx = i
                     break
-            if ids.idx == None:
+            else:
                 raise Exception(
                     f'Key {ids.key} was not found in the list.')
         %}
         # Verify that we have the correct key.
-        assert key_val_arr[idx].key = key
+        assert list[idx].key = key
 
         # Verify that the index is in range (0 <= idx <= size - 1).
         assert_nn_le(a=idx, b=size - 1)
 
         # Return the corresponding value.
-        return (value=key_val_arr[idx].value)
+        return (value=list[idx].value)
     end
 
 .. test::
@@ -272,7 +274,7 @@ Then, we check that we got the correct key, and that the index is in range
         \n assert struct_array[0] = KeyValue(key=7, val=1)
         \n assert struct_array[1] = KeyValue(key=4, val=5)
         \n assert struct_array[2] = KeyValue(key=10, val=20)
-        \n assert struct_array[3] = KeyValue(key=18, val=3)
+        \n assert struct_array[3] = KeyValue(key=8, val=3)
         \n let (__fp__, _) = get_fp_and_pc()
         \n let a = get_value_by_key(struct_array, 2, 14)
         \n ret \n end'''
@@ -282,11 +284,8 @@ Array index access
 ******************
 
 The ``get_value_by_key()`` function accepts a pointer to the start of an array. The first memory
-cell for each element in that array can be accessed with an index (e.g., ``key_val_arr[1]`` for
-the second element). Arrays contain homogeneous elements and occupy contiguous memory cells.
-If the size of each element is specified, a memory cell can be calculated from its index.
-The type of the elements within an array is specified with the ``Cast`` operator, as shown in
-the example above where the array is defined as a pointer ``KeyValue`` structs.
+cell for each element in that array can be accessed with an index (e.g., ``list[idx]`` from the
+line ``assert list[idx].key = key`` in the code).
 
 .. _hl_ids:
 
@@ -337,17 +336,16 @@ the way the verifier sees the program is as follows:
             list : KeyValue*, size, key) -> (value):
         alloc_locals
         # Create an array of KeyValue structs.
-        local key_val_arr : KeyValue*
         local idx : felt  # A variable to store an index
 
         # Verify that we have the correct key.
-        assert key_val_arr[idx].key = key
+        assert list[idx].key = key
 
         # Verify that the index is in range (0 <= idx <= size - 1).
         assert_nn_le(a=idx, b=size - 1)
 
         # Return the corresponding value.
-        return (value=key_val_arr[idx].value)
+        return (value=list[idx].value)
     end
 
 One takes an uninitialized number ``idx``
@@ -387,7 +385,7 @@ but in most aspects it's the important one :)
         \n assert struct_array[0] = KeyValue(key=7, val=1)
         \n assert struct_array[1] = KeyValue(key=4, val=5)
         \n assert struct_array[2] = KeyValue(key=10, val=20)
-        \n assert struct_array[3] = KeyValue(key=18, val=3)
+        \n assert struct_array[3] = KeyValue(key=8, val=3)
         \n let (__fp__, _) = get_fp_and_pc()
         \n let a = get_value_by_key(struct_array, 2, 14)
         \n ret \n end'''
