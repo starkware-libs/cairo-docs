@@ -250,13 +250,14 @@ Then, we check that we got the correct key, and that the index is in range
                     f'Key {ids.key} was not found in the list.')
         %}
         # Verify that we have the correct key.
+        let item : KeyValue* = list + KeyValue.SIZE * idx
         assert list[idx].key = key
 
         # Verify that the index is in range (0 <= idx <= size - 1).
         assert_nn_le(a=idx, b=size - 1)
 
         # Return the corresponding value.
-        return (value=list[idx].value)
+        return (value=item.value)
     end
 
 .. test::
@@ -276,7 +277,7 @@ Then, we check that we got the correct key, and that the index is in range
         \n assert struct_array[2] = KeyValue(key=10, val=20)
         \n assert struct_array[3] = KeyValue(key=8, val=3)
         \n let (__fp__, _) = get_fp_and_pc()
-        \n let a = get_value_by_key(struct_array, 2, 14)
+        \n let a = get_value_by_key(struct_array, 4, 10)
         \n ret \n end'''
     compile_cairo(code, PRIME)
 
@@ -339,13 +340,14 @@ the way the verifier sees the program is as follows:
         local idx : felt  # A variable to store an index
 
         # Verify that we have the correct key.
+        let item : KeyValue* = list + KeyValue.SIZE * idx
         assert list[idx].key = key
 
         # Verify that the index is in range (0 <= idx <= size - 1).
         assert_nn_le(a=idx, b=size - 1)
 
         # Return the corresponding value.
-        return (value=list[idx].value)
+        return (value=item.value)
     end
 
 One takes an uninitialized number ``idx``
@@ -387,13 +389,12 @@ but in most aspects it's the important one :)
         \n assert struct_array[2] = KeyValue(key=10, val=20)
         \n assert struct_array[3] = KeyValue(key=8, val=3)
         \n let (__fp__, _) = get_fp_and_pc()
-        \n let a = get_value_by_key(struct_array, 2, 14)
+        \n let a = get_value_by_key(struct_array, 4, 10)
         \n ret \n end'''
 
     program = compile_cairo(code, PRIME, debug_info=True)
     runner = CairoFunctionRunner(program, layout='small')
     rc_builtin = runner.range_check_builtin
-    # runner.run('get_value_by_key')
     runner.run('get_value_by_key', rc_builtin.base, [7, 1, 4, 5, 10, 20, 8, 3], 4, 10)
     range_check_ptr, val = runner.get_return_values(2)
     assert val == 20
