@@ -231,9 +231,7 @@ Then, we check that we got the correct key, and that the index is in range
     func get_value_by_key{range_check_ptr}(
             list : KeyValue*, size, key) -> (value):
         alloc_locals
-        # Create an array of KeyValue structs.
-
-        local idx : felt  # A variable to store an index
+        local idx
         %{
             # Populate idx using a hint.
             ENTRY_SIZE = ids.KeyValue.SIZE
@@ -249,9 +247,10 @@ Then, we check that we got the correct key, and that the index is in range
                 raise Exception(
                     f'Key {ids.key} was not found in the list.')
         %}
+
         # Verify that we have the correct key.
-        let item : KeyValue* = list + KeyValue.SIZE * idx
-        assert list[idx].key = key
+        let item : KeyValue = list[idx]
+        assert item.key = key
 
         # Verify that the index is in range (0 <= idx <= size - 1).
         assert_nn_le(a=idx, b=size - 1)
@@ -336,12 +335,11 @@ the way the verifier sees the program is as follows:
     func get_value_by_key{range_check_ptr}(
             list : KeyValue*, size, key) -> (value):
         alloc_locals
-        # Create an array of KeyValue structs.
-        local idx : felt  # A variable to store an index
+        local idx
 
         # Verify that we have the correct key.
-        let item : KeyValue* = list + KeyValue.SIZE * idx
-        assert list[idx].key = key
+        let item : KeyValue = list[idx]
+        assert item.key = key
 
         # Verify that the index is in range (0 <= idx <= size - 1).
         assert_nn_le(a=idx, b=size - 1)
