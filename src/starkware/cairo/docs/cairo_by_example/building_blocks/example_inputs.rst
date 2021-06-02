@@ -74,7 +74,7 @@ creates the proof and saves it in a compact format in the Fact Registry contract
     --program_input input.json
 
 Once the transaction has been mined, a solidity contract can be deployed to interact with
-the program above. The SpecialNumber contract below stores a number which can be updated
+the program above. The ``SpecialNumber`` contract below stores a number which can be updated
 if a valid proof is provided. The proof must show that the user knew the initial number and
 has provided a different number to store. The proof demonstrates that the Cairo program was not
 modified and that the program was exectuted properly to produce the two outputs.
@@ -122,17 +122,32 @@ modified and that the program was exectuted properly to produce the two outputs.
                 abi.encodePacked(programOutput));
             bytes32 fact = keccak256(
                 abi.encodePacked(cairoProgramHash_, outputHash));
-            require(cairoVerifier_.isValid(fact), "MISSING_CAIRO_PROOF");
+            require(
+                cairoVerifier_.isValid(fact),
+                "MISSING_CAIRO_PROOF");
 
-            // Ensure the output consistency with current system state.
-            require(programOutput.length == 2, "INVALID_PROGRAM_OUTPUT");
-            require(currentNumber_ == programOutput[0], "MISSING_ORIGINAL");
-            require(currentNumber_ != programOutput[1], "NEED_DIFFERENT");
+            // Ensure the output consistency with currentstate.
+            require(
+                programOutput.length == 2,
+                "INVALID_PROGRAM_OUTPUT");
+            require(
+                currentNumber_ == programOutput[0],
+                "MISSING_ORIGINAL_NUMBER");
+            require(
+                currentNumber_ != programOutput[1],
+                "NUMBER_MUST_BE_DIFFERENT");
 
-            // Update the stored number to the one provided by the user.
+            // Update stored number with new number.
             currentNumber_ = programOutput[1];
         }
     }
+
+A user can now check the current number in the ``SpecialNumber`` contract, run the
+``MyProgram.cairo`` contract and using that number and a new number as inputs. After sending
+that program to SHARP for proving, they can call the ``updateNumber()`` function, providing
+the two numbers from the output of ``MyProgram.cairo`` to the function. The contract will then
+call the fact registry contract method ``IsValid()`` and if ``True``, the special number will
+be updated.
 
 .. test::
 
