@@ -257,6 +257,16 @@ Then, we check that we got the correct key, and that the index is in range
         return (value=item.value)
     end
 
+Array index access
+******************
+
+The ``get_value_by_key()`` function accepts a pointer to the start of an array. The first memory
+cell for each element in that array can be accessed with an index (e.g., ``key_val_arr[1]`` for
+the second element). Arrays contain homogeneous elements and occupy contiguous memory cells.
+If the size of each element is specified, a memory cell can be calculated from its index.
+The type of the elements within an array is specified with the ``Cast`` operator, as shown in
+the example above where the array is defined as a pointer ``KeyValue`` structs.
+
 .. _hl_ids:
 
 The ``ids`` variable
