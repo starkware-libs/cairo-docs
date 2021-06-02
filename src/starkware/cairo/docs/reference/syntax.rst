@@ -230,13 +230,17 @@ nested tuple elements as shown below.
 
 .. tested-code:: cairo syntax_tuples
 
-    local tuple_one : (felt, felt, felt) = (7, 9, 13)  # A tuple with three elements.
-    local tuple_two : (felt) = (5,)  # (5) is not a valid tuple.
-    local tuple_three : (felt) = (a=5)  # A named tuple does not require a trailing comma.
-    local tuple_four : (felt, (felt, felt, felt), felt) = (1, tuple_one, 5)  # Tuple contains another tuple.
-    local tuple_five : ((felt, (felt, felt, felt), felt), felt, felt) = (tuple_four, 2, 11)
-    let a = tuple_one[2]  # let a = 13.
-    let b = tuple_five[0][1][2]  # let b = 13.
+    # A tuple with three elements.
+    local tuple0 : (felt, felt, felt) = (7, 9, 13)
+    local tuple1 : (felt) = (5,)  # (5) is not a valid tuple.
+    # A named tuple does not require a trailing comma.
+    local tuple2 : (felt) = (a=5)
+    # Tuple contains another tuple.
+    local tuple3 : (felt, (felt, felt, felt), felt) = (1, tuple0, 5)
+    local tuple4 : ((felt, (felt, felt, felt), felt), felt, felt) = (
+        tuple3, 2, 11)
+    let a = tuple0[2]  # let a = 13.
+    let b = tuple4[0][1][2]  # let b = 13.
 
 .. test::
 
