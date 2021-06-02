@@ -74,12 +74,12 @@ creates the proof and saves it in a compact format in the Fact Registry contract
     --program_input input.json
 
 Once the transaction has been mined, a solidity contract can be deployed to interact with
-the program above. An example contract format in the Ethereum smart contract language Solidity
-might take the following form. This SpecialNumber contract stores a number. The number can
-be updated if the proof is verified. The proof demonstrates that the Cairo program was not
-modified and that the input contained the current number and a new, different number.
+the program above. The SpecialNumber contract below stores a number which can be updated
+if a valid proof is provided. The proof must show that the user knew the initial number and
+has provided a different number to store. The proof demonstrates that the Cairo program was not
+modified and that the program was exectuted properly to produce the two outputs.
 
-.. none
+.. tested-code:: none special_number_solidity
 
     pragma solidity ^0.5.2;
 
