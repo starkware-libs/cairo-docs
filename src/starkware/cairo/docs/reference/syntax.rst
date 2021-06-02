@@ -214,8 +214,8 @@ Where ``A`` is a struct with members ``v`` and ``w`` and ``B`` is a struct with 
 Arrays
 ------
 
-Arrays can be defined as a pointer (``felt*``) to the first element. As an array is populated,
-the elements take up contiguous memory cells.
+Arrays can be defined as a pointer (``felt*``) to the first element in the memory. As an array is
+populated, the elements take up contiguous memory cells.
 
 .. tested-code:: cairo syntax_array
 
@@ -223,7 +223,7 @@ the elements take up contiguous memory cells.
 
     local struct_array = cast(MyStruct, felt*)  # an array of structs
 
-Elements each use the same quantity of memory and may be accessed by a zero based index as follows:
+Each element uses the same quantity of memory and may be accessed by a zero based index as follows:
 
 .. tested-code:: cairo array_index
 
@@ -231,8 +231,8 @@ Elements each use the same quantity of memory and may be accessed by a zero base
 
     let a = struct_array[1].first_member  # (2)
 
-Where: (1) sets the third element in the array to the ``felt`` ``85``, and (2) assigns ``a`` to a
-value in the second struct in the array of structs.
+Where: (1) the third element in the array is set to the ``felt`` ``85``, and (2) ``a`` is assigned
+a value from the second struct in the array of structs.
 
 Functions
 ---------
