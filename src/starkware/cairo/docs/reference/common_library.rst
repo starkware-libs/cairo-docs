@@ -25,7 +25,8 @@ element that has a first field value of at least ``95``.
 
 .. tested-code:: cairo library_search_sorted_lower
 
-    let smallest_pointer = search_sorted_lower(array_ptr=my_array*,
+    let smallest_pointer = search_sorted_lower(
+        array_ptr=my_array*,
         elm_size=3,
         n_elms=17,
         key=95)
@@ -60,7 +61,8 @@ return value is ``1``, otherwise it is ``0``.
 
 .. tested-code:: cairo library_search_sorted
 
-    let (first_pointer, success_val) = search_sorted_lower(array_ptr=my_array*,
+    let (first_pointer, success_val) = search_sorted_lower(
+        array_ptr=my_array*,
         elm_size=3,
         n_elms=17,
         key=95)
