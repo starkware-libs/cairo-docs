@@ -232,20 +232,20 @@ Then, we check that we got the correct key, and that the index is in range
             list : KeyValue*, size, key) -> (value):
         alloc_locals
         # Create an array of KeyValue structs.
-        local key_val_arr = cast(KeyValue, felt*)
+        local key_val_arr : KeyValue*
         local idx : felt  # A variable to store an index
         %{
             # Iterate through the array using a hint.
-            try:
-                for i in range(ids.size):
-                    # If array element key matches requested key
-                    if ids.key_val_arr[i].key == key:
-                        # Store the index of that array element
-                        ids.idx = i
-                        break
-                if ids.idx == None:
-                    raise Exception(
-                        f'Key {ids.key} was not found in the list.')
+
+            for i in range(ids.size - 1):
+                # If array element key matches requested key
+                if ids.key_val_arr[i].key == key:
+                    # Store the index of that array element
+                    ids.idx = i
+                    break
+            if ids.idx == None:
+                raise Exception(
+                    f'Key {ids.key} was not found in the list.')
         %}
         # Verify that we have the correct key.
         assert key_val_arr[idx].key = key
@@ -263,7 +263,17 @@ Then, we check that we got the correct key, and that the index is in range
 
     PRIME = 2**64 + 13
     code = codes['get_value_by_key']
-    code = f'''{code} \n func main(): \n let a = get_value_by_key() \n ret \n end'''
+    code = f'''%builtins range_check
+        \n from starkware.cairo.common.registers import get_fp_and_pc
+        \n {code}
+        \n func main{{range_check_ptr}}():
+        \n alloc_locals
+        \n local struct_array : KeyValue*
+        \n assert struct_array[0] = KeyValue(key=15, val=51)
+        \n assert struct_array[1] = KeyValue(key=14, val=41)
+        \n let (__fp__, _) = get_fp_and_pc()
+        \n let a = get_value_by_key(struct_array, 2, 14)
+        \n ret \n end'''
     compile_cairo(code, PRIME)
 
 Array index access
@@ -324,17 +334,18 @@ the way the verifier sees the program is as follows:
     func get_value_by_key{range_check_ptr}(
             list : KeyValue*, size, key) -> (value):
         alloc_locals
-        local idx
+        # Create an array of KeyValue structs.
+        local key_val_arr : KeyValue*
+        local idx : felt  # A variable to store an index
 
         # Verify that we have the correct key.
-        let item : KeyValue* = list + KeyValue.SIZE * idx
-        assert item.key = key
+        assert key_val_arr[idx].key = key
 
         # Verify that the index is in range (0 <= idx <= size - 1).
         assert_nn_le(a=idx, b=size - 1)
 
         # Return the corresponding value.
-        return (value=item.value)
+        return (value=key_val_arr[idx].value)
     end
 
 One takes an uninitialized number ``idx``
@@ -364,9 +375,21 @@ but in most aspects it's the important one :)
 
     PRIME = 2**64 + 13
 
-    program = compile_cairo(codes['get_value_by_key'], PRIME, debug_info=True)
+    code = codes['get_value_by_key']
+    code = f'''%builtins range_check
+        \n from starkware.cairo.common.registers import get_fp_and_pc
+        \n {code}
+        \n func main{{range_check_ptr}}():
+        \n alloc_locals
+        \n local struct_array : KeyValue*
+        \n assert struct_array[0] = KeyValue(key=15, val=51)
+        \n assert struct_array[1] = KeyValue(key=14, val=41)
+        \n let (__fp__, _) = get_fp_and_pc()
+        \n let a = get_value_by_key(struct_array, 2, 14)
+        \n ret \n end'''
 
-    runner = CairoFunctionRunner(program)
+    program = compile_cairo(code, PRIME, debug_info=True)
+    runner = CairoFunctionRunner(program, layout='small')
     rc_builtin = runner.range_check_builtin
     runner.run('get_value_by_key', rc_builtin.base, [7, 1, 4, 5, 10, 20, 8, 3], 4, 10)
     range_check_ptr, val = runner.get_return_values(2)
