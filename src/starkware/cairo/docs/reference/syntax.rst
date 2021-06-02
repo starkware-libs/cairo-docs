@@ -215,8 +215,8 @@ Arrays
 ------
 
 Arrays can be defined as a pointer (``felt*``) to the first element in the memory. As an array is
-populated, the elements take up contiguous memory cells. The ``alloc()`` function reserves memory
-for non-felt elements in the array.
+populated, the elements take up contiguous memory cells. The ``alloc()`` function is used to
+define a memory segment that can be used to allocate more memory for each new element in the array.
 
 .. tested-code:: cairo syntax_array
 
