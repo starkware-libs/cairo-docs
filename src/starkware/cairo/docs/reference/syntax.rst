@@ -215,13 +215,29 @@ Arrays
 ------
 
 Arrays can be defined as a pointer (``felt*``) to the first element in the memory. As an array is
-populated, the elements take up contiguous memory cells.
+populated, the elements take up contiguous memory cells. The ``alloc()`` function reserves memory
+for non-felt elements in the array.
 
 .. tested-code:: cairo syntax_array
 
-    local felt_array : felt*  # an array of integers
+    from starkware.cairo.common.alloc import alloc
 
-    local struct_array = cast(MyStruct, felt*)  # an array of structs
+    local felt_array : felt*  # an array of integers
+    let (local struct_array : MyStruct*) = alloc()  # An array of structs
+    # Populate the first element with a struct.
+    assert struct_array[0] = MyStruct(first_member=1, second_member=2)
+
+.. test::
+
+    from starkware.cairo.lang.compiler.cairo_compile import compile_cairo
+
+    PRIME = 2**64 + 13
+    code = codes['syntax_array']
+    code = f'''struct MyStruct: \n member first_member : felt
+        \n member second_member : felt \n end
+        \n func main(): \n alloc_locals \n {code} \n ret \n end
+        '''
+    program = compile_cairo(code, PRIME)
 
 Each element uses the same quantity of memory and may be accessed by a zero based index as follows:
 
@@ -231,7 +247,7 @@ Each element uses the same quantity of memory and may be accessed by a zero base
 
     let a = struct_array[1].first_member  # (2)
 
-Where: (1) the third element in the array is set to the ``felt`` ``85``, and (2) ``a`` is assigned
+Where: (1) the third element in the array is set to the ``felt`` ``85``, and (2) ``a`` is bound to
 a value from the second struct in the array of structs.
 
 Functions
