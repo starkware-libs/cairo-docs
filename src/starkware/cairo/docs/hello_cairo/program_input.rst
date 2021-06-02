@@ -262,9 +262,11 @@ Then, we check that we got the correct key, and that the index is in range:
 Array index access
 ******************
 
-The ``get_value_by_key()`` function accepts a pointer to the start of an array. The first memory
-cell for each element in that array can be accessed with an index (e.g., ``list[idx]`` from the
-line ``assert list[idx].key = key`` in the code).
+The ``get_value_by_key()`` function gets a pointer to the beginning of an array.
+To access the element at index ``idx`` (where the index is zero-based),
+one may write ``list[idx]``. This is an expression of type ``KeyValue``,
+which is equivalent to ``[list + KeyValue.SIZE * idx]``.
+Similarly, you can write ``list[idx].key`` for the ``key`` member of that element.
 
 .. _hl_ids:
 
@@ -354,22 +356,7 @@ but in most aspects it's the important one :)
 
     PRIME = 2**64 + 13
 
-    code = codes['get_value_by_key']
-    code = f'''%builtins range_check
-        \n from starkware.cairo.common.registers import get_fp_and_pc
-        \n {code}
-        \n func main{{range_check_ptr}}():
-        \n alloc_locals
-        \n local struct_array : KeyValue*
-        \n assert struct_array[0] = KeyValue(key=7, val=1)
-        \n assert struct_array[1] = KeyValue(key=4, val=5)
-        \n assert struct_array[2] = KeyValue(key=10, val=20)
-        \n assert struct_array[3] = KeyValue(key=8, val=3)
-        \n let (__fp__, _) = get_fp_and_pc()
-        \n let a = get_value_by_key(struct_array, 4, 10)
-        \n ret \n end'''
-
-    program = compile_cairo(code, PRIME, debug_info=True)
+    program = compile_cairo(codes['get_value_by_key'], PRIME, debug_info=True)
     runner = CairoFunctionRunner(program, layout='small')
     rc_builtin = runner.range_check_builtin
     runner.run('get_value_by_key', rc_builtin.base, [7, 1, 4, 5, 10, 20, 8, 3], 4, 10)
