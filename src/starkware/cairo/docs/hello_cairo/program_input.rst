@@ -269,8 +269,10 @@ Then, we check that we got the correct key, and that the index is in range
         \n func main{{range_check_ptr}}():
         \n alloc_locals
         \n local struct_array : KeyValue*
-        \n assert struct_array[0] = KeyValue(key=15, val=51)
-        \n assert struct_array[1] = KeyValue(key=14, val=41)
+        \n assert struct_array[0] = KeyValue(key=7, val=1)
+        \n assert struct_array[1] = KeyValue(key=4, val=5)
+        \n assert struct_array[2] = KeyValue(key=10, val=20)
+        \n assert struct_array[3] = KeyValue(key=18, val=3)
         \n let (__fp__, _) = get_fp_and_pc()
         \n let a = get_value_by_key(struct_array, 2, 14)
         \n ret \n end'''
@@ -382,8 +384,10 @@ but in most aspects it's the important one :)
         \n func main{{range_check_ptr}}():
         \n alloc_locals
         \n local struct_array : KeyValue*
-        \n assert struct_array[0] = KeyValue(key=15, val=51)
-        \n assert struct_array[1] = KeyValue(key=14, val=41)
+        \n assert struct_array[0] = KeyValue(key=7, val=1)
+        \n assert struct_array[1] = KeyValue(key=4, val=5)
+        \n assert struct_array[2] = KeyValue(key=10, val=20)
+        \n assert struct_array[3] = KeyValue(key=18, val=3)
         \n let (__fp__, _) = get_fp_and_pc()
         \n let a = get_value_by_key(struct_array, 2, 14)
         \n ret \n end'''
@@ -391,6 +395,7 @@ but in most aspects it's the important one :)
     program = compile_cairo(code, PRIME, debug_info=True)
     runner = CairoFunctionRunner(program, layout='small')
     rc_builtin = runner.range_check_builtin
+    # runner.run('get_value_by_key')
     runner.run('get_value_by_key', rc_builtin.base, [7, 1, 4, 5, 10, 20, 8, 3], 4, 10)
     range_check_ptr, val = runner.get_return_values(2)
     assert val == 20
