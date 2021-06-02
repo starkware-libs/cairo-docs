@@ -232,14 +232,14 @@ Then, we check that we got the correct key, and that the index is in range
             list : KeyValue*, size, key) -> (value):
         alloc_locals
         # Create an array of KeyValue structs.
-        local key_val_arr : KeyValue*
+        local key_val_arr : KeyValue* = list
         local idx : felt  # A variable to store an index
         %{
             # Iterate through the array using a hint.
 
             for i in range(ids.size - 1):
                 # If array element key matches requested key
-                if ids.key_val_arr[i].key == key:
+                if ids.key_val_arr[i].key == ids.key:
                     # Store the index of that array element
                     ids.idx = i
                     break
