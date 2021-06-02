@@ -219,11 +219,11 @@ Where ``A`` is a struct with members ``v`` and ``w`` and ``B`` is a struct with 
 Tuples
 ------
 
-A tuple is a finite, ordered, unchangeable list of elements. They are represented as a
+A tuple is a finite, ordered, unchangeable list of elements. It is represented as a
 comma-separated list of elements enclosed by parentheses (e.g., ``(3, x)``).
 Their elements may be of any combination of valid :ref:`types <syntax_type>`. A tuple
 that contains only one element must be defined in one of the two following ways: the element is
-a named tuple or with a trailing comma. When a tuple is passed as an argument, the type of each
+a named tuple or has a trailing comma. When a tuple is passed as an argument, the type of each
 element may be specified on a per-element basis (e.g., ``my_tuple : (felt, felt, MyStruct)``).
 Tuple values may be accessed with a zero-based index in brackets ``[index]``, including access to
 nested tuple elements as shown below.
