@@ -170,7 +170,8 @@ any additional paths specified at compile time. See :ref:`import_search_path` fo
 .. tested-code:: cairo syntax_library_imports
 
     %builtins output pedersen
-    from starkware.cairo.common.math import assert_not_zero, assert_not_equal
+    from starkware.cairo.common.math import (
+        assert_not_zero, assert_not_equal)
     from starkware.cairo.common.registers import get_ap
 
 Segments
@@ -178,13 +179,14 @@ Segments
 
 During debugging, the memory that different components occupy may be displayed. Memory is separated
 into different sections called segments. For example, each builtin occupies a different memory
-segment. Segments are designated by the colon ``:`` character and some examples are listed below.
-See :ref:`segments` for more information.
+segment. The memory locations are designated by two numbers, a segment and an offset in the segment.
+In this format, these numbers are separated by a colon ``:`` character.
+Some examples are listed below. See :ref:`segments` for more information.
 
 Memory segments and their interpretation:
 
-* ``0:3``: Memory address 3 within segment 0.
-* ``1:7``: Memory address 7 within segment 1.
-* ``2:12``: Memory address 12 within segment 2.
-* ``3:2``: Memory address 2 within segment 3.
-* ``4:0``: Memory address 0 within segment 4.
+* ``0:3``, memory address 3 within segment 0.
+* ``1:7``, memory address 7 within segment 1.
+* ``2:12``, memory address 12 within segment 2.
+* ``3:2``, memory address 2 within segment 3.
+* ``4:0``, memory address 0 within segment 4.
