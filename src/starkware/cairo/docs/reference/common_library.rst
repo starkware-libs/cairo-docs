@@ -25,11 +25,11 @@ element that has a first field value of at least ``95``.
 
 .. tested-code:: cairo library_search_sorted_lower
 
+    from starkware.cairo.common.find_element import (
+        search_sorted_lower)
+
     let smallest_pointer = search_sorted_lower(
-        array_ptr=my_array*,
-        elm_size=3,
-        n_elms=17,
-        key=95)
+        array_ptr=my_array, elm_size=3, n_elms=17, key=95)
 
 ``search_sorted()`` function
 ****************************
@@ -61,8 +61,7 @@ return value is ``1``, otherwise it is ``0``.
 
 .. tested-code:: cairo library_search_sorted
 
+    from starkware.cairo.common.find_element import search_sorted
+
     let (first_pointer, success_val) = search_sorted_lower(
-        array_ptr=my_array*,
-        elm_size=3,
-        n_elms=17,
-        key=95)
+        array_ptr=my_array, elm_size=3, n_elms=17, key=95)
