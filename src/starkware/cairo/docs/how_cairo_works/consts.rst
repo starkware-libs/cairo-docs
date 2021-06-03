@@ -631,8 +631,8 @@ use a pointer to the beginning of the array. The standard library function ``all
 be used to "dynamically" allocate a new array.
 
 For example, ``let (local struct_array : MyStruct*) = alloc()`` allocates a new memory segment and
-treats it as a pointer to ``MyStruct`` cells according to the value of ``MyStruct.SIZE``.
+treats it as a pointer to ``MyStruct``.
 
 The expression ``struct_array[n]`` is used to access the n-th element of the array,
 where n=0 is the first element. ``struct_array[index]`` is compiled to
-``[struct_array + index * MyStruct.SIZE]``, and it is of type ``MyStruct``.
+``[struct_array + index * MyStruct.SIZE]``, and is of type ``MyStruct``.
