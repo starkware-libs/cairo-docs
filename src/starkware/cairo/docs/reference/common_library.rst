@@ -12,24 +12,27 @@ requires the implicit argument ``range_check_ptr``.
 
 The function requires four explicit arguments:
 
-- ``array_ptr``, a pointer to an array (e.g., ``my_array``).
-- ``elm_size``, the size of each element in the array (e.g., ``3`` memory slots per element).
-- ``n_elms``, the number of elements in the array (e.g., ``17``).
-- ``key``, the value to look for (e.g., the ``felt`` value ``95``).
+-  ``array_ptr``, a pointer to an array (e.g., ``my_array``).
+-  ``elm_size``, the size of each element in the array (e.g., ``3`` memory slots per element).
+-  ``n_elms``, the number of elements in the array (e.g., ``17``).
+-  ``key``, the value to look for (e.g., the ``felt`` value ``95``).
 
 The function returns:
 
-- ``elm_ptr``, the pointer to an element whose value is ``key``, in other words an element that
-  satisfies ``[elm_ptr] = key``.
+-  ``elm_ptr``, the pointer to an element whose first memory cell is ``key``.
+
+   -   For an array of ``felt`` elements, this memory cell is a ``felt``. In this way,
+       ``find_element()`` finds a felt by its value.
+   -   For an array of structs, the first memory cell is the value of the first member. In
+       this way, ``find_element()`` finds a struct by its first member.
 
 In the example below, the element index is ``8``, and that information is provided as a global
 variable that the prover can access. This allows the ``find_element()`` function to be run by
-the prover in constant, "O(1)", time. This means that increasing the length of the array
+the prover in constant time. This means that increasing the length of the array
 does not increase the time to find the element. If the element index is not provided, or is
-incorrect, the prover must check every element in the array, which takes linear, "O(n)", time.
-That is, the use of ``__find_element_index`` can speed up proof generation through nondeterminism,
-and the function otherwise defaults to standard time complexity that normal deterministic
-programs operate in.
+incorrect, the prover must check every element in the array, which takes linear time.
+That is, unless the hint is provided ``__find_element_index`` the function operates in
+linear time.
 
 The function will identify an element whose first field value is equal to ``95``.
 
