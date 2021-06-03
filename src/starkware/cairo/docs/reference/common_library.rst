@@ -1,12 +1,6 @@
 ``find_element`` library
 ------------------------
 
-Import from this library by replacing ``*`` with the function name.
-
-.. tested-code:: cairo library_find_element
-
-    from starkware.cairo.common.find_element import *
-
 ``find_element()`` function
 ***************************
 
@@ -25,28 +19,29 @@ The function requires four explicit arguments:
 
 The function returns:
 
-- ``elm_ptr``, the pointer to an element in the array.
+- ``elm_ptr``, the pointer to an element whose value is ``key``, in other words an element that
+  satisfies ``[elm_ptr] = key``.
 
 In the example below, the element index is ``8``, and that information is provided as a global
 variable that the prover can access. This allows the ``find_element()`` function to be run by
 the prover in constant, "O(1)", time. This means that increasing the length of the array
 does not increase the time to find the element. If the element index is not provided, or is
 incorrect, the prover must check every element in the array, which takes linear, "O(n)", time.
-That is, use of ``__find_element_index`` can speed up proof generation through nondeterminism,
-and otherwise defaults to standard time complexity that normal deterministic programs operate in.
+That is, the use of ``__find_element_index`` can speed up proof generation through nondeterminism,
+and the function otherwise defaults to standard time complexity that normal deterministic
+programs operate in.
 
-The function will identify an element whose first field
-value is equal to ``95``.
+The function will identify an element whose first field value is equal to ``95``.
 
 .. tested-code:: cairo library_find_element
+
+    from starkware.cairo.common.find_element import find_element
 
     # Optional submission of the index
     __find_element_index = 8
 
-    let element_pointer = find_element(array_ptr=my_array*,
-                              elm_size=3,
-                              n_elms=17,
-                              key=95)
+    let element_pointer = find_element(
+        array_ptr=my_array, elm_size=3, n_elms=17, key=95)
 
 Note that if multiple elements in the array have the same value for the first memory cell,
 the function may return the index to any of these elements.
