@@ -11,21 +11,32 @@ Import from this library by replacing ``*`` with the function name.
 ***************************
 
 Returns the pointer to an element in an array whose value matches a specified value. The function
-uses a hint, whereby the Prover arrives at the correct element and then Cairo code verifies that it
+uses a hint, whereby the prover arrives at the correct element and then Cairo code verifies that it
 is correct. The function has the ability to receive the index of that element, which makes the
-operation faster than if the Prover has to manually search for the element. The function
+operation faster than if the prover has to manually search for the element. The function
 requires the implicit argument ``range_check_ptr``.
 
 The function requires four explicit arguments:
 
-- ``array_ptr : felt*``. The pointer to the array (e.g., ``my_array*``).
-- ``elm_size``. The size of each element in the array (e.g., ``3`` memory slots per element).
-- ``n_elms``. The number of elements in the array (e.g., ``17``).
-- ``key``. The first field of the element (e.g., the ``felt`` value ``95``).
+- ``array_ptr``, a pointer to an array (e.g., ``my_array``).
+- ``elm_size``, the size of each element in the array (e.g., ``3`` memory slots per element).
+- ``n_elms``, the number of elements in the array (e.g., ``17``).
+- ``key``, the value to look for (e.g., the ``felt`` value ``95``).
 
-In the below example, the element index is ``8`` and the value is supplied as a global variable that
-the prover can access to find the correct element in constant time. The function will identify an
-element whose first field value is equal to ``95``.
+The function returns:
+
+- ``elm_ptr``, the pointer to an element in the array.
+
+In the example below, the element index is ``8``, and that information is provided as a global
+variable that the prover can access. This allows the ``find_element()`` function to be run by
+the prover in constant, "O(1)", time. This means that increasing the length of the array
+does not increase the time to find the element. If the element index is not provided, or is
+incorrect, the prover must check every element in the array, which takes linear, "O(n)", time.
+That is, use of ``__find_element_index`` can speed up proof generation through nondeterminism,
+and otherwise defaults to standard time complexity that normal deterministic programs operate in.
+
+The function will identify an element whose first field
+value is equal to ``95``.
 
 .. tested-code:: cairo library_find_element
 
@@ -37,5 +48,5 @@ element whose first field value is equal to ``95``.
                               n_elms=17,
                               key=95)
 
-Note that if multiple elements have the same value in as their first field, the function may return
-any one of those elements.
+Note that if multiple elements in the array have the same value for the first memory cell,
+the function may return the index to any of these elements.
