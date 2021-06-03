@@ -1,17 +1,23 @@
 Common Library
 ==============
 
-This page summarizes library functions available within Cairo.
+This page summarizes library functions available in the Cairo common library.
+The common library is written in Cairo can be found here
+`Cairo common library
+<https://github.com/starkware-libs/cairo-lang/tree/master/src/starkware/cairo/common>`_. It
+providesa a level of abstraction for common and useful components that can be imported
+for use in any Cairo program.
 
-The library functions are arranged alphabetically and cover the following topics:
+The libraries available are listed below, organized by topic. The functions
+within each library are outlined under the relevant library heading.
 
+- array
+    - :ref:`common_library_find_element`
 - dictionary
     - :ref:`common_library_dict_access`
     - :ref:`common_library_dict`
     - :ref:`common_library_default_dict`
     - :ref:`common_library_squash_dict`
-- array
-    - :ref:`common_library_find_element`
 - math
     - :ref:`common_library_math`
 - hash
@@ -32,36 +38,33 @@ The library functions are arranged alphabetically and cover the following topics
 
 Where a library function requires an implicit argument, passing the argument is only required if the
 function lacks that argument. Example implicit arguments might be ``range_check_ptr`` or
-``dict_ptr``.
+``dict_ptr``. See :ref:`implicit_arguments` for more information.
 
 .. tested-code:: cairo library_implicits0
 
-    # Implicit argument part of function
-    function{implicit_argument}():
-        # Implicit argument not required again
+    func_with_implicit{range_check_ptr}():
+        # Implicit argument is not required again
         library_function()
 
-.. tested-code:: cairo library_implicits1
-
-    # Implicit argument not part of function
-    function():
-        # Implicit argument required
-        library_function{implicit_argument}()
+    func_without_implicit():
+        # Implicit argument is required
+        library_function{range_check_ptr}()
 
 ``alloc`` library
 -----------------
 
-Import from this library by replacing ``*`` with the function name.
-
-.. tested-code:: cairo library_alloc
-
-    from starkware.cairo.common.alloc import *
-
 ``alloc()`` function
 ********************
 
-Returns a newly allocated memory segment.
+Returns a newly allocated memory segment. This is useful when defining dynamically allocated
+arrays. As more elements are added, more memory can be allocated.
 
 .. tested-code:: cairo alloc_alloc
 
+    from starkware.cairo.common.alloc import alloc
+
+    # Allocate a memory segment.
     let new_slot = alloc()
+
+    # Allocate a memory segment for an array of structs.
+    let (local my_array : MyStruct) = alloc()
