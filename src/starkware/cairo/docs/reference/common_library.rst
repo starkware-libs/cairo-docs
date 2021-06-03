@@ -42,11 +42,11 @@ function lacks that argument. Example implicit arguments might be ``range_check_
 
 .. tested-code:: cairo library_implicits0
 
-    func_with_implicit{range_check_ptr}():
+    func function_with_implicit{range_check_ptr}():
         # Implicit argument is not required again
         library_function()
 
-    func_without_implicit():
+    func function_without_implicit():
         # Implicit argument is required
         library_function{range_check_ptr}()
 
