@@ -342,8 +342,8 @@ but in most aspects it's the important one :)
 
     import re
 
+    from starkware.cairo.common.cairo_function_runner import CairoFunctionRunner
     from starkware.cairo.lang.compiler.cairo_compile import compile_cairo
-    from starkware.cairo.common.test_utils import CairoFunctionRunner
 
     PRIME = 2**64 + 13
 
