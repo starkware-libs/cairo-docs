@@ -19,7 +19,8 @@ The function requires four explicit arguments:
 
 The function returns:
 
--  ``elm_ptr``, the pointer to an element whose first memory cell is ``key``.
+-  ``elm_ptr``, the pointer to an element whose first memory cell is ``key``, or raises an
+   exception if the value (``key``) is not found.
 
    -   For an array of ``felt`` elements, this memory cell is a ``felt``. In this way,
        ``find_element()`` finds a felt by its value.
@@ -29,10 +30,11 @@ The function returns:
 In the example below, the element index is ``8``, and that information is provided as a global
 variable that the prover can access. This allows the ``find_element()`` function to be run by
 the prover in constant time. This means that increasing the length of the array
-does not increase the time to find the element. If the element index is not provided, or is
-incorrect, the prover must check every element in the array, which takes linear time.
-That is, unless the hint is provided ``__find_element_index`` the function operates in
-linear time.
+does not increase the time to find the element. If the element index is not provided, the
+prover must check every element in the array, which takes linear time. That is, unless the
+hint is provided ``__find_element_index`` the function operates in linear time.
+If the element index provided is incorrect and points to a cell that has a value
+different from ``key``, an exception is raised.
 
 The function will identify an element whose first field value is equal to ``95``.
 
