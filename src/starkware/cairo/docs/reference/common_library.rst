@@ -45,10 +45,14 @@ function lacks that argument. Example implicit arguments might be ``range_check_
     func function_with_implicit{range_check_ptr}():
         # Implicit argument is not required again
         library_function()
+        return ()
+    end
 
     func function_without_implicit():
         # Implicit argument is required
         library_function{range_check_ptr}()
+        return ()
+    end
 
 ``alloc`` library
 -----------------
