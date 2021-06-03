@@ -8,33 +8,30 @@ The common library is written in Cairo can be found here
 providesa a level of abstraction for common and useful components that can be imported
 for use in any Cairo program.
 
-The libraries available are listed below, organized by topic. The functions
+The libraries available are listed below, organized alphabetically. The functions
 within each library are outlined under the relevant library heading.
 
-- array
-    - :ref:`common_library_find_element`
-- dictionary
-    - :ref:`common_library_dict_access`
-    - :ref:`common_library_dict`
-    - :ref:`common_library_default_dict`
-    - :ref:`common_library_squash_dict`
-- math
-    - :ref:`common_library_math`
-- hash
-    - :ref:`common_library_hash`
-    - :ref:`common_library_hash_chain`
-    - :ref:`common_library_hash_state`
-    - :ref:`common_library_small_merkle_tree`
-    - :ref:`common_library_merkle_update`
-    - :ref:`common_library_merkle_multi_update`
-- signature
-    - :ref:`common_library_signature`
-- memory and state
-    - :ref:`common_library_alloc`
-    - :ref:`common_library_registers`
-    - :ref:`common_library_cairo_builtins`
-    - :ref:`common_library_memcpy`
-    - :ref:`common_library_serialize`
+-   :ref:`common_library_alloc`.
+-   :ref:`common_library_cairo_builtins`
+-   :ref:`common_library_dict`
+-   :ref:`common_library_dict_access`
+-   :ref:`common_library_default_dict`
+-   :ref:`common_library_find_element`
+-   :ref:`common_library_hash`
+-   :ref:`common_library_hash_chain`
+-   :ref:`common_library_hash_state`
+-   :ref:`common_library_invoke`
+-   :ref:`common_library_math`
+-   :ref:`common_library_memcpy`
+-   :ref:`common_library_merkle_multi_update`
+-   :ref:`common_library_merkle_update`
+-   :ref:`common_library_registers`
+-   :ref:`common_library_serialize`
+-   :ref:`common_library_set`
+-   :ref:`common_library_signature`
+-   :ref:`common_library_small_merkle_tree`
+-   :ref:`common_library_squash_dict`
+-   :ref:`common_library_uint256`
 
 Where a library function requires an implicit argument, passing the argument is only required if the
 function lacks that argument. Example implicit arguments might be ``range_check_ptr`` or
