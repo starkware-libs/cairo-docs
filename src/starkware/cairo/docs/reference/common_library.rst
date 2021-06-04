@@ -3,6 +3,9 @@
 ----------------
 
 This section contains functions from the ``default_dict`` library.
+As Cairo programs have immutable memory, dictionaries are implemented in a special way,
+where a dictionary updates involve the creation of intermediate dictionary states.
+More information on how this works can be found in :ref:`dicts_in_cairo`.
 
 ``default_dict_new()``
 **********************
