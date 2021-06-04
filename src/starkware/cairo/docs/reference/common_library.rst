@@ -1,20 +1,18 @@
 
-``default_dict`` library
-------------------------
+``default_dict``
+----------------
 
-Import from this library by replacing ``*`` with the function name.
+This section contains functions from the ``default_dict`` library.
 
-.. tested-code:: cairo library_default_dict
-
-    from starkware.cairo.common.default_dict import *
-
-``default_dict_new()`` function
-*******************************
+``default_dict_new()``
+**********************
 
 Returns a new dictionary, with a default value. Must be followed by a call to
 ``default_dict_finalize()``.
 
 .. tested-code:: cairo library_default_dict_new
+
+    from starkware.cairo.common.default_dict import default_dict_new
 
     let new_dictionary = default_dict_new(value: felt)
 
@@ -24,5 +22,7 @@ Returns a new dictionary, with a default value. Must be followed by a call to
 Returns the squashed version of a ``default_dict_new`` dictionary.
 
 .. tested-code:: cairo library_default_dict_finalize
+
+    from starkware.cairo.common.default_dict import default_dict_finalize
 
     let finalized_dictionary = default_dict_finalize(new_dictionary)
