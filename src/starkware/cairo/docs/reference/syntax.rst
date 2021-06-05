@@ -180,7 +180,7 @@ Segments
 During debugging, the memory that different components occupy may be displayed. Memory is separated
 into different sections called segments. For example, each builtin occupies a different memory
 segment. The memory locations are designated by two numbers, a segment and an offset in the segment.
-In this format, these numbers are separated by a colon ``:`` character.
+In this format, these numbers are separated by a colon ``:``.
 Some examples are listed below. See :ref:`segments` for more information.
 
 Memory segments and their interpretation:
