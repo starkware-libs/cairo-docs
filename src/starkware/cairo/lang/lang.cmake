@@ -31,8 +31,9 @@ python_venv(cairo_lang_package_venv
     cairo_hash_program_lib
     cairo_run_lib
     cairo_script_lib
-    sharp_client_lib
     sharp_client_config_lib
+    sharp_client_lib
+    starknet_script_lib
 )
 
 python_lib(cairo_instances_lib

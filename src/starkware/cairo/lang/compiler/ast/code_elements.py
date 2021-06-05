@@ -509,6 +509,18 @@ class BuiltinsDirective(Directive):
 
 
 @dataclasses.dataclass
+class LangDirective(Directive):
+    name: str
+    location: Optional[Location] = LocationField
+
+    def format(self):
+        return f'%lang {self.name}'
+
+    def get_children(self) -> Sequence[Optional[AstNode]]:
+        return []
+
+
+@dataclasses.dataclass
 class CodeElementDirective(CodeElement):
     directive: Directive
     location: Optional[Location] = LocationField

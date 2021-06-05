@@ -88,7 +88,7 @@ def main():
                 py_exe_deps=args.py_exe_deps,
                 licenses=licenses,
                 cmake_dir=args.cmake_dir,
-                prefix=args.prefix
+                prefix=args.prefix,
             ),
             fp,
             sort_keys=True,
