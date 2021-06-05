@@ -51,5 +51,5 @@ def reorganize_code(code: str) -> str:
     )
 
     code = cairo_file.format()
-    code = isort.SortImports(file_contents=code).output
+    code = isort.SortImports(file_contents=code, lines_after_imports=1).output
     return code
