@@ -1408,6 +1408,13 @@ file:?:?: Directives must appear at the top of the file.
 %builtins ab cd ef
 ^****************^
 """)
+    verify_exception("""
+%lang abc
+""", """
+file:?:?: Unsupported %lang directive. Are you using the correct compiler?
+%lang abc
+^*******^
+""")
 
 
 def test_conditionals():
