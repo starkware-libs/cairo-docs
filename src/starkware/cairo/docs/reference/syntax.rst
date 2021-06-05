@@ -170,13 +170,14 @@ any additional paths specified at compile time. See :ref:`import_search_path` fo
 .. tested-code:: cairo syntax_library_imports
 
     %builtins output pedersen
-    from starkware.cairo.common.math import assert_not_zero, assert_not_equal
+    from starkware.cairo.common.math import (
+        assert_not_zero, assert_not_equal)
     from starkware.cairo.common.registers import get_ap
 
 Jumps
 -----
 
-Cairo programs can include special branch points in code called jumps. The Prover may choose to
+Cairo programs can include special branch points in code called jumps. The prover may choose to
 follow the jump instructions to arrive at a valid proof more readily, but they do not necessarily
 have to do so. Jumps contain a ``jump`` expression and a ``destination``. Jumps may be conditional.
 A conditional jump contains all of the following: A ``jump`` expression, a ``case_not_met`` name,
@@ -187,13 +188,13 @@ a ``case_met_name`` and an ``if`` statement.
     func MyFunction() -> (result):
         let a = 2
 
-        jump case_true if a == 3
+        jmp case_true if a != 0
 
         case_false:
-        return(result = 0)
+        return (result=0)
 
         case_true:
-        return(result = 1)
+        return (result=1)
     end
 
 See :ref:`non_deterministic_jumps` for more information.
