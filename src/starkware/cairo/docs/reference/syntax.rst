@@ -437,11 +437,11 @@ more information.
 
 .. tested-code:: cairo syntax_literals
 
-    let a = %[ 2 * 2 %] # a = 2 x 2 = 4
+    let a = %[ 2 * 2 %]  # a = 2 x 2 = 4
 
-    let b = %[ pow(8,2) %] # b = 8 to the power 3 = 512
+    let b = %[ pow(8,2) %]  # b = 8 to the power 3 = 512
 
-    let c = %[ len([6,7,8,9] %] # c = length of the list [6,7,8,9] = 4
+    let c = %[ len([6,7,8,9]) %]  # c = length of the list [6,7,8,9] = 4
 
 Library imports
 ---------------
@@ -506,4 +506,3 @@ Consider the function ``foo()`` that returns two values.
     let (local a, _) = foo()
 
 For more information see :ref:`return_values_unpacking`.
-
