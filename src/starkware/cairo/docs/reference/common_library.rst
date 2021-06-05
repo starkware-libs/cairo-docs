@@ -37,7 +37,7 @@ within each library are outlined under the relevant library heading.
 **A note about implicit arguments**. Some descriptions state that the library function
 "requires the implicit argument ``<argument>``". Where this is the case the decision to
 pass the the argument follows the the rule: If the parent function has already
-passed ``<argument>`` in curly brackets, the curly brackets can be omitted. Example implicit
+passed ``<argument>`` in braces, the braces can be omitted. Example implicit
 arguments might be ``range_check_ptr`` or ``dict_ptr``. See :ref:`implicit_arguments`
 for more information.
 
