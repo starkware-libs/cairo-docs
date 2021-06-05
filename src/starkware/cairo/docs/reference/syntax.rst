@@ -280,16 +280,16 @@ any additional paths specified at compile time. See :ref:`import_search_path` fo
 Builtins
 --------
 
-Builtins are included at the top of the cairo code file. They are invoked with the  ``%builtins``
-directive followed by the name of the builtin. Additional builtins can be included on the same
+Builtins are included at the top of the Cairo code file. They are invoked with the  ``%builtins``
+directive, followed by the name of the builtin. Additional builtins can be included on the same
 line with each new builtin separated by a space.
 
 .. tested-code:: cairo syntax_builtins
 
     %builtins output pedersen
 
-    function main():
-        return()
+    func main():
+        return ()
     end
 
-For more informaiton about builtins see :ref:`builtins`
+For more information about builtins see :ref:`builtins`
