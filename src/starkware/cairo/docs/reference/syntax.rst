@@ -281,28 +281,18 @@ Hints
 -----
 
 Python code can be invoked with the ``%{`` ``%}`` block, where all contained code is available
-to be modified during proof construction. See :ref:`hints` for more information.
+to be modified during proof construction. The ``ids`` expression allows a hint to access
+and modify Cairo expressions that preceed the hints block.
+See :ref:`hints` for more information.
 
 .. tested-code:: cairo syntax_hints
 
-    %{ a = 2 * 2 %}
+    local a : felt
+    %{ ids.a = 2 * 2 %}  # a = 4.
 
-Hints may span multiple lines.
-
-.. tested-code:: cairo syntax_hints_multiline
-
+    let d = 7
     %{
-        a = 2 * 2
-        b = a * 5
-    %}
-
-The ``ids`` expression allows a hint to access and modify Cairo expressions that preceed the hints
-block.
-
-.. tested-code:: cairo syntax_hints_multiline
-
-    let a = 4
-    %{
-        b = 100 * ids.a # cairo expression a is accessed.
-        ids.a = b # cairo expression a is modified.
+        b = 2 * 2
+        c = b * 5  # Hints may span multiple lines.
+        e = ids.d  # e = 7
     %}
