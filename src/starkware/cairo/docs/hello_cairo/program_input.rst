@@ -263,8 +263,8 @@ Array index access
 ******************
 
 The ``get_value_by_key()`` function gets a pointer to the beginning of an array,
-the array size, and a key value. It iterates over the array to look for this key
-and then returns the value correlated with this key.
+the array size, and a key value. It looks for this key
+and then returns the value that corresponds to this key.
 To access the element at index ``idx`` (where the index is zero-based),
 one may write ``list[idx]``. This is an expression of type ``KeyValue``,
 which is equivalent to ``[list + KeyValue.SIZE * idx]``.
