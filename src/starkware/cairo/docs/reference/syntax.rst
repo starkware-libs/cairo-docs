@@ -176,9 +176,9 @@ any additional paths specified at compile time. See :ref:`import_search_path` fo
 Implicit arguments
 ------------------
 
-Implicit arguments are specified as part of the function expression and are designated by
+Implicit arguments are specified as part of the function expression, and are designated by
 braces ``{}``. Expressions within the braces are passed between functions. If no implicit
-arguments are required the braces can be omitted.
+arguments are required, the braces can be omitted.
 
 .. tested-code:: cairo syntax_implicit_arguments
 
