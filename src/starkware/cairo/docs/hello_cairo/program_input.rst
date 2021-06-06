@@ -216,7 +216,7 @@ Take a moment to think how to write such a function.
 The naive solution takes ``O(N)`` Cairo instructions. It turns out that using non-determinism
 it can be done with a constant number of instructions!
 All we have to do is find the right index using a hint.
-Then, we check that we got the correct key, and that the index is in range
+Then, we check that we got the correct key, and that the index is in range:
 
 .. tested-code:: cairo get_value_by_key
 
@@ -249,7 +249,7 @@ Then, we check that we got the correct key, and that the index is in range
         %}
 
         # Verify that we have the correct key.
-        let item : KeyValue* = list + KeyValue.SIZE * idx
+        let item : KeyValue = list[idx]
         assert item.key = key
 
         # Verify that the index is in range (0 <= idx <= size - 1).
@@ -258,6 +258,17 @@ Then, we check that we got the correct key, and that the index is in range
         # Return the corresponding value.
         return (value=item.value)
     end
+
+Array index access
+******************
+
+The ``get_value_by_key()`` function gets a pointer to the beginning of an array,
+the array size, and a key value. It looks for this key
+and then returns the value that corresponds to this key.
+To access the element at index ``idx`` (where the index is zero-based),
+one may write ``list[idx]``. This is an expression of type ``KeyValue``,
+which is equivalent to ``[list + KeyValue.SIZE * idx]``.
+Similarly, you can write ``list[idx].key`` for the ``key`` member of that element.
 
 .. _hl_ids:
 
@@ -310,7 +321,7 @@ the way the verifier sees the program is as follows:
         local idx
 
         # Verify that we have the correct key.
-        let item : KeyValue* = list + KeyValue.SIZE * idx
+        let item : KeyValue = list[idx]
         assert item.key = key
 
         # Verify that the index is in range (0 <= idx <= size - 1).
@@ -348,8 +359,7 @@ but in most aspects it's the important one :)
     PRIME = 2**64 + 13
 
     program = compile_cairo(codes['get_value_by_key'], PRIME, debug_info=True)
-
-    runner = CairoFunctionRunner(program)
+    runner = CairoFunctionRunner(program, layout='small')
     rc_builtin = runner.range_check_builtin
     runner.run('get_value_by_key', rc_builtin.base, [7, 1, 4, 5, 10, 20, 8, 3], 4, 10)
     range_check_ptr, val = runner.get_return_values(2)
