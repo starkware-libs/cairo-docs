@@ -264,11 +264,12 @@ same return value.
 Library imports
 ---------------
 
-Library functions are imported at the top of the file or right below the ``%builtins`` directive if
-it is used. The statement consists of the module name and the functions to ``import`` from it.
-Multiple functions from the same library can be separated by commas. Functions from different libraries
-are imported on different lines. Cairo searches each module in a default directory path and in
-any additional paths specified at compile time. See :ref:`import_search_path` for more information.
+Library functions are imported at the top of the file or right below the ``%builtins``
+directive if it is used. The statement consists of the module name and the functions to
+``import`` from it. Multiple functions from the same library can be separated by commas.
+Functions from different libraries are imported on different lines. Cairo searches each
+module in a default directory path and in any additional paths specified at compile time.
+See :ref:`import_search_path` for more information.
 
 .. tested-code:: cairo syntax_library_imports
 
@@ -280,16 +281,14 @@ any additional paths specified at compile time. See :ref:`import_search_path` fo
 Segments
 --------
 
-During debugging, the memory that different components occupy may be displayed. Memory is separated
-into different sections called segments. For example, each builtin occupies a different memory
-segment. The memory locations are designated by two numbers, a segment and an offset in the segment.
+When running the Cairo code, the memory is separated into different sections called segments.
+For example, each builtin occupies a different memory segment. The memory locations are
+designated by two numbers, a segment index and an offset in the segment.
 In this format, these numbers are separated by a colon ``:``.
-Some examples are listed below. See :ref:`segments` for more information.
-
-Memory segments and their interpretation:
+When the program ends, the segments are glued and each value of the form ``*:*``
+is replaced with a number. See :ref:`segments` for more information. Some examples
+of segments and their interpretation are listed below:
 
 * ``0:3``, memory address 3 within segment 0.
 * ``1:7``, memory address 7 within segment 1.
 * ``2:12``, memory address 12 within segment 2.
-* ``3:2``, memory address 2 within segment 3.
-* ``4:0``, memory address 0 within segment 4.
