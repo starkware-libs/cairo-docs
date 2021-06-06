@@ -38,7 +38,7 @@ The function returns one argument:
 ***************
 
 Returns the value of a dictionary read. Must be passed an implicit argument, ``dict_ptr``,
- of type ``DictAccess*``, representing a pointer to the dictionary from which to be read.
+of type ``DictAccess*``, representing a pointer to the dictionary from which to be read.
 
 The function accepts one explicit argument:
 
@@ -48,11 +48,26 @@ The function returns:
 
 -   ``value``, a ``felt`` representing the value assigned to ``key``.
 
+The example below shows how a value can be read from a newly created dictionary.
+
 .. tested-code:: cairo library_dict_read
 
-    from starkware.cairo.common.dict import dict_read
+    from starkware.cairo.common.dict import dict_new, dict_read
+    from starkware.cairo.common.dict_access import DictAccess
 
-    let result = dict_read{dict_ptr : DictAccess*}(dict_key)
+    alloc_locals
+    %{
+        initial_dict = {
+        5: 8,
+        12: 35,
+        33: 198
+        }
+    %}
+    let (local a_dict : DictAccess*) = dict_new()
+    # The pointer, dict_a, is passed as an implicit argument.
+    # The value associated with key=12 is read.
+    # Equivalent to: local val = 35
+    let (local val : felt) = dict_read{dict_ptr=a_dict}(12)
 
 ``dict_write()``
 ****************
@@ -68,8 +83,21 @@ The function accepts two explicit arguments:
 
 .. tested-code:: cairo library_dict_write
 
-    from starkware.cairo.common.dict import dict_write
+    from starkware.cairo.common.dict import (
+        dict_new, dict_read, dict_write)
+    from starkware.cairo.common.dict_access import DictAccess
 
-    dict_write{dict_ptr : DictAccess*}(
-        key : felt,
-        new_value : felt)
+    alloc_locals
+    %{
+        initial_dict = {
+        5: 8,
+        12: 35,
+        33: 198
+        }
+    %}
+    let (local a_dict : DictAccess*) = dict_new()
+    # The pointer, dict_a, is passed as an implicit argument.
+    # The value associated with key=12 is set to 34.
+    dict_write{dict_ptr=a_dict}(12, 34)
+    # Equivalent to: local val = 34 (35 was overwritten)
+    let (local val : felt) = dict_read{dict_ptr=a_dict}(12)
