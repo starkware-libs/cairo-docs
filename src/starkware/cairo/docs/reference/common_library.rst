@@ -8,6 +8,9 @@ This section contains functions from the ``dict`` library.
 **************
 
 Returns a new dictionary. The function does not require any arguments.
+A new dictionary can be populated upon declaration by using a hint with with the
+expression ``initial_dict``. The dictionary associated with that expression
+will be found by the ``__dict_manager`` and assigned to the new dictionary.
 
 The function returns one argument:
 
@@ -16,8 +19,20 @@ The function returns one argument:
 .. tested-code:: cairo library_dict_new
 
     from starkware.cairo.common.dict import dict_new
+    from starkware.cairo.common.dict_access import DictAccess
 
     let new_dict = new_dict()
+
+    alloc_locals
+    %{
+        initial_dict = {
+            5: 8,
+            12: 35,
+            33: 198
+        }
+    %}
+    # Equivalent to: my_dict = {5: 8, 12: 35, 33: 198}
+    let (local my_dict : DictAccess*) = dict_new()
 
 ``dict_read()``
 ***************
