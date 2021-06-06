@@ -1,8 +1,10 @@
-``find_element`` library
-------------------------
+``find_element``
+----------------
 
-``find_element()`` function
-***************************
+This section contains functions from the ``find_element`` library.
+
+``find_element()``
+******************
 
 Returns the pointer to an element in an array whose value matches a specified value. The function
 uses a hint, whereby the prover arrives at the correct element and then Cairo code verifies that it
