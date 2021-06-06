@@ -507,10 +507,8 @@ all of the dict entries to the squashed dict, including entries that haven't cha
 
 Note that we write ``{state=state}`` explicitly when we call ``process_votes``. This is
 required since the compiler does not allow implicit bindings where the bound variable
-is not an implicit argument of the calling function.
-
-..  TODO(lior, 06/02/2021): Add a reference to "How Cairo Works" with an explanation of the
-    last part.
+is not an implicit argument of the calling function. See more information
+:ref:`here <calling_with_implicit_arguments>`.
 
 One new feature we used here is the ``cast`` keyword.
 The ``cast`` keyword in ``let output = cast(output_ptr, BatchOutput*)``
