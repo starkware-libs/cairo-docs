@@ -205,7 +205,7 @@ Compile and run using:
         assert output.strip() == expected_output
 
 
-Taking advantage of non-determinism
+Taking advantage of nondeterminism
 -----------------------------------
 
 Say that you have a list of N pairs ``(key, value)`` and you want a function ``get_value_by_key``
@@ -213,7 +213,7 @@ that returns the ``value`` that's associated with a certain ``key``.
 You may assume that the keys are distinct.
 Take a moment to think how to write such a function.
 
-The naive solution takes ``O(N)`` Cairo instructions. It turns out that using non-determinism
+The naive solution takes ``O(N)`` Cairo instructions. It turns out that using nondeterminism
 it can be done with a constant number of instructions!
 All we have to do is find the right index using a hint.
 Then, we check that we got the correct key, and that the index is in range:
@@ -294,7 +294,7 @@ Then we have a hint that looks for the entry with the requested key
 and assigns the index to ``idx``.
 The hint itself does take O(N) operations, but this is not part of the Cairo code --
 remember, a hint is just the instructions for the prover on how to resolve
-non-determinism. In practice, the operations of a hint are much cheaper (and in most cases
+nondeterminism. In practice, the operations of a hint are much cheaper (and in most cases
 negligible) with respect to Cairo instructions.
 
 The next thing is a Cairo statement verifying that we got the correct key.
@@ -332,7 +332,7 @@ the way the verifier sees the program is as follows:
     end
 
 One takes an uninitialized number ``idx``
-(we will use the terms "guess" and "non-deterministic" interchangeably with "uninitialized")
+(we will use the terms "guess" and "nondeterministic" interchangeably with "uninitialized")
 which they know nothing about,
 then they check that this index corresponds to the key and within range.
 Without either of these checks, it is clear that the prover will be able to cheat --

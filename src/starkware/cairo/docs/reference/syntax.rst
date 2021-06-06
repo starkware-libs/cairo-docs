@@ -85,7 +85,7 @@ You can define a constant value as follows:
 
 .. tested-code:: cairo syntax_consts
 
-   const CONSTANT_NAME = const_value
+    const CONSTANT_NAME = const_value
 
 ``const_value`` must be an expression that evaluates to an integer (field element) at compile time.
 For example: ``5`` or ``4 + 2 * VAL`` where ``VAL`` is another constant.
@@ -174,10 +174,10 @@ You can define a struct as follows:
 
 .. tested-code:: cairo structs
 
-   struct MyStruct:
-       member first_member : felt
-       member second_member : MyStruct*
-   end
+    struct MyStruct:
+        member first_member : felt
+        member second_member : MyStruct*
+    end
 
 Each member is defined using the syntax ``member <member_name> : <member_type>``.
 
@@ -219,11 +219,11 @@ You can define a function as follows:
 
 .. tested-code:: cairo syntax_function
 
-   func func_name{implicit_arg1 : felt, implicit_arg2 : felt*}(
-           arg1 : felt, arg2 : MyStruct*) -> (
-           ret1 : felt, fet2 : felt):
-       # Function body.
-   end
+    func func_name{implicit_arg1 : felt, implicit_arg2 : felt*}(
+            arg1 : felt, arg2 : MyStruct*) -> (
+            ret1 : felt, fet2 : felt):
+        # Function body.
+    end
 
 The implicit argument part ``{implicit_arg1 : felt, implicit_arg2 : felt*}``
 and the return value ``(ret1 : felt, fet2 : felt)`` are optional.
@@ -237,7 +237,7 @@ A function must end with a ``return`` statement, which takes the following form:
 
 .. tested-code:: cairo syntax_function_return
 
-   return (ret1=val1, ret2=val2)
+    return (ret1=val1, ret2=val2)
 
 
 Call statement
@@ -247,10 +247,10 @@ You can call a function in the following ways:
 
 .. tested-code:: cairo syntax_function_call
 
-   foo(x=1, y=2)  # (1)
-   let x = foo(x=1, y=2)  # (2)
-   let (ret1, ret2) = foo(x=1, y=2)  # (3)
-   return foo(x=1, y=2)  # (4)
+    foo(x=1, y=2)  # (1)
+    let x = foo(x=1, y=2)  # (2)
+    let (ret1, ret2) = foo(x=1, y=2)  # (3)
+    return foo(x=1, y=2)  # (4)
 
 Option (1) can be used when there is no return value or it should be ignored.
 
