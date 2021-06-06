@@ -12,43 +12,50 @@ More information on how this works can be found in :ref:`dicts_in_cairo`.
 
 Returns a new dictionary, with a default value. Must be followed by a call to
 ``default_dict_finalize()``. Default dictionaries are useful where access to
-create dictionaries where a certain key does not yet exist. Rather than raise
-and exception, the key will be set to ``default_value``.
+create dictionaries where all keys have the same value (``default_value``).
+The dictionary can be initialised using a hint with the special ``initial_dict``
+expression declaring a dictionary.
 
 The function requires one explicit argument:
 
--   ``default_value``, a ``felt`` that will be set as the value if
-    the key does not yet exist.
+-   ``default_value``, a ``felt`` that will be set for all keys.
 
 The function returns:
 
 -   ``res``, a pointer to a ``DictAccess`` struct.
 
-In the code below, an empty default dictionary is made and finalized. Then a key which
-does not exist is updated. This triggers the value to be set to the default value for
-that new key.
+In the code below, an empty default dictionary is made and finalized.
+The values provided in the hint are replaced by the default value.
+
 
 .. tested-code:: cairo library_default_dict_new
 
+    %builtins range_check
     from starkware.cairo.common.default_dict import default_dict_new
-    from starkware.cairo.common.default_dict import default_dict_finalize
-    from starkware.cairo.common.dict import dict_write
+    from starkware.cairo.common.default_dict import (
+        default_dict_finalize)
+    from starkware.cairo.common.dict import dict_write, dict_read
 
-    # Create a new default dict with no starting values.
-    let (local new_dictionary) = default_dict_new(7)
-    # Finalize dict.
-    let local (_, new_dictionary) = default_dict_finalize(
-        new_dictionary, new_dictionary, 7)
+    func main{range_check_ptr}():
+        alloc_locals
+        # Hint to initialise the dictionary
+        %{
+            initial_dict = {
+            17: 35,
+            57: 9
+            }
+        %}
 
-    # Update dict. Key 35 does not exist, default will be used.
-    # Adds the key=35, val=7 to the dict. 3 is not used.
-    dict_update(new_dictionary, 35, 0, 3)
-    # Finalize dictionary again.
-    let local (_, new_dictionary)  = default_dict_finalize(
-        new_dictionary, new_dictionary, 7)
+        # Create a new default dict. Values are overriden by "7".
+        # Initial dictionary: {17: 7, 57: 7}.
+        let (local my_dict) = default_dict_new(7)
+        # Dictionary must be now finalized
+        # See default_dict_finalize() for missing function.
+        return ()
+    end
 
-``default_dict_finalize()`` function
-************************************
+``default_dict_finalize()``
+***************************
 
 Returns the squashed version of a default dictionary. The function is
 used to remove the intermediate dictionary states. All updates to the dictionary
@@ -67,8 +74,15 @@ The function returns:
 -   ``squashed_dict_start``, a pointer to the initial state of the dictionary.
 -   ``squashed_dict_end``, a pointer to the final state of the dictionary.
 
+The code below is the missing code from the example in ``default_dict_new``.
+The value of ``val`` is trusted because is after the function that finalizes
+the dictionary.
+
 .. tested-code:: cairo library_default_dict_finalize
 
-    from starkware.cairo.common.default_dict import default_dict_finalize
-
-    let (local original, updated) = default_dict_finalize(new_dictionary)
+    # Code that creates the default dict here.
+    # Finalize dict below, ensuring that the values are all "7".
+    let (local old, my_dict_final) = default_dict_finalize(
+        my_dict, my_dict, 7)
+    # Equivalent to: let val = 7.
+    let (local val : felt) = dict_read{dict_ptr=my_dict_final}(57)
