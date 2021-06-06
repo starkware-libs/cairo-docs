@@ -7,7 +7,11 @@ This section contains functions from the ``dict`` library.
 ``dict_new()``
 **************
 
-Returns a new dictionary.
+Returns a new dictionary. The function does not require any arguments.
+
+The function returns one argument:
+
+-   ``res``, a pointer to a ``DictAccess`` element.
 
 .. tested-code:: cairo library_dict_new
 
@@ -18,8 +22,16 @@ Returns a new dictionary.
 ``dict_read()``
 ***************
 
-Returns the value of a dictionary read. Must be passed an implicit argument pointing to the most
-recent version of the dictionary.
+Returns the value of a dictionary read. Must be passed an implicit argument, ``dict_ptr``,
+ of type ``DictAccess*``, representing a pointer to the dictionary from which to be read.
+
+The function accepts one explicit argument:
+
+-   ``key``, a ``felt`` representing the key of a key-value pair.
+
+The function returns:
+
+-   ``value``, a ``felt`` representing the value assigned to ``key``.
 
 .. tested-code:: cairo library_dict_read
 
@@ -30,8 +42,14 @@ recent version of the dictionary.
 ``dict_write()``
 ****************
 
-Writes a value to the dictionary, overriding the existing value. Must be passed an implicit argument
-pointing to the most recent version of the dictionary. No values are returned.
+Writes a value to the dictionary, overriding the existing value. Must be passed an
+implicit argument, ``dict_ptr``, of type ``DictAccess*``, representing a pointer
+to the dictionary in which to write. No values are returned.
+
+The function accepts two explicit arguments:
+
+-   ``key``, a ``felt`` representing the key of a key-value pair.
+-   ``new_value``, a ``felt`` that will overwrite the existing value of a key-value pair.
 
 .. tested-code:: cairo library_dict_write
 
