@@ -1,5 +1,5 @@
-``search_sorted_lower()`` function
-**********************************
+``search_sorted_lower()``
+*************************
 
 Returns the pointer to the first element in the array whose first field is at least ``key``.
 The array elements must be sorted by first field in ascending order. For an array containing
@@ -31,8 +31,8 @@ element that has a first field value of at least ``95``.
     let smallest_pointer = search_sorted_lower(
         array_ptr=my_array, elm_size=3, n_elms=17, key=95)
 
-``search_sorted()`` function
-****************************
+``search_sorted()``
+*******************
 
 Returns both the pointer to the first element in the array whose first field is exactly ``key`` and
 a value reflecting the success of the search. The array elements must be sorted by first field in
