@@ -1,6 +1,6 @@
 
-``dict_update()`` function
-**************************
+``dict_update()``
+*****************
 
 Updates the value of a particular key in a dictionary. The old value must be provided and
 passed an implicit argument, ``DictAccess*``, a pointer to the most recent dictionary access.
@@ -15,8 +15,8 @@ No values are returned.
         prev_value : felt,
         new_value : felt)
 
-``dict_squash()`` function
-**************************
+``dict_squash()``
+*****************
 
 Returns a dictionary that represents the the final state of an altered dictionary.
 A dictionary that has been updated and that has had all intermediate steps removed.
@@ -31,8 +31,8 @@ The squashed dictionary contains one value per key. The function requires
         dict_accesses_start : DictAccess*
         dict_accesses_end : DictAccess*)
 
-``dict_access`` library
------------------------
+``dict_access``
+---------------
 
 This section contains a struct from the ``dict_access`` library.
 
