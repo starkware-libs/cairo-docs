@@ -72,6 +72,7 @@ python_lib(cairo_compile_lib
     cairo_version_lib
     starkware_expression_string_lib
     starkware_python_utils_lib
+    starkware_utils_lib
     pip_marshmallow_dataclass
     pip_marshmallow_enum
     pip_marshmallow_oneofschema

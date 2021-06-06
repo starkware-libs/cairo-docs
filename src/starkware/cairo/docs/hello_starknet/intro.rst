@@ -60,14 +60,17 @@ Unlike a Cairo program, which is stateless, StarkNet contracts have a state,
 called "the contract's storage".
 Transactions invoked on such contracts may modify this state, in a way
 defined by the contract.
+
+.. _storage_var:
+
 The ``@storage_var`` decorator declares a variable which will be kept as part of this storage.
-In our case, this is variable consists of a single ``felt``, called ``balance``.
+In our case, this variable consists of a single ``felt``, called ``balance``.
 To use this variable, we will use the ``balance.read()`` and ``balance.write()`` functions
 which are automatically created by the ``@storage_var`` decorator.
 
 StarkNet contracts have no ``main()`` function. Instead, each function may be
 annotated as an external function (using the ``@external`` decorator).
-External function may be called by the users of StarkNet.
+External functions may be called by the users of StarkNet.
 Currently, StarkNet has no authentication mechanism, so any user can invoke any external
 function. If you want to restrict it, or have some authentication,
 you can use the ``ecdsa`` builtin to verify a user's signature
@@ -77,6 +80,8 @@ In our case, the contract has two external functions: ``increase_balance`` reads
 the current value of balance from the storage, adds the given amount to it
 and writes the new value back to storage.
 ``get_balance`` simply reads the balance and returns its value.
+
+.. _view_decorator:
 
 The ``@view`` decorator is identical to the ``@external`` decorator.
 The only difference is that the method is *annotated* as a method that only queries the state
@@ -96,6 +101,30 @@ Consider the two implicit arguments: ``storage_ptr`` and ``pedersen_ptr``:
     it allows the code to talk with the contract's storage.
     This is also an implicit argument of ``read()`` and ``write()``
     (this time, for more obvious reasons).
+
+Programming without hints
+*************************
+
+If you are familiar with programming in Cairo,
+you are probably familiar with :ref:`hints <hints>`.
+Unfortunately (or fortunately, depending on your personal opinion), using hints
+in StarkNet is not possible. This is due to the fact that
+the contract's author, the user invoking the function and the operator running it are
+likely to be different entities:
+
+1.  The operator cannot run arbitrary python code due to security concerns.
+2.  The user won't be able to verify that the operator ran the hint the contract author supplied.
+3.  It is not possible to prove that nondeterministic code *failed*, since you should
+    either prove you executed the hint or prove that for any hint the code would've failed.
+
+For efficiency, hints are still used by the standard library functions, through a mechanism
+of whitelisting (a function is whitelisted by an operator if it agrees to run it,
+when it knows that it can run its hints successfully. It doesn't have to do with the question
+of the soundness of the library function, which should be verified separately).
+This means that not all the Cairo library functions can be used when writing
+a StarkNet contract. See
+`here <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/starknet/security/starknet_common.cairo>`_
+for a list of the whitelisted library functions.
 
 Compile the contract
 --------------------
@@ -158,18 +187,21 @@ pass ``--network=alpha`` or set the ``STARKNET_NETWORK`` environment variable as
 
     export STARKNET_NETWORK=alpha
 
+**Important note**: The alpha release is an experimental release. Newer versions may
+require a reset of the network's state (resulting in the removal of the deployed contracts).
+
 Run the following command to deploy your contract on the StarkNet testnet:
 
 .. tested-code:: bash starknet_deploy
 
-    starknet deploy --program contract_compiled.json --abi contract_abi.json
+    starknet deploy --contract contract_compiled.json
 
 The output should look like:
 
 .. tested-code:: none starknet_deploy_output
 
     Deploy transaction was sent.
-    Contract address: 0x39564c4f6d9f45a963a6dc8cf32737f0d51a08e446304626173fd838bd70e1c.
+    Contract address: 0x039564c4f6d9f45a963a6dc8cf32737f0d51a08e446304626173fd838bd70e1c.
     Transaction ID: 0.
 
 You can see here the address of your new contract. You'll need this address to interact with
@@ -194,7 +226,7 @@ The result should look like:
 .. tested-code:: none starknet_invoke_output
 
     Invoke transaction was sent.
-    Contract address: 0x39564c4f6d9f45a963a6dc8cf32737f0d51a08e446304626173fd838bd70e1c.
+    Contract address: 0x039564c4f6d9f45a963a6dc8cf32737f0d51a08e446304626173fd838bd70e1c.
     Transaction ID: 1.
 
 The following command allows you to query the transaction status based on the transaction ID
@@ -204,6 +236,15 @@ that you got (here you'll have to replace ``TRANSACTION_ID`` with the transactio
 .. tested-code:: bash starknet_tx_status
 
     starknet tx_status --id=TRANSACTION_ID
+
+The result should look like:
+
+.. tested-code:: none starknet_tx_status_output
+
+    {
+        "block_id": 1,
+        "tx_status": "PENDING"
+    }
 
 The possible statuses are:
 
@@ -237,6 +278,6 @@ The result should be:
     1234
 
 Note that to see the up-to-date balance you should wait until the ``increase_balance``
-transaction status is at least ``RECEIVED`` (that is, ``RECEIVED`` or ``ACCEPTED_ONCHAIN``).
+transaction status is at least ``PENDING`` (that is, ``PENDING`` or ``ACCEPTED_ONCHAIN``).
 Otherwise, you'll see the balance before the execution of the ``increase_balance`` transaction
 (that is, 0).

@@ -14,7 +14,7 @@ class SetField(mfields.List):
         if value is None:
             return None
         res = super()._serialize(value, attr, obj, **kwargs)
-        return sorted(res, key=lambda x: x['name'])
+        return sorted(res, key=lambda x: (x['name'], x['expr']))
 
     def _deserialize(self, *args, **kwargs):
         return set(super()._deserialize(*args, **kwargs))
@@ -59,7 +59,7 @@ class HintsWhitelistDict(mfields.Field):
         return [
             HintsWhitelistEntry(
                 hint_lines.split('\n'), allowed_expressions=allowed_expressions).serialize()
-            for hint_lines, allowed_expressions in value.items()]
+            for hint_lines, allowed_expressions in sorted(value.items())]
 
     def _deserialize(self, value, attr, data, **kwargs) -> Dict[str, Set[NamedExpression]]:
         entries = [HintsWhitelistEntry.Schema().load(entry) for entry in value]
