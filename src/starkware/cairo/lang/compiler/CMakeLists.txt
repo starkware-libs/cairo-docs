@@ -10,6 +10,7 @@ python_lib(cairo_compile_lib
     ast/cairo_types.py
     ast/code_elements.py
     ast/expr.py
+    ast/expr_func_call.py
     ast/formatting_utils.py
     ast/instructions.py
     ast/module.py
@@ -43,11 +44,14 @@ python_lib(cairo_compile_lib
     parser_transformer.py
     parser.py
     preprocessor/compound_expressions.py
+    preprocessor/default_pass_manager.py
     preprocessor/dependency_graph.py
     preprocessor/flow.py
     preprocessor/identifier_aware_visitor.py
     preprocessor/identifier_collector.py
     preprocessor/local_variables.py
+    preprocessor/pass_manager.py
+    preprocessor/preprocess_codes.py
     preprocessor/preprocessor_error.py
     preprocessor/preprocessor_utils.py
     preprocessor/preprocessor.py
@@ -56,10 +60,12 @@ python_lib(cairo_compile_lib
     preprocessor/unique_labels.py
     program.py
     references.py
+    resolve_search_result.py
     scoped_name.py
     substitute_identifiers.py
     type_casts.py
     type_system_visitor.py
+    type_system.py
 
     LIBS
     cairo_constants_lib
@@ -92,6 +98,7 @@ python_exe(cairo_format
 python_lib(cairo_compile_test_utils_lib
     PREFIX starkware/cairo/lang/compiler
     FILES
+    ast/ast_objects_test_utils.py
     preprocessor/preprocessor_test_utils.py
     test_utils.py
 
@@ -110,6 +117,7 @@ full_python_test(cairo_compile_test
     ast_objects_test.py
     ast/formatting_utils_test.py
     cairo_compile_test.py
+    conftest.py
     encode_test.py
     error_handling_test.py
     expression_evaluator_test.py
@@ -124,10 +132,13 @@ full_python_test(cairo_compile_test
     module_reader_test.py
     offset_reference_test.py
     parser_errors_test.py
+    parser_test_utils.py
     parser_test.py
     preprocessor/compound_expressions_test.py
+    preprocessor/conftest.py
     preprocessor/dependency_graph_test.py
     preprocessor/flow_test.py
+    preprocessor/identifier_aware_visitor_test.py
     preprocessor/identifier_collector_test.py
     preprocessor/local_variables_test.py
     preprocessor/preprocessor_test.py
@@ -135,6 +146,7 @@ full_python_test(cairo_compile_test
     preprocessor/struct_collector_test.py
     preprocessor/unique_labels_test.py
     references_test.py
+    resolve_search_result_test.py
     scoped_name_test.py
     type_casts_test.py
     type_system_visitor_test.py
@@ -142,5 +154,6 @@ full_python_test(cairo_compile_test
     LIBS
     cairo_compile_lib
     cairo_compile_test_utils_lib
+    starkware_python_utils_lib
     pip_pytest
 )

@@ -94,17 +94,13 @@ Segments appear again in the memory output:
     Addr  Value
     -----------
     ⋮
-    0:0   1226245742482522112
-    0:1   4
-    0:2   74168662805676031
-    0:3   0
-    0:4   5191102247248822272
-    0:5   5189976364521848832
-    0:6   12
-    0:7   4612389708016484351
-    0:8   5198983563776458752
-    0:9   1
-    0:10  2345108766317314046
+    0:0   5191102247248822272
+    0:1   5189976364521848832
+    0:2   12
+    0:3   4612389708016484351
+    0:4   5198983563776458752
+    0:5   1
+    0:6   2345108766317314046
     ⋮
     1:0   2:0
     1:1   3:0
@@ -119,7 +115,7 @@ Segments appear again in the memory output:
       12
 
     Number of steps: 5 (originally, 5)
-    Used memory cells: 18
+    Used memory cells: 14
     Register values after execution:
     pc = 4:0
     ap = 1:6
@@ -148,10 +144,10 @@ after relocation:
 
     Segment relocation table:
     0     1
-    1     12
-    2     18
-    3     19
-    4     19
+    1     8
+    2     14
+    3     15
+    4     15
 
 Segments ``3-4`` are the empty segments used for the return values of ``fp`` an ``pc``.
 Observe that each segment's beginning is mapped to the sum of the lengths of the previous
