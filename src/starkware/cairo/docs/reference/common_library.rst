@@ -63,11 +63,11 @@ The example below shows how a value can be read from a newly created dictionary.
         33: 198
         }
     %}
-    let (local a_dict : DictAccess*) = dict_new()
+    let (local my_dict : DictAccess*) = dict_new()
     # The pointer, dict_a, is passed as an implicit argument.
     # The value associated with key=12 is read.
     # Equivalent to: local val = 35
-    let (local val : felt) = dict_read{dict_ptr=a_dict}(12)
+    let (local val : felt) = dict_read{dict_ptr=my_dict}(12)
 
 ``dict_write()``
 ****************
@@ -95,9 +95,9 @@ The function accepts two explicit arguments:
         33: 198
         }
     %}
-    let (local a_dict : DictAccess*) = dict_new()
+    let (local my_dict : DictAccess*) = dict_new()
     # The pointer, dict_a, is passed as an implicit argument.
     # The value associated with key=12 is set to 34.
-    dict_write{dict_ptr=a_dict}(12, 34)
+    dict_write{dict_ptr=my_dict}(12, 34)
     # Equivalent to: local val = 34 (35 was overwritten)
-    let (local val : felt) = dict_read{dict_ptr=a_dict}(12)
+    let (local val : felt) = dict_read{dict_ptr=my_dict}(12)
