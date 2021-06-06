@@ -116,6 +116,7 @@ def test_file_format():
     before = """
 
 ap+=[ fp ]
+%lang starknet
 [ap + -1] = [fp]  *  3
  const x=y  +  f(a=g(
                       z) ,# test
@@ -144,6 +145,7 @@ label2:
 [fp] = [fp] * [fp]"""
     after = """\
 ap += [fp]
+%lang starknet
 [ap + (-1)] = [fp] * 3
 const x = y + f(a=g(
         z),  # test

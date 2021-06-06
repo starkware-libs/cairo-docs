@@ -256,42 +256,43 @@ main function):
     func main():
         alloc_locals
 
-        local loc0 : Location
-        assert loc0.row = 0
-        assert loc0.col = 2
-        local loc1 : Location
-        assert loc1.row = 1
-        assert loc1.col = 2
-        local loc2 : Location
-        assert loc2.row = 1
-        assert loc2.col = 3
-        local loc3 : Location
-        assert loc3.row = 2
-        assert loc3.col = 3
-        local loc4 : Location
-        assert loc4.row = 3
-        assert loc4.col = 3
+        local loc_tuple : (Location, Location, Location, Location, Location) = (
+            Location(row=0, col=2),
+            Location(row=1, col=2),
+            Location(row=1, col=3),
+            Location(row=2, col=3),
+            Location(row=3, col=3),
+            )
 
         # Get the value of the frame pointer register (fp) so that
-        # we can use the address of loc0.
+        # we can use the address of loc_tuple.
         let (__fp__, _) = get_fp_and_pc()
-        # Since the variables are next to each other we can use the
-        # address of loc0 as a pointer to the 5 locations.
-        verify_location_list(loc_list=&loc0, n_steps=4)
+        # Since the tuple elements are next to each other we can use the
+        # address of loc_tuple as a pointer to the 5 locations.
+        verify_location_list(
+            loc_list=cast(&loc_tuple, Location*), n_steps=4)
         return ()
     end
 
-In the beginning of the function we allocate 5 locations, using typed local variables.
-Cairo looks for the constant ``Location.SIZE`` to find how much cells are
+This function uses a tuple to define and store the list of ``Location`` elements. Tuples are
+ordered, finite lists that can contain any combination of valid types, for example, five
+``Location`` structs. Each element may be accessed with a zero-based index (e.g., ``loc_tuple[2]``
+is the third element. See :ref:`tuples`).
+
+At the beginning of the function we allocate 5 locations, using a typed local variable.
+Cairo looks for the constant ``Location.SIZE`` to find how many cells are
 required for each of the variables, and then allocates them in the order of definition.
-Each ``Location`` instance is assigned some coordinates (according to the example above).
+Since ``loc_tuple`` is a tuple of 5 locations, Cairo allocates ``5 * Location.SIZE`` memory
+cells. Each ``Location`` instance is assigned some coordinates (according to the example above).
 
 Since ``verify_location_list`` requires a pointer to a list of locations,
-we pass ``&loc0``, which represents the address in memory of ``loc0``, and is of type
-``Location*``.
+we pass ``&loc_tuple``, which represents the address in memory of ``loc_tuple``.  Since the type
+of ``&loc_tuple`` is a pointer to a tuple rather than ``Location*``, we need the cast operation
+to instruct the compiler to treat this address as ``Location*``. See :ref:`casting` for
+more information.
 
-For technical reasons, when Cairo needs to retrieve the address of a local variable (``&loc0``),
-it needs to be told the value of the frame pointer register, ``fp``
+For technical reasons, when Cairo needs to retrieve the address of a local variable
+(``&loc_tuple``), it needs to be told the value of the frame pointer register, ``fp``
 (see :ref:`fp_register`).
 This can be done by the statement ``let (__fp__, _) = get_fp_and_pc()``
 which calls the library function ``get_fp_and_pc()`` to retrieve ``fp``.
@@ -308,7 +309,7 @@ Exercise
 Play with the values of the location coordinates and make sure the program fails
 if they represent illegal values.
 
-For example, try to change ``loc0.row`` from 0 to 10.
+For example, try to change ``loc_tuple[0].row`` from 0 to 10.
 You should see that the assert in ``verify_valid_location`` fails.
 Or you can change this value to 1, which will make the first transition
 illegal (the empty tile cannot stay in the same place).
