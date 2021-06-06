@@ -310,7 +310,7 @@ different pointers and pointer types.
         return ()
     end
 
-For more information about builtins see :ref:`builtins`. and the ``cairo_builtins``
+For more information about builtins see :ref:`builtins`, and the ``cairo_builtins``
 section in the common library.
 
 ..  TODO (perama 6 June).
