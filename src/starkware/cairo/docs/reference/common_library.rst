@@ -17,33 +17,52 @@ The struct has the following members:
 -   ``y``, a ``felt``.
 -   ``result``, a ``felt`` representing the hash of ``x`` and ``y``.
 
+In the example below, ``foo()`` accepts two numbers and returns their Pedersen
+hash ``hash(a, b)``.
+
 .. tested-code:: cairo library_builtins_hashbuiltin
 
     from starkware.cairo.common.cairo_builtins import HashBuiltin
     from starkware.cairo.common.hash import hash2
 
-    func foo{hash_ptr : HashBuiltin*}() -> (hash):
-        # The hash_ptr is a pointer to a HashBuiltin struct.
+    func foo{hash_ptr : HashBuiltin*}(
+            a : felt, b : felt) -> (hash):
+        # hash_ptr is a pointer to a HashBuiltin struct.
         # It is passed implicitly to hash2().
-        let (my_hash) = hash2(5,13)
+        let (my_hash) = hash2(a, b)
         return (hash=my_hash)
     end
 
 ``SignatureBuiltin``
 ********************
 
-Returns a representation of a ``SignatureBuiltin`` struct, specifying the signature builtin memory
-structure.
+Returns a representation of a ``SignatureBuiltin`` struct, specifying the signature
+builtin memory structure. This struct is used by functions from the common library to represent
+the elements to be hashed. For example, the ``verify_ecdsa_signature()`` function accepts an
+implicit argument of type ``SignatureBulitin*``, which is used internally to enable
+signatures to be tracked within a Cairo program.
 
--   ``pub_key``, .
--   ``message``, .
+-   ``pub_key``, a ``felt`` representing an ECDSA public key.
+-   ``message``, a ``felt`` representing a message signed by the ``pub_Key``.
 
 .. tested-code:: cairo library_builtins_signaturebuiltin
 
-    from starkware.cairo.common.cairo_builtins import SignatureBuiltin
+    from starkware.cairo.common.cairo_builtins import (
+        SignatureBuiltin)
+    from starkware.cairo.common.signature import (
+        verify_ecdsa_signature)
 
-    alloc_locals
-    local new_signature : SignatureBuiltin
+    func foo{ecdsa_ptr : SignatureBuiltin*}(
+            msg, pubkey, r, s):
+        # ecdsa_ptr is a pointer to a SignatureBuiltin struct.
+        # It is passed implicitly to the function below.
+        verify_ecdsa_signature(
+            message=msg,
+            public_key=vote_info_ptr.pub_key,
+            signature_r=vote_info_ptr.r,
+            signature_s=vote_info_ptr.s)
+        return ()
+    end
 
 ``CheckpointsBuiltin``
 **********************
