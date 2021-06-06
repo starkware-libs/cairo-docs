@@ -2,6 +2,8 @@
 ------------------
 
 This section contains builtin structs from the ``cairo_builtins`` library.
+The structs are defined
+`here <https://github.com/starkware-libs/cairo-lang/tree/master/src/starkware/cairo/common>`_.
 
 ``HashBuiltin``
 ***************
