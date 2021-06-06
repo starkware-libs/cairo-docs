@@ -50,15 +50,17 @@ that new key.
 ``default_dict_finalize()`` function
 ************************************
 
-Returns the squashed version of a ``default_dict_new`` dictionary. The function is
-used to remove the intermediate dictionary states. That is, if a dictionary has
-been populated with new elements and had values changed, this function
+Returns the squashed version of a default dictionary. The function is
+used to remove the intermediate dictionary states. All updates to the dictionary
+are sequentially applied and a new dictionary is returned with the final values.
+The value of ``default_value`` in the original call to ``default_dict_new()`` is
+checked ensure it matches that supplied in this function call.
 
 The function requires three explicit arguments:
 
 -   ``dict_accesses_start``, a pointer ``DictAccess*``, to the initial value of the dictionary.
 -   ``dict_accesses_end``, a pointer ``DictAccess*``, to the latest value of the dictionary.
--   ``default_value``, the default value specified whe this dictionary was created.
+-   ``default_value``, the default value specified when this dictionary was created.
 
 The function returns:
 
