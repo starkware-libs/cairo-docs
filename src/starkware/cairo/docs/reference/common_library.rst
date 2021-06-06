@@ -68,14 +68,19 @@ signatures to be tracked within a Cairo program.
 **********************
 
 Returns a representation of a ``CheckpointsBuiltin`` struct, specifying
-the checkpoint builtin memory structure.
+the checkpoint builtin memory structure. This struct is used where a checkpoint
+is required. For example, a function, ``foo()`` may require access to the
+``checkpoints_ptr`` which would have the type ``CheckpointsBuiltin*``.
 
--   ``required_pc``, .
--   ``required_fp``, .
+-   ``required_pc``, a ``felt`` representing ``pc``.
+-   ``required_fp``, a ``felt`` representing ``fp``.
 
 .. tested-code:: cairo library_builtins_checkpointsbuiltin
 
-    from starkware.cairo.common.cairo_builtins import CheckpointsBuiltin
+    from starkware.cairo.common.cairo_builtins import (
+        CheckpointsBuiltin)
 
-    alloc_locals
-    local new_checkpoint : CheckpointsBuiltin
+    func foo{checkpoints_ptr : CheckpointsBuiltin*}():
+        # Code requiring a checkpoint here.
+        return ()
+    end
