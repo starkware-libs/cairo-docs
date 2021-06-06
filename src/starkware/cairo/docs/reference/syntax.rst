@@ -282,14 +282,37 @@ Builtins
 
 Builtins are included at the top of the Cairo code file. They are invoked with the  ``%builtins``
 directive, followed by the name of the builtin. Additional builtins can be included on the same
-line with each new builtin separated by a space.
+line with each new builtin separated by a space. A builtin is utilised with an expression that
+points to the builtin. The builtins, and their respective pointer expressions and
+pointer types are are listed below:
+
+-   ``ecdsa``, a builtin with pointer ``ecdsa_ptr`` and pointer type ``SignatureBuiltin*``
+    (a pointer to a struct defined in the ``cairo_builtins`` common library).
+-   ``output``, a builtin with pointer ``output_ptr`` and pointer type ``felt*``.
+-   ``pedersen``, a builtin with pointer ``pedersen_ptr`` and pointer type ``HashBuiltin*``
+     (a pointer to a struct defined in the ``cairo_builtins`` common library).
+-   ``range_check``, a builtin with pointer ``range_check_ptr`` and no required pointer type.
+
+Below is a function, ``foo()`` which accepts all four builtins, illustrating their
+different pointers and pointer types.
 
 .. tested-code:: cairo syntax_builtins
 
-    %builtins output pedersen
+    %builtins ecdsa output pedersen range_check
+    from starkware.cairo.common.cairo_builtins import (
+        HashBuiltin, SignatureBuiltin)
 
-    func main():
+    func foo{
+            ecdsa_ptr : SignatureBuiltin*,
+            pedersen_ptr : HashBuiltin*, output_ptr : felt*,
+            range_check_ptr}():
+        # Code body here.
         return ()
     end
 
-For more information about builtins see :ref:`builtins`
+For more information about builtins see :ref:`builtins`. and the ``cairo_builtins``
+section in the common library.
+
+..  TODO (perama 6 June).
+    Add link to common library once merged.
+    (:ref:`common_library_cairo_builtins` )
