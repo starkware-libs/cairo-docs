@@ -46,6 +46,8 @@ The punctuation marks used in Cairo are described below:
 *   ``_`` (underscore, underline). A placeholder to handle values that are not used, such as an
     unused function return value.
 
+.. _syntax_type:
+
 Type system
 -----------
 
@@ -53,6 +55,7 @@ Cairo have the following types:
 
 * ``felt`` -- a field element (see :ref:`field_elements`).
 * ``MyStruct`` where ``MyStruct`` is a :ref:`struct <syntax_structs>` name.
+* A tuple -- For example ``(a, b)`` where ``a`` and ``b`` are types (see :ref:`syntax_tuples`).
 * ``T*`` where ``T`` is any type -- a pointer to type ``T``. For example: ``MyStruct*`` or
   ``felt**``.
 
@@ -211,6 +214,42 @@ Members must be declared in order of appearance. Struct constructors may be nest
 Where ``A`` is a struct with members ``v`` and ``w`` and ``B`` is a struct with members ``x`` and
 ``y``.
 
+.. _syntax_tuples:
+
+Tuples
+------
+
+A tuple is a finite, ordered, unchangeable list of elements. It is represented as a
+comma-separated list of elements enclosed by parentheses (e.g., ``(3, x)``).
+Their elements may be of any combination of valid :ref:`types <syntax_type>`. A tuple
+that contains only one element must be defined in one of the two following ways: the element is
+a named tuple or has a trailing comma. When a tuple is passed as an argument, the type of each
+element may be specified on a per-element basis (e.g., ``my_tuple : (felt, felt, MyStruct)``).
+Tuple values may be accessed with a zero-based index in brackets ``[index]``, including access to
+nested tuple elements as shown below.
+
+.. tested-code:: cairo syntax_tuples
+
+    # A tuple with three elements.
+    local tuple0 : (felt, felt, felt) = (7, 9, 13)
+    local tuple1 : (felt) = (5,)  # (5) is not a valid tuple.
+    # A named tuple does not require a trailing comma.
+    local tuple2 : (felt) = (a=5)
+    # Tuple contains another tuple.
+    local tuple3 : (felt, (felt, felt, felt), felt) = (1, tuple0, 5)
+    local tuple4 : ((felt, (felt, felt, felt), felt), felt, felt) = (
+        tuple3, 2, 11)
+    let a = tuple0[2]  # let a = 13.
+    let b = tuple4[0][1][2]  # let b = 13.
+
+.. test::
+
+    from starkware.cairo.lang.compiler.cairo_compile import compile_cairo
+
+    PRIME = 2**64 + 13
+    code = codes['syntax_tuples']
+    code = f'func main():\n alloc_locals \n {code}\n ret \n end'
+    compile_cairo(code, PRIME)
 
 Functions
 ---------
