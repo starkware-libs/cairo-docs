@@ -253,6 +253,8 @@ You may omit the type and write (the Cairo compiler will deduce the type from th
     compile_cairo(codes['typed_references0'] + '\n' + codes['typed_references1'], PRIME)
     compile_cairo(codes['typed_references0'] + '\n' + codes['typed_references2'], PRIME)
 
+.. _casting:
+
 Casting
 -------
 
@@ -618,3 +620,19 @@ first accesses index 2 of ``MyTuple``. This value is accessed at index 4, and so
     programs = [compiled_program(i) for i in range(2)]
     # Verify that the compiled programs are identical.
     assert programs[0].data == programs[1].data
+
+.. _arrays:
+
+Arrays
+------
+
+In order to represent an array (an ordered collection of homogeneous elements) in Cairo, one may
+use a pointer to the beginning of the array. The standard library function ``alloc()`` may
+be used to "dynamically" allocate a new array.
+
+For example, ``let (local struct_array : MyStruct*) = alloc()`` allocates a new memory segment and
+treats it as a pointer to ``MyStruct``.
+
+The expression ``struct_array[n]`` is used to access the n-th element of the array,
+where n=0 is the first element. ``struct_array[index]`` is compiled to
+``[struct_array + index * MyStruct.SIZE]``, and is of type ``MyStruct``.

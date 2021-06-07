@@ -6,6 +6,7 @@ import pytest
 from starkware.cairo.lang.compiler.ast.ast_objects_test_utils import remove_parentheses
 from starkware.cairo.lang.compiler.ast.cairo_types import (
     CairoType, TypeFelt, TypePointer, TypeStruct, TypeTuple)
+from starkware.cairo.lang.compiler.ast_objects_test import remove_parentheses
 from starkware.cairo.lang.compiler.identifier_definition import MemberDefinition, StructDefinition
 from starkware.cairo.lang.compiler.identifier_manager import IdentifierManager
 from starkware.cairo.lang.compiler.parser import parse_expr
@@ -102,30 +103,57 @@ def test_type_subscript_op():
         identifiers=identifiers) == (
         remove_parentheses(parse_expr('[fp + (2 * ap + 3) * 7]')), t)
 
+    # Test subscript operator for tuples.
+    simplify_type_system_test('(cast(fp, felt**), fp, cast(fp, T*))[2]', 'fp', t_star)
+    simplify_type_system_test('(cast(fp, felt**), fp, cast(fp, T*))[0]', 'fp', felt_star_star)
+    simplify_type_system_test('(cast(fp, felt**), ap, cast(fp, T*))[3*4 - 11]', 'ap', TypeFelt())
+    simplify_type_system_test('[cast(ap, (felt, felt)*)][0]', '[ap + 0]', TypeFelt())
+    simplify_type_system_test(
+        '[cast(ap, (T*, T, felt, T*, felt*)*)][3]', '[ap + 9]', t_star, identifiers=identifiers)
+
     # Test failures.
 
+    verify_exception('(fp, fp, fp)[cast(ap, felt*)]', """
+file:?:?: Cannot apply subscript-operator with offset of non-felt type 'felt*'.
+(fp, fp, fp)[cast(ap, felt*)]
+             ^*************^
+""")
+
+    verify_exception('(fp, fp, fp)[[ap]]', """
+file:?:?: Subscript-operator for tuples supports only constant offsets, found 'ExprDeref'.
+(fp, fp, fp)[[ap]]
+             ^**^
+""")
+
+    # The simplifier in TypeSystemVisitor cannot access PRIME, so PyConsts are unsimplified.
+    verify_exception('(fp, fp, fp)[%[1%]]', """
+file:?:?: Subscript-operator for tuples supports only constant offsets, found 'ExprPyConst'.
+(fp, fp, fp)[%[1%]]
+             ^***^
+""")
+
+    verify_exception('(fp, fp, fp)[3]', """
+file:?:?: Tuple index 3 is out of range [0, 3).
+(fp, fp, fp)[3]
+^*************^
+""")
+
+    verify_exception('[cast(fp, (T*, T, felt)*)][-1]', """
+file:?:?: Tuple index -1 is out of range [0, 3).
+[cast(fp, (T*, T, felt)*)][-1]
+^****************************^
+""")
+
     verify_exception('cast(fp, felt)[0]', """
-file:?:?: Cannot apply subscript-operator to non-pointer type 'felt'.
+file:?:?: Cannot apply subscript-operator to non-pointer, non-tuple type 'felt'.
 cast(fp, felt)[0]
 ^***************^
 """)
 
     verify_exception('[cast(fp, T*)][0]', """
-file:?:?: Cannot apply subscript-operator to non-pointer type 'T'.
+file:?:?: Cannot apply subscript-operator to non-pointer, non-tuple type 'T'.
 [cast(fp, T*)][0]
 ^***************^
-""")
-
-    verify_exception('(fp, ap)[0]', """
-file:?:?: Subscript-operator for tuples is not supported yet.
-(fp, ap)[0]
-^*********^
-""")
-
-    verify_exception('cast(fp, felt*)[cast(ap, felt*)]', """
-file:?:?: Cannot apply subscript-operator with offset of non-felt type 'felt*'.
-cast(fp, felt*)[cast(ap, felt*)]
-                ^*************^
 """)
 
     verify_exception('cast(fp, felt*)[[cast(ap, T*)]]', """

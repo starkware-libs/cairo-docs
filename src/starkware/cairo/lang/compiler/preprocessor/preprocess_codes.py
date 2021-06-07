@@ -12,8 +12,6 @@ def preprocess_codes(
     """
     Preprocesses a list of Cairo files and returns a PreprocessedProgram instance.
     codes is a list of pairs (code_string, file_name).
-    read_module is a callback that gets a module name ('a.b.c') and returns a pair
-    (file content, file name)
     """
     context = PassManagerContext(
         codes=list(codes),

@@ -458,13 +458,16 @@ class CairoRunner:
         print()
 
     def print_info(self, relocated: bool):
+        print(self.get_info(relocated=relocated))
+
+    def get_info(self, relocated: bool) -> str:
         pc, ap, fp = self.vm.run_context.pc, self.vm.run_context.ap, self.vm.run_context.fp
         if relocated:
             pc = self.relocate_value(pc)
             ap = self.relocate_value(ap)
             fp = self.relocate_value(fp)
 
-        print(f"""\
+        info = f"""\
 Number of steps: {len(self.vm.trace)} {
     '' if self.original_steps is None else f'(originally, {self.original_steps})'}
 Used memory cells: {len(self.vm_memory)}
@@ -472,20 +475,28 @@ Register values after execution:
 pc = {pc}
 ap = {ap}
 fp = {fp}
-    """)
+    """
         if self.segment_offsets is not None:
-            print('Segment relocation table:')
+            info += 'Segment relocation table:\n'
             for segment_index in range(self.segments.n_segments):
-                print(f'{segment_index:<5} {self.segment_offsets[segment_index]}')
+                info += f'{segment_index:<5} {self.segment_offsets[segment_index]}\n'
+
+        return info
+
+    def get_builtin_usage(self) -> str:
+        if len(self.builtin_runners) == 0:
+            return ''
+
+        builtin_usage_str = '\nBuiltin usage:\n'
+        for name, builtin_runner in self.builtin_runners.items():
+            used, size = builtin_runner.get_used_cells_and_allocated_size(self)
+            percentage = f'{used / size * 100:.2f}%' if size > 0 else '100%'
+            builtin_usage_str += f'{name:<30s} {percentage:>7s} (used {used} cells)\n'
+
+        return builtin_usage_str
 
     def print_builtin_usage(self):
-        if self.builtin_runners:
-            print()
-            print('Builtin usage:')
-            for name, builtin_runner in self.builtin_runners.items():
-                used, size = builtin_runner.get_used_cells_and_allocated_size(self)
-                percentage = f'{used / size * 100:.2f}%' if size > 0 else '100%'
-                print(f'{name:<30s} {percentage:>7s} (used {used} cells)')
+        print(self.get_builtin_usage())
 
     def get_builtin_segments_info(self):
         builtin_segments: Dict[str, SegmentInfo] = {}
@@ -581,10 +592,10 @@ def get_runner_from_code(
     Cairo runner and returns the runner.
     """
     program = compile_cairo(code=code, prime=prime, debug_info=True)
-    return get_main_runner(hint_locals={}, layout=layout, program=program)
+    return get_main_runner(program=program, hint_locals={}, layout=layout)
 
 
-def get_main_runner(hint_locals: Dict[str, Any], layout: str, program: Program):
+def get_main_runner(program: Program, hint_locals: Dict[str, Any], layout: str):
     """
     Runs a main-entrypoint program using Cairo runner and returns the runner.
     """
