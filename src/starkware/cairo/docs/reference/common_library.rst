@@ -75,8 +75,8 @@ The function returns:
 -   ``squashed_dict_end``, a pointer to the final state of the dictionary.
 
 The code below is the missing code from the example in ``default_dict_new``.
-The value of ``val`` is trusted because is after the function that finalizes
-the dictionary.
+The value of ``val`` is trusted because it is after the function that finalizes
+the dictionary, which verifies that the default values were applied.
 
 .. tested-code:: cairo library_default_dict_finalize
 
