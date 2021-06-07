@@ -27,32 +27,23 @@ The function returns:
 In the code below, an empty default dictionary is made and finalized.
 The values provided in the hint are replaced by the default value.
 
-
 .. tested-code:: cairo library_default_dict_new
 
-    %builtins range_check
     from starkware.cairo.common.default_dict import default_dict_new
-    from starkware.cairo.common.default_dict import (
-        default_dict_finalize)
-    from starkware.cairo.common.dict import dict_write, dict_read
 
-    func main{range_check_ptr}():
-        alloc_locals
-        # Hint to initialise the dictionary
-        %{
-            initial_dict = {
-            17: 35,
-            57: 9
-            }
-        %}
-
-        # Create a new default dict. Values are overriden by "7".
-        # Initial dictionary: {17: 7, 57: 7}.
-        let (local my_dict) = default_dict_new(7)
-        # Dictionary must be now finalized
-        # See default_dict_finalize() for missing function.
-        return ()
-    end
+    alloc_locals
+    # Hint to initialise the dictionary
+    %{
+        initial_dict = {
+        17: 35,
+        57: 9
+        }
+    %}
+    # Create a new default dict. Values are overriden by "7".
+    # Initial dictionary: {17: 7, 57: 7}.
+    let (local my_dict) = default_dict_new(7)
+    # Dictionary must be now finalized
+    # with a call to default_dict_finalize()
 
 ``default_dict_finalize()``
 ***************************
@@ -79,6 +70,10 @@ The value of ``val`` is trusted because it is after the function that finalizes
 the dictionary, which verifies that the default values were applied.
 
 .. tested-code:: cairo library_default_dict_finalize
+
+    from starkware.cairo.common.default_dict import (
+        default_dict_finalize)
+    from starkware.cairo.common.dict import dict_read
 
     # Code that creates the default dict here.
     # Finalize dict below, ensuring that the values are all "7".
