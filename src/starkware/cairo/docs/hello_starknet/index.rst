@@ -7,4 +7,6 @@ Hello, StarkNet
     :maxdepth: 2
 
     intro
-    multiple_users
+    cli
+    user_auth
+    amm
