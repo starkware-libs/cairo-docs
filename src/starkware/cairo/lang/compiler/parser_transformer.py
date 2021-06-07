@@ -15,7 +15,7 @@ from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeElementLabel, CodeElementLocalVariable, CodeElementMember, CodeElementReference,
     CodeElementReturn, CodeElementReturnValueReference, CodeElementStaticAssert,
     CodeElementTailCall, CodeElementTemporaryVariable, CodeElementUnpackBinding, CodeElementWith,
-    CommentedCodeElement)
+    CommentedCodeElement, LangDirective)
 from starkware.cairo.lang.compiler.ast.expr import (
     ArgList, ExprAddressOf, ExprAssignment, ExprCast, ExprConst, ExprDeref, ExprDot, ExprIdentifier,
     ExprNeg, ExprOperator, ExprParentheses, ExprPyConst, ExprReg, ExprSubscript, ExprTuple)
@@ -491,6 +491,10 @@ class ParserTransformer(Transformer):
     def directive_builtins(self, value, meta):
         builtins = [ident.name for ident in value]
         return BuiltinsDirective(builtins=builtins, location=self.meta2loc(meta))
+
+    @v_args(meta=True)
+    def directive_lang(self, value, meta):
+        return LangDirective(name=value[0].name, location=self.meta2loc(meta))
 
     @v_args(meta=True)
     def aliased_identifier(self, value, meta):
