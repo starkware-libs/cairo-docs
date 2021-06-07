@@ -13,6 +13,7 @@ python_lib(cairo_common_lib
     hash_state.cairo
     hash.cairo
     invoke.cairo
+    math_cmp.cairo
     math_utils.py
     math.cairo
     memcpy.cairo
