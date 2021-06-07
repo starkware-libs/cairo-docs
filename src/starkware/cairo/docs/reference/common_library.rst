@@ -76,7 +76,7 @@ the dictionary, which verifies that the default values were applied.
     from starkware.cairo.common.dict import dict_read
 
     # Code that creates the default dict here.
-    # Finalize dict below, ensuring that the values are all "7".
+    # Finalize dict, ensuring that the initial values are all "7".
     let (local old, my_dict_final) = default_dict_finalize(
         my_dict, my_dict, 7)
     # Equivalent to: let val = 7.
