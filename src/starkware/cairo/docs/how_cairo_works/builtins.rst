@@ -107,6 +107,8 @@ we added the :ref:`reference rebinding <reference_rebinding>`:
 ``let hash_ptr = hash_ptr + HashBuiltin.SIZE``.
 Note that its only effect is on the return statement (implicitly).
 
+.. _calling_with_implicit_arguments:
+
 Calling a function that gets implicit arguments
 -----------------------------------------------
 
@@ -407,7 +409,6 @@ The ``small`` layout (``--layout=small``) includes the following builtins:
     Pedersen        8
     Range check     8
     ECDSA           512
-    Checkpoints     -
 
 .. test::
 
@@ -564,7 +565,7 @@ Write a function that verifies that x is within the range :math:`[0, 2^{128})` a
 
 .. toggle:: Hint
 
-    Check that x and y (for a non-deterministic y) are within the range :math:`[0, 2^{128})`
+    Check that x and y (for a nondeterministic y) are within the range :math:`[0, 2^{128})`
     and that :math:`x = 3 \cdot y` (the range-checks will guarantee that there is no overflow).
 
 .. _integer_division:

@@ -205,7 +205,7 @@ Compile and run using:
         assert output.strip() == expected_output
 
 
-Taking advantage of non-determinism
+Taking advantage of nondeterminism
 -----------------------------------
 
 Say that you have a list of N pairs ``(key, value)`` and you want a function ``get_value_by_key``
@@ -213,10 +213,10 @@ that returns the ``value`` that's associated with a certain ``key``.
 You may assume that the keys are distinct.
 Take a moment to think how to write such a function.
 
-The naive solution takes ``O(N)`` Cairo instructions. It turns out that using non-determinism
+The naive solution takes ``O(N)`` Cairo instructions. It turns out that using nondeterminism
 it can be done with a constant number of instructions!
 All we have to do is find the right index using a hint.
-Then, we check that we got the correct key, and that the index is in range
+Then, we check that we got the correct key, and that the index is in range:
 
 .. tested-code:: cairo get_value_by_key
 
@@ -249,7 +249,7 @@ Then, we check that we got the correct key, and that the index is in range
         %}
 
         # Verify that we have the correct key.
-        let item : KeyValue* = list + KeyValue.SIZE * idx
+        let item : KeyValue = list[idx]
         assert item.key = key
 
         # Verify that the index is in range (0 <= idx <= size - 1).
@@ -258,6 +258,17 @@ Then, we check that we got the correct key, and that the index is in range
         # Return the corresponding value.
         return (value=item.value)
     end
+
+Array index access
+******************
+
+The ``get_value_by_key()`` function gets a pointer to the beginning of an array,
+the array size, and a key value. It looks for this key
+and then returns the value that corresponds to this key.
+To access the element at index ``idx`` (where the index is zero-based),
+one may write ``list[idx]``. This is an expression of type ``KeyValue``,
+which is equivalent to ``[list + KeyValue.SIZE * idx]``.
+Similarly, you can write ``list[idx].key`` for the ``key`` member of that element.
 
 .. _hl_ids:
 
@@ -283,7 +294,7 @@ Then we have a hint that looks for the entry with the requested key
 and assigns the index to ``idx``.
 The hint itself does take O(N) operations, but this is not part of the Cairo code --
 remember, a hint is just the instructions for the prover on how to resolve
-non-determinism. In practice, the operations of a hint are much cheaper (and in most cases
+nondeterminism. In practice, the operations of a hint are much cheaper (and in most cases
 negligible) with respect to Cairo instructions.
 
 The next thing is a Cairo statement verifying that we got the correct key.
@@ -310,7 +321,7 @@ the way the verifier sees the program is as follows:
         local idx
 
         # Verify that we have the correct key.
-        let item : KeyValue* = list + KeyValue.SIZE * idx
+        let item : KeyValue = list[idx]
         assert item.key = key
 
         # Verify that the index is in range (0 <= idx <= size - 1).
@@ -321,7 +332,7 @@ the way the verifier sees the program is as follows:
     end
 
 One takes an uninitialized number ``idx``
-(we will use the terms "guess" and "non-deterministic" interchangeably with "uninitialized")
+(we will use the terms "guess" and "nondeterministic" interchangeably with "uninitialized")
 which they know nothing about,
 then they check that this index corresponds to the key and within range.
 Without either of these checks, it is clear that the prover will be able to cheat --
@@ -342,14 +353,13 @@ but in most aspects it's the important one :)
 
     import re
 
+    from starkware.cairo.common.cairo_function_runner import CairoFunctionRunner
     from starkware.cairo.lang.compiler.cairo_compile import compile_cairo
-    from starkware.cairo.common.test_utils import CairoFunctionRunner
 
     PRIME = 2**64 + 13
 
     program = compile_cairo(codes['get_value_by_key'], PRIME, debug_info=True)
-
-    runner = CairoFunctionRunner(program)
+    runner = CairoFunctionRunner(program, layout='small')
     rc_builtin = runner.range_check_builtin
     runner.run('get_value_by_key', rc_builtin.base, [7, 1, 4, 5, 10, 20, 8, 3], 4, 10)
     range_check_ptr, val = runner.get_return_values(2)

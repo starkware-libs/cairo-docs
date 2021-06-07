@@ -1,3 +1,5 @@
+.. _amm_cairo:
+
 A simple Automated Market Maker (AMM)
 =====================================
 
@@ -34,6 +36,9 @@ is an example of an on-chain state).
 
 In this tutorial we will write Cairo code that implements a very simple AMM.
 The system we are going to build will handle swaps between users and the AMM.
+Following the release StarkNet Planets Alpha, we released a :ref:`tutorial <amm_starknet>`
+that implements the same functionality presented here, only as a StarkNet contract.
+Comparing those two tutorials can be a fun exercise that highlights the power of StarkNet.
 To keep the tutorial manageable, a few things were omitted
 (after reading this page, and assuming you have read the previous pages of the tutorial,
 you should be able to add all of them by yourself):
@@ -246,6 +251,8 @@ Let's isolate b (as the rest of the values are known):
 
         return (state=new_state)
     end
+
+.. _transaction_loop_list:
 
 The transaction loop
 --------------------

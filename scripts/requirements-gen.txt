@@ -1,6 +1,8 @@
+aiohttp
 ecdsa
 eth-hash[pycryptodome]==0.2.0
 fastecdsa
+frozendict==1.2
 isort<5.0.0
 lark-parser==0.8.5
 marshmallow-dataclass>=7.1.0
@@ -14,3 +16,4 @@ pytest
 sphinx
 sympy
 Web3
+typeguard
