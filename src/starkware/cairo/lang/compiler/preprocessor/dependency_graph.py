@@ -53,6 +53,7 @@ class DependencyGraphVisitor(Visitor):
         pass
 
     def visit_ExprDot(self, expr: ExprDot):
+        # We override the default visitor, since we must not visit expr.member.
         self.visit(expr.expr)
 
     def visit_CodeElementFunction(self, elm: CodeElementFunction):
@@ -70,6 +71,7 @@ class DependencyGraphVisitor(Visitor):
             super().visit_CodeElementFunction(elm)
 
     def visit_ExprAssignment(self, elm: ExprAssignment):
+        # We override the default visitor, since we must not visit expr.identifier.
         self.visit(elm.expr)
 
     def visit_ExprIdentifier(self, expr: ExprIdentifier):
@@ -84,6 +86,9 @@ class DependencyGraphVisitor(Visitor):
                 location=code_elm.location)
 
     def find_function_dependencies(self, functions: Set[ScopedName]) -> Set[ScopedName]:
+        """
+        Finds all the transitive dependencies of a given set of functions.
+        """
         finder = FunctionDependencyFinder(self.visited_identifiers)
         for x in functions:
             if x not in self.visited_identifiers:
@@ -93,6 +98,10 @@ class DependencyGraphVisitor(Visitor):
 
 
 class FunctionDependencyFinder:
+    """
+    A class helper for find_function_dependencies.
+    """
+
     def __init__(self, identifer_dependencies: Dict[ScopedName, List[ScopedName]]):
         self.identifer_dependencies = identifer_dependencies
         self.visited: Set[ScopedName] = set()
@@ -113,6 +122,11 @@ class FunctionDependencyFinder:
 
 def get_main_functions_to_compile(
         identifiers: IdentifierManager, main_scope: ScopedName) -> Set[ScopedName]:
+    """
+    Retrieves the root functions to compile from a main scope.
+    The definition of which functions we need to compile is somewhat arbitrary:
+    All functions explicitly defined, or aliased in the main scope.
+    """
     main_functions: Set[ScopedName] = set()
     try:
         scope = identifiers.get_scope(main_scope)

@@ -46,6 +46,8 @@ The punctuation marks used in Cairo are described below:
 *   ``_`` (underscore, underline). A placeholder to handle values that are not used, such as an
     unused function return value.
 
+.. _syntax_type:
+
 Type system
 -----------
 
@@ -53,6 +55,7 @@ Cairo have the following types:
 
 * ``felt`` -- a field element (see :ref:`field_elements`).
 * ``MyStruct`` where ``MyStruct`` is a :ref:`struct <syntax_structs>` name.
+* A tuple -- For example ``(a, b)`` where ``a`` and ``b`` are types (see :ref:`syntax_tuples`).
 * ``T*`` where ``T`` is any type -- a pointer to type ``T``. For example: ``MyStruct*`` or
   ``felt**``.
 
@@ -85,7 +88,7 @@ You can define a constant value as follows:
 
 .. tested-code:: cairo syntax_consts
 
-   const CONSTANT_NAME = const_value
+    const CONSTANT_NAME = const_value
 
 ``const_value`` must be an expression that evaluates to an integer (field element) at compile time.
 For example: ``5`` or ``4 + 2 * VAL`` where ``VAL`` is another constant.
@@ -174,10 +177,10 @@ You can define a struct as follows:
 
 .. tested-code:: cairo structs
 
-   struct MyStruct:
-       member first_member : felt
-       member second_member : MyStruct*
-   end
+    struct MyStruct:
+        member first_member : felt
+        member second_member : MyStruct*
+    end
 
 Each member is defined using the syntax ``member <member_name> : <member_type>``.
 
@@ -250,6 +253,37 @@ Each element uses the same quantity of memory and may be accessed by a zero base
 Where: (1) the third element in the array is set to the ``felt`` ``85``, and (2) ``a`` is bound to
 a value from the second struct in the array of structs.
 
+.. _syntax_tuples:
+
+Tuples
+------
+
+A tuple is a finite, ordered, unchangeable list of elements. It is represented as a
+comma-separated list of elements enclosed by parentheses (e.g., ``(3, x)``).
+Their elements may be of any combination of valid :ref:`types <syntax_type>`. A tuple
+that contains only one element must be defined in one of the two following ways: the element is
+a named tuple or has a trailing comma. When a tuple is passed as an argument, the type of each
+element may be specified on a per-element basis (e.g., ``my_tuple : (felt, felt, MyStruct)``).
+Tuple values may be accessed with a zero-based index in brackets ``[index]``, including access to
+nested tuple elements as shown below.
+
+.. tested-code:: cairo syntax_tuples
+
+    # A tuple with three elements.
+    local tuple0 : (felt, felt, felt) = (7, 9, 13)
+    local tuple1 : (felt) = (5,)  # (5) is not a valid tuple.
+    # A named tuple does not require a trailing comma.
+    local tuple2 : (felt) = (a=5)
+    # Tuple contains another tuple.
+    local tuple3 : (felt, (felt, felt, felt), felt) = (1, tuple0, 5)
+    local tuple4 : ((felt, (felt, felt, felt), felt), felt, felt) = (
+        tuple3, 2, 11)
+    let a = tuple0[2]  # let a = 13.
+    let b = tuple4[0][1][2]  # let b = 13.
+    code = codes['syntax_tuples']
+    code = f'func main():\n alloc_locals \n {code}\n ret \n end'
+    compile_cairo(code, PRIME)
+
 Functions
 ---------
 
@@ -257,11 +291,11 @@ You can define a function as follows:
 
 .. tested-code:: cairo syntax_function
 
-   func func_name{implicit_arg1 : felt, implicit_arg2 : felt*}(
-           arg1 : felt, arg2 : MyStruct*) -> (
-           ret1 : felt, fet2 : felt):
-       # Function body.
-   end
+    func func_name{implicit_arg1 : felt, implicit_arg2 : felt*}(
+            arg1 : felt, arg2 : MyStruct*) -> (
+            ret1 : felt, fet2 : felt):
+        # Function body.
+    end
 
 The implicit argument part ``{implicit_arg1 : felt, implicit_arg2 : felt*}``
 and the return value ``(ret1 : felt, fet2 : felt)`` are optional.
@@ -275,7 +309,7 @@ A function must end with a ``return`` statement, which takes the following form:
 
 .. tested-code:: cairo syntax_function_return
 
-   return (ret1=val1, ret2=val2)
+    return (ret1=val1, ret2=val2)
 
 
 Call statement
@@ -285,10 +319,10 @@ You can call a function in the following ways:
 
 .. tested-code:: cairo syntax_function_call
 
-   foo(x=1, y=2)  # (1)
-   let x = foo(x=1, y=2)  # (2)
-   let (ret1, ret2) = foo(x=1, y=2)  # (3)
-   return foo(x=1, y=2)  # (4)
+    foo(x=1, y=2)  # (1)
+    let x = foo(x=1, y=2)  # (2)
+    let (ret1, ret2) = foo(x=1, y=2)  # (3)
+    return foo(x=1, y=2)  # (4)
 
 Option (1) can be used when there is no return value or it should be ignored.
 

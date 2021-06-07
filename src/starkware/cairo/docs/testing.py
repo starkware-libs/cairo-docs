@@ -1,3 +1,5 @@
+import json
+import os
 import re
 import sys
 import traceback
@@ -11,6 +13,7 @@ from starkware.cairo.lang.compiler.ast.formatting_utils import set_max_line_leng
 from starkware.cairo.lang.compiler.parser import parse_file
 
 MAX_LINE_LENGTH = 65
+DOCS_TEST_FILTER_ENV_VAR = 'DOCS_TEST_FILTER'
 
 
 class TestedCodeDirective(Directive):
@@ -53,6 +56,11 @@ class TestDirective(Directive):
 
     Codes which were stored using the tested-code directive are accessible using the 'codes'
     dictionary.
+
+    Use the DOCS_TEST_FILTER environment variable to restrict the *.rst files being tested.
+    For example, use
+      DOCS_TEST_FILTER=builtins scripts/burn.py --target cairo_docs_test
+    to run all the tests in *.rst files that contain the word 'builtins'.
     """
     has_content = True
 
@@ -91,15 +99,24 @@ class TestCodeBuilder(Builder):
             for node in doctree.traverse(is_code):
                 self.handle_code_node(node, docname, codes)
 
-        # Run the tests.
-        for docname in build_docnames:
-            doctree = self.env.get_doctree(docname)
+        codes_json_file = os.environ.get('DOCS_CODES_JSON_FILE')
+        if codes_json_file is not None:
+            with open(codes_json_file, 'w') as f:
+                json.dump(codes, f, indent=4)
+                f.write('\n')
 
-            def is_test(node: nodes.Node):
-                return isinstance(node, nodes.comment) and 'testing_test' in node
+        if os.environ.get('DOCS_SKIP_TESTS') == '1':
+            print('Skipping tests.')
+        else:
+            # Run the tests.
+            for docname in build_docnames:
+                doctree = self.env.get_doctree(docname)
 
-            for node in doctree.traverse(is_test):
-                self.handle_test_node(node, docname, codes)
+                def is_test(node: nodes.Node):
+                    return isinstance(node, nodes.comment) and 'testing_test' in node
+
+                for node in doctree.traverse(is_test):
+                    self.handle_test_node(node, docname, codes)
 
     def handle_code_node(self, node, docname, codes):
         """
@@ -142,7 +159,12 @@ class TestCodeBuilder(Builder):
                 sys.exit(1)
 
     def handle_test_node(self, node, docname, codes):
+        test_filter = os.environ.get(DOCS_TEST_FILTER_ENV_VAR)
+        if test_filter is not None and re.search(test_filter, docname) is None:
+            return
         try:
+            if test_filter is not None:
+                print(f'Running test {docname}...')
             exec(node.children[0].astext(), {'codes': codes})
         except Exception:
             traceback_str = traceback.format_exc()

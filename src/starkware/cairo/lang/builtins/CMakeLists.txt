@@ -10,7 +10,7 @@ python_lib(cairo_run_builtins_lib
     signature/signature_builtin_runner.py
 
     LIBS
-    cairo_relocatable
+    cairo_relocatable_lib
     cairo_vm_lib
     starkware_python_utils_lib
 )

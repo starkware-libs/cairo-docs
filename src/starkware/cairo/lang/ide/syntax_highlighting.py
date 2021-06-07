@@ -14,7 +14,7 @@ class CairoLexer(RegexLexer):
         'root': [
             (words(KEYWORDS, prefix=r'\b', suffix=r'\b'), token.Keyword),
             (words(('SIZEOF_LOCALS', 'SIZE'), prefix=r'\b', suffix=r'\b'), token.Literal),
-            (r'%builtins', token.Keyword),
+            (r'%builtins|%lang', token.Keyword),
             (words(('ap', 'fp'), prefix=r'\b', suffix=r'\b'), token.Name.Entity),
             (r'!=|->', token.Operator),
             (r'[+\-*/&]', token.Operator),
@@ -24,6 +24,7 @@ class CairoLexer(RegexLexer):
             (r'#.*', token.Comment),
             (r'%\{(.|\n)*?%\}', token.Text),
             (r'%\[(.|\n)*?%\]', token.Text),
+            (r'@\w+', token.Keyword),
             (r'<[a-zA-Z0-9 _\-]+>', token.Comment),
             (r' ', token.Text),
         ]

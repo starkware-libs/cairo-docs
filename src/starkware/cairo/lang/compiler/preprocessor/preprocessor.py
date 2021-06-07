@@ -12,7 +12,8 @@ from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeElementFunction, CodeElementHint, CodeElementIf, CodeElementImport, CodeElementInstruction,
     CodeElementLabel, CodeElementLocalVariable, CodeElementMember, CodeElementReference,
     CodeElementReturn, CodeElementReturnValueReference, CodeElementStaticAssert,
-    CodeElementTailCall, CodeElementTemporaryVariable, CodeElementUnpackBinding, CodeElementWith)
+    CodeElementTailCall, CodeElementTemporaryVariable, CodeElementUnpackBinding, CodeElementWith,
+    LangDirective)
 from starkware.cairo.lang.compiler.ast.expr import (
     ExprAssignment, ExprCast, ExprConst, ExprDeref, Expression, ExprFutureLabel, ExprIdentifier,
     ExprOperator, ExprReg, ExprTuple)
@@ -593,7 +594,12 @@ Expected 'elm.element_type' to be a 'namespace'. Found: '{elm.element_type}'."""
                 location=dst_type.location)
 
         location = val.location
+
+        # At this point 'val' is a simplified typeless expression and we need 'ref_expr'
+        # to include a cast to the correct type.
+        # We insert the cast at the correct location according to the outermost expression in 'val'.
         if isinstance(val, ExprDeref):
+            # Add the cast inside the ExprDeref. For example, "[cast(ap, T*)]".
             addr = get_expr_addr(val)
             ref_expr: Expression = ExprDeref(
                 addr=ExprCast(
@@ -1067,6 +1073,7 @@ Cannot convert the implicit arguments of {func_name} to the implicit arguments o
                     location=implicit_arg_location)
 
     def visit_CodeElementFuncCall(self, elm: CodeElementFuncCall):
+        # Make sure the identifier for the called function refers to a function.
         called_function = ScopedName.from_string(elm.func_call.func_ident.name)
         try:
             res = self.identifiers.search(
@@ -1457,6 +1464,12 @@ Expected expression of type '{member_def.cairo_type.format()}', got '{cairo_type
             seen_builtins.add(builtin)
 
         self.builtins = directive.builtins
+
+    def visit_LangDirective(self, directive: LangDirective):
+        raise PreprocessorError(
+            f'Unsupported %lang directive. Are you using the correct compiler?',
+            location=directive.location,
+        )
 
     def simplify_expr(self, expr) -> Tuple[Expression, CairoType]:
         """

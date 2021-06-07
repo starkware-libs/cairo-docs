@@ -87,7 +87,7 @@ def get_y_coordinate(stark_key_x_coordinate: int) -> int:
 
 
 def get_random_private_key() -> int:
-    # Returns a private key in the range [1, EC_ORDER)
+    # Returns a private key in the range [1, EC_ORDER).
     return secrets.randbelow(EC_ORDER - 1) + 1
 
 
