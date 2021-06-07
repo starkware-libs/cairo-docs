@@ -37,7 +37,7 @@ class Transaction(EverestTransaction):
 @marshmallow_dataclass.dataclass(frozen=True)
 class Deploy(Transaction):
     """
-    Represents a transaction in the StarkNet network, that is a deployment of a StarkNet contract.
+    Represents a transaction in the StarkNet network that is a deployment of a StarkNet contract.
     """
 
     contract_address: int = field(metadata=fields.contract_address_metadata)
@@ -76,7 +76,7 @@ class Deploy(Transaction):
 @marshmallow_dataclass.dataclass(frozen=True)
 class InvokeFunction(Transaction):
     """
-    Represents a transaction in the StarkNet network, that is an invocation of a Cairo contract
+    Represents a transaction in the StarkNet network that is an invocation of a Cairo contract
     function.
     """
 

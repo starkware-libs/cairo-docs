@@ -337,6 +337,7 @@ class VirtualMachine:
         self.exec_scopes.append({**new_scope_locals, **self.builtin_runners})
 
     def exit_scope(self):
+        assert len(self.exec_scopes) > 1, 'Cannot exit main scope.'
         self.exec_scopes.pop()
 
     def update_registers(self, instruction: Instruction, operands: Operands):
@@ -763,8 +764,8 @@ class VirtualMachine:
 
     def end_run(self):
         self.verify_auto_deductions()
-        assert len(self.exec_scopes) == 1, \
-            'Every enter_scope() requires a corresponding exit_scope().'
+        if len(self.exec_scopes) != 1:
+            raise VmExceptionBase('Every enter_scope() requires a corresponding exit_scope().')
 
 
 def get_perm_range_check_limits(
