@@ -274,27 +274,32 @@ Return statement
 
 A function must end with a ``return`` statement, which takes the following form:
 
-.. tested-code:: cairo syntax_function_return
+.. tested-code:: cairo syntax_return
 
     return (ret1=val1, ret2=val2)
 
-Function outputs
-----------------
+Return values may either be positional or named, where positional values are identified
+by the order in which they appear in the ``-> ()`` syntax. Positional arguments
+must appear before named arguments.
 
-A function can return arguments to the parent function that called it. The arguments expected are
-designated by the ``-> ()`` expression. The argument type(s) are defined in the return statement of
-the function. Arguments may either be positional or named, where positional arguments are identified
-by the order in which they appear in the calling function. Positional arguments must appear before
-named arguments.
+.. tested-code:: cairo syntax_return_position
 
-.. tested-code:: cairo syntax_function_outputs
+    # Permitted
+    return (2, b=3)  # positional, named.
+
+    # Not permitted
+    # return (a=2, 3)  # named, positional.
+
+Function return values
+----------------------
+
+A function can return values to the caller function. The return values are
+designated by the ``-> ()`` syntax.
+
+.. tested-code:: cairo syntax_return_val
 
     func my_function() -> (a, b):
-        # Permitted
-        return (2, b=3) # positional, named
-
-        # Not permitted
-        # return (a=2, 3) # named, positional
+        return (2, b=3)
     end
 
     func main():
@@ -302,10 +307,11 @@ named arguments.
         return()
     end
 
-Functions can specify that an output be of a specific type. The function below returns two arguments,
-``a``, a value of type ``felt`` and ``b``, the address of a felt value.
+Functions can specify that a return value should be of a specific type.
+The function below returns two values, ``a``, a value of type ``felt``
+and ``b``, a pointer.
 
-.. tested-code:: cairo syntax_function_outputs_typed
+.. tested-code:: cairo syntax_return_val_typed
 
     func my_function() -> (a : felt, b : felt*):
 
