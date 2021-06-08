@@ -197,7 +197,7 @@ For example, ``MyStruct.first_member == 0`` and ``MyStruct.second_member == 1``
 Pointers
 --------
 
-A pointer is used to signify the address of the first field element in the memory.
+A pointer is used to signify the address of the first field element in the memory of an element.
 The pointer can be used to access the element in an efficient manner. For example, a function
 may accept a pointer as an argument, and then access the element at the address of the pointer.
 The following example shows how to use this type of expression to access a tuple element:
@@ -215,9 +215,9 @@ The following example shows how to use this type of expression to access a tuple
 
     func main():
         alloc_locals
-        # Reveal 'fp' to the compiler.
+        # Get the value of the fp register.
         let (__fp__, _) = get_fp_and_pc()
-        # Define tuple.
+        # Define a tuple.
         local numbers : (felt, felt, felt) = (1, 2, 3)
         # Send the address of the 'numbers' tuple.
         foo(&numbers)
