@@ -329,6 +329,8 @@ Cairo supports a syntactic sugar for these cases (which we call "return value re
     # foo_ret is implicitly a reference to ap with type foo.Return.
     [ap] = foo_ret.z + foo_ret.w; ap++
 
+.. _return_values_unpacking:
+
 Return values unpacking
 ***********************
 

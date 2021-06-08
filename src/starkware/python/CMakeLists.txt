@@ -5,6 +5,7 @@ python_lib(starkware_python_utils_lib
     math_utils.py
     utils.py
     python_dependencies.py
+    async_subprocess.py
 
     LIBS
     pip_sympy
@@ -14,12 +15,6 @@ python_lib(starkware_expression_string_lib
     PREFIX starkware/python
     FILES
     expression_string.py
-)
-
-python_lib(starkware_json_rpc_lib
-    PREFIX starkware/python
-    FILES
-    json_rpc.py
 )
 
 python_lib(starkware_merkle_tree_lib
@@ -45,14 +40,12 @@ full_python_test(starkware_python_utils_test
 
     FILES
     expression_string_test.py
-    json_rpc_test.py
     math_utils_test.py
     test_utils_test.py
     utils_test.py
 
     LIBS
     starkware_expression_string_lib
-    starkware_json_rpc_lib
     starkware_python_test_utils_lib
     starkware_python_utils_lib
     pip_pytest
