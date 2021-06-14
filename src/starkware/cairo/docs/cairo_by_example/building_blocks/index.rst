@@ -6,4 +6,6 @@ Building blocks
 Short, complete examples of basic constructs.
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
+
+    skeleton
