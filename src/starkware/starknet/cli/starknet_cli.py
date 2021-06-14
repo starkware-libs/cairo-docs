@@ -8,9 +8,8 @@ import os
 import sys
 
 from services.external_api.base_client import RetryConfig
-from starkware.cairo.lang.compiler.program import Program
 from starkware.cairo.lang.version import __version__
-from starkware.starknet.compiler.compile import get_entry_points, get_selector_from_name
+from starkware.starknet.compiler.compile import get_selector_from_name
 from starkware.starknet.definitions import fields
 from starkware.starknet.services.api.contract_definition import ContractDefinition
 from starkware.starknet.services.api.feeder_gateway.feeder_gateway_client import FeederGatewayClient
@@ -24,7 +23,9 @@ def get_gateway_client(args) -> GatewayClient:
     if args.gateway_url is not None:
         gateway_url = args.gateway_url
     if gateway_url is None:
-        raise Exception(f'--gateway_url must be specified with the "{args.command}" subcommand.')
+        raise Exception(
+            f'gateway_url must be specified with the "{args.command}" subcommand.\n'
+            'Consider passing --network or setting the STARKNET_NETWORK environment variable.')
     # Limit the number of retries.
     retry_config = RetryConfig(n_retries=1)
     return GatewayClient(url=gateway_url, retry_config=retry_config)
@@ -36,7 +37,8 @@ def get_feeder_gateway_client(args) -> FeederGatewayClient:
         feeder_gateway_url = args.feeder_gateway_url
     if feeder_gateway_url is None:
         raise Exception(
-            f'--feeder_gateway_url must be specified with the "{args.command}" subcommand.')
+            f'feeder_gateway_url must be specified with the "{args.command}" subcommand.\n'
+            'Consider passing --network or setting the STARKNET_NETWORK environment variable.')
     # Limit the number of retries.
     retry_config = RetryConfig(n_retries=1)
     return FeederGatewayClient(url=feeder_gateway_url, retry_config=retry_config)
@@ -50,25 +52,19 @@ async def deploy(args, command_args):
         help='An optional address specifying where the contract will be deployed. '
         'If the address is not specified, the contract will be deployed in a random address.')
     parser.add_argument(
-        '--abi', type=argparse.FileType('r'), help='The Cairo contract ABI.')
-    parser.add_argument(
-        '--program', type=argparse.FileType('r'),
-        help='The compiled Cairo program to deploy as a contract.', required=True)
+        '--contract', type=argparse.FileType('r'),
+        help='The contract definition to deploy.', required=True)
     parser.parse_args(command_args, namespace=args)
 
     gateway_client = get_gateway_client(args)
 
-    abi = None if args.abi is None else json.load(args.abi)
     try:
         address = fields.ContractAddressField.get_random_value() if args.address is None \
             else int(args.address, 16)
     except ValueError:
         raise ValueError('Invalid address format.')
-    program = Program.Schema().loads(args.program.read())
 
-    contract_definition = ContractDefinition(
-        program=program, entry_points=list(get_entry_points(program=program).values()), abi=abi)
-
+    contract_definition = ContractDefinition.loads(args.contract.read())
     tx = Deploy(
         contract_address=address,
         contract_definition=contract_definition)
@@ -95,7 +91,9 @@ async def invoke_or_call(args, command_args, call: bool):
         '--inputs', type=int, nargs='*', default=[], help='The inputs to the invoked function.')
     if call:
         parser.add_argument(
-            '--block_number', type=int, help='The address of the invoked contract', required=False)
+            '--block_id', type=int, required=False,
+            help='The ID of the block used as the context for the call operation. '
+            'In case this argument is not given, uses the latest block.')
     parser.parse_args(command_args, namespace=args)
 
     abi = json.load(args.abi)
@@ -121,7 +119,7 @@ async def invoke_or_call(args, command_args, call: bool):
     gateway_response: dict
     if call:
         feeder_client = get_feeder_gateway_client(args)
-        gateway_response = await feeder_client.call_contract(tx, args.block_number)
+        gateway_response = await feeder_client.call_contract(tx, args.block_id)
         print(*gateway_response['result'])
     else:
         gateway_client = get_gateway_client(args)
@@ -143,7 +141,8 @@ async def tx_status(args, command_args):
 
     feeder_gateway_client = get_feeder_gateway_client(args)
 
-    print(await feeder_gateway_client.get_transaction_status(tx_id=args.id))
+    tx_status_response = await feeder_gateway_client.get_transaction_status(tx_id=args.id)
+    print(json.dumps(tx_status_response, indent=4, sort_keys=True))
 
 
 def handle_network_param(args):
@@ -152,8 +151,8 @@ def handle_network_param(args):
     """
     network = os.environ.get('STARKNET_NETWORK') if args.network is None else args.network
     if network is not None:
-        if args.network != 'alpha':
-            print(f"Unknown network '{args.network}'.")
+        if network != 'alpha':
+            print(f"Unknown network '{network}'.")
             return 1
 
         dns = 'alpha.starknet.io'
