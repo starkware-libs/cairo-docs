@@ -7,5 +7,6 @@ Short, complete examples of basic constructs.
 
 .. toctree::
     :maxdepth: 1
+    :titlesonly:
 
     skeleton
