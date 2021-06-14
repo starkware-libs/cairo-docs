@@ -1,5 +1,5 @@
 Template
---------
+========
 ..
     This page is a demonstration of [...]
 
@@ -16,34 +16,31 @@ This page outlines the structure of the code examples used in Cairo by Example.
     5. Check that the path to deploy_notes.rst is correct (../deploy_notes.rst)
     6. Remove this section
 
+Code
+----
+
 Create a file called ``MyProgram.cairo`` with the following contents:
 
 .. tested-code:: cairo example_TEMPLATE_code
 
-    %builtins output
-
-    from starkware.cairo.common.serialize import serialize_word
-
-    func main{output_ptr : felt*}():
-        alloc_locals
-        local a : felt
-        local b : felt
-        %{
-            ids.a = 7
-            ids.b = program_input['secret']
-        %}
-        serialize_word(a)
-        serialize_word(b)
+    func main():
+        # Cairo code here
         return ()
     end
+
+Inputs
+------
 
 Create an ``input.json`` file in the same directory as the Cairo code with the following contents.
 
 .. tested-code:: json example_TEMPLATE_input
 
     {
-        "secret": 1234
+        "input_name": 1234
     }
+
+Execution
+---------
 
 Now compile the program to produce ``MyProgram_compiled.json``:
 
@@ -59,15 +56,26 @@ Now run the program, using the compiled ``MyProgram_compiled.json`` file:
     --program=MyProgram_compiled.json --print_output \
     --print_info --relocate_prints --tracer
 
+The flags function as follows:
+
+-   ``--program``, the name of the program json file.
+-   ``--print_output``, print the program output (if the output builtin is used).
+-   ``--print_info``, print information on the execution of the program.
+-   ``--relocate_prints``, print memory and info after memory relocation.
+-   ``--tracer``, run the tracer.
+
 Confirm that the program output matches the output below:
 
 .. tested-code:: none example_TEMPLATE_output
 
     Program output:
-    7
-    1234
+    ouput_1
+    ouput_2
 
 To explore the program structure and to debug, visit the tracer at http://localhost:8100/.
+
+Deployment
+----------
 
 The program can be sent to a public Ethereum testnet (Ropsten) using SHARP. Run the following
 command to send the programto SHARP for proof generation and fact registration:
