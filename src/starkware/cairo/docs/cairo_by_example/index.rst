@@ -6,7 +6,7 @@ self-contained Cairo programs that can be executed without modification.
 
 .. toctree::
     :maxdepth: 2
-    :titles_only:
+    :titlesonly:
 
     building_blocks/index
 

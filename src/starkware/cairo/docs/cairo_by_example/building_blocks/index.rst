@@ -3,10 +3,8 @@
 Building blocks
 ===============
 
-Short, complete examples of basic constructs.
+Short, context-rich examples of basic constructs.
 
 .. toctree::
     :maxdepth: 1
     :titlesonly:
-
-    skeleton

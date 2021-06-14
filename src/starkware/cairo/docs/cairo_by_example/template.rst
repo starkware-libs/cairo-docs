@@ -23,7 +23,7 @@ Create an ``input.json`` file in the same directory as the Cairo code with the f
 .. tested-code:: json example_TEMPLATE_input
 
     {
-        "input_name": 1234
+        "secret": 1234
     }
 
 **Code**
@@ -32,8 +32,20 @@ Create a file called ``MyProgram.cairo`` with the following contents:
 
 .. tested-code:: cairo example_TEMPLATE_code
 
-    func main():
-        # Cairo code here
+    %builtins output
+
+    from starkware.cairo.common.serialize import serialize_word
+
+    func main{output_ptr : felt*}():
+        alloc_locals
+        local a : felt
+        local b : felt
+        %{
+            ids.a = 7
+            ids.b = program_input['secret']
+        %}
+        serialize_word(a)
+        serialize_word(b)
         return ()
     end
 
@@ -66,8 +78,8 @@ Confirm that the program output matches the output below:
 .. tested-code:: none example_TEMPLATE_output
 
     Program output:
-    ouput_1
-    ouput_2
+    7
+    1234
 
 To explore the program structure and to debug, visit the tracer at http://localhost:8100/.
 
@@ -117,24 +129,3 @@ command to send the programto SHARP for proof generation and fact registration:
             line.strip() for line in expected_output.splitlines() if line.strip()
         ]
         assert actual_output_lines == expected_output_lines
-
-**Application Deployment**
-
-A solidity contract ``CairoApplication.sol`` can be deployed to use the fact in the
-``FactRegistry`` contract for its logic. That contract may have a function ``updateState()``
-which can be called by passing outputs from ``MyProgram.cairo`` as arguments. The function
-call would be a transaction that updates the state of the application to reflect the
-state changes that the Cairo program created.
-
-**Application Use**
-
-A user, or agent on behalf of a user, can interact with the application by following the steps:
-
-1. Create an ``inputs.json`` file with curstom values.
-2. Obtain a copy of ``MyProgram.cairo``.
-3. Install Cairo and compile the program.
-4. Submit the program to SHARP for proving.
-5. Call ``updateState()`` function in the ``CairoApplication`` contract.
-
-These steps can be abstracted away from the user experience with the use of an interface and
-server backend.
