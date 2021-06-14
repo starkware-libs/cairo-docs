@@ -16,8 +16,17 @@ This page outlines the structure of the code examples used in Cairo by Example.
     5. Check that the path to deploy_notes.rst is correct (../deploy_notes.rst)
     6. Remove this section
 
-Code
-----
+**Inputs**
+
+Create an ``input.json`` file in the same directory as the Cairo code with the following contents.
+
+.. tested-code:: json example_TEMPLATE_input
+
+    {
+        "input_name": 1234
+    }
+
+**Code**
 
 Create a file called ``MyProgram.cairo`` with the following contents:
 
@@ -28,19 +37,7 @@ Create a file called ``MyProgram.cairo`` with the following contents:
         return ()
     end
 
-Inputs
-------
-
-Create an ``input.json`` file in the same directory as the Cairo code with the following contents.
-
-.. tested-code:: json example_TEMPLATE_input
-
-    {
-        "input_name": 1234
-    }
-
-Execution
----------
+**Execution**
 
 Now compile the program to produce ``MyProgram_compiled.json``:
 
@@ -74,8 +71,7 @@ Confirm that the program output matches the output below:
 
 To explore the program structure and to debug, visit the tracer at http://localhost:8100/.
 
-Deployment
-----------
+**Submission**
 
 The program can be sent to a public Ethereum testnet (Ropsten) using SHARP. Run the following
 command to send the programto SHARP for proof generation and fact registration:
@@ -121,3 +117,24 @@ command to send the programto SHARP for proof generation and fact registration:
             line.strip() for line in expected_output.splitlines() if line.strip()
         ]
         assert actual_output_lines == expected_output_lines
+
+**Application Deployment**
+
+A solidity contract ``CairoApplication.sol`` can be deployed to use the fact in the
+``FactRegistry`` contract for its logic. That contract may have a function ``updateState()``
+which can be called by passing outputs from ``MyProgram.cairo`` as arguments. The function
+call would be a transaction that updates the state of the application to reflect the
+state changes that the Cairo program created.
+
+**Application Use**
+
+A user, or agent on behalf of a user, can interact with the application by following the steps:
+
+1. Create an ``inputs.json`` file with curstom values.
+2. Obtain a copy of ``MyProgram.cairo``.
+3. Install Cairo and compile the program.
+4. Submit the program to SHARP for proving.
+5. Call ``updateState()`` function in the ``CairoApplication`` contract.
+
+These steps can be abstracted away from the user experience with the use of an interface and
+server backend.
