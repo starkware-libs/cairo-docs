@@ -5,53 +5,58 @@ This page summarizes library functions available in the Cairo common library.
 The common library is written in Cairo the code can be found
 `here
 <https://github.com/starkware-libs/cairo-lang/tree/master/src/starkware/cairo/common>`_. It
-provides a a level of abstraction for common and useful components that can be imported
+provides a level of abstraction for common and useful components that can be imported
 for use in any Cairo program.
 
 The libraries available are listed below, organized alphabetically. The functions
 within each library are outlined under the relevant library heading.
 
 -   :ref:`common_library_alloc`.
--   :ref:`common_library_cairo_builtins`
--   :ref:`common_library_default_dict`
--   :ref:`common_library_dict`
--   :ref:`common_library_dict_access`
--   :ref:`common_library_find_element`
--   :ref:`common_library_hash`
--   :ref:`common_library_hash_chain`
--   :ref:`common_library_hash_state`
--   :ref:`common_library_invoke`
--   :ref:`common_library_math`
--   :ref:`common_library_memcpy`
--   :ref:`common_library_merkle_multi_update`
--   :ref:`common_library_merkle_update`
--   :ref:`common_library_registers`
--   :ref:`common_library_serialize`
--   :ref:`common_library_set`
--   :ref:`common_library_signature`
--   :ref:`common_library_small_merkle_tree`
--   :ref:`common_library_squash_dict`
--   :ref:`common_library_uint256`
 
+.. TODO (perama, 15 June. Move above when section complete)
+    -   :ref:`common_library_cairo_builtins`
+    -   :ref:`common_library_default_dict`
+    -   :ref:`common_library_dict`
+    -   :ref:`common_library_dict_access`
+    -   :ref:`common_library_find_element`
+    -   :ref:`common_library_hash`
+    -   :ref:`common_library_hash_chain`
+    -   :ref:`common_library_hash_state`
+    -   :ref:`common_library_invoke`
+    -   :ref:`common_library_math`
+    -   :ref:`common_library_memcpy`
+    -   :ref:`common_library_merkle_multi_update`
+    -   :ref:`common_library_merkle_update`
+    -   :ref:`common_library_registers`
+    -   :ref:`common_library_serialize`
+    -   :ref:`common_library_set`
+    -   :ref:`common_library_signature`
+    -   :ref:`common_library_small_merkle_tree`
+    -   :ref:`common_library_squash_dict`
+    -   :ref:`common_library_uint256`
 
-**A note about implicit arguments**. Some descriptions state that the library function
-"requires the implicit argument ``<argument>``". Where this is the case the decision to
-pass the the argument follows the the rule: If the parent function has already
-passed ``<argument>`` in braces, the braces can be omitted. For example, implicit
-arguments might be ``range_check_ptr`` or ``dict_ptr``. See :ref:`implicit_arguments`
+**A note about implicit arguments**: Some descriptions state that the library function
+"requires the implicit argument ``<argument>``". Where this is the case, the decision to
+pass the argument follows the the rule: If the parent function already has the
+required argument as an implicit argument, the braces can be omitted. Otherwise, it
+should be given explicitly. For example, implicit
+arguments may be ``range_check_ptr`` or ``dict_ptr``. See :ref:`implicit_arguments`
 for more information.
 
 .. tested-code:: cairo library_implicits0
 
-    func function_with_implicit{range_check_ptr}():
-        # Implicit argument is not required again
-        library_function()
+    # An implicit argument, x, can be passed to the parent function.
+    # E.g., func function_with_implicit{x}():
+    func function_with_implicit():
+        # Implicit argument x is not required again.
+        # E.g., library_function()
         return ()
     end
 
+    # No implicit arguments are passed to the parent function.
     func function_without_implicit():
-        # Implicit argument is required
-        library_function{range_check_ptr}()
+        # Implicit argument x is required.
+        # E.g., library_function{x}()
         return ()
     end
 
@@ -78,162 +83,162 @@ arrays. As more elements are added, more memory can be allocated.
     # Allocate a memory segment for an array of structs.
     let (local my_array : MyStruct) = alloc()
 
-.. _common_library_cairo_builtins:
+.. .. _common_library_cairo_builtins:
 
-``cairo_builtins``
-------------------
+..  ``cairo_builtins``
+..  ------------------
 
 ..  TODO (perama, 03 June)
     This section contains functions from the ``cairo_builtins`` library.
 
-.. _common_library_default_dict:
+.. .. _common_library_default_dict:
 
-``default_dict``
-----------------
+..  ``default_dict``
+..  ----------------
 
 ..  TODO (perama, 03 June)
    This section contains functions from the ``default_dict`` library.
 
-.. _common_library_dict:
+.. .. _common_library_dict:
 
-``dict``
---------
+..  ``dict``
+..  --------
 
 ..  TODO (perama, 03 June)
     This section contains functions from the ``dict`` library.
 
-.. _common_library_dict_access:
+.. .. _common_library_dict_access:
 
-``dict_access``
----------------
+..  ``dict_access``
+..  ---------------
 
 ..  TODO (perama, 03 June)
     This section contains functions from the ``dict_access`` library.
 
-.. _common_library_find_element:
+.. .. _common_library_find_element:
 
-``find_element``
-----------------
+..  ``find_element``
+..  ----------------
 
 ..  TODO (perama, 03 June)
     This section contains functions from the ``find_element`` library.
 
-.. _common_library_hash:
+.. .. _common_library_hash:
 
-``hash``
---------
+..  ``hash``
+..  --------
 
 ..  TODO (perama, 03 June)
     This section contains functions from the ``hash`` library.
 
-.. _common_library_hash_chain:
+.. .. _common_library_hash_chain:
 
-``hash_chain``
---------------
+..  ``hash_chain``
+..  --------------
 
 ..  TODO (perama, 03 June)
     This section contains functions from the ``hash_chain`` library.
 
-.. _common_library_hash_state:
+.. .. _common_library_hash_state:
 
-``hash_state``
---------------
+..  ``hash_state``
+..  --------------
 
 ..  TODO (perama, 03 June)
     This section contains functions from the ``hash_state`` library.
 
-.. _common_library_invoke:
+.. .. _common_library_invoke:
 
-``invoke``
-----------
+..  ``invoke``
+..  ----------
 
 ..  TODO (perama, 03 June)
     This section contains functions from the ``invoke`` library.
 
-.. _common_library_math:
+.. .. _common_library_math:
 
-``math``
---------
+..  ``math``
+..  --------
 
 ..  TODO (perama, 03 June)
     This section contains functions from the ``math`` library.
 
-.. _common_library_memcpy:
+.. .. _common_library_memcpy:
 
-``memcpy``
-----------
+..  ``memcpy``
+..  ----------
 
 ..  TODO (perama, 03 June)
     This section contains functions from the ``memcpy`` library.
 
-.. _common_library_merkle_multi_update:
+.. .. _common_library_merkle_multi_update:
 
-``merkle_multi_update``
------------------------
+..  ``merkle_multi_update``
+..  -----------------------
 
 ..  TODO (perama, 03 June)
     This section contains functions from the ``merkle_multi_update`` library.
 
-.. _common_library_merkle_update:
+.. .. _common_library_merkle_update:
 
-``merkle_update``
------------------
+..  ``merkle_update``
+..  -----------------
 
 ..  TODO (perama, 03 June)
     This section contains functions from the ``merkle_update`` library.
 
-.. _common_library_registers:
+.. .. _common_library_registers:
 
-``registers``
---------------
+..  ``registers``
+..  --------------
 
 ..  TODO (perama, 03 June)
     This section contains functions from the ``registers`` library.
 
-.. _common_library_serialize:
+.. .. _common_library_serialize:
 
-``serialize``
--------------
+..  ``serialize``
+..  -------------
 
 ..  TODO (perama, 03 June)
     This section contains functions from the ``serialize`` library.
 
-.. _common_library_set:
+.. .. _common_library_set:
 
-``set``
--------
+..  ``set``
+..  -------
 
 ..  TODO (perama, 03 June)
     This section contains functions from the ``set`` library.
 
-.. _common_library_signature:
+.. .. _common_library_signature:
 
-``signature``
--------------
+..  ``signature``
+..  -------------
 
 ..  TODO (perama, 03 June)
     This section contains functions from the ``signature`` library.
 
-.. _common_library_small_merkle_tree:
+.. .. _common_library_small_merkle_tree:
 
-``small_merkle_tree``
----------------------
+..  ``small_merkle_tree``
+..  ---------------------
 
 ..  TODO (perama, 03 June)
     This section contains functions from the ``small_merkle_tree`` library.
 
-.. _common_library_squash_dict:
+.. .. _common_library_squash_dict:
 
-``squash_dict``
----------------
+..  ``squash_dict``
+..  ---------------
 
 ..  TODO (perama, 03 June)
     This section contains functions from the ``squash_dict`` library.
 
-.. _common_library_uint256:
+.. .. _common_library_uint256:
 
-``uint256``
------------
+..  ``uint256``
+..  -----------
 
 ..  TODO (perama, 03 June)
     This section contains functions from the ``uint256`` library.
