@@ -307,31 +307,23 @@ and use ``--layout=small`` to ``cairo-run`` due to the usage of builtins):
     func main{output_ptr : felt*, range_check_ptr}():
         alloc_locals
 
-        local loc0 : Location
-        assert loc0.row = 0
-        assert loc0.col = 2
-        local loc1 : Location
-        assert loc1.row = 1
-        assert loc1.col = 2
-        local loc2 : Location
-        assert loc2.row = 1
-        assert loc2.col = 3
-        local loc3 : Location
-        assert loc3.row = 2
-        assert loc3.col = 3
-        local loc4 : Location
-        assert loc4.row = 3
-        assert loc4.col = 3
+        local loc_tuple : (Location, Location, Location, Location, Location) = (
+            Location(row=0, col=2),
+            Location(row=1, col=2),
+            Location(row=1, col=3),
+            Location(row=2, col=3),
+            Location(row=3, col=3),
+            )
 
-        local tile0 = 3
-        local tile1 = 7
-        local tile2 = 8
-        local tile3 = 12
+        local tiles : (felt, felt, felt, felt) = (3, 7, 8, 12)
 
         # Get the value of the frame pointer register (fp) so that
         # we can use the address of loc0.
         let (__fp__, _) = get_fp_and_pc()
-        check_solution(loc_list=&loc0, tile_list=&tile0, n_steps=4)
+        check_solution(
+            loc_list=cast(&loc_tuple, Location*),
+            tile_list=cast(&tiles, felt*),
+            n_steps=4)
         return ()
     end
 

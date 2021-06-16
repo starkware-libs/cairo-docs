@@ -20,7 +20,7 @@ The idea is to use an unused memory cell (``[ap]``) to decide whether or not to 
 Do not forget to increase ``ap`` to make sure the following instructions will not use this memory
 cell.
 
-As with every non-deterministic instruction, a hint must be attached to let the prover know whether
+As with every nondeterministic instruction, a hint must be attached to let the prover know whether
 to jump or not. For example:
 
 .. code-block:: cairo

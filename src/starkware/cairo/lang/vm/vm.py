@@ -38,7 +38,13 @@ class Operands:
     op1: MaybeRelocatable
 
 
-class VmException(LocationError):
+class VmExceptionBase(Exception):
+    """
+    Base class for exceptions thrown by the Cairo VM.
+    """
+
+
+class VmException(LocationError, VmExceptionBase):
     def __init__(
             self, pc, inst_location: Optional[InstructionLocation], inner_exc,
             traceback: Optional[str] = None, notes: Optional[List[str]] = None, hint: bool = False):
@@ -56,7 +62,7 @@ class VmException(LocationError):
             self.notes += notes
 
 
-class InconsistentAutoDeductionError(Exception):
+class InconsistentAutoDeductionError(VmExceptionBase):
     def __init__(self, addr, current_value, new_value):
         self.addr = addr
         self.current_value = current_value
@@ -65,7 +71,7 @@ class InconsistentAutoDeductionError(Exception):
             f'Inconsistent auto deduction rule at address {addr}. {current_value} != {new_value}.')
 
 
-class PureValueError(Exception):
+class PureValueError(VmExceptionBase):
     def __init__(self, oper, *values):
         self.oper = oper
         self.values = values
@@ -74,7 +80,7 @@ class PureValueError(Exception):
             f'Could not complete computation {oper} of non pure {values_str}.')
 
 
-class HintException(Exception):
+class HintException(VmExceptionBase):
     def __init__(self, vm, exc_type, exc_value, exc_tb):
         tb_exception = traceback.TracebackException(exc_type, exc_value, exc_tb)
         # First item in the traceback is the call to exec, remove it.
@@ -331,6 +337,7 @@ class VirtualMachine:
         self.exec_scopes.append({**new_scope_locals, **self.builtin_runners})
 
     def exit_scope(self):
+        assert len(self.exec_scopes) > 1, 'Cannot exit main scope.'
         self.exec_scopes.pop()
 
     def update_registers(self, instruction: Instruction, operands: Operands):
@@ -757,8 +764,8 @@ class VirtualMachine:
 
     def end_run(self):
         self.verify_auto_deductions()
-        assert len(self.exec_scopes) == 1, \
-            'Every enter_scope() requires a corresponding exit_scope().'
+        if len(self.exec_scopes) != 1:
+            raise VmExceptionBase('Every enter_scope() requires a corresponding exit_scope().')
 
 
 def get_perm_range_check_limits(
