@@ -43,20 +43,30 @@ should be given explicitly. For example, implicit
 arguments may be ``range_check_ptr`` or ``dict_ptr``. See :ref:`implicit_arguments`
 for more information.
 
+In the example below, two of the three functions require implicit arguments. In situation
+#1, the function is called passing argument ``x`` explicitly. In situation
+#2, the function is called passing argument ``x`` implicitly.
+
 .. tested-code:: cairo library_implicits0
 
-    # An implicit argument, x, can be passed to the parent function.
-    # E.g., func function_with_implicit{x}():
-    func function_with_implicit():
-        # Implicit argument x is not required again.
-        # E.g., library_function()
+    # Situation #1.
+    func function_without_implicit_arg():
+        let x = 0
+        # x must be passed explicitly since it's not an
+        # implicit argument of this function.
+        function_with_implicit_arg{x=x}()
         return ()
     end
 
-    # No implicit arguments are passed to the parent function.
-    func function_without_implicit():
-        # Implicit argument x is required.
-        # E.g., library_function{x}()
+    # Situation #2.
+    func function_with_implicit_arg{x}():
+        # x is an implicit argument of this function
+        # so it does not need to be passed explicitly.
+        another_function_with_implicit_arg():
+        return ()
+    end
+
+    func another_function_with_implicit_arg{x}():
         return ()
     end
 
