@@ -313,6 +313,5 @@ different pointers and pointer types.
 For more information about builtins see :ref:`builtins`, and the ``cairo_builtins``
 section in the common library.
 
-..  TODO (perama 6 June).
-    Add link to common library once merged.
+..  TODO (perama, 06/06/21): Add link to common library once merged.
     (:ref:`common_library_cairo_builtins` )
