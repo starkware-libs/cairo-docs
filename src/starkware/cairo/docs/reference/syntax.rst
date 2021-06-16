@@ -431,17 +431,17 @@ same return value.
 Literals
 --------
 
-Python code can be invoked with the ``%[`` ``%]`` block, where all contained code will be converted
-to memory at compile time and cannot be modified during proof construction. See :ref:`literals` for
-more information.
+Python code can be invoked with the ``%[`` ``%]`` block, where all contained code is converted
+to memory at compile time, and cannot be modified during proof construction. See :ref:`literals`
+for more information.
 
 .. tested-code:: cairo syntax_literals
 
-    let a = %[ 2 * 2 %]  # a = 2 x 2 = 4
+    let a = %[ 2 * 2 %]  # a = 2 x 2 = 4.
 
-    let b = %[ pow(8,2) %]  # b = 8 to the power 3 = 512
+    let b = %[ pow(8,2) %]  # b = 8 to the power 3 = 512.
 
-    let c = %[ len([6,7,8,9]) %]  # c = length of the list [6,7,8,9] = 4
+    let c = %[ len([6,7,8,9]) %]  # c = length of the list [6,7,8,9] = 4.
 
 Library imports
 ---------------
