@@ -325,10 +325,10 @@ must appear before named arguments.
 
 .. tested-code:: cairo syntax_return_position
 
-    # Permitted
+    # Permitted.
     return (2, b=3)  # positional, named.
 
-    # Not permitted
+    # Not permitted.
     # return (a=2, 3)  # named, positional.
 
 Function return values
@@ -345,7 +345,7 @@ designated by the ``-> ()`` syntax.
 
     func main():
         let (val_a, val_b) = my_function()
-        return()
+        return ()
     end
 
 Functions can specify that a return value should be of a specific type.
@@ -355,6 +355,7 @@ and ``b``, a pointer.
 .. tested-code:: cairo syntax_return_val_typed
 
     func my_function() -> (a : felt, b : felt*):
+    end
 
 Call statement
 --------------
