@@ -13,7 +13,7 @@ within each library are outlined under the relevant library heading.
 
 -   :ref:`common_library_alloc`.
 
-.. TODO (perama, 15 June. Move above when section complete)
+..  TODO (perama, 16/06/2021): Move the link above when the section is complete.
     -   :ref:`common_library_cairo_builtins`
     -   :ref:`common_library_default_dict`
     -   :ref:`common_library_dict`
@@ -37,7 +37,7 @@ within each library are outlined under the relevant library heading.
 
 **A note about implicit arguments**: Some descriptions state that the library function
 "requires the implicit argument ``<argument>``". Where this is the case, the decision to
-pass the argument follows the the rule: If the parent function already has the
+pass the argument follows the rule: If the parent function already has the
 required argument as an implicit argument, the braces can be omitted. Otherwise, it
 should be given explicitly. For example, implicit
 arguments may be ``range_check_ptr`` or ``dict_ptr``. See :ref:`implicit_arguments`
@@ -65,180 +65,222 @@ for more information.
 ``alloc``
 ---------
 
-This section contains a function from the ``alloc`` library.
+This section contains components from `alloc`_ in the common library.
+
+.. _alloc: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/alloc.cairo
 
 ``alloc()``
 ***********
 
 Returns a newly allocated memory segment. This is useful when defining dynamically allocated
-arrays. As more elements are added, more memory can be allocated.
+arrays. As more elements are added, more memory will be allocated.
 
 .. tested-code:: cairo alloc_alloc
 
     from starkware.cairo.common.alloc import alloc
 
     # Allocate a memory segment.
-    let new_slot = alloc()
+    let (new_slot : felt*) = alloc()
 
     # Allocate a memory segment for an array of structs.
-    let (local my_array : MyStruct) = alloc()
+    let (local my_array : MyStruct*) = alloc()
 
 .. .. _common_library_cairo_builtins:
 
 ..  ``cairo_builtins``
 ..  ------------------
 
-..  TODO (perama, 03 June)
-    This section contains functions from the ``cairo_builtins`` library.
+..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
+    This section contains components from `cairo_builtins`_ in the common library.
+
+.. .. _cairo_builtins: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/cairo_builtins.cairo
 
 .. .. _common_library_default_dict:
 
 ..  ``default_dict``
 ..  ----------------
 
-..  TODO (perama, 03 June)
-   This section contains functions from the ``default_dict`` library.
+..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
+    This section contains components from `default_dict`_ in the common library.
+
+.. .. _default_dict: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/default_dict.cairo
 
 .. .. _common_library_dict:
 
 ..  ``dict``
 ..  --------
 
-..  TODO (perama, 03 June)
-    This section contains functions from the ``dict`` library.
+..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
+    This section contains components from `dict`_ in the common library.
+
+.. .. _dict: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/dict.cairo
 
 .. .. _common_library_dict_access:
 
 ..  ``dict_access``
 ..  ---------------
 
-..  TODO (perama, 03 June)
-    This section contains functions from the ``dict_access`` library.
+..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
+    This section contains components from `dict_access`_ in the common library.
+
+.. .. _dict_access: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/dict_access.cairo
 
 .. .. _common_library_find_element:
 
 ..  ``find_element``
 ..  ----------------
 
-..  TODO (perama, 03 June)
-    This section contains functions from the ``find_element`` library.
+..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
+    This section contains components from `find_element`_ in the common library.
+
+.. .. _find_element: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/find_element.cairo
 
 .. .. _common_library_hash:
 
 ..  ``hash``
 ..  --------
 
-..  TODO (perama, 03 June)
-    This section contains functions from the ``hash`` library.
+..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
+    This section contains components from `hash`_ in the common library.
+
+.. .. _hash: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/hash.cairo
 
 .. .. _common_library_hash_chain:
 
 ..  ``hash_chain``
 ..  --------------
 
-..  TODO (perama, 03 June)
-    This section contains functions from the ``hash_chain`` library.
+..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
+    This section contains components from `hash_chain`_ in the common library.
+
+.. .. _hash_chain: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/hash_chain.cairo
 
 .. .. _common_library_hash_state:
 
 ..  ``hash_state``
 ..  --------------
 
-..  TODO (perama, 03 June)
-    This section contains functions from the ``hash_state`` library.
+..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
+    This section contains components from `hash_state`_ in the common library.
+
+.. .. _hash_state: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/hash_state.cairo
 
 .. .. _common_library_invoke:
 
 ..  ``invoke``
 ..  ----------
 
-..  TODO (perama, 03 June)
-    This section contains functions from the ``invoke`` library.
+..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
+    This section contains components from `invoke`_ in the common library.
+
+.. .. _invoke: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/invoke.cairo
 
 .. .. _common_library_math:
 
 ..  ``math``
 ..  --------
 
-..  TODO (perama, 03 June)
-    This section contains functions from the ``math`` library.
+..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
+    This section contains components from `math`_ in the common library.
+
+.. .. _math: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/math.cairo
 
 .. .. _common_library_memcpy:
 
 ..  ``memcpy``
 ..  ----------
 
-..  TODO (perama, 03 June)
-    This section contains functions from the ``memcpy`` library.
+..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
+    This section contains components from `memcpy`_ in the common library.
+
+.. .. _memcpy: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/memcpy.cairo
 
 .. .. _common_library_merkle_multi_update:
 
 ..  ``merkle_multi_update``
 ..  -----------------------
 
-..  TODO (perama, 03 June)
-    This section contains functions from the ``merkle_multi_update`` library.
+..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
+    This section contains components from `merkle_multi_update`_ in the common library.
+
+.. .. _merkle_multi_update: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/merkle_multi_update.cairo
 
 .. .. _common_library_merkle_update:
 
 ..  ``merkle_update``
 ..  -----------------
 
-..  TODO (perama, 03 June)
-    This section contains functions from the ``merkle_update`` library.
+..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
+    This section contains components from `merkle_update`_ in the common library.
+
+.. .. _merkle_update: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/merkle_update.cairo
 
 .. .. _common_library_registers:
 
 ..  ``registers``
 ..  --------------
 
-..  TODO (perama, 03 June)
-    This section contains functions from the ``registers`` library.
+..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
+    This section contains components from `registers`_ in the common library.
+
+.. .. _registers: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/registers.cairo
 
 .. .. _common_library_serialize:
 
 ..  ``serialize``
 ..  -------------
 
-..  TODO (perama, 03 June)
-    This section contains functions from the ``serialize`` library.
+..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
+    This section contains components from `serialize`_ in the common library.
+
+.. .. _serialize: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/serialize.cairo
 
 .. .. _common_library_set:
 
 ..  ``set``
 ..  -------
 
-..  TODO (perama, 03 June)
-    This section contains functions from the ``set`` library.
+..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
+    This section contains components from `set`_ in the common library.
+
+.. .. _set: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/set.cairo
 
 .. .. _common_library_signature:
 
 ..  ``signature``
 ..  -------------
 
-..  TODO (perama, 03 June)
-    This section contains functions from the ``signature`` library.
+..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
+    This section contains components from `signature`_ in the common library.
+
+.. .. _signature: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/signature.cairo
 
 .. .. _common_library_small_merkle_tree:
 
 ..  ``small_merkle_tree``
 ..  ---------------------
 
-..  TODO (perama, 03 June)
-    This section contains functions from the ``small_merkle_tree`` library.
+..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
+    This section contains components from `small_merkle_tree`_ in the common library.
+
+.. .. _small_merkle_tree: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/small_merkle_tree.cairo
 
 .. .. _common_library_squash_dict:
 
 ..  ``squash_dict``
 ..  ---------------
 
-..  TODO (perama, 03 June)
-    This section contains functions from the ``squash_dict`` library.
+..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
+    This section contains components from `squash_dict`_ in the common library.
+
+.. .. _squash_dict: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/squash_dict.cairo
 
 .. .. _common_library_uint256:
 
 ..  ``uint256``
 ..  -----------
 
-..  TODO (perama, 03 June)
-    This section contains functions from the ``uint256`` library.
+..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
+    This section contains components from `uint256`_ in the common library.
+
+.. .. _uint256: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/uint256.cairo
