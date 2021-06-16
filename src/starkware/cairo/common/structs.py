@@ -10,14 +10,15 @@ from starkware.python.utils import WriteOnceDict
 
 
 class CairoStructFactory:
-    """
-    Creates a CairoStructFactory that converts Cairo structs to python namedtuples.
-
-    identifiers - an identifier manager holding the structs.
-    """
-
     def __init__(
             self, identifiers: IdentifierManager, additional_imports: Optional[List[str]] = None):
+        """
+        Creates a CairoStructFactory that converts Cairo structs to python namedtuples.
+
+        identifiers - an identifier manager holding the structs.
+        additional_imports - An optional list of fully qualified names of structs to preload.
+          Useful for importing absolute paths, rather than relative.
+        """
         self.identifiers = identifiers
 
         self.resolved_identifiers: MutableMapping[ScopedName, ScopedName] = WriteOnceDict()
@@ -44,17 +45,23 @@ class CairoStructFactory:
             name=name).get_canonical_name()
 
     def build_struct(self, name: ScopedName):
+        """
+        Builds and returns namedtuple from a Cairo struct.
+        """
         full_name = self._get_full_name(name)
         members = get_struct_definition(full_name, self.identifiers).members
         return namedtuple(full_name.path[-1], list(members.keys()))
 
     def get_struct_size(self, name: ScopedName) -> int:
+        """
+        Returns the size of the given struct.
+        """
         full_name = self._get_full_name(name)
         return get_struct_definition(full_name, self.identifiers).size
 
     def build_func_args(self, func: ScopedName):
         """
-        Builds a struct the contains both the explicit and the implicit args of 'fund'.
+        Builds a namedtuple that contains both the explicit and the implicit arguments of 'func'.
         """
         full_name = self._get_full_name(func)
 
@@ -67,10 +74,18 @@ class CairoStructFactory:
 
     @property
     def structs(self):
+        """
+        Dynamic namespace of all available structs. For example, to get the namedtuple of
+        a.b.MyStruct, use cairo_struct_factory.struct.a.b.MyStruct.
+        """
         return CairoStructProxy(self, ScopedName())
 
 
 class CairoStructProxy:
+    """
+    Helper class for CairoStructFactory. See CairoStructFactory.structs.
+    """
+
     def __init__(self, factory: CairoStructFactory, path: ScopedName):
         self.factory = factory
         self.path = path
@@ -91,7 +106,7 @@ class CairoStructProxy:
     def from_ptr(self, runner, addr):
         """
         Interprets addr as a pointer to a struct of type path and creates the corresponding
-        namedtuple.
+        namedtuple instance.
         """
         named_tuple = self.build()
 

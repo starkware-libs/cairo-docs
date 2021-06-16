@@ -121,11 +121,8 @@ def parametrize_random_object(n_nightly_runs: int = 10, seed: Optional[int] = No
             test_func: Callable[[NamedArg(type=random.Random, name='random_object')], None]):
         seeds = _get_seeds(n_nightly_runs=n_nightly_runs, seed=seed)
 
-        def fixate_seed_and_yield_test_run(*args, random_object, **kwargs):
-            try:
-                yield test_func(*args, random_object=random_object, **kwargs)
-            except Exception:
-                raise
+        def fixate_seed_and_yield_test_run(*args, **kwargs):
+            yield test_func(*args, **kwargs)
 
         return pytest.mark.parametrize(
             'random_object',

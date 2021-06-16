@@ -55,9 +55,9 @@ class CairoFunctionRunner(CairoRunner):
 
     def assert_eq(self, arg: MaybeRelocatable, expected_value, apply_modulo: bool = True):
         """
-        Assert that arg is the cairo representation of expected_value.
-        If the expected_value is Iterable then arg is interpreted as a pointer to a list
-        and assert_eq is called recursively on all the items in the expected_value.
+        Asserts that arg is the Cairo representation of expected_value.
+        If expected_value is Iterable then arg is interpreted as a pointer to a list
+        and assert_eq is called recursively on all the items in expected_value.
         If apply_modulo=True, all the integers are taken modulo the program's prime.
         """
         assert isinstance(arg, (int, RelocatableValue)), f'Expecting MaybeRelocatable got {arg}'
@@ -66,6 +66,7 @@ class CairoFunctionRunner(CairoRunner):
             for idx, value in enumerate(expected_value):
                 self.assert_eq(self.vm_memory[arg + idx], value, apply_modulo=apply_modulo)
             return
+
         if apply_modulo and isinstance(arg, int):
             expected_value = expected_value % self.program.prime
 
