@@ -39,4 +39,4 @@ def test_safe_zip():
     test_cases = [[range(4), range(3)], [[], range(3)]]
     for iterables in test_cases:
         with pytest.raises(AssertionError, match='Iterables to safe_zip are not equal in length.'):
-            assert list(safe_zip(*iterables)) == list(zip(*iterables))
+            list(safe_zip(*iterables))  # Consume generator to get to the error.

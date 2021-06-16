@@ -44,7 +44,7 @@ function(python_pip TARGET)
       COMMAND cd ${LIB_DIR} && ${CMAKE_COMMAND} -E tar xzf ${DOWNLOAD_DIR}/*.whl
       # Some wheels may put their files at /{name}-{version}.data/(pure|plat)lib/, instead of under
       # the root directory. See https://www.python.org/dev/peps/pep-0427/#id24.
-      # Copy the files from there. Supress errors, which happen most of the times when this
+      # Copy the files from there. Suppress errors, which happen most of the times when this
       # subdirectory does not exist.
       COMMAND cp -r ${LIB_DIR}/*.data/*lib/* ${LIB_DIR}/ > /dev/null 2>&1 || true
       # Cleanup download.
