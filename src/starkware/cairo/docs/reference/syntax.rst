@@ -389,7 +389,7 @@ and location in memory.
 
     # Code defining the struct goes here
 
-    func main{output_ptr: felt*}():
+    func main{output_ptr : felt*}():
         # Code defining the struct contents goes here
 
         let output = cast(output_ptr, MyStruct*)
