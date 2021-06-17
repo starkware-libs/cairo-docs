@@ -73,9 +73,9 @@ In ``function_with_implicit_arg{x}()``, a function is called passing argument ``
 ``alloc``
 ---------
 
-This section refers to common library's `alloc`_ module.
-
-.. common_alloc: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/alloc.cairo
+This section refers to the common library's
+`alloc <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/alloc.cairo>`_
+module.
 
 ``alloc()``
 ***********
@@ -99,9 +99,9 @@ arrays. As more elements are added, more memory will be allocated.
 ..  ------------------
 
 ..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's `common_cairo_builtins`_ module.
-
-.. .. _common_cairo_builtins: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/cairo_builtins.cairo
+    This section refers to the common library's
+    `common_cairo_builtins <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/cairo_builtins.cairo>`_
+    module.
 
 .. .. _common_library_default_dict:
 
@@ -109,9 +109,9 @@ arrays. As more elements are added, more memory will be allocated.
 ..  ----------------
 
 ..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's `common_default_dict`_ module.
-
-.. .. _common_default_dict: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/default_dict.cairo
+    This section refers to the common library's
+    `common_default_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/default_dict.cairo>`_
+    module.
 
 .. .. _common_library_dict:
 
@@ -119,9 +119,9 @@ arrays. As more elements are added, more memory will be allocated.
 ..  --------
 
 ..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's `common_dict`_ module.
-
-.. .. _common_dict: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/dict.cairo
+    This section refers to the common library's
+    `common_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/dict.cairo>`_
+    module.
 
 .. .. _common_library_dict_access:
 
@@ -129,9 +129,9 @@ arrays. As more elements are added, more memory will be allocated.
 ..  ---------------
 
 ..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's `common_dict_access`_ module.
-
-.. .. _common_dict_access: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/dict_access.cairo
+    This section refers to the common library's
+    `common_dict_access <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/dict_access.cairo>`_
+    module.
 
 .. .. _common_library_find_element:
 
@@ -139,9 +139,9 @@ arrays. As more elements are added, more memory will be allocated.
 ..  ----------------
 
 ..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's `common_find_element`_ module.
-
-.. .. _common_find_element: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/find_element.cairo
+    This section refers to the common library's
+    `common_find_element <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/find_element.cairo>`_
+    module.
 
 .. .. _common_library_hash:
 
@@ -149,9 +149,9 @@ arrays. As more elements are added, more memory will be allocated.
 ..  --------
 
 ..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's `common_hash`_ module.
-
-.. .. _common_hash: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/hash.cairo
+    This section refers to the common library's
+    `common_hash <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/hash.cairo>`_
+    module.
 
 .. .. _common_library_hash_chain:
 
@@ -159,9 +159,9 @@ arrays. As more elements are added, more memory will be allocated.
 ..  --------------
 
 ..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's `common_hash_chain`_ module.
-
-.. .. _common_hash_chain: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/hash_chain.cairo
+    This section refers to the common library's
+    `common_hash_chain <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/hash_chain.cairo>`_
+    module.
 
 .. .. _common_library_hash_state:
 
@@ -169,9 +169,9 @@ arrays. As more elements are added, more memory will be allocated.
 ..  --------------
 
 ..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's `common_hash_state`_ module.
-
-.. .. _common_hash_state: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/hash_state.cairo
+    This section refers to the common library's
+    `common_hash_state <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/hash_state.cairo>`_
+    module.
 
 .. .. _common_library_invoke:
 
@@ -179,9 +179,9 @@ arrays. As more elements are added, more memory will be allocated.
 ..  ----------
 
 ..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's `common_invoke`_ module.
-
-.. .. _common_invoke: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/invoke.cairo
+    This section refers to the common library's
+    `common_invoke <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/invoke.cairo>`_
+    module.
 
 .. .. _common_library_math:
 
@@ -189,9 +189,9 @@ arrays. As more elements are added, more memory will be allocated.
 ..  --------
 
 ..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's `common_math`_ module.
-
-.. .. _common_math: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/math.cairo
+    This section refers to the common library's
+    `common_math <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/math.cairo>`_
+    module.
 
 .. .. _common_library_memcpy:
 
@@ -199,9 +199,9 @@ arrays. As more elements are added, more memory will be allocated.
 ..  ----------
 
 ..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's `common_memcpy`_ module.
-
-.. .. _common_memcpy: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/memcpy.cairo
+    This section refers to the common library's
+    `common_memcpy <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/memcpy.cairo>`_
+    module.
 
 .. .. _common_library_merkle_multi_update:
 
@@ -209,19 +209,19 @@ arrays. As more elements are added, more memory will be allocated.
 ..  -----------------------
 
 ..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's `common_merkle_multi_update`_ module.
+    This section refers to the common library's `common_merkle_multi_update <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/merkle_multi_update.cairo>`_
+    module
 
-.. .. _common_merkle_multi_update: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/merkle_multi_update.cairo
-
-.. .. _common_library_merkle_update:
-
+.. .. _common_library_m
+erkle_update:
+.
 ..  ``merkle_update``
 ..  -----------------
 
 ..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's `common_merkle_update`_ module.
-
-.. .. _common_merkle_update: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/merkle_update.cairo
+    This section refers to the common library's
+    `common_merkle_update <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/merkle_update.cairo>`_
+    module.
 
 .. .. _common_library_registers:
 
@@ -229,9 +229,9 @@ arrays. As more elements are added, more memory will be allocated.
 ..  --------------
 
 ..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's `common_registers`_ module.
-
-.. .. _common_registers: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/registers.cairo
+    This section refers to the common library's
+    `common_registers <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/registers.cairo>`_
+    module.
 
 .. .. _common_library_serialize:
 
@@ -239,9 +239,9 @@ arrays. As more elements are added, more memory will be allocated.
 ..  -------------
 
 ..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's `common_serialize`_ module.
-
-.. .. _common_serialize: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/serialize.cairo
+    This section refers to the common library's
+    `common_serialize <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/serialize.cairo>`_
+    module.
 
 .. .. _common_library_set:
 
@@ -249,9 +249,9 @@ arrays. As more elements are added, more memory will be allocated.
 ..  -------
 
 ..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's `common_set`_ module.
-
-.. .. _common_set: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/set.cairo
+    This section refers to the common library's
+    `common_set <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/set.cairo>`_
+    module.
 
 .. .. _common_library_signature:
 
@@ -259,9 +259,9 @@ arrays. As more elements are added, more memory will be allocated.
 ..  -------------
 
 ..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's `common_signature`_ module.
-
-.. .. _common_signature: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/signature.cairo
+    This section refers to the common library's
+    `common_signature <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/signature.cairo>`_
+    module.
 
 .. .. _common_library_small_merkle_tree:
 
@@ -269,9 +269,9 @@ arrays. As more elements are added, more memory will be allocated.
 ..  ---------------------
 
 ..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's `common_small_merkle_tree`_ module.
-
-.. .. _common_small_merkle_tree: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/small_merkle_tree.cairo
+    This section refers to the common library's
+    `common_small_merkle_tree <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/small_merkle_tree.cairo>`_
+    module.
 
 .. .. _common_library_squash_dict:
 
@@ -279,9 +279,9 @@ arrays. As more elements are added, more memory will be allocated.
 ..  ---------------
 
 ..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's `common_squash_dict`_ module.
-
-.. .. _common_squash_dict: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/squash_dict.cairo
+    This section refers to the common library's
+    `common_squash_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/squash_dict.cairo>`_
+    module.
 
 .. .. _common_library_uint256:
 
@@ -289,6 +289,6 @@ arrays. As more elements are added, more memory will be allocated.
 ..  -----------
 
 ..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's `common_uint256`_ module.
-
-.. .. _uint256: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/uint256.cairo
+    This section refers to the common library's
+    `common_uint256 <://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/uint256.cairo>`_
+    module.
