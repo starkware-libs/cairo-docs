@@ -209,12 +209,12 @@ arrays. As more elements are added, more memory will be allocated.
 ..  -----------------------
 
 ..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's `common_merkle_multi_update <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/merkle_multi_update.cairo>`_
-    module
+    This section refers to the common library's
+    `common_merkle_multi_update <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/merkle_multi_update.cairo>`_
+    module.
 
-.. .. _common_library_m
-erkle_update:
-.
+.. .. _common_library_merkle_update:
+
 ..  ``merkle_update``
 ..  -----------------
 
