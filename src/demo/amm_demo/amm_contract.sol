@@ -1,10 +1,11 @@
+// SPDX-License-Identifier: Cairo Program License (Source Available), Version 1.0, November 2020.
 pragma solidity ^0.5.2;
 
-contract IFactRegistry {
+abstract contract IFactRegistry {
     /*
       Returns true if the given fact was previously registered in the contract.
     */
-    function isValid(bytes32 fact)
+    function isValid(bytes32 fact) virtual
         external view
         returns(bool);
 }
@@ -36,7 +37,6 @@ contract AmmDemo {
         uint256 amountTokenB,
         uint256 cairoProgramHash,
         address cairoVerifier)
-        public
     {
         accountTreeRoot_ = accountTreeRoot;
         amountTokenA_ = amountTokenA;
