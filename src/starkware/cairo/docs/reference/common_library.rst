@@ -11,11 +11,11 @@ for use in any Cairo program.
 The libraries available are listed below, organized alphabetically. The functions
 within each library are outlined under the relevant library heading.
 
--   :ref:`common_library_alloc`.
+-   :ref:`common_library_alloc`
+-   :ref:`common_library_default_dict`
 
 ..  TODO (perama, 16/06/2021): Move the link above when the section is complete.
     -   :ref:`common_library_cairo_builtins`
-    -   :ref:`common_library_default_dict`
     -   :ref:`common_library_dict`
     -   :ref:`common_library_dict_access`
     -   :ref:`common_library_find_element`
@@ -103,24 +103,14 @@ arrays. As more elements are added, more memory will be allocated.
     `common_cairo_builtins <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/cairo_builtins.cairo>`_
     module.
 
-.. .. _common_library_default_dict:
-
-..  ``default_dict``
-..  ----------------
-
-..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's
-    `common_default_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/default_dict.cairo>`_
-    module.
-
+.. _common_library_default_dict:
 
 ``default_dict``
 ----------------
 
-This section contains functions from the ``default_dict`` library.
-As Cairo programs have immutable memory, dictionaries are implemented in a special way,
-where dictionary updates involve the creation of intermediate dictionary states.
-More information on how this works can be found in :ref:`dicts_in_cairo`.
+This section refers to the common library's
+`common_default_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/default_dict.cairo>`_
+module.
 
 ``default_dict_new()``
 **********************
