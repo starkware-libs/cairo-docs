@@ -136,7 +136,8 @@ See :ref:`revoked_references` for more information.
             let a = 8
         end
 
-        # A cannot be accessed, because it has conflicting values: 23 vs 8.
+        # "a" cannot be accessed, because it has
+        # conflicting values: 23 vs 8.
 
         return ()
     end
@@ -266,10 +267,13 @@ define a memory segment that can be used to allocate more memory for each new el
 
     from starkware.cairo.common.alloc import alloc
 
-    local felt_array : felt*  # an array of integers
-    let (local struct_array : MyStruct*) = alloc()  # An array of structs
+    # An array of integers.
+    local felt_array : felt*
+    # An array of structs.
+    let (local struct_array : MyStruct*) = alloc()
     # Populate the first element with a struct.
-    assert struct_array[0] = MyStruct(first_member=1, second_member=2)
+    assert struct_array[0] = MyStruct(first_member=1,
+        second_member=2)
 
 .. test::
 
@@ -321,6 +325,11 @@ nested tuple elements as shown below.
         tuple3, 2, 11)
     let a = tuple0[2]  # let a = 13.
     let b = tuple4[0][1][2]  # let b = 13.
+
+.. test::
+
+    from starkware.cairo.lang.compiler.cairo_compile import compile_cairo
+    PRIME = 2**64 + 13
     code = codes['syntax_tuples']
     code = f'func main():\n alloc_locals \n {code}\n ret \n end'
     compile_cairo(code, PRIME)
