@@ -12,9 +12,9 @@ The libraries available are listed below, organized alphabetically. The function
 within each library are outlined under the relevant library heading.
 
 -   :ref:`common_library_alloc`.
+-   :ref:`common_library_cairo_builtins`
 
 ..  TODO (perama, 16/06/2021): Move the link above when the section is complete.
-    -   :ref:`common_library_cairo_builtins`
     -   :ref:`common_library_default_dict`
     -   :ref:`common_library_dict`
     -   :ref:`common_library_dict_access`
@@ -93,15 +93,14 @@ arrays. As more elements are added, more memory will be allocated.
     # Allocate a memory segment for an array of structs.
     let (local my_array : MyStruct*) = alloc()
 
-.. .. _common_library_cairo_builtins:
+.. _common_library_cairo_builtins:
 
-..  ``cairo_builtins``
-..  ------------------
+``cairo_builtins``
+------------------
 
-..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's
-    `common_cairo_builtins <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/cairo_builtins.cairo>`_
-    module.
+This section refers to the common library's
+`common_cairo_builtins <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/cairo_builtins.cairo>`_
+module.
 
 ``cairo_builtins``
 ------------------
