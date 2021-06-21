@@ -11,13 +11,13 @@ for use in any Cairo program.
 The libraries available are listed below, organized alphabetically. The functions
 within each library are outlined under the relevant library heading.
 
--   :ref:`common_library_alloc`.
+-   :ref:`common_library_alloc`
+-   :ref:`common_library_dict`
+-   :ref:`common_library_dict_access`
 
 ..  TODO (perama, 16/06/2021): Move the link above when the section is complete.
     -   :ref:`common_library_cairo_builtins`
     -   :ref:`common_library_default_dict`
-    -   :ref:`common_library_dict`
-    -   :ref:`common_library_dict_access`
     -   :ref:`common_library_find_element`
     -   :ref:`common_library_hash`
     -   :ref:`common_library_hash_chain`
@@ -113,7 +113,7 @@ arrays. As more elements are added, more memory will be allocated.
     `common_default_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/default_dict.cairo>`_
     module.
 
-.. .. _common_library_dict:
+.. _common_library_dict:
 
 ``dict``
 --------
@@ -127,61 +127,86 @@ module.
 ``dict_update()``
 *****************
 
-Updates the value of a particular key in a dictionary. The old value must be provided and
-passed an implicit argument, ``DictAccess*``, a pointer to the most recent dictionary access.
-No values are returned.
+Updates the value of a particular key in a dictionary. Must be passed an
+implicit argument, ``dict_ptr``, of type ``DictAccess*``, representing a pointer
+to the dictionary to be updated. No values are returned.
+
+The function accepts three explicit arguments:
+
+-   ``key``, a ``felt`` representing the key of a key-value pair.
+-   ``prev_value``, a ``felt`` representing the current value of a key-value pair.
+-   ``new_value``, a ``felt`` representing the value to replace ``prev_value``.
 
 .. tested-code:: cairo library_dict_update
 
     from starkware.cairo.common.dict import dict_update
+    from starkware.cairo.common.dict_access import DictAccess
 
-    dict_update{dict_ptr : DictAccess*}(
-        key : felt,
-        prev_value : felt,
-        new_value : felt)
+    dict_update{dict_ptr}(key, prev_value, new_value)
 
 ``dict_squash()``
 *****************
 
-Returns a dictionary that represents the the final state of an altered dictionary.
-A dictionary that has been updated and that has had all intermediate steps removed.
-The squashed dictionary contains one value per key. The function requires
-``range_check_pointer`` as an implicit argument.
+Returns a dictionary that represents the the final state of a modified dictionary.
+A squashed dictionary is one whose intermediate updates have been summarized and
+finalized. The function requires ``range_check_pointer`` as an implicit argument.
+
+The function accepts two explicit arguments:
+
+-   ``dict_accesses_start``, a ``DictAccess*`` representing the an instance of the dictionary
+    before updates were applied.
+-   ``dict_accesses_end``, a ``DictAccess*`` representing the final instance of the dictionary.
+
+The function returns two arguments:
+
+-   ``squashed_dict_start``, a ``DictAccess*`` representing the first instance of the dictionary.
+    This could be used as the ``dict_accesses_start`` argument for a subsequent ``dict_squash``.
+-   ``squashed_dict_end``, a ``DictAccess*`` representing the final instance of the dictionary.
+    Values accessed from this pointer will return the most recent dictionary state.
 
 .. tested-code:: cairo library_dict_squash
 
     from starkware.cairo.common.dict import dict_squash
 
     let (squashed_dict_start, squashed_dict_end) = dict_squash(
-        dict_accesses_start : DictAccess*
-        dict_accesses_end : DictAccess*)
+        dict_accesses_start, dict_accesses_end)
+
+.. _common_library_dict_access:
 
 ``dict_access``
 ---------------
 
-This section contains a struct from the ``dict_access`` library.
+This section refers to the common library's
+`common_dict_access <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/dict_access.cairo>`_
+module.
 
 ``DictAccess``
 **************
 
-Returns a new struct that is used in other dictionary-related functions.
+Returns a struct ``DictAccess`` that is used to represent the basic dictionary element.
+A modified dictionary is composed of a sequence of intermediate ``DictAccess`` instances,
+where each instance consists of a key and the previous and new values for that
+modification. A pointer to an instance, ``DictAccess*``, is useful to declare the type
+of an argument. Such an argument can be used to access the whole dictionary, which occupies
+sequential memory cells.
+
+The ``DictAccess`` struct has members:
+
+-   ``key``, a ``felt`` representing the key.
+-   ``prev_value``, a ``felt`` representing the previous value.
+-   ``new_value``, a ``felt`` representing the curent value.
+
+In the example below, a dictionary called ``dict_start`` is initialized with an expandable
+memory to accomodate modifications. Each new modification would append a new ``DictAccess``
+instance to that section of memory. ``dict_start`` is a local variable assigned to
+a pointer to the beginning of the first ``DictAccess`` instance of that dictionary.
 
 .. tested-code:: cairo library_dictaccess
 
-from starkware.cairo.common.dict_access import DictAccess
+    from starkware.cairo.common.dict_access import DictAccess
+    from starkware.cairo.common.alloc import alloc
 
-    alloc_locals
-    local (new_dict : DictAccess)
-
-.. .. _common_library_dict_access:
-
-..  ``dict_access``
-..  ---------------
-
-..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's
-    `common_dict_access <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/dict_access.cairo>`_
-    module.
+    let (local dict_start : DictAccess*) = alloc()
 
 .. .. _common_library_find_element:
 
