@@ -135,13 +135,14 @@ arrays. As more elements are added, more memory will be allocated.
 
 .. .. _common_library_find_element:
 
-..  ``find_element``
-..  ----------------
+``find_element``
+----------------
 
-..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's
-    `common_find_element <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/find_element.cairo>`_
-    module.
+This section refers to the common library's
+`common_find_element <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/find_element.cairo>`_
+module.
+
+
 
 ``search_sorted_lower()``
 *************************
@@ -149,7 +150,7 @@ arrays. As more elements are added, more memory will be allocated.
 Returns the pointer to the first element in the array whose first field is at least ``key``.
 The array elements must be sorted by first field in ascending order. For an array containing
 structs, the first field of each element corresponds to the first member. If no such item exists,
-returns a pointer to the end of the array. The function requires the implicit argument
+it returns a pointer to the end of the array. The function requires the implicit argument
 ``range_check_ptr``.
 
 The function accepts the arguments:
