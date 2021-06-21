@@ -165,9 +165,8 @@ The function returns:
 
 -  ``elm_ptr``, the pointer to an element, where ``[elm_ptr]`` is the value of the element.
 
-This function behaves similarly to ``find_element()``, and accepts the same arguments, except the
-key is used in a slightly different way. In the example below, the function identifies the first
-element that has a first field value of at least ``95``.
+In the example below, the function identifies the first element that has a first field value
+of at least ``95``.
 
 .. tested-code:: cairo library_search_sorted_lower
 
@@ -198,7 +197,7 @@ The function returns:
 
 -  ``elm_ptr``, the pointer to an element, where ``[elm_ptr]`` is the value of the element.
 -  ``success``, a ``felt`` value where ``1`` indicates that the array contains an element whose
-    first field matches ``key``, and ``0`` indicates that it does not.
+    first field matches ``key``, and ``0`` indicates that it does not contain such an element.
 
 This function behaves similarly to ``find_element()``, and accepts the same arguments, except the
 key is used in a slightly different way. In the example below, the function will identify the
