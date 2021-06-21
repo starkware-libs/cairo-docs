@@ -194,6 +194,47 @@ The offset can be retrieved using ``MyStruct.member_name``.
 For example, ``MyStruct.first_member == 0`` and ``MyStruct.second_member == 1``
 (since the size of ``felt`` is 1).
 
+Pointers
+--------
+
+A pointer is used to signify the address of the first field element in the memory of an element.
+The pointer can be used to access the element in an efficient manner. For example, a function
+may accept a pointer as an argument, and then access the element at the address of the pointer.
+The following example shows how to use this type of expression to access a tuple element:
+
+.. tested-code:: cairo syntax_pointer
+
+    from starkware.cairo.common.registers import get_fp_and_pc
+
+    # Accepts a pointer called my_tuple.
+    func foo(my_tuple : felt*):
+        # 'my_tuple' points to the 'numbers' tuple.
+        let a = my_tuple[1]  # a = 2
+        return ()
+    end
+
+    func main():
+        alloc_locals
+        # Get the value of the fp register.
+        let (__fp__, _) = get_fp_and_pc()
+        # Define a tuple.
+        local numbers : (felt, felt, felt) = (1, 2, 3)
+        # Send the address of the 'numbers' tuple.
+        foo(&numbers)
+        return ()
+    end
+
+.. test::
+
+    from starkware.cairo.lang.compiler.cairo_compile import compile_cairo
+
+    PRIME = 2**64 + 13
+    code = codes['syntax_pointer']
+    compile_cairo(code, PRIME)
+
+The above example shows how ``foo()`` accepts a pointer, which is then used to access the tuple.
+Passing an argument as a pointer, instead of by value, may be cheaper.
+
 Struct constructor
 ------------------
 
@@ -310,7 +351,6 @@ A function must end with a ``return`` statement, which takes the following form:
 .. tested-code:: cairo syntax_function_return
 
     return (ret1=val1, ret2=val2)
-
 
 Call statement
 --------------
