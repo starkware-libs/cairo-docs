@@ -162,8 +162,9 @@ The function requires four explicit arguments:
 
 The function returns:
 
--   ``elm_ptr``, the pointer to an element whose first memory cell is ``key``, or raises an
-    exception if the value (``key``) is not found.
+-   ``elm_ptr``, the pointer to an element whose first memory cell is ``key``, where
+    ``[elm_ptr]`` is the value of the element. An exception is raised if the
+    value (``key``) is not found.
 
     -   For an array of ``felt`` elements, this memory cell is a ``felt``. In this way,
         ``find_element()`` finds a felt by its value.
