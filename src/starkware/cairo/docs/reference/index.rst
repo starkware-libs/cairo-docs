@@ -8,5 +8,5 @@ Brief descriptions and implementation details for commonly used components in Ca
 .. toctree::
     :maxdepth: 2
 
-   syntax
-   common_library
+    syntax
+    common_library
