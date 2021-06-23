@@ -109,18 +109,17 @@ arrays. As more elements are added, more memory will be allocated.
 ----------------
 
 This section refers to the common library's
-`common_default_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/default_dict.cairo>`_
+`default_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/default_dict.cairo>`_
 module.
 
 ``default_dict_new()``
 **********************
 
-Returns a new dictionary, with a default value. Must be followed by a call to
-``default_dict_finalize()``. Default dictionaries are useful where access to
-create dictionaries where all keys have the same value (``default_value``).
-The dictionary can be initialised using a hint with the special ``initial_dict``
-expression declaring a dictionary. Default dictionaries are useful for efficient
+Returns a new dictionary, with a default value. At the end of using the dictionary,
+``default_dict_finalize()`` must be called. Default dictionaries are useful for efficient
 population of a dictionary where many keys have the same value.
+The dictionary can be initialized without using a hint, compared with ``dict_new()``,
+which requires a one.
 
 The function requires the explicit argument:
 
