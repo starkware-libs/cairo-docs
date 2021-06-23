@@ -135,7 +135,7 @@ to track the next available builtin instance.
 The struct has the following members of type ``felt``:
 
 -   ``pub_key``, an ECDSA public key.
--   ``message``, a message signed by the ``pub_Key``.
+-   ``message``, a message signed by the ``pub_key``.
 
 A pointer to the ``ecdsa`` builtin, ``ecdsa_ptr``, has the type ``SignatureBuiltin*``.
 
