@@ -11,9 +11,9 @@ for use in any Cairo program.
 The libraries available are listed below, organized alphabetically. The functions
 within each library are outlined under the relevant library heading.
 
--   :ref:`common_library_alloc`
--   :ref:`common_library_dict`
--   :ref:`common_library_dict_access`
+-   :ref:`common_library_alloc`.
+-   :ref:`common_library_dict`.
+-   :ref:`common_library_dict_access`.
 
 ..  TODO (perama, 16/06/2021): Move the link above when the section is complete.
     -   :ref:`common_library_cairo_builtins`
@@ -129,47 +129,67 @@ module.
 
 Updates the value of a particular key in a dictionary. Must be passed an
 implicit argument, ``dict_ptr``, of type ``DictAccess*``, representing a pointer
-to the dictionary to be updated. No values are returned.
+to the dictionary to be updated. No arguments are returned.
 
-The function accepts three explicit arguments:
+The function accepts the explicit arguments of type ``felt``:
 
--   ``key``, a ``felt`` representing the key of a key-value pair.
--   ``prev_value``, a ``felt`` representing the current value of a key-value pair.
--   ``new_value``, a ``felt`` representing the value to replace ``prev_value``.
+-   ``key``, the key of a key-value pair.
+-   ``prev_value``, the current value assigned to ``key``.
+-   ``new_value``, the value to be assigned to ``key``.
+
+It is possible to get ``prev_value`` from ``__dict_manager`` using the hint:
+```
+%{ ids.new_value = __dict_manager.get_dict(ids.dict_ptr)[ids.key] %}
+```
+
+The example shows how, for a dictionary whose pointer is ``my_dict``,
+the value of a specified key can be updated.
 
 .. tested-code:: cairo library_dict_update
 
     from starkware.cairo.common.dict import dict_update
     from starkware.cairo.common.dict_access import DictAccess
 
-    dict_update{dict_ptr}(key, prev_value, new_value)
+    # my_dict has key:val pairs {5: 8, 12: 35, 33: 198}.
+
+    # The value associated with key=12 is changed.
+    dict_update{dict_ptr=my_dict}(12, 35, 34)
+
+    # my_dict has key:val pairs {1: 2, 5: 8, 12: 34, 33: 198}.
+
+Unlike ``dict_write()``, this function does not allow new keys to be added to the
+dictionary.
 
 ``dict_squash()``
 *****************
 
-Returns a dictionary that represents the the final state of a modified dictionary.
+Creates a dictionary that represents the the final state of a modified dictionary.
 A squashed dictionary is one whose intermediate updates have been summarized and
-finalized. The function requires ``range_check_pointer`` as an implicit argument.
+finalized. The function requires ``range_check_pointer``, of type ``DictAcess*``
+as an implicit argument. Squashing allows for the dictionary to be read from.
 
-The function accepts two explicit arguments:
+The function accepts the explicit arguments of type ``DictAccess*``:
 
--   ``dict_accesses_start``, a ``DictAccess*`` representing the an instance of the dictionary
-    before updates were applied.
--   ``dict_accesses_end``, a ``DictAccess*`` representing the final instance of the dictionary.
+-   ``dict_accesses_start``, a pointer to the initial dictionary state.
+-   ``dict_accesses_end``, a pointer to the latest dictionary state.
 
-The function returns two arguments:
+The function returns two arguments of type ``DictAccess*``:
 
--   ``squashed_dict_start``, a ``DictAccess*`` representing the first instance of the dictionary.
-    This could be used as the ``dict_accesses_start`` argument for a subsequent ``dict_squash``.
--   ``squashed_dict_end``, a ``DictAccess*`` representing the final instance of the dictionary.
-    Values accessed from this pointer will return the most recent dictionary state.
+-   ``squashed_dict_start``, a pointer to the initial dictionary state.
+-   ``squashed_dict_end``, a pointer to the latest dictionary state.
+
+In order for the initial state to be available to pass to the function,
+it is convention to save the state before updates are applied.
+In the example below, ``my_dict_saved`` is a reference to the the dictionary state
+that was made prior to updates being applied.
 
 .. tested-code:: cairo library_dict_squash
 
     from starkware.cairo.common.dict import dict_squash
 
     let (squashed_dict_start, squashed_dict_end) = dict_squash(
-        dict_accesses_start, dict_accesses_end)
+        dict_accesses_start=my_dict_saved,
+        dict_accesses_end=my_dict)
 
 .. _common_library_dict_access:
 
@@ -183,18 +203,20 @@ module.
 ``DictAccess``
 **************
 
-Returns a struct ``DictAccess`` that is used to represent the basic dictionary element.
-A modified dictionary is composed of a sequence of intermediate ``DictAccess`` instances,
-where each instance consists of a key and the previous and new values for that
-modification. A pointer to an instance, ``DictAccess*``, is useful to declare the type
-of an argument. Such an argument can be used to access the whole dictionary, which occupies
-sequential memory cells.
+A struct specifying the ``DictAccess`` memory structure.
+This struct is used by functions from the common library that use dictionaries.
+For example, the ``dict_read()`` function accepts an implicit argument ``dict_ptr``
+of type ``DictAccess*``, which is used to locate the dictionary in memory.
 
-The ``DictAccess`` struct has members:
+A modified dictionary is composed of a sequence of "intermediate" ``DictAccess`` instances.
+Each instance consists of a key, the previous value and the new value assigned during
+a particular modification.
 
--   ``key``, a ``felt`` representing the key.
--   ``prev_value``, a ``felt`` representing the previous value.
--   ``new_value``, a ``felt`` representing the curent value.
+The struct has the following members of type ``felt``:
+
+-   ``key``, the key of a key-value pair.
+-   ``prev_value``, the previous value of a key-value pair.
+-   ``new_value``, the current value of a key-value pair.
 
 In the example below, a dictionary called ``dict_start`` is initialized with an expandable
 memory to accomodate modifications. Each new modification would append a new ``DictAccess``
