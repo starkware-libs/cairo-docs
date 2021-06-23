@@ -12,7 +12,7 @@ The libraries available are listed below, organized alphabetically. The function
 within each library are outlined under the relevant library heading.
 
 -   :ref:`common_library_alloc`.
--   :ref:`common_library_cairo_builtins`
+-   :ref:`common_library_cairo_builtins`.
 
 ..  TODO (perama, 16/06/2021): Move the link above when the section is complete.
     -   :ref:`common_library_default_dict`
@@ -105,61 +105,39 @@ module.
 ``HashBuiltin``
 ***************
 
-Returns a representation of a ``HashBuiltin`` struct, specifying the hash builtin memory structure.
-This struct is used by functions from the common library to represent the elements to be
-hashed. For example, the ``hash2()`` function accepts an implicit argument of type
-``HashBuiltin*``, which is used internally to enable hashes to be tracked within a Cairo program.
+A struct specifying the hash builtin memory structure.
+This struct is used by functions from the common library that use a hash builtin,
+such as the ``pedersen`` builtin. For example, the ``hash2()`` function accepts an implicit
+argument of type ``HashBuiltin*``, which is used internally to track the next available
+builtin instance.
 
-The struct has the following members:
+..  TODO (perama, 23/06/2021): Add link to hash2() module.
 
--   ``x``, a ``felt``.
--   ``y``, a ``felt``.
--   ``result``, a ``felt`` representing the hash of ``x`` and ``y``.
+The struct has the following members of type ``felt``:
 
-In the example below, ``foo()`` accepts two numbers and returns their Pedersen
-hash ``hash(a, b)``.
+-   ``x``, the first input being hashed.
+-   ``y``, the second input being hashed.
+-   ``result`` -- the hash of ``x`` and ``y``.
 
-.. tested-code:: cairo library_builtins_hashbuiltin
-
-    from starkware.cairo.common.cairo_builtins import HashBuiltin
-    from starkware.cairo.common.hash import hash2
-
-    func foo{hash_ptr : HashBuiltin*}(a : felt, b : felt) -> (hash):
-        # hash_ptr is a pointer to a HashBuiltin struct.
-        # It is passed implicitly to hash2().
-        let (my_hash) = hash2(a, b)
-        return (hash=my_hash)
-    end
+A pointer to the ``pedersen`` builtin, ``pedersen_ptr``, has the type ``HashBuiltin*``.
 
 ``SignatureBuiltin``
 ********************
 
-Returns a representation of a ``SignatureBuiltin`` struct, specifying the signature
-builtin memory structure. This struct is used by functions from the common library to represent
-the elements to be hashed. For example, the ``verify_ecdsa_signature()`` function accepts an
-implicit argument of type ``SignatureBulitin*``, which is used internally to enable
-signatures to be tracked within a Cairo program.
+A struct specifying the signature builtin memory structure.
+This struct is used by functions from the common library that use a signature builtin,
+such as the ``ecdsa`` builtin. For example, the ``verify_ecdsa_signature()`` function
+accepts an implicit argument of type ``SignatureBulitin*``, which is used internally
+to track the next available builtin instance.
 
--   ``pub_key``, a ``felt`` representing an ECDSA public key.
--   ``message``, a ``felt`` representing a message signed by the ``pub_Key``.
+..  TODO (perama, 23/06/2021): Add link to verify_ecdsa_signature() module.
 
-.. tested-code:: cairo library_builtins_signaturebuiltin
+The struct has the following members of type ``felt``:
 
-    from starkware.cairo.common.cairo_builtins import (
-        SignatureBuiltin)
-    from starkware.cairo.common.signature import (
-        verify_ecdsa_signature)
+-   ``pub_key``, an ECDSA public key.
+-   ``message``, a message signed by the ``pub_Key``.
 
-    func foo{ecdsa_ptr : SignatureBuiltin*}(msg, pubkey, r, s):
-        # ecdsa_ptr is a pointer to a SignatureBuiltin struct.
-        # It is passed implicitly to the function below.
-        verify_ecdsa_signature(
-            message=msg,
-            public_key=vote_info_ptr.pub_key,
-            signature_r=vote_info_ptr.r,
-            signature_s=vote_info_ptr.s)
-        return ()
-    end
+A pointer to the ``ecdsa`` builtin, ``ecdsa_ptr``, has the type ``SignatureBuiltin*``.
 
 .. .. _common_library_default_dict:
 
