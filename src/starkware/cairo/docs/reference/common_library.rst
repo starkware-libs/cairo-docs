@@ -11,8 +11,8 @@ for use in any Cairo program.
 The libraries available are listed below, organized alphabetically. The functions
 within each library are outlined under the relevant library heading.
 
--   :ref:`common_library_alloc`
--   :ref:`common_library_default_dict`
+-   :ref:`common_library_alloc`.
+-   :ref:`common_library_default_dict`.
 
 ..  TODO (perama, 16/06/2021): Move the link above when the section is complete.
     -   :ref:`common_library_cairo_builtins`
@@ -119,15 +119,16 @@ Returns a new dictionary, with a default value. Must be followed by a call to
 ``default_dict_finalize()``. Default dictionaries are useful where access to
 create dictionaries where all keys have the same value (``default_value``).
 The dictionary can be initialised using a hint with the special ``initial_dict``
-expression declaring a dictionary.
+expression declaring a dictionary. Default dictionaries are useful for efficient
+population of a dictionary where many keys have the same value.
 
-The function requires one explicit argument:
+The function requires the explicit argument:
 
--   ``default_value``, a ``felt`` that will be set for all keys.
+-   ``default_value``, of type ``felt``, the value that will be set for all keys.
 
 The function returns:
 
--   ``res``, a pointer to a ``DictAccess`` struct.
+-   ``res``, of type ``DictAccess*``, a pointer to a the new dictionary.
 
 In the code below, an empty default dictionary is made and finalized.
 The values provided in the hint are replaced by the default value.
@@ -144,11 +145,8 @@ The values provided in the hint are replaced by the default value.
         57: 9
         }
     %}
-    # Create a new default dict. Values are overriden by "7".
-    # Initial dictionary: {17: 7, 57: 7}.
-    let (local my_dict) = default_dict_new(7)
-    # Dictionary must be now finalized
-    # with a call to default_dict_finalize()
+    # A new default dict. Values 35 and 9 are overriden by 7.
+    let (local my_dict) = default_dict_new(7)  # {17: 7, 57: 7}.
 
 ``default_dict_finalize()``
 ***************************
@@ -159,20 +157,28 @@ are sequentially applied and a new dictionary is returned with the final values.
 The value of ``default_value`` in the original call to ``default_dict_new()`` is
 checked ensure it matches that supplied in this function call.
 
-The function requires three explicit arguments:
+The function requires the explicit arguments:
 
--   ``dict_accesses_start``, a pointer ``DictAccess*``, to the initial value of the dictionary.
--   ``dict_accesses_end``, a pointer ``DictAccess*``, to the latest value of the dictionary.
--   ``default_value``, the default value specified when this dictionary was created.
+-   ``dict_accesses_start``, of type ``DictAccess*``, a pointer to the initial
+    dictionary instance.
+-   ``dict_accesses_end``, of type ``DictAccess*``, a pointer to the latest
+    value of the dictionary.
+-   ``default_value``, of type ``felt``, the default value specified when the
+    dictionary was created.
 
-The function returns:
+The function returns the arguments:
 
--   ``squashed_dict_start``, a pointer to the initial state of the dictionary.
--   ``squashed_dict_end``, a pointer to the final state of the dictionary.
+-   ``squashed_dict_start``, of type ``DictAccess*``, a pointer to the initial state
+    of the dictionary.
+-   ``squashed_dict_end``, of type ``DictAccess*``, a pointer to the final state
+    of the dictionary.
 
-The code below is the missing code from the example in ``default_dict_new``.
-The value of ``val`` is trusted because it is after the function that finalizes
-the dictionary, which verifies that the default values were applied.
+In order for the program to verify that the prover used the specified default value
+for a call to ``default_dict_new()``, ``default_dict_finalize()`` is required.
+The function asserts that each value is equal to the supplied ``default_value``.
+
+In the example below, ``my_dict`` is the output of a previous call to
+``default_dict_new`` with a``default_value`` of ``7``.
 
 .. tested-code:: cairo library_default_dict_finalize
 
@@ -180,9 +186,8 @@ the dictionary, which verifies that the default values were applied.
         default_dict_finalize)
     from starkware.cairo.common.dict import dict_read
 
-    # Code that creates the default dict here.
-    # Finalize dict, ensuring that the initial values are all "7".
-    let (local old, my_dict_final) = default_dict_finalize(
+    # Finalize, ensuring that the values are all 7.
+    let (local original, my_dict_final) = default_dict_finalize(
         my_dict, my_dict, 7)
     # Equivalent to: let val = 7.
     let (local val : felt) = dict_read{dict_ptr=my_dict_final}(57)
