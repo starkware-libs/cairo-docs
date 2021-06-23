@@ -194,7 +194,8 @@ The function accepts the explicit arguments:
 
 The example below shows how, for an existing dictionary whose pointer is ``my_dict``,
 the value associated with the key ``12`` can be changed from ``35`` to ``34``.
-Note how the pointer ``my_dict`` is passed as an implicit argument.
+A new key-value pair is then added. Note how the pointer ``my_dict`` is passed
+as an implicit argument.
 
 .. tested-code:: cairo library_dict_write
 
@@ -204,8 +205,9 @@ Note how the pointer ``my_dict`` is passed as an implicit argument.
 
     # The value associated with key=12 is changed.
     dict_write{dict_ptr=my_dict}(12, 34)
+    dict_write{dict_ptr=my_dict}(1, 2)
 
-    # my_dict has key:val pairs {5: 8, 12: 34, 33: 198}.
+    # my_dict has key:val pairs {1: 2, 5: 8, 12: 34, 33: 198}.
 
 .. .. _common_library_dict_access:
 
