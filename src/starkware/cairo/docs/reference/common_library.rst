@@ -119,7 +119,7 @@ Returns a new dictionary, with a default value. At the end of using the dictiona
 ``default_dict_finalize()`` must be called. Default dictionaries are useful for efficient
 population of a dictionary where many keys have the same value.
 The dictionary can be initialized without using a hint, compared with ``dict_new()``,
-which requires a one.
+which requires a hint.
 
 The function requires the explicit argument:
 
