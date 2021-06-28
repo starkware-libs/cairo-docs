@@ -126,17 +126,16 @@ See :ref:`revoked_references` for more information.
 
 .. tested-code:: cairo syntax_revoked_references
 
-    func foo():
-        let x = 0
-
-        # The Prover may choose to enter the if or the else statement.
+    func foo(x):
+        # The compiler cannot deduce whether the if or the else
+        # block will be executed.
         if x == 0:
             let a = 23
         else:
             let a = 8
         end
 
-        # "a" cannot be accessed, because it has
+        # 'a' cannot be accessed, because it has
         # conflicting values: 23 vs 8.
 
         return ()
@@ -259,9 +258,9 @@ Where ``A`` is a struct with members ``v`` and ``w`` and ``B`` is a struct with 
 Arrays
 ------
 
-Arrays can be defined as a pointer (``felt*``) to the first element in the memory. As an array is
+Arrays can be defined as a pointer (``felt*``) to the first element of the array. As an array is
 populated, the elements take up contiguous memory cells. The ``alloc()`` function is used to
-define a memory segment that can be used to allocate more memory for each new element in the array.
+define a memory segment that expands its size whenever each new element in the array is written.
 
 .. tested-code:: cairo syntax_array
 
@@ -272,8 +271,8 @@ define a memory segment that can be used to allocate more memory for each new el
     # An array of structs.
     let (local struct_array : MyStruct*) = alloc()
     # Populate the first element with a struct.
-    assert struct_array[0] = MyStruct(first_member=1,
-        second_member=2)
+    assert struct_array[0] = MyStruct(
+        first_member=1, second_member=2)
 
 .. test::
 
@@ -281,13 +280,21 @@ define a memory segment that can be used to allocate more memory for each new el
 
     PRIME = 2**64 + 13
     code = codes['syntax_array']
-    code = f'''struct MyStruct: \n member first_member : felt
-        \n member second_member : felt \n end
-        \n func main(): \n alloc_locals \n {code} \n ret \n end
-        '''
+    code = f"""
+        struct MyStruct:
+            member first_member : felt
+            member second_member : felt
+        end
+        func main():
+            alloc_locals
+            {code}
+            ret
+        end
+    """
     program = compile_cairo(code, PRIME)
 
-Each element uses the same quantity of memory and may be accessed by a zero based index as follows:
+Each element uses the same amount of memory cells and may be accessed by a zero based index
+as follows:
 
 .. tested-code:: cairo array_index
 
@@ -295,8 +302,8 @@ Each element uses the same quantity of memory and may be accessed by a zero base
 
     let a = struct_array[1].first_member  # (2)
 
-Where: (1) the third element in the array is set to the ``felt`` ``85``, and (2) ``a`` is bound to
-a value from the second struct in the array of structs.
+Where: (1) the third element in the array is bound to the ``felt`` ``85``, and (2) ``a``
+is bound to a value from the second struct in the array of structs.
 
 .. _syntax_tuples:
 
@@ -329,6 +336,7 @@ nested tuple elements as shown below.
 .. test::
 
     from starkware.cairo.lang.compiler.cairo_compile import compile_cairo
+
     PRIME = 2**64 + 13
     code = codes['syntax_tuples']
     code = f'func main():\n alloc_locals \n {code}\n ret \n end'
