@@ -288,6 +288,8 @@ pointer types are are listed below:
 
 -   ``ecdsa``, a builtin with pointer ``ecdsa_ptr`` and pointer type ``SignatureBuiltin*``
     (a pointer to a struct defined in the ``cairo_builtins`` common library).
+-   ``bitwise``, a builtin with pointer ``bitwise_ptr`` and pointer type ``BitWiseBuiltin*``
+    (a pointer to a struct defined in the ``cairo_builtins`` common library).
 -   ``output``, a builtin with pointer ``output_ptr`` and pointer type ``felt*``.
 -   ``pedersen``, a builtin with pointer ``pedersen_ptr`` and pointer type ``HashBuiltin*``
      (a pointer to a struct defined in the ``cairo_builtins`` common library).
