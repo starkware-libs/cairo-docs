@@ -102,6 +102,27 @@ This section refers to the common library's
 `cairo_builtins <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/cairo_builtins.cairo>`_
 module.
 
+``BitWiseBuiltin``
+******************
+
+A struct specifying the bitwise builtin memory structure.
+This struct is used by functions from the common library that use the ``bitwise`` builtin.
+For example, the ``bitwise_xor()`` function accepts an implicit
+argument of type ``BitWiseBuiltin*``, which is used internally to track the next available
+builtin instance. See the function
+`here <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/bitwise.cairo>`__.
+
+The struct has the following members of type ``felt``:
+
+-   ``x``, the first oprand.
+-   ``y``, the second operand.
+-   ``x_and_y``, the result of bitwise AND operation on x and y.
+-   ``x_xor_y``, the result of bitwise XOR operation on x and y.
+-   ``x_or_y``, the result of bitwise OR operation on x and y.
+
+A pointer to the ``bitwise`` builtin, ``bitwise_ptr``, has the type ``BitWiseBuiltin*``.
+
+
 ``HashBuiltin``
 ***************
 
@@ -109,9 +130,8 @@ A struct specifying the hash builtin memory structure.
 This struct is used by functions from the common library that use a hash builtin,
 such as the ``pedersen`` builtin. For example, the ``hash2()`` function accepts an implicit
 argument of type ``HashBuiltin*``, which is used internally to track the next available
-builtin instance.
-
-..  TODO (perama, 23/06/2021): Add link to hash2() module.
+builtin instance. See the function
+`here <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/hash.cairo>`__.
 
 The struct has the following members of type ``felt``:
 
@@ -128,9 +148,8 @@ A struct specifying the signature builtin memory structure.
 This struct is used by functions from the common library that use a signature builtin,
 such as the ``ecdsa`` builtin. For example, the ``verify_ecdsa_signature()`` function
 accepts an implicit argument of type ``SignatureBulitin*``, which is used internally
-to track the next available builtin instance.
-
-..  TODO (perama, 23/06/2021): Add link to verify_ecdsa_signature() module.
+to track the next available builtin instance. See the function
+`here <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/signature.cairo>`__.
 
 The struct has the following members of type ``felt``:
 
