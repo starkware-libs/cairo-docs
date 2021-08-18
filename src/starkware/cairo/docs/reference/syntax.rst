@@ -266,7 +266,7 @@ define a memory segment that expands its size whenever each new element in the a
 
     from starkware.cairo.common.alloc import alloc
 
-    # An array of integers.
+    # An array of felts.
     local felt_array : felt*
     # An array of structs.
     let (local struct_array : MyStruct*) = alloc()
