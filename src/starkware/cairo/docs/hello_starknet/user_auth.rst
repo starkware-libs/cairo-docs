@@ -69,6 +69,7 @@ and add the following import statement:
         HashBuiltin, SignatureBuiltin)
     from starkware.cairo.common.signature import (
         verify_ecdsa_signature)
+    from starkware.cairo.common.hash import hash2
     from starkware.starknet.common.storage import Storage
 
 Next, we will change the code of ``increase_balance()`` to:
@@ -81,9 +82,13 @@ Next, we will change the code of ``increase_balance()`` to:
             storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
             range_check_ptr, ecdsa_ptr : SignatureBuiltin*}(
             user : felt, amount : felt, sig_r : felt, sig_s : felt):
+        # Compute the hash of the message.
+        # hash of (x, 0) is equivalent to hash of (x).
+        let (amount_hash) = hash2{hash_ptr=pedersen_ptr}(amount, 0)
+
         # Verify the user's signature.
         verify_ecdsa_signature(
-            message=amount,
+            message=amount_hash,
             public_key=user,
             signature_r=sig_r,
             signature_s=sig_s)
