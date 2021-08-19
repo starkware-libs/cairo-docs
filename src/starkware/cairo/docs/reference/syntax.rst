@@ -177,11 +177,13 @@ any additional paths specified at compile time. See :ref:`import_search_path` fo
 Jumps
 -----
 
-Cairo programs can include special branch points in code called jumps. The prover may choose to
-follow the jump instructions to arrive at a valid proof more readily, but they do not necessarily
-have to do so. Jumps contain a ``jump`` expression and a ``destination``. Jumps may be conditional.
+Cairo programs can include branch points in code called jumps.
+Jumps contain a ``jump`` expression and a ``destination``. They may also be conditional.
 A conditional jump contains all of the following: A ``jump`` expression, a ``case_not_met`` name,
 a ``case_met_name`` and an ``if`` statement.
+
+Where the jump condition depends on a value that is determined by the Prover, that value
+will also determine if the jump is executed.
 
 .. tested-code:: cairo syntax_jumps
 
