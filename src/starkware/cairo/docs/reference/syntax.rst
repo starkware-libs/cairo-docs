@@ -302,7 +302,7 @@ as follows:
 
     let a = struct_array[1].first_member  # (2)
 
-Where: (1) the third element in the array is bound to the ``felt`` ``85``, and (2) ``a``
+Where: (1) the third element in the array is assigned to the value ``85``, and (2) ``a``
 is bound to a value from the second struct in the array of structs.
 
 .. _syntax_tuples:
