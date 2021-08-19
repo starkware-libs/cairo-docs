@@ -1,3 +1,5 @@
+.. _user_authentication:
+
 Adding User Authentication
 ==========================
 
@@ -27,10 +29,14 @@ The functions ``balance.read()`` and ``balance.write()`` will now have the follo
 
 .. code-block:: cairo
 
-    func read{storage_ptr : Storage*, pedersen_ptr : HashBuiltin*}(
+    func read{
+            storage_ptr : Storage*, range_check_ptr,
+            pedersen_ptr : HashBuiltin*}(
         user : felt) -> (res : felt)
 
-    func write{storage_ptr : Storage*, pedersen_ptr : HashBuiltin*}(
+    func write{
+            storage_ptr : Storage*, range_check_ptr,
+            pedersen_ptr : HashBuiltin*}(
         user : felt, value : felt)
 
 Note that the default value of all the entries in the map is 0.
@@ -48,11 +54,12 @@ which is natively supported in Cairo.
 For technical details about this cryptographic primitive see
 `STARK Curve <https://docs.starkware.co/starkex-docs/crypto/stark-curve>`_.
 
-We will need the ``ecdsa`` builtin to verify the signature, so change the ``%builtins`` line to:
+We will need the ``ecdsa`` builtin to verify the signature, so we will change the ``%builtins``
+line to:
 
 .. tested-code:: cairo user_auth_builtins
 
-    %builtins pedersen ecdsa
+    %builtins pedersen range_check ecdsa
 
 and add the following import statement:
 
@@ -63,7 +70,7 @@ and add the following import statement:
     from starkware.cairo.common.signature import (
         verify_ecdsa_signature)
 
-Next, change the code of ``increase_balance()`` to:
+Next, we will change the code of ``increase_balance()`` to:
 
 .. tested-code:: cairo user_auth_increase_balance
 
@@ -71,7 +78,7 @@ Next, change the code of ``increase_balance()`` to:
     @external
     func increase_balance{
             storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
-            ecdsa_ptr : SignatureBuiltin*}(
+            range_check_ptr, ecdsa_ptr : SignatureBuiltin*}(
             user : felt, amount : felt, sig_r : felt, sig_s : felt):
         # Verify the user's signature.
         verify_ecdsa_signature(
@@ -84,6 +91,9 @@ Next, change the code of ``increase_balance()`` to:
         balance.write(user, res + amount)
         return ()
     end
+
+``verify_ecdsa_signature`` behaves like an assert -- in case the signature is invalid, the function
+will revert the entire transaction.
 
 Note that we don't handle replay attacks here -- once the user signs a transaction
 someone may call it multiple times. One way to prevent replay attacks is to
@@ -102,8 +112,8 @@ so the change is simpler:
     # Returns the balance of the given user.
     @view
     func get_balance{
-            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*}(
-            user : felt) -> (res : felt):
+            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
+            range_check_ptr}(user : felt) -> (res : felt):
         let (res) = balance.read(user=user)
         return (res)
     end
@@ -119,8 +129,8 @@ Compile and deploy the file:
 .. tested-code:: bash user_auth_compile_starknet
 
     starknet-compile user_auth.cairo \
-        --output=user_auth_compiled.json \
-        --abi=user_auth_abi.json
+        --output user_auth_compiled.json \
+        --abi user_auth_abi.json
 
     starknet deploy --contract user_auth_compiled.json
 
@@ -153,6 +163,8 @@ You should get:
 
 Now, let's update the balance:
 
+.. _user_auth_increase_balance:
+
 .. tested-code:: bash user_auth_invoke
 
     starknet invoke \
@@ -169,7 +181,7 @@ You can query the transaction status:
 
 .. tested-code:: bash user_auth_tx_status
 
-    starknet tx_status --id=TX_ID
+    starknet tx_status --id TX_ID
 
 Finally, after the transaction is executed (status ``PENDING`` or ``ACCEPTED_ONCHAIN``)
 we may query the user's balance.
@@ -188,6 +200,89 @@ You should get:
 
     4321
 
+Note that if you want to use the :ref:`get_storage_at` CLI command to query the balance of a
+specific user, you can no longer compute the relevant key by only supplying the name of the storage
+variable. That is because the balance storage variable now requires an additional argument, namely,
+the user key. Hence, you will need to supply the additional arguments when acquiring the key used in
+``get_storage_at``. In our case, this translates to the following python code:
+
+.. tested-code:: python user_auth_balance_key
+
+    from starkware.starknet.public.abi import get_storage_var_address
+
+    user = 1628448741648245036800002906075225705100596136133912895015035902954123957052
+    user_balance_key = get_storage_var_address('balance', user)
+    print(f'Storage key for user {user}:\n{user_balance_key}')
+
+You should get:
+
+.. tested-code:: none user_auth_balance_key_output
+
+    Storage key for user 1628448741648245036800002906075225705100596136133912895015035902954123957052:
+    142452623821144136554572927896792266630776240502820879601186867231282346767
+
+What if we have an invalid signature?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To examine this case, we will modify the signature we obtained before by changing its second
+component to 1, and then invoke ``increase_balance()`` again with this invalid signature:
+
+.. tested-code:: bash user_auth_invalid_signature
+
+    starknet invoke \
+        --address CONTRACT_ADDRESS \
+        --abi user_auth_abi.json \
+        --function increase_balance \
+        --inputs \
+            1628448741648245036800002906075225705100596136133912895015035902954123957052 \
+            4321 \
+            2620967193230873397198710803425457084022525354559824107385923461037870205486 \
+            1
+
+After this, when querying the transaction status, you should get:
+
+.. tested-code:: none user_auth_invalid_signature_output
+
+    {
+        "tx_failure_reason": {
+            "code": "TRANSACTION_FAILED",
+            "error_message": "Error at pc=0:71:\nSignature (2620967193230873397198710803425457084022525354559824107385923461037870205486, 1), is invalid, with respect to the public key 1628448741648245036800002906075225705100596136133912895015035902954123957052, and the message hash 4321.\nCairo traceback (most recent call last):\nUnknown location (pc=0:152)\nUnknown location (pc=0:121)",
+            "tx_id": 2
+        },
+        "tx_status": "REJECTED"
+    }
+
+
+This indicates that the transaction was reverted due to an invalid signature.
+Notice that the error message entry states that the error location is unknown. This is because
+the StarkNet network is not aware of the source code and debug information of a contract.
+To retrieve the error location and reconstruct the traceback, add the path to the relevant
+compiled contract in the transaction status query, using the ``--contract`` argument. To better
+display the error (and only it), add the ``--error_message`` flag as well:
+
+.. tested-code:: bash user_auth_get_error_message
+
+    starknet tx_status \
+        --id TX_ID \
+        --contract user_auth_compiled.json \
+        --error_message
+
+The output should look like:
+
+.. tested-code:: none user_auth_get_error_message_output
+
+    .../signature.cairo:11:5: Error at pc=0:71:
+        assert ecdsa_ptr.pub_key = public_key
+        ^***********************************^
+    Signature (2620967193230873397198710803425457084022525354559824107385923461037870205486, 1), is invalid, with respect to the public key 1628448741648245036800002906075225705100596136133912895015035902954123957052, and the message hash 4321.
+    Cairo traceback (most recent call last):
+    user_auth.cairo:15:6
+    func increase_balance{
+         ^**************^
+    user_auth.cairo:19:5
+        verify_ecdsa_signature(message=amount, public_key=user, signature_r=sig_r, signature_s=sig_s)
+        ^*******************************************************************************************^
+
 .. test::
 
     import json
@@ -198,14 +293,12 @@ You should get:
 
     from starkware.cairo.docs.test_utils import reorganize_code
 
-    PRIME = 2**251 + 17 * 2**192 + 1
-
     code = reorganize_code('\n\n'.join([
         '%lang starknet',
         codes['user_auth_builtins'],
         codes['user_auth_imports'],
         'from starkware.cairo.common.cairo_builtins import HashBuiltin',
-        'from starkware.starknet.core.storage.storage import Storage',
+        'from starkware.starknet.common.storage import Storage',
         codes['balance_map'],
         codes['user_auth_increase_balance'],
         codes['user_auth_get_balance'],

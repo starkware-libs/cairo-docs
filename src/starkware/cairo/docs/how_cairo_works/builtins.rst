@@ -594,15 +594,15 @@ assuming that :math:`|\mathbb{F}| > 2^{128}`:
 
         # Check that 0 <= x < 2**64.
         [range_check_ptr] = x
-        assert [range_check_ptr + 1] = %[ 2 ** 64 - 1 %] - x
+        assert [range_check_ptr + 1] = 2 ** 64 - 1 - x
 
         # Check that 0 <= y < 2**64.
         [range_check_ptr + 2] = y
-        assert [range_check_ptr + 3] = %[ 2 ** 64 - 1 %] - y
+        assert [range_check_ptr + 3] = 2 ** 64 - 1 - y
 
         # Check that 0 <= q < 2**64.
         [range_check_ptr + 4] = q
-        assert [range_check_ptr + 5] = %[ 2 ** 64 - 1 %] - q
+        assert [range_check_ptr + 5] = 2 ** 64 - 1 - q
 
         # Check that 0 <= r < y.
         [range_check_ptr + 6] = r
