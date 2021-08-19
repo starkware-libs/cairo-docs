@@ -83,7 +83,7 @@ Next, we will change the code of ``increase_balance()`` to:
             range_check_ptr, ecdsa_ptr : SignatureBuiltin*}(
             user : felt, amount : felt, sig_r : felt, sig_s : felt):
         # Compute the hash of the message.
-        # hash of (x, 0) is equivalent to hash of (x).
+        # The hash of (x, 0) is equivalent to the hash of (x).
         let (amount_hash) = hash2{hash_ptr=pedersen_ptr}(amount, 0)
 
         # Verify the user's signature.
@@ -158,9 +158,8 @@ For this, we will use the following python statements:
     private_key = 12345
     message_hash = pedersen_hash(4321)
     public_key = private_to_stark_key(private_key)
-    print(f'''Public key: {public_key}
-    Signature: {sign(msg_hash=message_hash,
-    priv_key=private_key)}''')
+    print(f'Public key: {public_key}')
+    print(f'Signature: {sign(message_hash, private_key)}')
 
 You should get:
 
