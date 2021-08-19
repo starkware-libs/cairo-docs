@@ -280,34 +280,57 @@ any additional paths specified at compile time. See :ref:`import_search_path` fo
 Builtins
 --------
 
-Builtins are included at the top of the Cairo code file. They are invoked with the  ``%builtins``
+Builtins are included at the top of the Cairo code file. They are declared with the  ``%builtins``
 directive, followed by the name of the builtin. Additional builtins can be included on the same
-line with each new builtin separated by a space. A builtin is utilised with an expression that
-points to the builtin. The builtins, and their respective pointer expressions and
-pointer types are are listed below:
+line with each new builtin separated by a space.
+A builtin is utilized by writing the inputs to a dedicated memory segment accessed via the
+builtin pointer. The builtin directive adds those pointers as
+parameters to main (abstracted in StarkNet contracts), who can then be passed to any
+function making use of them.
 
--   ``ecdsa``, a builtin with pointer ``ecdsa_ptr`` and pointer type ``SignatureBuiltin*``
-    (a pointer to a struct defined in the ``cairo_builtins`` common library).
--   ``bitwise``, a builtin with pointer ``bitwise_ptr`` and pointer type ``BitWiseBuiltin*``
-    (a pointer to a struct defined in the ``cairo_builtins`` common library).
--   ``output``, a builtin with pointer ``output_ptr`` and pointer type ``felt*``.
--   ``pedersen``, a builtin with pointer ``pedersen_ptr`` and pointer type ``HashBuiltin*``
-     (a pointer to a struct defined in the ``cairo_builtins`` common library).
--   ``range_check``, a builtin with pointer ``range_check_ptr`` and no required pointer type.
+Pointer names follow the convention ``<builtin name>_ptr``
+and pointer types can be found in the ``cairo_builtins``
+module of the common library. The builtins, and their respective pointer expressions and
+pointer types are are listed below.
 
-Below is a function, ``foo()`` which accepts all four builtins, illustrating their
-different pointers and pointer types.
+-   ``ecdsa``, for verifying ECDSA signatures. Access with a pointer to type ``SignatureBuiltin``.
+    Tracks a public key and message pair, ensuring the signature is valid with respect to the
+    public key and message hash.
+-   ``bitwise``, for performing bitwise operations on felt elements. Access with a pointer to
+    type ``BitwiseBuiltin``. Tracks the cells in the program trace used for inputs an outputs
+    of bitwise operations.
+-   ``output``, for writing values as an outputs of a program. Access with a pointer to
+    type ``felt``. Maintains a map of the program output name to its value and position in
+    the program memory.
+-   ``pedersen``, for computing the Pedersen hash function. Access with a pointer to
+    type ``HashBuiltin``. Tracks the steps of the hash function, memory used
+    and the size of the hash.
+-   ``range_check``, for checking that a field element is within a range ``[0, 2^128)``.
+    Access with a pointer which has no specific type. The range check can be used to assert
+    that a value is in the range ``[0, BOUND]`` with the statement
+    ``assert [range_check_ptr] = BOUND - x``,
+
+Below is a function, ``foo()`` which accepts all five builtins, illustrating their
+different pointers and pointer types. Note that the pointers must be passed in the
+same order that they appear in the ``%builtins`` directive and that the order follows
+the convention:
+
+1. ``output``.
+2. ``pedersen``.
+3. ``range_check``.
+4. Either ``ecdsa`` or ``bitwise``.
 
 .. tested-code:: cairo syntax_builtins
 
-    %builtins ecdsa output pedersen range_check
-    from starkware.cairo.common.cairo_builtins import (
-        HashBuiltin, SignatureBuiltin)
+    %builtins output pedersen range_check ecdsa bitwise
 
-    func foo{
-            ecdsa_ptr : SignatureBuiltin*,
-            pedersen_ptr : HashBuiltin*, output_ptr : felt*,
-            range_check_ptr}():
+    from starkware.cairo.common.cairo_builtins import (
+        BitwiseBuiltin, HashBuiltin, SignatureBuiltin)
+
+    func main{
+            output_ptr : felt*, pedersen_ptr : HashBuiltin*,
+            range_check_ptr, ecdsa_ptr : SignatureBuiltin*,
+            bitwise_ptr : BitwiseBuiltin*}():
         # Code body here.
         return ()
     end
