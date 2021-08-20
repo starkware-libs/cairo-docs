@@ -280,18 +280,23 @@ any additional paths specified at compile time. See :ref:`import_search_path` fo
 Hints
 -----
 
-Python code can be invoked with the ``%{`` ``%}`` block, where all contained code is available
-to be modified during proof construction. We can run a Cairo program with the ``--program_input``
-flag, which allows providing a json input file that can be referenced inside a hint
+Python code can be invoked with the ``%{`` ``%}`` block. The hint can interact with the
+program's variables/memory as shown in the following code sample.
+Note that the hint is not actually part of the Cairo program,
+and can thus be replaced by a malicious prover. We can run a Cairo program with
+the ``--program_input`` flag, which allows providing a json input file that
+can be referenced inside a hint
 
 .. tested-code:: cairo syntax_hints
 
-    local a : felt
-    %{ ids.a = 2 * 2 %}  # a = 4.
+    %{
+        memory[ap] = 100  # Assign to memory.
+    %}
+    [ap - 1] = 100; ap++  # Assert the value has some property.
 
     let d = 7
     %{
         b = 2 * 2
         c = b * 5  # Hints may span multiple lines.
-        e = ids.d  # e = 7
+        e = ids.d  # Access using 'ids'. e = 7
     %}
