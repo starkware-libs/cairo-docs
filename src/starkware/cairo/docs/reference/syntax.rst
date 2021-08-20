@@ -281,9 +281,8 @@ Hints
 -----
 
 Python code can be invoked with the ``%{`` ``%}`` block, where all contained code is available
-to be modified during proof construction. The ``ids`` expression allows a hint to access
-and modify Cairo expressions that preceed the hints block.
-See :ref:`hints` for more information.
+to be modified during proof construction. We can run a Cairo program with the ``--program_input``
+flag, which allows providing a json input file that can be referenced inside a hint
 
 .. tested-code:: cairo syntax_hints
 
