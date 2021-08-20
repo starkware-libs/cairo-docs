@@ -117,17 +117,17 @@ module.
 *****************
 
 Returns the result of the bitwise AND operation on two elements. Must be passed an implicit
-argument, ``bitwise_ptr``, of type ``BitwiseBuiltin``, a pointer to the ``bitwise`` builtin
+argument, ``bitwise_ptr`` of type ``BitwiseBuiltin``, a pointer to the ``bitwise`` builtin
 struct which stores the bitwise elements.
 
 The function accepts the explicit arguments:
 
--   ``x``, of type ``felt``, the first operand.
--   ``y``, of type ``felt``, the second operand.
+-   ``x`` of type ``felt``, the first operand.
+-   ``y`` of type ``felt``, the second operand.
 
 The function returns the argument:
 
--   ``x_and_y``, of type ``felt``, the result of the bitwise ``AND`` operation ``a & b``.
+-   ``x_and_y`` of type ``felt``, the result of the bitwise ``AND`` operation ``a & b``.
 
 The example below shows the operation on binary inputs ``1100`` and ``1010``
 results in ``1000``:
@@ -143,17 +143,17 @@ results in ``1000``:
 *****************
 
 Returns the result of the bitwise XOR operation on two elements. Must be passed an implicit
-argument, ``bitwise_ptr``, of type ``BitwiseBuiltin``, a pointer to the ``bitwise`` builtin
+argument, ``bitwise_ptr`` of type ``BitwiseBuiltin``, a pointer to the ``bitwise`` builtin
 struct which stores the bitwise elements.
 
 The function accepts the explicit arguments:
 
--   ``x``, of type ``felt``, the first operand.
--   ``y``, of type ``felt``, the second operand.
+-   ``x`` of type ``felt``, the first operand.
+-   ``y`` of type ``felt``, the second operand.
 
 The function returns the argument:
 
--   ``x_xor_y``, of type ``felt``, the result of the bitwise ``XOR`` operation ``a ^ b``.
+-   ``x_xor_y`` of type ``felt``, the result of the bitwise ``XOR`` operation ``a ^ b``.
 
 The example below shows the operation on binary inputs ``1100`` and ``1010``
 results in ``0110``:
@@ -169,17 +169,17 @@ results in ``0110``:
 ****************
 
 Returns the result of the bitwise OR operation on two elements. Must be passed an implicit
-argument, ``bitwise_ptr``, of type ``BitwiseBuiltin``, a pointer to the ``bitwise`` builtin
+argument, ``bitwise_ptr`` of type ``BitwiseBuiltin``, a pointer to the ``bitwise`` builtin
 struct which stores the bitwise elements.
 
 The function accepts the explicit arguments:
 
--   ``x``, of type ``felt``, the first operand.
--   ``y``, of type ``felt``, the second operand.
+-   ``x`` of type ``felt``, the first operand.
+-   ``y`` of type ``felt``, the second operand.
 
 The function returns the argument:
 
--   ``x_or_y``, of type ``felt``, the result of the bitwise ``OR`` operation ``a | b``.
+-   ``x_or_y`` of type ``felt``, the result of the bitwise ``OR`` operation ``a | b``.
 
 The example below shows the operation on binary inputs ``1100`` and ``1010``
 results in ``1110``:
@@ -195,19 +195,19 @@ results in ``1110``:
 ************************
 
 Returns the result of the bitwise AND, XOR and OR operations on two elements. Must be
-passed an implicit argument, ``bitwise_ptr``, of type ``BitwiseBuiltin``, a pointer to
+passed an implicit argument, ``bitwise_ptr`` of type ``BitwiseBuiltin``, a pointer to
 the ``bitwise`` builtin struct which stores the bitwise elements.
 
 The function accepts the explicit arguments:
 
--   ``x``, of type ``felt``, the first operand.
--   ``y``, of type ``felt``, the second operand.
+-   ``x`` of type ``felt``, the first operand.
+-   ``y`` of type ``felt``, the second operand.
 
 The function returns the arguments:
 
--   ``x_and_y``, of type ``felt``, the result of the bitwise ``AND`` operation ``a & b``.
--   ``x_xor_y``, of type ``felt``, the result of the bitwise ``XOR`` operation ``a ^ b``.
--   ``x_or_y``, of type ``felt``, the result of the bitwise ``OR`` operation ``a | b``.
+-   ``x_and_y`` of type ``felt``, the result of the bitwise ``AND`` operation ``a & b``.
+-   ``x_xor_y`` of type ``felt``, the result of the bitwise ``XOR`` operation ``a ^ b``.
+-   ``x_or_y`` of type ``felt``, the result of the bitwise ``OR`` operation ``a | b``.
 
 The example below shows the operation on binary inputs ``1100`` and ``1010``
 results in ``1000``, ``0110`` and ``1110``:
