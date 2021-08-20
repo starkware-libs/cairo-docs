@@ -177,18 +177,20 @@ any additional paths specified at compile time. See :ref:`import_search_path` fo
 Jumps
 -----
 
-Cairo programs can include branch points in code called jumps.
-Jumps contain a ``jump`` expression and a ``destination``. They may also be conditional.
-A conditional jump contains all of the following: A ``jump`` expression, a ``case_not_met`` name,
-a ``case_met_name`` and an ``if`` statement.
+The ``jmp`` command allows navigating through the program, either moving to a
+specific label via ``jmp LABEL``, or a specific location defined by the program counter.
+This may be an absolute counter with ``jmp abs COUNTER`` or an offset relative to the current
+command with ``jmp rel OFFSET``.
+Cairo supports conditional jumps with the syntax ``if <expr> != 0`` following a jump command.
 
-Where the jump condition depends on a value that is determined by the Prover, that value
+When the jump condition depends on a value that is determined by the Prover, that value
 will also determine if the jump is executed.
 
 .. tested-code:: cairo syntax_jumps
 
     func MyFunction() -> (result):
-        let a = 2
+        let a = 2  # 'a = [ap]; ap++' allows the prover
+        # to decide where to branch.
 
         jmp case_true if a != 0
 
