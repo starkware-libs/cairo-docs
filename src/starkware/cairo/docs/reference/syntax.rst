@@ -294,21 +294,14 @@ module of the common library. The builtins, and their respective pointer express
 pointer types are are listed below.
 
 -   ``ecdsa``, for verifying ECDSA signatures. Access with a pointer to type ``SignatureBuiltin``.
-    Tracks a public key and message pair, ensuring the signature is valid with respect to the
-    public key and message hash.
 -   ``bitwise``, for performing bitwise operations on felt elements. Access with a pointer to
-    type ``BitwiseBuiltin``. Tracks the cells in the program trace used for inputs an outputs
-    of bitwise operations.
--   ``output``, for writing values as an outputs of a program. Access with a pointer to
-    type ``felt``. Maintains a map of the program output name to its value and position in
-    the program memory.
+    type ``BitwiseBuiltin``.
+-   ``output``, for writing program output which appears explicitly in an execution proof.
+    Access with a pointer to type ``felt``.
 -   ``pedersen``, for computing the Pedersen hash function. Access with a pointer to
-    type ``HashBuiltin``. Tracks the steps of the hash function, memory used
-    and the size of the hash.
+    type ``HashBuiltin``.
 -   ``range_check``, for checking that a field element is within a range ``[0, 2^128)``.
-    Access with a pointer which has no specific type. The range check can be used to assert
-    that a value is in the range ``[0, BOUND]`` with the statement
-    ``assert [range_check_ptr] = BOUND - x``,
+    Access with a pointer to type ``felt``.
 
 Below is a function, ``foo()`` which accepts all five builtins, illustrating their
 different pointers and pointer types. Note that the pointers must be passed in the
