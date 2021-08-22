@@ -66,9 +66,11 @@ and add the following import statement:
 .. tested-code:: cairo user_auth_imports
 
     from starkware.cairo.common.cairo_builtins import (
-        SignatureBuiltin)
+        HashBuiltin, SignatureBuiltin)
     from starkware.cairo.common.signature import (
         verify_ecdsa_signature)
+    from starkware.cairo.common.hash import hash2
+    from starkware.starknet.common.storage import Storage
 
 Next, we will change the code of ``increase_balance()`` to:
 
@@ -80,9 +82,13 @@ Next, we will change the code of ``increase_balance()`` to:
             storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
             range_check_ptr, ecdsa_ptr : SignatureBuiltin*}(
             user : felt, amount : felt, sig_r : felt, sig_s : felt):
+        # Compute the hash of the message.
+        # The hash of (x, 0) is equivalent to the hash of (x).
+        let (amount_hash) = hash2{hash_ptr=pedersen_ptr}(amount, 0)
+
         # Verify the user's signature.
         verify_ecdsa_signature(
-            message=amount,
+            message=amount_hash,
             public_key=user,
             signature_r=sig_r,
             signature_s=sig_s)
@@ -150,16 +156,19 @@ For this, we will use the following python statements:
     from starkware.crypto.signature.signature import (
         pedersen_hash, private_to_stark_key, sign)
     private_key = 12345
+    message_hash = pedersen_hash(4321)
     public_key = private_to_stark_key(private_key)
+    signature = sign(
+        msg_hash=message_hash, priv_key=private_key)
     print(f'Public key: {public_key}')
-    print(f'Signature: {sign(msg_hash=4321, priv_key=private_key)}')
+    print(f'Signature: {signature}')
 
 You should get:
 
 .. tested-code:: python user_auth_sign_output
 
     Public key: 1628448741648245036800002906075225705100596136133912895015035902954123957052
-    Signature: (2620967193230873397198710803425457084022525354559824107385923461037870205486, 3272947357463083975342237526788619260723986710381984701548320822682741741637)
+    Signature: (1225578735933442828068102633747590437426782890965066746429241472187377583468, 3568809569741913715045370357918125425757114920266578211811626257903121825123)
 
 Now, let's update the balance:
 
@@ -174,8 +183,8 @@ Now, let's update the balance:
         --inputs \
             1628448741648245036800002906075225705100596136133912895015035902954123957052 \
             4321 \
-            2620967193230873397198710803425457084022525354559824107385923461037870205486 \
-            3272947357463083975342237526788619260723986710381984701548320822682741741637
+            1225578735933442828068102633747590437426782890965066746429241472187377583468 \
+            3568809569741913715045370357918125425757114920266578211811626257903121825123
 
 You can query the transaction status:
 
