@@ -189,8 +189,8 @@ may be considered nondeterministic.
 .. tested-code:: cairo syntax_jumps
 
   func MyFunction() -> (result):
-
-      tempvar a
+      alloc_locals
+      local a
       %{ ids.a = 2 %}  # allows the prover to decide where to branch.
 
       jmp case_true if a != 0
