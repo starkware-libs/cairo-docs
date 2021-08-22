@@ -183,22 +183,23 @@ This may be an absolute counter with ``jmp abs COUNTER`` or an offset relative t
 command with ``jmp rel OFFSET``.
 Cairo supports conditional jumps with the syntax ``if <expr> != 0`` following a jump command.
 
-When the jump condition depends on a value that is determined by the prover, they
-get to decide whether or not the jump is executed, de facto making this a non deterministic jump
+When the jump condition depends on a value that is determined by the prover, the jump
+may be considered nondeterministic.
 
 .. tested-code:: cairo syntax_jumps
 
-    func MyFunction() -> (result):
-        let a = 2  # 'a = [ap]; ap++' allows the prover
-        # to decide where to branch.
+  func MyFunction() -> (result):
 
-        jmp case_true if a != 0
+      tempvar a
+      %{ ids.a = 2 %}  # allows the prover to decide where to branch.
 
-        case_false:
-        return (result=0)
+      jmp case_true if a != 0
 
-        case_true:
-        return (result=1)
-    end
+      case_false:
+      return (result=0)
+
+      case_true:
+      return (result=1)
+  end
 
 See :ref:`non_deterministic_jumps` for more information.
