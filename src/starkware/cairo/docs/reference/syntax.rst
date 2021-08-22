@@ -289,14 +289,13 @@ can be referenced inside a hint
 
 .. tested-code:: cairo syntax_hints
 
-    %{
-        memory[ap] = 100  # Assign to memory.
-    %}
-    [ap - 1] = 100; ap++  # Assert the value has some property.
+    %{ memory[ap] = 100 %}  # Assign to memory.
+    [ap] = [ap]; ap++  # Increment ap after using in the hint.
+    assert [ap - 1] = 100  # Assert the value has some property.
 
-    let d = 7
+    let a = 4
+    let b = 7
     %{
-        b = 2 * 2
-        c = b * 5  # Hints may span multiple lines.
-        e = ids.d  # Access using 'ids'. e = 7
+        ids.a = 3 ** 2  # Set value of outside hint.
+        c = ids.b * 2  # Use value outside hint.
     %}
