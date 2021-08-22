@@ -126,17 +126,17 @@ See :ref:`revoked_references` for more information.
 
 .. tested-code:: cairo syntax_revoked_references
 
-    func foo():
-        let x = 0
-
-        # The Prover may choose to enter the if or the else statement.
+    func foo(x):
+        # The compiler cannot deduce whether the if or the else
+        # block will be executed.
         if x == 0:
             let a = 23
         else:
             let a = 8
         end
 
-        # A cannot be accessed, because it has conflicting values: 23 vs 8.
+        # 'a' cannot be accessed, because it has
+        # conflicting values: 23 vs 8.
 
         return ()
     end
@@ -254,6 +254,56 @@ Members must be declared in order of appearance. Struct constructors may be nest
 
 Where ``A`` is a struct with members ``v`` and ``w`` and ``B`` is a struct with members ``x`` and
 ``y``.
+
+Arrays
+------
+
+Arrays can be defined as a pointer (``felt*``) to the first element of the array. As an array is
+populated, the elements take up contiguous memory cells. The ``alloc()`` function is used to
+define a memory segment that expands its size whenever each new element in the array is written.
+
+.. tested-code:: cairo syntax_array
+
+    from starkware.cairo.common.alloc import alloc
+
+    # An array of felts.
+    local felt_array : felt*
+    # An array of structs.
+    let (local struct_array : MyStruct*) = alloc()
+    # Populate the first element with a struct.
+    assert struct_array[0] = MyStruct(
+        first_member=1, second_member=2)
+
+.. test::
+
+    from starkware.cairo.lang.compiler.cairo_compile import compile_cairo
+
+    PRIME = 2**64 + 13
+    code = codes['syntax_array']
+    code = f"""
+        struct MyStruct:
+            member first_member : felt
+            member second_member : felt
+        end
+        func main():
+            alloc_locals
+            {code}
+            ret
+        end
+    """
+    program = compile_cairo(code, PRIME)
+
+Each element uses the same amount of memory cells and may be accessed by a zero based index
+as follows:
+
+.. tested-code:: cairo array_index
+
+    assert felt_array[2] = 85  # (1)
+
+    let a = struct_array[1].first_member  # (2)
+
+Where: (1) the third element in the array is assigned the value ``85``, and (2) ``a``
+is bound to a value from the second struct in the array of structs.
 
 .. _syntax_tuples:
 
