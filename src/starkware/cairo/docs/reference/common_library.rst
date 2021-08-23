@@ -120,7 +120,8 @@ arrays. As more elements are added, more memory will be allocated.
 
 This section refers to the common library's
 `common_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/dict.cairo>`_
-module.
+module for working with user defined dicts, abstracting away Cairo's simulation
+of dictionaries as an array of read/write logs.
 
 ``dict_new()``
 **************
@@ -128,7 +129,16 @@ module.
 Returns a new dictionary. The function does not require any arguments.
 A new dictionary can be populated upon declaration by using a hint with the
 expression ``initial_dict``. The dictionary associated with that expression
-will be found by the ``__dict_manager`` and assigned to the new dictionary.
+will be found by the ``__dict_manager``.
+
+Note that Cairo has no way to enforce that subsequent read/writes are consistent
+with ``initial_dict`` hint (this is only enforced at the python level). Technically the
+return value is a pointer to an empty ``DictAccess`` array. Soundness with respect to the
+initial values can only be achieved with explicit initialization of the dictionary or
+by using the ``default_dict_new()`` from the
+`common_default_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/default_dict.cairo>`_
+module instead, which is not based on hints (and is thus also
+available in StarkNet, unlike ``dict_new()``).
 
 The function returns the argument:
 
@@ -139,8 +149,6 @@ The function returns the argument:
     from starkware.cairo.common.dict import dict_new
     from starkware.cairo.common.dict_access import DictAccess
 
-    let new_dict = new_dict()
-
     alloc_locals
     %{
         initial_dict = {
@@ -149,26 +157,26 @@ The function returns the argument:
             33: 198
         }
     %}
-    # my_dict has key:val pairs {5: 8, 12: 35, 33: 198}.
     let (local my_dict : DictAccess*) = dict_new()
+    # 'my_dict' is now associated with the hint's 'initial_dict'.
 
 ``dict_read()``
 ***************
 
 Returns the value of a specified dictionary key. Must be passed an implicit argument,
-``dict_ptr``, of type ``DictAccess*``, representing a pointer to the dictionary from
-which to be read.
+``dict_ptr``, of type ``DictAccess*``, Representing the pointer to the end of the dictionary.
+Only available for dictionaries created via ``dict_new()``.
 
 The function accepts the explicit argument:
 
--   ``key``, of type ``felt``, the key of a key-value pair.
+-   ``key``, of type ``felt``, the requested key of a key-value pair.
 
 The function returns the argument:
 
 -   ``value``, of type ``felt``, the value assigned to ``key``.
 
-The example below shows how, for an existing dictionary whose pointer is ``my_dict``,
-the value associated with the key ``12`` can be read. Note how the pointer ``my_dict``
+The example below shows, for an existing dictionary whose end pointer is ``my_dict``,
+how the value associated with the key ``12`` can be read. Note how the pointer ``my_dict``
 is passed as an implicit argument.
 
 .. tested-code:: cairo library_dict_read
@@ -176,16 +184,16 @@ is passed as an implicit argument.
     from starkware.cairo.common.dict import dict_read
 
     # my_dict has key:val pairs {5: 8, 12: 35, 33: 198}.
-
-    # Equivalent to: local val = 35.
-    let (local val : felt) = dict_read{dict_ptr=my_dict}(12)
+    let (local val : felt) = dict_read{dict_ptr=my_dict}(key=12)
+    assert val = 35
 
 ``dict_write()``
 ****************
 
 Writes a value to the dictionary, overriding the existing value. Must be passed a
-pointer to the dictionary, ``dict_ptr``, of type ``DictAccess*``, as an implicit
-argument. No values are returned.
+pointer to the end of the dictionary, ``dict_ptr``, of type ``DictAccess*``, as an implicit
+argument. No values are returned. The function is only available for dictionaries
+created via ``dict_new()``.
 
 The function accepts the explicit arguments:
 
@@ -194,8 +202,7 @@ The function accepts the explicit arguments:
 
 The example below shows how, for an existing dictionary whose pointer is ``my_dict``,
 the value associated with the key ``12`` can be changed from ``35`` to ``34``.
-A new key-value pair is then added. Note how the pointer ``my_dict`` is passed
-as an implicit argument.
+Note how the pointer ``my_dict`` is passed as an implicit argument.
 
 .. tested-code:: cairo library_dict_write
 
@@ -204,10 +211,13 @@ as an implicit argument.
     # my_dict has key:val pairs {5: 8, 12: 35, 33: 198}.
 
     # The value associated with key=12 is changed.
-    dict_write{dict_ptr=my_dict}(12, 34)
-    dict_write{dict_ptr=my_dict}(1, 2)
+    dict_write{dict_ptr=my_dict}(key=12, new_value=34)
+    dict_write{dict_ptr=my_dict}(key=1, new_value=2)
 
-    # my_dict has key:val pairs {1: 2, 5: 8, 12: 34, 33: 198}.
+    let key_12_val = dict_read{dict_ptr=my_dict}(key=12)
+    assert key_12_val = 34
+    let key_1_val = dict_read{dict_ptr=my_dict}(key=1)
+    assert key_1_val = 2
 
 .. .. _common_library_dict_access:
 
