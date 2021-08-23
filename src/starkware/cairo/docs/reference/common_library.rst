@@ -243,8 +243,8 @@ and manually incrementing a pointer to the end of the array. The ``check_key_rat
 adds new entries that match existing entries, highlighting how a ``squash()`` operation
 reduces duplicate entries for each key.
 
-.. tested-code:: cairo library_dictaccess
-
+..  TODO (perama, 23/08/2021): Uncomment when the error below is resolved.
+.. .. tested-code:: cairo library_dictaccess
     # Currently fails with runtime error:
     # "does not reference memory and cannot be assigned."
     %builtins range_check
