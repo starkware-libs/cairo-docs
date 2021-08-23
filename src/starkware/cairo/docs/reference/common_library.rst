@@ -139,9 +139,8 @@ The function accepts the explicit arguments of type ``felt``:
 -   ``new_value``, the value to be assigned to ``key``.
 
 It is possible to get ``prev_value`` from ``__dict_manager`` using the hint:
-```
-%{ ids.new_value = __dict_manager.get_dict(ids.dict_ptr)[ids.key] %}
-```
+
+``%{ ids.new_value = __dict_manager.get_dict(ids.dict_ptr)[ids.key] %}``
 
 The example shows how, for a dictionary whose pointer is ``my_dict``,
 the value of a specified key can be updated.
@@ -157,8 +156,9 @@ the value of a specified key can be updated.
         %{ initial_dict = {0: 0} %}
         let (dict_start) = dict_new()
         let dict_end = dict_start
-        dict_write{dict_ptr=dict_end}(0, 1)
-        dict_update{dict_ptr=dict_end}(0, 1, 2)
+        dict_write{dict_ptr=dict_end}(key=0, new_value=1)
+        dict_update{dict_ptr=dict_end}(
+            key=0, prev_value=1, new_value=2)
 
         # A malicious prover might try the line below.
         # dict_update{dict_ptr=dict_end}(0, 2, 3)
@@ -238,39 +238,34 @@ The struct has the following members of type ``felt``:
 -   ``prev_value``, the previous value of a key-value pair.
 -   ``new_value``, the current value of a key-value pair.
 
-In the example below, a dictionary called ``dict_start`` is initialized with an expandable
-memory to accomodate modifications. Each new modification would append a new ``DictAccess``
-instance to that section of memory. ``dict_start`` is a local variable assigned to
-a pointer to the beginning of the first ``DictAccess`` instance of that dictionary.
+In the example below, a dictionary is created by adding ``DictAccess`` structs to an array
+and manually incrementing a pointer to the end of the array. The ``check_key_ratio()``
+adds new entries that match existing entries, highlighting how a ``squash()`` operation
+reduces duplicate entries for each key.
 
-.. .. tested-code:: cairo library_dictaccess
-    Currently fails with runtime error:
-    "does not reference memory and cannot be assigned."
+.. tested-code:: cairo library_dictaccess
+
+    # Currently fails with runtime error:
+    # "does not reference memory and cannot be assigned."
     %builtins range_check
 
     from starkware.cairo.common.dict import dict_squash
     from starkware.cairo.common.alloc import alloc
     from starkware.cairo.common.dict_access import DictAccess
 
-    # Illustrates the structure of a dictionary.
     func check_key_ratio{dict_ptr: DictAccess*}(a: felt, b: felt):
-        # Takes a dictionary and its keys.
-        # Adds more DictAccess entries to the array.
-        # The new entries have the same values as the original ones,
-        # and will not change the final squashed result.
-
-        # Allows the prover to generate values.
+        # Adds more DictAccess entries to the existing array.
+        # Values match previous entries and will be squashed.
         let value_a = 0
         let value_b = 0
         %{
-            ids.value_a = 100
+            ids.value_a = 100  # Malicious prover may change.
             ids.value_b = 200
         %}
-        # Assert the desired property.
+        # Assert the desired arbitraty property.
         assert value_a * 2 = value_b
 
-        # Create a new entry (entry number 3) with the same values
-        # as entry number 1. {0: 100}.
+        # New entry (entry 3) matches entry number 1.
         dict_ptr.key = a
         assert dict_ptr.prev_value = value_a  # Set new = old.
         assert dict_ptr.new_value = value_a
@@ -282,32 +277,23 @@ a pointer to the beginning of the first ``DictAccess`` instance of that dictiona
         # Increment to point to the end of the dictionary.
         let dict_ptr = dict_ptr + DictAccess.SIZE
 
-        # Entries 3 and 4 populated the dictionary with
-        # values whose keys had the desired property (2 * a = b).
-        # The prover could have changed a
-
-        # A call to dict_squash() would ensure the prover
+        # A call to dict_squash() will ensure the prover
         # used values that matched those already used (100, 200).
         return()
     end
 
-    # Creates a dictionary.
     func main{range_check_ptr}() -> ():
         alloc_locals
-        # Allocate an expandable memory segment.
         let (dict_start: DictAccess*) = alloc()
         let dict_end = dict_start
-        # Define keys.
         local key_a = 0
         local key_b = 1
-        # Define a new dictionary entry.
-        assert dict_end.key = key_a
+        assert dict_end.key = key_a  # New dictionary entry.
         assert dict_end.prev_value = 100
         assert dict_end.new_value = 100
         # Increment the pointer by the size of the latest entry.
         let dict_end = dict_end + DictAccess.SIZE
-        # Repeat the process.
-        assert dict_end.key = key_b
+        assert dict_end.key = key_b  # Append another entry.
         assert dict_end.prev_value = 200
         assert dict_end.new_value = 200
 
@@ -319,15 +305,11 @@ a pointer to the beginning of the first ``DictAccess`` instance of that dictiona
         # Now pass the dictionary to a function for inspection.
         check_key_ratio{dict_ptr=dict_end}(a=key_a, b=key_b)
 
-        # The implicit argument dict_ptr is returned pointing to the end
-        # of the new additions.
-
         # Squash the dictionary from an array of 4 DictAccess structs
         # to an array of 2, with a single DictAccess entry per key.
-        # Fails if the prover used different values for 'value_a' and 'value_b'.
+        # Fails if the prover changed 'value_a' and 'value_b'.
         let (squashed_dict_start, squashed_dict_end) = dict_squash{
             range_check_ptr=range_check_ptr}(dict_start, dict_end)
-
         return ()
     end
 
