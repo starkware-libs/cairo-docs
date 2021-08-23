@@ -148,21 +148,32 @@ the value of a specified key can be updated.
 
 .. tested-code:: cairo library_dict_update
 
-    from starkware.cairo.common.dict import dict_update
-    from starkware.cairo.common.dict_access import DictAccess
+    %builtins range_check
 
-    # my_dict has key:val pairs {5: 8, 12: 35, 33: 198}.
+    from starkware.cairo.common.dict import (
+        dict_new, dict_write, dict_update, dict_squash)
 
-    # The value associated with key=12 is changed.
-    dict_update{dict_ptr=my_dict}(12, 35, 34)
+    func main{range_check_ptr}() -> ():
+        %{ initial_dict = {0: 0} %}
+        let (dict_start) = dict_new()
+        let dict_end = dict_start
+        dict_write{dict_ptr = dict_end}(0,1)
+        dict_update{dict_ptr = dict_end}(0,1,2)
 
-    # my_dict has key:val pairs {1: 2, 5: 8, 12: 34, 33: 198}.
-    let (value) = dict_read{dict_ptr=my_dict}(12)
-    assert value = 34
+        # A malicious prover might try the line below.
+        # dict_update{dict_ptr = dict_end}(0,2,3)
+        # Squash prevents the above malicious change.
+
+        let (squashed_dict_start, squashed_dict_end) = dict_squash{
+            range_check_ptr = range_check_ptr}(dict_start, dict_end)
+        return ()
+    end
 
 Unlike ``dict_write()``, this function does not allow new keys to be added to the
 dictionary (recall that this is only enforced at the hint level, a malicious
 prover can use dict_update to add new keys).
+
+Note that in
 
 ``dict_squash()``
 *****************
@@ -170,7 +181,7 @@ prover can use dict_update to add new keys).
 Squashes a dictionary represented by an array of read/write logs.
 A squashed dictionary is one whose intermediate updates have been summarized and each key
 appears exactly once with its most recent value. This is the only function that
-asserts the consistency of the DictAccess array representing the dictionary,
+asserts the consistency of the ``DictAccess`` array representing the dictionary,
 a program with inconsistent dict operations can run successfully unless
 we call squash (see example below).
 
@@ -179,26 +190,25 @@ requires ``range_check_pointer`` as an implicit argument
 
 The function accepts the explicit arguments of type ``DictAccess*``:
 
--   ``dict_accesses_start``, a pointer to the initial dictionary state.
--   ``dict_accesses_end``, a pointer to the latest dictionary state.
+-   ``dict_accesses_start``, a pointer to the start of the dictionary (first operation).
+-   ``dict_accesses_end``, a pointer to the end of the dictionary (last operation).
 
 The function returns two arguments of type ``DictAccess*``:
 
--   ``squashed_dict_start``, a pointer to the initial dictionary state.
--   ``squashed_dict_end``, a pointer to the latest dictionary state.
+-   ``squashed_dict_start``, a pointer to the start of the squashed dictionary.
+-   ``squashed_dict_end``, a pointer to the end of the squashed dictionary.
 
-In order for the initial state to be available to pass to the function,
-it is convention to save the state before updates are applied.
-In the example below, ``my_dict_saved`` is a reference to the the dictionary state
-that was made prior to updates being applied.
+The only operation that uses ``dict_accesses_start`` is the ``dict_squash()`` function. All
+other dictionary operations append to the array of dictionary access instances.
 
 .. tested-code:: cairo library_dict_squash
 
     from starkware.cairo.common.dict import dict_squash
 
     let (squashed_dict_start, squashed_dict_end) = dict_squash(
-        dict_accesses_start=my_dict_saved,
-        dict_accesses_end=my_dict)
+        dict_accesses_start=my_dict_start,
+        dict_accesses_end=my_dict_end)
+
 
 .. _common_library_dict_access:
 
@@ -212,7 +222,10 @@ module.
 ``DictAccess``
 **************
 
-A struct specifying the ``DictAccess`` memory structure.
+A struct specifying the ``DictAccess`` memory structure. Cairo simulates dictionaries
+by an array read-modify-write instructions, which are specified by the ``DictAccess`` struct.
+The consistency of such an array can be verified by applying ``squash_dict()``.
+
 This struct is used by functions from the common library that use dictionaries.
 For example, the ``dict_read()`` function accepts an implicit argument ``dict_ptr``
 of type ``DictAccess*``, which is used to locate the dictionary in memory.
