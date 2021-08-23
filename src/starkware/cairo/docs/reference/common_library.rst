@@ -129,11 +129,12 @@ module.
 
 Updates the value of a particular key in a dictionary. Must be passed an
 implicit argument, ``dict_ptr``, of type ``DictAccess*``, representing a pointer
-to the dictionary to be updated. No arguments are returned.
+to the end of the dictionary. Only available for dictionaries created via ``dict_new()``.
+No arguments are returned.
 
 The function accepts the explicit arguments of type ``felt``:
 
--   ``key``, the key of a key-value pair.
+-   ``key``, the key to update of a key-value pair.
 -   ``prev_value``, the current value assigned to ``key``.
 -   ``new_value``, the value to be assigned to ``key``.
 
@@ -156,17 +157,25 @@ the value of a specified key can be updated.
     dict_update{dict_ptr=my_dict}(12, 35, 34)
 
     # my_dict has key:val pairs {1: 2, 5: 8, 12: 34, 33: 198}.
+    let (value) = dict_read{dict_ptr=my_dict}(12)
+    assert value = 34
 
 Unlike ``dict_write()``, this function does not allow new keys to be added to the
-dictionary.
+dictionary (recall that this is only enforced at the hint level, a malicious
+prover can use dict_update to add new keys).
 
 ``dict_squash()``
 *****************
 
-Creates a dictionary that represents the the final state of a modified dictionary.
-A squashed dictionary is one whose intermediate updates have been summarized and
-finalized. The function requires ``range_check_pointer``, of type ``DictAcess*``
-as an implicit argument. Squashing allows for the dictionary to be read from.
+Squashes a dictionary represented by an array of read/write logs.
+A squashed dictionary is one whose intermediate updates have been summarized and each key
+appears exactly once with its most recent value. This is the only function that
+asserts the consistency of the DictAccess array representing the dictionary,
+a program with inconsistent dict operations can run successfully unless
+we call squash (see example below).
+
+The function uses the ``range_check`` builtin and thus
+requires ``range_check_pointer`` as an implicit argument
 
 The function accepts the explicit arguments of type ``DictAccess*``:
 
