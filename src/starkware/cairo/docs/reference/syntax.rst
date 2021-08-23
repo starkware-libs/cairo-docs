@@ -183,8 +183,8 @@ This may be an absolute counter with ``jmp abs COUNTER`` or an offset relative t
 command with ``jmp rel OFFSET``.
 Cairo supports conditional jumps with the syntax ``if <expr> != 0`` following a jump command.
 
-When the jump condition depends on a value that is determined by the prover, the jump
-may be considered nondeterministic.
+When the jump condition depends on a value that is determined by the prover, they
+get to decide whether or not the jump is executed, de facto making this a non deterministic jump.
 
 .. tested-code:: cairo syntax_jumps
 
