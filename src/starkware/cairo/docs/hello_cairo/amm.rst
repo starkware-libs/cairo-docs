@@ -88,7 +88,7 @@ If you need to recall how a ``DictAccess`` array works, see :ref:`dicts_in_cairo
     from starkware.cairo.common.dict_access import DictAccess
 
     # The maximum amount of each token that belongs to the AMM.
-    const MAX_BALANCE = %[ 2**64 - 1 %]
+    const MAX_BALANCE = 2 ** 64 - 1
 
     struct AmmState:
         # A dictionary that tracks the accounts' state.
