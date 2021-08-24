@@ -148,52 +148,67 @@ module.
 ******************
 
 Returns the pointer to an element in an array whose value matches a specified value. The function
-uses a hint, whereby the prover arrives at the correct element and then Cairo code verifies that it
-is correct. The function has the ability to receive the index of that element, which makes the
-operation faster than if the prover has to manually search for the element. The function
-requires the implicit argument ``range_check_ptr``.
+uses a hint, whereby the prover arrives at the correct element and then the
+Cairo code verifies that it is correct. The function has the ability to receive the index
+of that element, which saves proving time. The function
+requires the implicit argument ``range_check_ptr``. Note that if the array contains
+multiple elements with the requested key, the function may return a pointer to any of them.
 
 The function requires four explicit arguments:
 
--   ``array_ptr``, a pointer to an array (e.g., the pointer ``my_array*``).
--   ``elm_size``, the size of each element in the array (e.g., ``3`` memory slots per element).
--   ``n_elms``, the number of elements in the array (e.g., ``17``).
--   ``key``, the value to look for (e.g., the ``felt`` value ``95``).
+-   ``array_ptr``, a pointer to an array.
+-   ``elm_size``, the size (in memory cells) of each element in the array.
+-   ``n_elms``, the number of elements in the array.
+-   ``key``, the value to look for (the key is assumed to be the first member of
+    each element in the array).
 
 The function returns:
 
--   ``elm_ptr``, the pointer to an element whose first memory cell is ``key``, where
-    ``[elm_ptr]`` is the value of the element. An exception is raised if the
-    value (``key``) is not found.
-
-    -   For an array of ``felt`` elements, this memory cell is a ``felt``. In this way,
-        ``find_element()`` finds a felt by its value.
-    -   For an array of structs, the first memory cell is the value of the first member. In
-        this way, ``find_element()`` finds a struct by its first member.
-
-In the example below, the element index is ``8``, and that information is provided as a global
-variable that the prover can access. This allows the ``find_element()`` function to be run by
-the prover in constant time. This means that increasing the length of the array
-does not increase the time to find the element. If the element index is not provided, the
-prover must check every element in the array, which takes linear time. That is, unless the
-hint is provided ``__find_element_index`` the function operates in linear time.
-If the element index provided is incorrect and points to a cell that has a value
-different from ``key``, an exception is raised.
-
-The function will identify an element whose first field value is equal to ``95``.
+-   ``elm_ptr``, the pointer to an element whose first memory cell is ``key``.
+    I.e., ``[elm_ptr]=key``. If key is not found then a ``ValueError`` exception
+    will be raised while processing the library's hint. Note that a malicious prover
+    can't cause ``find_element()`` to succeed by changing the hint, as the Cairo
+    program will fail when the key is not present in the array.
 
 .. tested-code:: cairo library_find_element
 
+    %builtins range_check
     from starkware.cairo.common.find_element import find_element
+    from starkware.cairo.common.alloc import alloc
 
-    # Optional submission of the index
-    __find_element_index = 8
+    struct MyStruct:
+        member a : felt
+        member b : felt
+    end
 
-    let element_pointer = find_element(
-        array_ptr=my_array*, elm_size=3, n_elms=17, key=95)
+    func main{range_check_ptr}() -> ():
+        # Create an array with MyStruct elements (1,2), (3,4), (5,6).
+        let array_ptr : MyStruct* = alloc()
+        assert [array_ptr + 0 * MyStruct.SIZE] = MyStruct(a=1, b=2)
+        assert [array_ptr + 1 * MyStruct.SIZE] = MyStruct(a=3, b=4)
+        assert [array_ptr + 2 * MyStruct.SIZE] = MyStruct(a=5, b=6)
 
-Note that if multiple elements in the array have the same value for the first memory cell,
-the function may return the index to any of those elements.
+        # Find any element with '5' in first memory cell.
+        let (element_ptr : MyStruct*) = find_element(
+            array_ptr=array_ptr,
+            elm_size=MyStruct.SIZE,
+            n_elms=3,
+            key=5)
+        # A pointer to the element with index 2 is returned.
+        assert element_ptr.a = 5
+        assert element_ptr.b = 6
+
+        # Pass a known index in a hint for a faster proving time.
+        %{ __find_element_index = 2 %}
+        let (element_ptr : MyStruct*) = find_element(
+            array_ptr=array_ptr,
+            elm_size=MyStruct.SIZE,
+            n_elms=3,
+            key=5)
+        assert element_ptr.a = 5
+        assert element_ptr.b = 6
+        return ()
+    end
 
 .. .. _common_library_hash:
 
