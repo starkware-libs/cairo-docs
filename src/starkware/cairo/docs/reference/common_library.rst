@@ -137,7 +137,7 @@ return value is a pointer to an empty ``DictAccess`` array. Soundness with respe
 initial values can only be achieved with explicit initialization of the dictionary or
 by using the ``default_dict_new()`` from the
 `common_default_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/default_dict.cairo>`_
-module instead, which is not based on hints (and is thus also
+module instead, which is not based on user-defined hints (and is thus also
 available in StarkNet, unlike ``dict_new()``).
 
 The function returns the argument:
@@ -165,7 +165,7 @@ The function returns the argument:
 
 Returns the value of a specified dictionary key. Must be passed an implicit argument,
 ``dict_ptr``, of type ``DictAccess*``, representing the pointer to the end of the dictionary.
-Only available for dictionaries created via ``dict_new()``.
+Only available for dictionaries created via ``dict_new()`` or ``default_dict_new()``.
 
 The function accepts the explicit argument:
 
@@ -190,14 +190,16 @@ is passed as an implicit argument.
 ``dict_write()``
 ****************
 
-Writes a value to the dictionary, overriding the existing value. Must be passed a
-pointer to the end of the dictionary, ``dict_ptr``, of type ``DictAccess*``, as an implicit
-argument. No values are returned. Only available for dictionaries
-created via ``dict_new()``.
+Overrides the current value of an existing key. In order to work with a dynamic
+dictionary one can initialize with ``default_dict_new()`` rather than ``dict_new()``
+(in which case all keys are assumed to be present, initially with the default value).
+Must be passed a pointer to the end of the dictionary, ``dict_ptr``, of
+type ``DictAccess*``, as an implicit argument. No values are returned.
+Only available for dictionaries created via ``dict_new()`` or ``default_dict_new()``.
 
 The function accepts the explicit arguments:
 
--   ``key``, of type ``felt``, the key to write.
+-   ``key``, of type ``felt``, the key to override.
 -   ``new_value``, of type ``felt``, the value to be assigned to ``key``.
 
 The example below shows how, for an existing dictionary whose pointer is ``my_dict``,
