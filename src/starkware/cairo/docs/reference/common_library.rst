@@ -127,12 +127,12 @@ of dictionaries as an array of read/write logs.
 **************
 
 Returns a new dictionary. The function does not require any arguments.
-A new dictionary can be populated upon declaration by using a hint with the
+A new dictionary is initially populated by using a hint with the
 expression ``initial_dict``. The dictionary associated with that expression
 will be found by the ``__dict_manager``.
 
 Note that Cairo has no way to enforce that subsequent read/writes are consistent
-with ``initial_dict`` hint (this is only enforced at the python level). Technically the
+with the ``initial_dict`` hint (this is only enforced at the python level). Technically, the
 return value is a pointer to an empty ``DictAccess`` array. Soundness with respect to the
 initial values can only be achieved with explicit initialization of the dictionary or
 by using the ``default_dict_new()`` from the
@@ -164,12 +164,12 @@ The function returns the argument:
 ***************
 
 Returns the value of a specified dictionary key. Must be passed an implicit argument,
-``dict_ptr``, of type ``DictAccess*``, Representing the pointer to the end of the dictionary.
+``dict_ptr``, of type ``DictAccess*``, representing the pointer to the end of the dictionary.
 Only available for dictionaries created via ``dict_new()``.
 
 The function accepts the explicit argument:
 
--   ``key``, of type ``felt``, the requested key of a key-value pair.
+-   ``key``, of type ``felt``, the requested key.
 
 The function returns the argument:
 
@@ -192,12 +192,12 @@ is passed as an implicit argument.
 
 Writes a value to the dictionary, overriding the existing value. Must be passed a
 pointer to the end of the dictionary, ``dict_ptr``, of type ``DictAccess*``, as an implicit
-argument. No values are returned. The function is only available for dictionaries
+argument. No values are returned. Only available for dictionaries
 created via ``dict_new()``.
 
 The function accepts the explicit arguments:
 
--   ``key``, of type ``felt``, the key of a key-value pair.
+-   ``key``, of type ``felt``, the key to write.
 -   ``new_value``, of type ``felt``, the value to be assigned to ``key``.
 
 The example below shows how, for an existing dictionary whose pointer is ``my_dict``,
