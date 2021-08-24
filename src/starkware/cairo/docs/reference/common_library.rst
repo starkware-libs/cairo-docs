@@ -145,7 +145,7 @@ It is possible to get ``prev_value`` from ``__dict_manager`` using the hint:
 The example shows how, for a dictionary whose pointer is ``my_dict``,
 the value of a specified key can be updated.
 
-.. tested-code:: cairo library_dict_update
+.. tested-code:: cairo library_dict_update0
 
     %builtins range_check
 
@@ -159,16 +159,25 @@ the value of a specified key can be updated.
         dict_write{dict_ptr=dict_end}(key=0, new_value=1)
         dict_update{dict_ptr=dict_end}(
             key=0, prev_value=1, new_value=2)
-
-        # A malicious prover might try the line below.
-        # dict_update{dict_ptr=dict_end}(0, 2, 3)
-
         return ()
     end
 
 Unlike ``dict_write()``, this function does not allow new keys to be added to the
 dictionary (recall that this is only enforced at the hint level, a malicious
 prover can use dict_update to add new keys).
+
+.. tested-code:: cairo library_dict_update1
+
+        dict_start = new_dict()
+        let dict_end = dict_start
+        dict_write{dict_ptr=dict_end}(key=0, new_value=1)
+        # Below is an inconsistent entry, real 'prev_value' is 1.
+        dict_update{dict_ptr=dict_end}(key=0, prev_value=3, new_value=2)
+
+        # To enforce the consistency of the dictionary, one MUST
+        # call squash. The below operation would fail.
+        # let (squashed_dict_start, squashed_dict_end) = dict_squash{
+        #    range_check_ptr = range_check_ptr}(dict_start, dict_end)
 
 ``dict_squash()``
 *****************
@@ -245,7 +254,7 @@ This will only be enforced if we eventually call ``squash_dict()``.
     from starkware.cairo.common.alloc import alloc
     from starkware.cairo.common.dict_access import DictAccess
 
-    func check_key_ratio{dict_ptr: DictAccess*}(a: felt, b: felt):
+    func check_key_ratio{dict_ptr : DictAccess*}(a : felt, b : felt):
         alloc_locals
         # Adds more DictAccess entries to the existing array.
         # Values match previous entries and will be squashed.
@@ -270,12 +279,12 @@ This will only be enforced if we eventually call ``squash_dict()``.
 
         # A call to dict_squash() will ensure the prover
         # used values that are consistent with the input dictionary.
-        return()
+        return ()
     end
 
     func main{range_check_ptr}() -> ():
         alloc_locals
-        let (dict_start: DictAccess*) = alloc()
+        let (dict_start : DictAccess*) = alloc()
         let dict_end = dict_start
         local key_a = 0
         local key_b = 1
@@ -298,7 +307,7 @@ This will only be enforced if we eventually call ``squash_dict()``.
         # Squash the dictionary from an array of 4 DictAccess structs
         # to an array of 2, with a single DictAccess entry per key.
         # Fails if the prover changed 'value_a' and 'value_b'.
-        let (local squashed_dict_end: DictAccess*) = alloc()
+        let (local squashed_dict_end : DictAccess*) = alloc()
         let (squashed_dict_end) = squash_dict{
             range_check_ptr=range_check_ptr}(
             dict_start, dict_end, squashed_dict_end)
