@@ -365,9 +365,47 @@ Return statement
 
 A function must end with a ``return`` statement, which takes the following form:
 
-.. tested-code:: cairo syntax_function_return
+.. tested-code:: cairo syntax_return
 
     return (ret1=val1, ret2=val2)
+
+Return values may either be positional or named, where positional values are identified
+by the order in which they appear in the ``-> ()`` syntax. Positional arguments
+must appear before named arguments.
+
+.. tested-code:: cairo syntax_return_position
+
+    # Permitted.
+    return (2, b=3)  # positional, named.
+
+    # Not permitted.
+    # return (a=2, 3)  # named, positional.
+
+Function return values
+----------------------
+
+A function can return values to the caller function. The return values are
+designated by the ``-> ()`` syntax.
+
+.. tested-code:: cairo syntax_return_val
+
+    func my_function() -> (a, b):
+        return (2, b=3)
+    end
+
+    func main():
+        let (val_a, val_b) = my_function()
+        return ()
+    end
+
+Functions can specify that a return value should be of a specific type.
+The function below returns two values, ``a``, a value of type ``felt``
+and ``b``, a pointer.
+
+.. tested-code:: cairo syntax_return_val_typed
+
+    func my_function() -> (a : felt, b : felt*):
+    end
 
 Call statement
 --------------
