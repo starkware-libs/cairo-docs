@@ -198,6 +198,9 @@ The function returns:
    namely ``[elm_ptr] = key``.
 -  ``success``, a ``felt`` which equals ``1`` if the key was found and ``0`` otherwise.
 
+Continuing with the same example, since the array is sorted, searching for the key
+``5`` leads to the last element.
+
 .. tested-code:: cairo library_search_sorted
 
     from starkware.cairo.common.find_element import search_sorted
