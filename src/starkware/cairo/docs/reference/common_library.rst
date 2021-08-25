@@ -155,8 +155,7 @@ it returns a pointer to the end of the array. The function requires the implicit
 The function accepts the arguments:
 
 -  ``array_ptr``, a pointer to a sorted array.
--  ``elm_size``, the size of (in memory cells) of each element in the array (e.g.,
-   ``MyStruct.SIZE`` for an array with ``MyStruct`` elements).
+-  ``elm_size``, the size of (in memory cells) of each element in the array.
 -  ``n_elms``, the number of elements in the array.
 -  ``key``, the key lower bound (the key is assumed to be the first member of
    each element in the array).
@@ -165,9 +164,7 @@ The function returns:
 
 -  ``elm_ptr``, the pointer to the first element whose key is greater or equal to the lower bound.
 
-In the example below we call ``search_sorted_lower()`` to find the first element in the array
-whose key is at least ``95``. Continuing with the example above, with lower bound 2,
-the middle element is returned.
+Continuing with the example above, with lower bound ``2``, the middle element is returned.
 
 .. tested-code:: cairo library_search_sorted_lower
 
@@ -190,8 +187,7 @@ and ``success=0``. The function requires the implicit argument ``range_check_ptr
 The function accepts the arguments:
 
 -  ``array_ptr``, the pointer to a sorted array.
--  ``elm_size``, the size (in memory cells) of each element in the array
-   (e.g., ``MyStruct.SIZE`` for an array with ``MyStruct`` elements).
+-  ``elm_size``, the size (in memory cells) of each element in the array.
 -  ``n_elms``, the number of elements in the array.
 -  ``key``, the key to look for (the key is assumed to be the first member of
    each element in the array).
