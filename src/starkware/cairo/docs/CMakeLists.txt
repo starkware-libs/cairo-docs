@@ -22,6 +22,7 @@ python_venv(cairo_docs_venv
     cairo_run_lib
     cairo_script_lib
     cairo_syntax_highlighting_lib
+    starknet_compile_test_utils_lib
     pip_pytest
     pip_sphinx
 )
