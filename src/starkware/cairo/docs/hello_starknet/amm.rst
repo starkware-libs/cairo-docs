@@ -5,13 +5,18 @@ A simple Automated Market Maker (AMM)
 
 In this tutorial, we'll review the code of a simple AMM, written as a StarkNet contract,
 highlighting specific implementation details. The contract is deployable (and is actually deployed
--- go check it out) to the StarkNet Planets Alpha release, and will be seamlessly deployable
+-- `go check it out <https://amm-demo.starknet.starkware.co>`_)
+to the StarkNet Planets Alpha release, and will be seamlessly deployable
 and compatible with future StarkNet releases.
 
 We'll start by describing the scope of the contract functionality,
 and after that will dive into the implementation.
 Finally, we'll show how to invoke the demo contract's functionality on the StarkNet Planets Alpha
 environment with a few concrete examples.
+
+Before we begin, you can review the full contract code `here
+<https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/starknet/
+apps/amm_sample/amm_sample.cairo>`_
 
 AMM implementation in StarkNet Planets Alpha
 --------------------------------------------
@@ -114,7 +119,7 @@ function inside the curly brackets. Specifically, the arguments necessary for th
 storage operations. Wherever such functionality is used, we'll pass these implicit arguments.
 
 Next, the assert functions used here are imported from Cairo's `common math library
-<https://github.com/starkware-libs/cairo-lang/tree/master/src/starkware/cairo/common/math.cairo>`_
+<https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/math.cairo>`_
 . In this case, ``assert_nn_le`` asserts that the first
 argument is non-negative and is less than or equal to the second argument.
 
@@ -125,7 +130,8 @@ To allow a user to read the balance of an account, we define the following
 
     @view
     func get_account_token_balance{
-            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*}(
+            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
+            range_check_ptr}(
             account_id : felt, token_type : felt) -> (
             balance : felt):
         return account_balance.read(account_id, token_type)
@@ -145,8 +151,8 @@ Similarly, for the pool balance:
 
     @view
     func get_pool_token_balance{
-            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*}(
-            token_type : felt) -> (balance : felt):
+            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
+            range_check_ptr}(token_type : felt) -> (balance : felt):
         return pool_balance.read(token_type)
     end
 
@@ -249,3 +255,137 @@ amount to be swapped essentially implements the AMM constant product formula:
 
 We use Cairo's common math library, specifically ``unsigned_div_rem``
 (unsigned division with remainder) to calculate the amount of tokens to be received.
+
+Initializing the AMM
+---------------------
+
+As we don't have contract interaction and liquidity providers in this version, we will now define
+how to initialize the AMM -- both the liquidity pool itself and some account balances.
+
+.. tested-code:: cairo sn_amm_init_amm
+
+    @external
+    func init_pool{
+            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
+            range_check_ptr}(token_a : felt, token_b : felt):
+        assert_nn_le(token_a, POOL_UPPER_BOUND - 1)
+        assert_nn_le(token_b, POOL_UPPER_BOUND - 1)
+
+        set_pool_token_balance(token_type=TOKEN_TYPE_A, bal=token_a)
+        set_pool_token_balance(token_type=TOKEN_TYPE_B, bal=token_b)
+
+        return ()
+    end
+
+Initializing the pool is a simple function that accepts two balances for the tokens (A,B),
+and sets them using the ``set_pool_token_balance`` function we defined above:
+The ``POOL_UPPER_BOUND`` is a constant defined to prevent overflows.
+
+Having this function defined, we proceed to add demo tokens to an account:
+
+.. tested-code:: cairo sn_amm_add_tokens
+
+    @external
+    func add_demo_token{
+            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
+            range_check_ptr}(
+            account_id : felt, token_a_amount : felt,
+            token_b_amount : felt):
+        # Make sure the account's balance is much smaller then pool init balance.
+        assert_nn_le(token_a_amount, ACCOUNT_BALANCE_BOUND - 1)
+        assert_nn_le(token_b_amount, ACCOUNT_BALANCE_BOUND - 1)
+
+        modify_account_balance(
+            account_id=account_id,
+            token_type=TOKEN_TYPE_A,
+            amount=token_a_amount)
+        modify_account_balance(
+            account_id=account_id,
+            token_type=TOKEN_TYPE_B,
+            amount=token_b_amount)
+
+        return ()
+    end
+
+Note that here we add another business constraint (for demo purposes) that the account is capped
+at some number calculated as a ratio from the pool cap. Specifically, ``ACCOUNT_BALANCE_BOUND``
+is defined as ``POOL_UPPER_BOUND`` divided by 1000, so the cap for an account is 1/1000 that of a
+pool.
+All constants are defined at the top of the contract file.
+
+Interaction examples
+--------------------
+
+We can now explore a few examples which demonstrate contract interaction using the StarkNet CLI
+tool. An instance of this contract is deployed and initialized at address ``0x05``.
+
+We assume the reader is familiar with the StarkNet CLI. If this is not the case, we recommend you
+review this :ref:`section <starknet_intro>`.
+Also we assume the ``STARKNET_NETWORK`` environment variable is set as follows:
+
+.. tested-code:: bash amm_starknet_env
+
+    export STARKNET_NETWORK=alpha
+
+.. test::
+
+    assert codes['starknet_env'] == codes['amm_starknet_env']
+
+For this section you need to have the contract code, you can find it `here
+<https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/starknet/
+apps/amm_sample/amm_sample.cairo>`_.
+
+To use the StarkNet CLI, start by generating the ABI of the contract:
+
+.. tested-code:: bash compile_amm_sample
+
+    starknet-compile amm_sample.cairo \
+        --output amm_sample_compiled.json \
+        --abi amm_sample_abi.json
+
+First, you can query the pool's balance using:
+
+.. tested-code:: bash sn_amm_call_pool_balance
+
+    starknet call \
+        --address 5 \
+        --abi amm_sample_abi.json \
+        --function get_pool_token_balance \
+        --inputs 1
+
+In response, you should get the pool's balance of token 1.
+
+Now let's add some tokens to our account's balance. Choose your favorite ``ACCOUNT_ID``, it should
+be a 251-bit integer value:
+
+.. tested-code:: bash sn_amm_invoke_add_tokens
+
+    starknet invoke \
+        --address 5 \
+        --abi amm_sample_abi.json \
+        --function add_demo_token \
+        --inputs ACCOUNT_ID 1000 1000
+
+Now that we have some tokens, we can use the AMM and swap 500 units of token 1 in exchange for
+some units of token 2 (the exact number depends on the current balance of the pool).
+
+.. tested-code:: bash sn_amm_invoke_swap
+
+    starknet invoke \
+        --address 5 \
+        --abi amm_sample_abi.json \
+        --function swap \
+        --inputs ACCOUNT_ID 1 500
+
+You can now query the account's balance of token 2 after the swap:
+
+.. tested-code:: bash sn_amm_call_account_balance
+
+    starknet call \
+        --address 5 \
+        --abi amm_sample_abi.json \
+        --function get_account_token_balance \
+        --inputs ACCOUNT_ID 2
+
+Note that the change will only take effect after the ``swap`` transaction's status
+is either ``PENDING`` or ``ACCEPTED_ONCHAIN``.
