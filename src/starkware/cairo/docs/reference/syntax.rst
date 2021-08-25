@@ -462,8 +462,8 @@ can be referenced inside a hint
     assert [ap - 1] = 100  # Assert the value has some property.
 
     local a
-    local b = 7
+    let b = 7
     %{
-        ids.a = 3 ** 2  # Rebind reference outside the hint.
+        ids.a = 3 ** 2  # Assigns the value '9' to the local 'a'.
         c = ids.b * 2  # Read reference inside a hint.
     %}
