@@ -25,11 +25,11 @@ On Mac, you can use ``brew``::
 
     brew install gmp
 
-Download the python package (``cairo-lang-0.1.0.zip``) from
-https://github.com/starkware-libs/cairo-lang/releases/tag/v0.1.0.
+Download the python package (``cairo-lang-0.3.1.zip``) from
+https://github.com/starkware-libs/cairo-lang/releases/tag/v0.3.1.
 To install it using ``pip``, run::
 
-    pip3 install cairo-lang-0.1.0.zip
+    pip3 install cairo-lang-0.3.1.zip
 
 Cairo was tested with python3.7.
 To make it work with python3.6, you will have to install ``contextvars``::
@@ -105,11 +105,11 @@ Visual Studio Code setup
 
 .. only:: not internal
 
-    Download the Cairo Visual Studio Code extension (``cairo-0.1.0.vsix``) from
-    https://github.com/starkware-libs/cairo-lang/releases/tag/v0.1.0,
+    Download the Cairo Visual Studio Code extension (``cairo-0.3.1.vsix``) from
+    https://github.com/starkware-libs/cairo-lang/releases/tag/v0.3.1,
     and install it using::
 
-        code --install-extension cairo-0.1.0.vsix
+        code --install-extension cairo-0.3.1.vsix
 
     Configure Visual Studio Code settings::
 

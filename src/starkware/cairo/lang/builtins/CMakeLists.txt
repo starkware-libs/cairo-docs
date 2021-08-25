@@ -2,6 +2,8 @@ python_lib(cairo_run_builtins_lib
     PREFIX starkware/cairo/lang/builtins
 
     FILES
+    bitwise/bitwise_builtin_runner.py
+    bitwise/instance_def.py
     hash/hash_builtin_runner.py
     hash/instance_def.py
     range_check/instance_def.py
@@ -10,7 +12,7 @@ python_lib(cairo_run_builtins_lib
     signature/signature_builtin_runner.py
 
     LIBS
-    cairo_relocatable
+    cairo_relocatable_lib
     cairo_vm_lib
     starkware_python_utils_lib
 )

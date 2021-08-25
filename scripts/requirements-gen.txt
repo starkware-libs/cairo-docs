@@ -1,6 +1,9 @@
+aiohttp
+cachetools
 ecdsa
 eth-hash[pycryptodome]==0.2.0
 fastecdsa
+frozendict==1.2
 isort<5.0.0
 lark-parser==0.8.5
 marshmallow-dataclass>=7.1.0
@@ -10,7 +13,10 @@ marshmallow>=3.2.1
 mpmath
 numpy
 pipdeptree
+prometheus-client
 pytest
+pytest-asyncio
 sphinx
 sympy
 Web3
+typeguard

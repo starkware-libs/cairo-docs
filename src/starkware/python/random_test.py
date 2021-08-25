@@ -10,11 +10,15 @@ from mypy_extensions import NamedArg
 
 
 def _get_seeds(n_nightly_runs: int, seed: Optional[int]) -> List[int]:
+    """
+    Gets a list of seeds based on environment variables and the seed function argument.
+    If RANDOM_TEST_N_RUNS is specified, returns a list of RANDOM_TEST_N_RUNS random seeds.
+    """
     n_iters_env_var = os.environ.get('RANDOM_TEST_N_RUNS')
     if n_iters_env_var is None:
         n_iters = n_nightly_runs if (os.environ.get('NIGHTLY_TEST') == '1') else 1
     else:
-        n_iters = int(n_iters_env_var)
+        return [random.randrange(sys.maxsize) for _ in range(int(n_iters_env_var))]
 
     seed_env_var = os.environ.get('RANDOM_TEST_SEED')
     if seed_env_var == 'random':
@@ -23,7 +27,11 @@ def _get_seeds(n_nightly_runs: int, seed: Optional[int]) -> List[int]:
         return [int(seed_env_var)]
     elif seed is not None:
         return [seed]
-    return [random.randrange(sys.maxsize) for _ in range(n_iters)]
+
+    # If we got here, then the seed wasn't set with an environment variable or a function argument.
+    if os.environ.get('NIGHTLY_TEST') == '1':
+        return [random.randrange(sys.maxsize) for _ in range(n_iters)]
+    return [0]
 
 
 def _print_seed(seed: int, decorator_name: str):
@@ -121,11 +129,8 @@ def parametrize_random_object(n_nightly_runs: int = 10, seed: Optional[int] = No
             test_func: Callable[[NamedArg(type=random.Random, name='random_object')], None]):
         seeds = _get_seeds(n_nightly_runs=n_nightly_runs, seed=seed)
 
-        def fixate_seed_and_yield_test_run(*args, random_object, **kwargs):
-            try:
-                yield test_func(*args, random_object=random_object, **kwargs)
-            except Exception:
-                raise
+        def fixate_seed_and_yield_test_run(*args, **kwargs):
+            yield test_func(*args, **kwargs)
 
         return pytest.mark.parametrize(
             'random_object',

@@ -253,6 +253,8 @@ You may omit the type and write (the Cairo compiler will deduce the type from th
     compile_cairo(codes['typed_references0'] + '\n' + codes['typed_references1'], PRIME)
     compile_cairo(codes['typed_references0'] + '\n' + codes['typed_references2'], PRIME)
 
+.. _casting:
+
 Casting
 -------
 
@@ -558,3 +560,79 @@ To stress this last point, consider the following code.
     assert [runner.vm_memory[runner.initial_ap + i] for i in range(2)] == [1, 2]
 
 This code will return either ``[1, 2]``, or ``[1, 3]``.
+
+.. _tuples:
+
+Tuples
+------
+
+Tuples allow convenient referencing of an ordered collection of elements. Tuples consist of any
+combination of valid types, including other tuples.
+
+Tuples are represented as a comma-separated list of elements enclosed in parentheses.
+For example: ``(3, x)``.
+
+Consider the following assert statement:
+
+.. tested-code:: cairo tuples0
+
+    assert (x, y) = (1, 2)
+
+The above statement compiles to:
+
+.. tested-code:: cairo tuples1
+
+    assert x = 1
+    assert y = 2
+
+Tuple elements are accessed with the tuple expression followed by brackets containing a zero-based
+index to the element. The index must be known at compile time.
+
+.. tested-code:: cairo tuples2
+
+    let a = (7, 6, 5)[2]  # let a = 5
+
+Cairo requires a trailing comma for single-element tuples, to distinguish them from regular
+parentheses. For example ``(5,)`` is a single-element tuple. Access to nested tuples is achieved by
+using additional indices starting with the outer-most tuple. For example, ``MyTuple[2][4][3][1]``
+first accesses index 2 of ``MyTuple``. This value is accessed at index 4, and so on.
+
+.. test::
+
+    from starkware.cairo.lang.compiler.cairo_compile import compile_cairo
+
+    PRIME = 2**64 + 13
+
+    # Wrap code inside function to allow locals
+    def compiled_program(index):
+        test_code = codes[f'tuples{index}']
+        code = f"""
+        func foo():
+            alloc_locals
+            local x : felt
+            local y : felt
+            {test_code}
+            return ()
+        end
+        """
+        return compile_cairo(code, PRIME)
+    # Generate compiled programs for each example.
+    programs = [compiled_program(i) for i in range(2)]
+    # Verify that the compiled programs are identical.
+    assert programs[0].data == programs[1].data
+
+.. _arrays:
+
+Arrays
+------
+
+In order to represent an array (an ordered collection of homogeneous elements) in Cairo, one may
+use a pointer to the beginning of the array. The standard library function ``alloc()`` may
+be used to "dynamically" allocate a new array.
+
+For example, ``let (local struct_array : MyStruct*) = alloc()`` allocates a new memory segment and
+treats it as a pointer to ``MyStruct``.
+
+The expression ``struct_array[n]`` is used to access the n-th element of the array,
+where n=0 is the first element. ``struct_array[index]`` is compiled to
+``[struct_array + index * MyStruct.SIZE]``, and is of type ``MyStruct``.

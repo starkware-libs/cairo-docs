@@ -43,7 +43,7 @@ On the other hand, there are cases where working modulo :math:`P` requires more 
     even there -- multiplying ``x`` by 3 does not always results in a number divisible by 3
     (try running the following c++ code: ``std::cout << 12297829382473034411U * 3 << std::endl;``).
 
-Non-deterministic computation
+Nondeterministic computation
 -----------------------------
 
 As the goal of a Cairo program is to prove that some computation is correct,
@@ -55,12 +55,12 @@ The straight-forward way would be to write a complicated code that starts from
 But we can do something much easier, simply show that if we start with 31 and
 square it we get 961 (and verify that 31 is in the range).
 This means that instead of starting with the input (961) we can start from the solution (31).
-We refer to this method as non-deterministic computation
+We refer to this method as nondeterministic computation
 (you can learn more `here <https://en.wikipedia.org/wiki/NP_(complexity)>`_).
 
 The pseudocode will take the following form:
 
-1. Magically guess the value of :math:`y` (this is the non-deterministic part).
+1. Magically guess the value of :math:`y` (this is the nondeterministic part).
 2. Compute :math:`y^2` and make sure the result is equal to :math:`x`.
 3. Verify :math:`y` is in the range.
 
@@ -70,9 +70,9 @@ this ability in the sections :ref:`hints` and :ref:`non_deterministic_jumps`.
 Exercise
 ********
 
-1.  Write non-deterministic pseudocode for proving that the equation
+1.  Write nondeterministic pseudocode for proving that the equation
     :math:`x^7 + x + 18 = 0` has a solution.
-2.  Write non-deterministic pseudocode for proving that the same equation
+2.  Write nondeterministic pseudocode for proving that the same equation
     has at least two different solutions.
 
 .. _memory_model:
@@ -80,7 +80,7 @@ Exercise
 Memory model
 ------------
 
-Cairo supports a read-only non-deterministic memory, which means that the value for each memory
+Cairo supports a read-only nondeterministic memory, which means that the value for each memory
 cell is chosen by the prover, but it cannot change over time (during a Cairo program execution).
 We use the syntax ``[x]`` to represent the value of the memory at address ``x``.
 The above implies, for example, that if we assert that ``[0] = 7`` at the beginning of a program,
@@ -92,7 +92,7 @@ but you cannot change it afterwards.
 Thus, we may interpret an instruction that asserts that ``[0] == 7`` either as
 "read the value from the memory cell at address 0 and verify that you got 7" or
 "write the value 7 to that memory cell" depending on the context
-(in the read-only non-deterministic memory model they mean the same thing).
+(in the read-only nondeterministic memory model they mean the same thing).
 
 .. _registers:
 

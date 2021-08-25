@@ -1,5 +1,4 @@
 import itertools
-import re
 from typing import Optional
 
 import pytest
@@ -11,7 +10,7 @@ from starkware.cairo.lang.compiler.preprocessor.compound_expressions import (
     CompoundExpressionContext, CompoundExpressionVisitor, SimplicityLevel,
     process_compound_expressions)
 from starkware.cairo.lang.compiler.preprocessor.preprocessor_test_utils import (
-    PRIME, preprocess_str, verify_exception)
+    PRIME, preprocess_str, strip_comments_and_linebreaks, verify_exception)
 
 
 class CompoundExpressionTestContext(CompoundExpressionContext):
@@ -138,7 +137,7 @@ tempvar x5 : felt = x3 + x4
 
 
 def test_process_compound_expressions():
-    code_elements, res, _ = process_compound_expressions(list(map(parse_expr, [
+    code_elements, res = process_compound_expressions(list(map(parse_expr, [
         '[ap - 1] + 5',
         '[ap - 1] * [ap - 1]',
         '[ap - 1] * [ap - 1]',
@@ -240,13 +239,14 @@ assert x + y * z + x / (-x - (y - z)) = x * x
 [ap] = [ap + (-2)] * [ap + (-1)]; ap++     # Compute x * x.
 [ap + (-10)] + [ap + (-4)] = [ap + (-1)]   # Assert x + y * z + x / (-x - (y - z)) = x * x.
 """
-    assert program.format() == re.sub(r'\s*#.*\n', '\n', expected_result)
+    assert program.format() == strip_comments_and_linebreaks(expected_result)
 
 
 def test_compound_expressions_tempvars():
     code = """\
 tempvar x = [ap - 1] * [ap - 1] + [ap - 1] * [ap - 2]
 tempvar y = x + x
+tempvar z = 5 + nondet %{ val %} * 15 + nondet %{ 1 %}
 """
     program = preprocess_str(code=code, prime=PRIME)
     assert program.format() == """\
@@ -255,6 +255,14 @@ tempvar y = x + x
 [ap] = [ap + (-2)] + [ap + (-1)]; ap++
 
 [ap] = [ap + (-1)] + [ap + (-1)]; ap++
+
+%{ memory[ap] = int(val) %}
+ap += 1
+[ap] = [ap + (-1)] * 15; ap++
+[ap] = [ap + (-1)] + 5; ap++
+%{ memory[ap] = int(1) %}
+ap += 1
+[ap] = [ap + (-2)] + [ap + (-1)]; ap++
 """.replace('\n\n', '\n')
 
 
@@ -280,7 +288,7 @@ ap += 3
 
 ret
 """
-    assert program.format() == re.sub(r'\s*#.*\n', '\n', expected_result).replace('\n\n', '\n')
+    assert program.format() == strip_comments_and_linebreaks(expected_result)
 
 
 def test_compound_expressions_args():
@@ -311,7 +319,7 @@ ret
 [ap] = [ap + (-5)] + [ap + (-4)]; ap++     # Push 3 * x + x * x.
 call rel -15
 """
-    assert program.format() == re.sub(r'\s*#.*\n', '\n', expected_result).replace('\n\n', '\n')
+    assert program.format() == strip_comments_and_linebreaks(expected_result)
 
 
 def test_compound_expressions_failures():

@@ -22,6 +22,7 @@ def test_format_parentheses():
     assert remove_parentheses(parse_expr('-(a + b + c)')).format() == '-(a + b + c)'
     assert remove_parentheses(parse_expr('a + -b + c')).format() == 'a + (-b) + c'
     assert remove_parentheses(parse_expr('&(a + b)')).format() == '&(a + b)'
+    assert remove_parentheses(parse_expr('a ** b ** c ** d')).format() == 'a ** (b ** (c ** d))'
 
     # Test that parentheses are added to non-atomized Dot and Subscript expressions.
     assert remove_parentheses(parse_expr('(x * y).z')).format() == '(x * y).z'
@@ -116,6 +117,7 @@ def test_file_format():
     before = """
 
 ap+=[ fp ]
+%lang starknet
 [ap + -1] = [fp]  *  3
  const x=y  +  f(a=g(
                       z) ,# test
@@ -129,6 +131,7 @@ ap+=[ fp ]
   label  :
 [ap] = [fp];  ap ++
 tempvar x=y*z+w
+tempvar q      : felt
   alloc_locals
 local     z                     :T*=x
 assert x*z+x=    y+y
@@ -144,6 +147,7 @@ label2:
 [fp] = [fp] * [fp]"""
     after = """\
 ap += [fp]
+%lang starknet
 [ap + (-1)] = [fp] * 3
 const x = y + f(a=g(
         z),  # test
@@ -155,6 +159,7 @@ let y : a.b.c = x
 label:
 [ap] = [fp]; ap++
 tempvar x = y * z + w
+tempvar q : felt
 alloc_locals
 local z : T* = x
 assert x * z + x = y + y

@@ -68,6 +68,8 @@ def test_simple():
     vm = run_single(code, 9, pc=10, ap=102, extra_mem={101: 1})
 
     assert [vm.run_context.memory[101 + i] for i in range(7)] == [1, 3, 9, 10, 16, 48, 10]
+    assert vm.accessed_addresses == \
+        set(vm.run_context.memory.keys()) == {*range(10, 28), 99, *range(101, 108)}
 
 
 def test_jnz():
@@ -219,11 +221,26 @@ end
         vm.step()
 
     assert [vm.run_context.memory[202 + i] for i in range(3)] == [2000, 1000, 1234]
+    # Check that address fp + 2, whose value was only set in a hint, is not counted as accessed.
+    assert [202 + i in vm.accessed_addresses for i in range(3)] == [True, True, False]
+
+
+def test_hint_between_references():
+    code = """
+let x = 1
+%{ assert ids.x == 1 %}
+let x = 2
+%{ assert ids.x == 2 %}
+ap += 0
+"""
+    run_single(code=code, steps=1)
 
 
 def test_hint_exception():
     code = """
 # Some comment.
+
+%{ x = 0 %}
 
 %{
 def f():
@@ -231,6 +248,7 @@ def f():
 %}
 [ap] = 0; ap++
 
+%{ y = 0 %}
 %{
 
 
@@ -266,14 +284,14 @@ f()
     with pytest.raises(VmException) as excinfo:
         vm.step()
     assert str(excinfo.value) == f"""\
-{cairo_file.name}:10:1: Error at pc=12:
+{cairo_file.name}:13:1: Error at pc=12:
 Got an exception while executing a hint.
 %{{
 ^^
 Traceback (most recent call last):
-  File "{cairo_file.name}", line 13, in <module>
+  File "{cairo_file.name}", line 16, in <module>
     f()
-  File "{cairo_file.name}", line 6, in f
+  File "{cairo_file.name}", line 8, in f
     0 / 0  # Raises exception.
 ZeroDivisionError: division by zero\
 """

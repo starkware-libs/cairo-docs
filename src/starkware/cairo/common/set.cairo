@@ -4,7 +4,7 @@ from starkware.cairo.common.memcpy import memcpy
 const SET_ADD_RANGE_CHECK_USAGE_ON_DUPLICATE = 2
 const SET_ADD_RANGE_CHECK_USAGE_ON_NO_DUPLICATE = 0
 
-# Given an array of elements and an element, Does one of two things:
+# Given an array of elements and an element, does one of two things:
 # 1. Adds the element to the array.
 # 2. Verifies that the element is in the array (all of the fields of the element are equal to all of
 #    the fields of one of the array's elements).

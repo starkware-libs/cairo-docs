@@ -4,7 +4,7 @@ from pygments.lexer import RegexLexer, words
 KEYWORDS = [
     'func', 'struct', 'namespace', 'end', 'call', 'ret', 'jmp', 'if', 'let', 'const',
     'import', 'from', 'as', 'abs', 'rel', 'static_assert', 'local', 'tempvar', 'felt',
-    'return', 'assert', 'member', 'cast', 'else', 'alloc_locals', 'with']
+    'return', 'assert', 'member', 'cast', 'else', 'alloc_locals', 'with', 'nondet']
 
 
 class CairoLexer(RegexLexer):
@@ -14,7 +14,7 @@ class CairoLexer(RegexLexer):
         'root': [
             (words(KEYWORDS, prefix=r'\b', suffix=r'\b'), token.Keyword),
             (words(('SIZEOF_LOCALS', 'SIZE'), prefix=r'\b', suffix=r'\b'), token.Literal),
-            (r'%builtins', token.Keyword),
+            (r'%builtins|%lang', token.Keyword),
             (words(('ap', 'fp'), prefix=r'\b', suffix=r'\b'), token.Name.Entity),
             (r'!=|->', token.Operator),
             (r'[+\-*/&]', token.Operator),
@@ -24,6 +24,7 @@ class CairoLexer(RegexLexer):
             (r'#.*', token.Comment),
             (r'%\{(.|\n)*?%\}', token.Text),
             (r'%\[(.|\n)*?%\]', token.Text),
+            (r'@\w+', token.Keyword),
             (r'<[a-zA-Z0-9 _\-]+>', token.Comment),
             (r' ', token.Text),
         ]

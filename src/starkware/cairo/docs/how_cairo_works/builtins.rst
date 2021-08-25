@@ -107,6 +107,8 @@ we added the :ref:`reference rebinding <reference_rebinding>`:
 ``let hash_ptr = hash_ptr + HashBuiltin.SIZE``.
 Note that its only effect is on the return statement (implicitly).
 
+.. _calling_with_implicit_arguments:
+
 Calling a function that gets implicit arguments
 -----------------------------------------------
 
@@ -563,7 +565,7 @@ Write a function that verifies that x is within the range :math:`[0, 2^{128})` a
 
 .. toggle:: Hint
 
-    Check that x and y (for a non-deterministic y) are within the range :math:`[0, 2^{128})`
+    Check that x and y (for a nondeterministic y) are within the range :math:`[0, 2^{128})`
     and that :math:`x = 3 \cdot y` (the range-checks will guarantee that there is no overflow).
 
 .. _integer_division:
@@ -592,15 +594,15 @@ assuming that :math:`|\mathbb{F}| > 2^{128}`:
 
         # Check that 0 <= x < 2**64.
         [range_check_ptr] = x
-        assert [range_check_ptr + 1] = %[ 2 ** 64 - 1 %] - x
+        assert [range_check_ptr + 1] = 2 ** 64 - 1 - x
 
         # Check that 0 <= y < 2**64.
         [range_check_ptr + 2] = y
-        assert [range_check_ptr + 3] = %[ 2 ** 64 - 1 %] - y
+        assert [range_check_ptr + 3] = 2 ** 64 - 1 - y
 
         # Check that 0 <= q < 2**64.
         [range_check_ptr + 4] = q
-        assert [range_check_ptr + 5] = %[ 2 ** 64 - 1 %] - q
+        assert [range_check_ptr + 5] = 2 ** 64 - 1 - q
 
         # Check that 0 <= r < y.
         [range_check_ptr + 6] = r
