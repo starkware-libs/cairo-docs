@@ -140,16 +140,15 @@ arrays. As more elements are added, more memory will be allocated.
 ----------------
 
 This section refers to the common library's
-`common_find_element <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/find_element.cairo>`_
+`find_element <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/find_element.cairo>`_
 module.
 
 
 ``find_element()``
 ******************
 
-Returns the pointer to an element in an array whose value matches a specified key. The function
-uses a hint, whereby the prover arrives at the correct element and then the
-Cairo code verifies that it is correct. The function has the ability to receive the index
+Returns the pointer to an element in an array whose key matches a specified key.
+The function has the ability to receive the index
 of that element via a hint, which saves proving time. The function
 requires the implicit argument ``range_check_ptr``. Note that if the array contains
 multiple elements with the requested key, the function may return a pointer to any of them.
@@ -183,7 +182,8 @@ The function returns:
 
     func main{range_check_ptr}() -> ():
         # Create an array with MyStruct elements (1,2), (3,4), (5,6).
-        let array_ptr : MyStruct* = alloc()
+        alloc_locals
+        let (local array_ptr : MyStruct*) = alloc()
         assert [array_ptr + 0 * MyStruct.SIZE] = MyStruct(a=1, b=2)
         assert [array_ptr + 1 * MyStruct.SIZE] = MyStruct(a=3, b=4)
         assert [array_ptr + 2 * MyStruct.SIZE] = MyStruct(a=5, b=6)
