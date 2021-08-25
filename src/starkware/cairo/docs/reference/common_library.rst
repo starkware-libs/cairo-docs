@@ -147,10 +147,10 @@ module.
 ``find_element()``
 ******************
 
-Returns the pointer to an element in an array whose value matches a specified value. The function
+Returns the pointer to an element in an array whose value matches a specified key. The function
 uses a hint, whereby the prover arrives at the correct element and then the
 Cairo code verifies that it is correct. The function has the ability to receive the index
-of that element, which saves proving time. The function
+of that element via a hint, which saves proving time. The function
 requires the implicit argument ``range_check_ptr``. Note that if the array contains
 multiple elements with the requested key, the function may return a pointer to any of them.
 
@@ -159,13 +159,13 @@ The function requires four explicit arguments:
 -   ``array_ptr``, a pointer to an array.
 -   ``elm_size``, the size (in memory cells) of each element in the array.
 -   ``n_elms``, the number of elements in the array.
--   ``key``, the value to look for (the key is assumed to be the first member of
+-   ``key``, the key to look for (the key is assumed to be the first member of
     each element in the array).
 
 The function returns:
 
--   ``elm_ptr``, the pointer to an element whose first memory cell is ``key``.
-    I.e., ``[elm_ptr]=key``. If key is not found then a ``ValueError`` exception
+-   ``elm_ptr``, the pointer to an element whose first memory cell is ``key``
+    (namely ``[elm_ptr]=key``). If key is not found then a ``ValueError`` exception
     will be raised while processing the library's hint. Note that a malicious prover
     can't cause ``find_element()`` to succeed by changing the hint, as the Cairo
     program will fail when the key is not present in the array.
@@ -188,7 +188,7 @@ The function returns:
         assert [array_ptr + 1 * MyStruct.SIZE] = MyStruct(a=3, b=4)
         assert [array_ptr + 2 * MyStruct.SIZE] = MyStruct(a=5, b=6)
 
-        # Find any element with '5' in first memory cell.
+        # Find any element with key '5'.
         let (element_ptr : MyStruct*) = find_element(
             array_ptr=array_ptr,
             elm_size=MyStruct.SIZE,
@@ -198,7 +198,7 @@ The function returns:
         assert element_ptr.a = 5
         assert element_ptr.b = 6
 
-        # Pass a known index in a hint for a faster proving time.
+        # Pass a known index in a hint to save proving time.
         %{ __find_element_index = 2 %}
         let (element_ptr : MyStruct*) = find_element(
             array_ptr=array_ptr,
