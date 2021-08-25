@@ -120,7 +120,7 @@ arrays. As more elements are added, more memory will be allocated.
 
 This section refers to the common library's
 `common_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/dict.cairo>`_
-module for working with user defined dicts, abstracting away Cairo's simulation
+module for working with user defined dictionaries, abstracting away Cairo's simulation
 of dictionaries as an array of read/write logs.
 
 ``dict_new()``
@@ -166,6 +166,11 @@ The function returns the argument:
 Returns the value of a specified dictionary key. Must be passed an implicit argument,
 ``dict_ptr``, of type ``DictAccess*``, representing the pointer to the end of the dictionary.
 Only available for dictionaries created via ``dict_new()`` or ``default_dict_new()``.
+
+Note that the consistency of the returned value from ``dict_read()`` is only verified
+at the hint level (technically, ``dict_read()`` appends one ``DictAccess`` instruction
+to the dictionary). To make sure that a malicious prover won't be able to return a
+different value one must eventually call ``dict_squash()``.
 
 The function accepts the explicit argument:
 
@@ -214,12 +219,9 @@ Note how the pointer ``my_dict`` is passed as an implicit argument.
 
     # The value associated with key=12 is changed.
     dict_write{dict_ptr=my_dict}(key=12, new_value=34)
-    dict_write{dict_ptr=my_dict}(key=1, new_value=2)
 
     let key_12_val = dict_read{dict_ptr=my_dict}(key=12)
     assert key_12_val = 34
-    let key_1_val = dict_read{dict_ptr=my_dict}(key=1)
-    assert key_1_val = 2
 
 .. .. _common_library_dict_access:
 
