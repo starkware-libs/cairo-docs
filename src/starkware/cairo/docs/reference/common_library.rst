@@ -148,68 +148,69 @@ module.
 *************************
 
 Returns the pointer to the first element in the array whose first field is at least ``key``.
-The array elements must be sorted by first field in ascending order. For an array containing
-structs, the first field of each element corresponds to the first member. If no such item exists,
+The array elements must be sorted by the first field in ascending order. If no such item exists,
 it returns a pointer to the end of the array. The function requires the implicit argument
 ``range_check_ptr``.
 
 The function accepts the arguments:
 
--  ``array_ptr``, the pointer to a sorted array.
--  ``elm_size``, the size of each element in the array (e.g., ``MyStruct.SIZE`` for an array with
-    ``MyStruct`` elements).
+-  ``array_ptr``, a pointer to a sorted array.
+-  ``elm_size``, the size of (in memory cells) of each element in the array (e.g.,
+   ``MyStruct.SIZE`` for an array with ``MyStruct`` elements).
 -  ``n_elms``, the number of elements in the array.
--  ``key``, the ``felt`` value of the ``key`` element being searched for.
+-  ``key``, the key lower bound (the key is assumed to be the first member of
+   each element in the array).
 
 The function returns:
 
--  ``elm_ptr``, the pointer to an element, where ``[elm_ptr]`` is the value of the element.
+-  ``elm_ptr``, the pointer to the first element whose key is greater or equal to the lower bound.
 
-In the example below, the function identifies the first element that has a first field value
-of at least ``95``.
+In the example below we call ``search_sorted_lower()`` to find the first element in the array
+whose key is at least ``95``. Continuing with the example above, with lower bound 2,
+the middle element is returned.
 
 .. tested-code:: cairo library_search_sorted_lower
 
     from starkware.cairo.common.find_element import (
         search_sorted_lower)
 
-    let smallest_pointer = search_sorted_lower(
-        array_ptr=my_array, elm_size=3, n_elms=17, key=95)
+    let (smallest_ptr : MyStruct*) = search_sorted_lower(
+        array_ptr=array_ptr, elm_size=2, n_elms=3, key=2)
+    assert smallest_ptr.a = 3
+    assert smallest_ptr.b = 4
 
 ``search_sorted()``
 *******************
 
-Returns both the pointer to the first element in the array whose first field is exactly ``key`` and
-a value reflecting the success of the search. The array elements must be sorted by first field in
-ascending order. For an array containing structs, the first field of each element corresponds to
-the first member.  If no such item exists, returns an undefined pointer, and ``success=0``. The
-function requires the implicit argument ``range_check_ptr``.
+Returns both the pointer to the first element in the array whose key matches a specified key, and
+an indicator for the success of the search. The array elements must be sorted by the
+first field in ascending order. If no such item exists, returns an undefined pointer,
+and ``success=0``. The function requires the implicit argument ``range_check_ptr``.
 
 The function accepts the arguments:
 
 -  ``array_ptr``, the pointer to a sorted array.
--  ``elm_size``, the size of each element in the array (e.g., ``MyStruct.SIZE`` for an array with
-    ``MyStruct`` elements).
+-  ``elm_size``, the size (in memory cells) of each element in the array
+   (e.g., ``MyStruct.SIZE`` for an array with ``MyStruct`` elements).
 -  ``n_elms``, the number of elements in the array.
--  ``key``, the ``felt`` value of the ``key`` element being searched for.
+-  ``key``, the key to look for (the key is assumed to be the first member of
+   each element in the array).
 
 The function returns:
 
--  ``elm_ptr``, the pointer to an element, where ``[elm_ptr]`` is the value of the element.
--  ``success``, a ``felt`` value where ``1`` indicates that the array contains an element whose
-    first field matches ``key``, and ``0`` indicates that it does not contain such an element.
-
-This function behaves similarly to ``find_element()``, and accepts the same arguments, except the
-key is used in a slightly different way. In the example below, the function will identify the
-first element that has a first field value of ``95``. If such an element exists, the second
-return value is ``1``, otherwise it is ``0``.
+-  ``elm_ptr``, the pointer to the first element whose first member is ``key``,
+   namely ``[elm_ptr] = key``.
+-  ``success``, a ``felt`` which equals ``1`` if the key was found and ``0`` otherwise.
 
 .. tested-code:: cairo library_search_sorted
 
     from starkware.cairo.common.find_element import search_sorted
 
-    let (first_pointer, success_val) = search_sorted_lower(
-        array_ptr=my_array, elm_size=3, n_elms=17, key=95)
+    let (first_ptr : MyStruct*, success_val) = search_sorted(
+        array_ptr=array_ptr, elm_size=2, n_elms=3, key=5)
+    assert success_val = 1
+    assert first_ptr.a = 5
+    assert first_ptr.b = 6
 
 .. .. _common_library_hash:
 
