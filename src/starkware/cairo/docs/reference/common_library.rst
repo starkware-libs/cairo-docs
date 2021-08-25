@@ -143,7 +143,7 @@ It is possible to get ``prev_value`` from ``__dict_manager`` using the hint:
 
 ``%{ ids.new_value = __dict_manager.get_dict(ids.dict_ptr)[ids.key] %}``
 
-The example shows how, for a dictionary whose pointer is ``my_dict``,
+The example shows how, for a dictionary whose pointer is ``dict_end``,
 the value of a specified key can be updated.
 
 .. tested-code:: cairo library_dict_update0
@@ -164,10 +164,9 @@ the value of a specified key can be updated.
     end
 
 One can think of ``dict_update()`` as a conditional write. Passing ``prev_value``
-ensures that an override will only happen in case the current valu equals ``prev_value``.
+ensures that an override will only happen in case the current value equals ``prev_value``.
 Note that this is only verified at the hint level and consistency relies on eventual
-squashing. Additionally, one can verify that ``dictionary[key]=value`` by updating key
-with ``prev_value=new_value`` (simulating a read operation), by calling
+squashing. Additionally, one can verify that ``dictionary[key]=value`` by calling
 ``dict_update(key, value, value)``.
 
 ``dict_squash()``
@@ -194,7 +193,7 @@ The function returns two arguments of type ``DictAccess*``:
 -   ``squashed_dict_end``, a pointer to the end of the squashed dictionary.
 
 The only operation that uses ``dict_accesses_start`` is the ``dict_squash()`` function. All
-other dictionary operations append to the array of dictionary access instances.
+other dictionary operations append to the array of ``DictAccess`` instances.
 
 .. tested-code:: cairo library_dict_squash
 
@@ -211,9 +210,9 @@ other dictionary operations append to the array of dictionary access instances.
         dict_update{dict_ptr=dict_end}(0, 1, 2)
         let (squashed_dict_start, squashed_dict_end) = dict_squash{
             range_check_ptr=range_check_ptr}(dict_start, dict_end)
-        # Inconsistent update 'prev_value' is now '2'. This will
-        # fail while using the library's hints but can be made to
-        # pass by a malicious prover.
+        # The following is an inconsistent update, 'prev_value'
+        # is now '2'. This will fail while using the library's hints
+        # but can be made to pass by a malicious prover.
         dict_update{dict_ptr=squashed_dict_end}(
             key=0, prev_value=3, new_value=2)
         # Squash fails.
@@ -236,7 +235,7 @@ module.
 **************
 
 A struct specifying the ``DictAccess`` memory structure. Cairo simulates dictionaries
-by an array read-modify-write instructions, which are specified by the ``DictAccess`` struct.
+by an array of read-modify-write instructions, which are specified by the ``DictAccess`` struct.
 The consistency of such an array can be verified by applying ``squash_dict()``.
 
 For libraries that abstract away Cairo's representation of dictionaries and allow a more
@@ -271,8 +270,7 @@ and manually incrementing a pointer to the end of the array.
 
         let dict_end = dict_start + 2 * DictAccess.SIZE
         # (dict_start, dict_end) now represent the dictionary
-        # {0: 100, 1: 200}. The dictionary is an array
-        # of DictAccess structs (one per key).
+        # {0: 100, 1: 200}.
 
         # Now pass the dictionary to a function for inspection.
         check_key_ratio{dict_ptr=dict_end}(a=0, b=1)
@@ -305,12 +303,12 @@ This will only be enforced if we eventually call ``squash_dict()``.
         assert value_a * 2 = value_b
         # Simulate dictionary read by appending a 'DictAccess'
         # instruction with 'prev_value=new_value=current_value'.
-        assert [dict_ptr + 2 * DictAccess.SIZE] = DictAccess(
+        assert [dict_ptr] = DictAccess(
             key=a, prev_value=value_a, new_value=value_a)
-        assert [dict_ptr + 3 * DictAccess.SIZE] = DictAccess(
+        assert [dict_ptr + DictAccess.SIZE] = DictAccess(
             key=b, prev_value=value_b, new_value=value_b)
         let dict_end = dict_ptr + 2 * DictAccess.SIZE
-        # A call to dict_squash() will ensure the prover
+        # A call to dict_squash() will ensure that the prover
         # used values that are consistent with the input dictionary.
         return ()
     end
