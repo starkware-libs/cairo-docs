@@ -143,7 +143,7 @@ It is possible to get ``prev_value`` from ``__dict_manager`` using the hint:
 
 ``%{ ids.new_value = __dict_manager.get_dict(ids.dict_ptr)[ids.key] %}``
 
-The example shows how, for a dictionary whose pointer is ``dict_end``,
+The example shows how, for a dictionary whose end pointer is ``dict_end``,
 the value of a specified key can be updated.
 
 .. tested-code:: cairo library_dict_update0
