@@ -17,7 +17,7 @@ func increase_balance{
         storage_ptr : Storage*, pedersen_ptr : HashBuiltin*, range_check_ptr,
         ecdsa_ptr : SignatureBuiltin*}(user : felt, amount : felt, sig_r : felt, sig_s : felt):
     # Compute the hash of the message.
-    # hash of (x, 0) is equivalent to hash of (x).
+    # The hash of (x, 0) is equivalent to the hash of (x).
     let (amount_hash) = hash2{hash_ptr=pedersen_ptr}(amount, 0)
 
     # Verify the user's signature.
