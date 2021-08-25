@@ -483,7 +483,7 @@ of tail recursion return values.
     end = runner.initialize_main_entrypoint()
     runner.initialize_vm(hint_locals={})
     runner.run_until_pc(end)
-    runner.finalize_segments_by_effective_size()
+    runner.end_run()
 
     assert runner.vm_memory[runner.vm.run_context.ap - 1] == 144
 

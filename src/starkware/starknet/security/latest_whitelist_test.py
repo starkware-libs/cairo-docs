@@ -7,7 +7,7 @@ from starkware.python.utils import get_source_dir_path
 from starkware.starknet.security.secure_hints import HintsWhitelist
 
 """
-Fix using the starknet_security_test_fix executable.
+Fix using the starknet_hints_latest_whitelist_fix executable.
 """
 
 

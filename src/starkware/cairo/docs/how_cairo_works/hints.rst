@@ -6,7 +6,7 @@ Hints
 Introduction
 ------------
 
-Cairo supports non-deterministic instructions.
+Cairo supports nondeterministic instructions.
 For example, to compute the root of 25 one may simply write:
 
 .. tested-code:: cairo sqrt_no_hints
