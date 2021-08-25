@@ -164,19 +164,11 @@ the value of a specified key can be updated.
     end
 
 One can think of ``dict_update()`` as a conditional write. Passing ``prev_value``
-ensures that an override will only happen in case the ``current_value`` equals ``prev_value``.
+ensures that an override will only happen in case the current valu equals ``prev_value``.
 Note that this is only verified at the hint level and consistency relies on eventual
 squashing. Additionally, one can verify that ``dictionary[key]=value`` by updating key
-with ``prev_value=new_value`` (simulating a read operation).
-
-.. tested-code:: cairo library_dict_update1
-
-        %{ initial_dict = {0: 0} %}
-        dict_start = new_dict()
-        let dict_end = dict_start
-        dict_write{dict_ptr=dict_end}(key=0, new_value=1)
-        # Below is an inconsistent entry, real 'prev_value' is 1.
-        dict_update{dict_ptr=dict_end}(key=0, prev_value=3, new_value=2)
+with ``prev_value=new_value`` (simulating a read operation), by calling
+``dict_update(key, value, value)``.
 
 ``dict_squash()``
 *****************
@@ -219,7 +211,9 @@ other dictionary operations append to the array of dictionary access instances.
         dict_update{dict_ptr=dict_end}(0, 1, 2)
         let (squashed_dict_start, squashed_dict_end) = dict_squash{
             range_check_ptr=range_check_ptr}(dict_start, dict_end)
-        # Inconsistent update.
+        # Inconsistent update 'prev_value' is now '2'. This will
+        # fail while using the library's hints but can be made to
+        # pass by a malicious prover.
         dict_update{dict_ptr=squashed_dict_end}(
             key=0, prev_value=3, new_value=2)
         # Squash fails.
@@ -256,11 +250,9 @@ The struct has the following members of type ``felt``:
 -   ``new_value``, the current value of a key-value pair.
 
 In the example below, a dictionary is created by adding ``DictAccess`` structs to an array
-and manually incrementing a pointer to the end of the array. ``check_key_ratio()``
-checks that the value at key ``b`` is double the value at key ``a``.
-This will only be enforced if we eventually call ``squash_dict()``.
+and manually incrementing a pointer to the end of the array.
 
-.. tested-code:: cairo library_dictaccess
+.. tested-code:: cairo library_dictaccess0
 
     %builtins range_check
 
@@ -268,6 +260,37 @@ This will only be enforced if we eventually call ``squash_dict()``.
     from starkware.cairo.common.squash_dict import squash_dict
     from starkware.cairo.common.alloc import alloc
     from starkware.cairo.common.dict_access import DictAccess
+
+    func main{range_check_ptr}() -> ():
+        alloc_locals
+        let (dict_start : DictAccess*) = alloc()
+        assert [dict_start] = DictAccess(
+            key=0, prev_value=100, new_value=100)
+        assert [dict_start + DictAccess.SIZE] = DictAccess(
+            key=1, prev_value=200, new_value=200)
+
+        let dict_end = dict_start + 2 * DictAccess.SIZE
+        # (dict_start, dict_end) now represent the dictionary
+        # {0: 100, 1: 200}. The dictionary is an array
+        # of DictAccess structs (one per key).
+
+        # Now pass the dictionary to a function for inspection.
+        check_key_ratio{dict_ptr=dict_end}(a=0, b=1)
+
+        # Squash the dictionary from an array of 4 DictAccess structs
+        # to an array of 2, with a single DictAccess entry per key.
+        # Fails if the prover changed 'value_a' and 'value_b'.
+        let (local squashed_dict_start : DictAccess*) = alloc()
+        let (squashed_dict_end) = squash_dict{
+            range_check_ptr=range_check_ptr}(
+            dict_start, dict_end, squashed_dict_start)
+        return ()
+    end
+
+``check_key_ratio()`` checks that the value at key ``b`` is double the value at key ``a``.
+This will only be enforced if we eventually call ``squash_dict()``.
+
+.. tested-code:: cairo library_dictaccess1
 
     func check_key_ratio{dict_ptr : DictAccess*}(a : felt, b : felt):
         alloc_locals
@@ -282,50 +305,13 @@ This will only be enforced if we eventually call ``squash_dict()``.
         assert value_a * 2 = value_b
         # Simulate dictionary read by appending a 'DictAccess'
         # instruction with 'prev_value=new_value=current_value'.
-        dict_ptr.key = a
-        assert dict_ptr.prev_value = value_a
-        assert dict_ptr.new_value = value_a
-        let dict_ptr = dict_ptr + DictAccess.SIZE
-        dict_ptr.key = b
-        assert dict_ptr.prev_value = value_b
-        assert dict_ptr.new_value = value_b
-        # Increment to point to the end of the dictionary.
-        let dict_ptr = dict_ptr + DictAccess.SIZE
-
+        assert [dict_ptr + 2 * DictAccess.SIZE] = DictAccess(
+            key=a, prev_value=value_a, new_value=value_a)
+        assert [dict_ptr + 3 * DictAccess.SIZE] = DictAccess(
+            key=b, prev_value=value_b, new_value=value_b)
+        let dict_end = dict_ptr + 2 * DictAccess.SIZE
         # A call to dict_squash() will ensure the prover
         # used values that are consistent with the input dictionary.
-        return ()
-    end
-
-    func main{range_check_ptr}() -> ():
-        alloc_locals
-        let (dict_start : DictAccess*) = alloc()
-        let dict_end = dict_start
-        local key_a = 0
-        local key_b = 1
-        assert dict_end.key = key_a
-        assert dict_end.prev_value = 100
-        assert dict_end.new_value = 100
-        let dict_end = dict_end + DictAccess.SIZE
-        assert dict_end.key = key_b
-        assert dict_end.prev_value = 200
-        assert dict_end.new_value = 200
-
-        let dict_end = dict_end + DictAccess.SIZE
-        # (dict_start, dict_end) now represent the dictionary
-        # {0: 100, 1: 200}. The dictionary is an array
-        # of DictAccess structs (one per key).
-
-        # Now pass the dictionary to a function for inspection.
-        check_key_ratio{dict_ptr=dict_end}(a=key_a, b=key_b)
-
-        # Squash the dictionary from an array of 4 DictAccess structs
-        # to an array of 2, with a single DictAccess entry per key.
-        # Fails if the prover changed 'value_a' and 'value_b'.
-        let (local squashed_dict_start : DictAccess*) = alloc()
-        let (squashed_dict_end) = squash_dict{
-            range_check_ptr=range_check_ptr}(
-            dict_start, dict_end, squashed_dict_start)
         return ()
     end
 
