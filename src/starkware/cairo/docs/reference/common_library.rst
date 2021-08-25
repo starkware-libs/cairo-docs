@@ -23,10 +23,13 @@ within each library are outlined under the relevant library heading.
     -   :ref:`common_library_hash_chain`
     -   :ref:`common_library_hash_state`
     -   :ref:`common_library_invoke`
+    -   :ref:`common_library_keccak`
     -   :ref:`common_library_math`
+    -   :ref:`common_library_math_cmp`
     -   :ref:`common_library_memcpy`
     -   :ref:`common_library_merkle_multi_update`
     -   :ref:`common_library_merkle_update`
+    -   :ref:`common_library_pow`
     -   :ref:`common_library_registers`
     -   :ref:`common_library_serialize`
     -   :ref:`common_library_set`
@@ -183,6 +186,16 @@ arrays. As more elements are added, more memory will be allocated.
     `invoke <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/invoke.cairo>`_
     module.
 
+.. .. _common_library_keccak:
+
+..  ``keccak``
+..  ----------
+
+..  TODO (perama, 26/08/2021): Uncomment the link when the section is complete.
+    This section refers to the common library's
+    `keccak <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/keccak.cairo>`_
+    module.
+
 .. .. _common_library_math:
 
 ..  ``math``
@@ -191,6 +204,16 @@ arrays. As more elements are added, more memory will be allocated.
 ..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
     This section refers to the common library's
     `math <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/math.cairo>`_
+    module.
+
+.. .. _common_library_math_cmp:
+
+..  ``math_cmp``
+..  ------------
+
+..  TODO (perama, 26/08/2021): Uncomment the link when the section is complete.
+    This section refers to the common library's
+    `math_cmp <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/math_cmp.cairo>`_
     module.
 
 .. .. _common_library_memcpy:
@@ -221,6 +244,16 @@ arrays. As more elements are added, more memory will be allocated.
 ..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
     This section refers to the common library's
     `merkle_update <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/merkle_update.cairo>`_
+    module.
+
+.. .. _common_library_pow:
+
+..  ``pow``
+..  -------
+
+..  TODO (perama, 26/08/2021): Uncomment the link when the section is complete.
+    This section refers to the common library's
+    `pow <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/pow.cairo>`_
     module.
 
 .. .. _common_library_registers:
