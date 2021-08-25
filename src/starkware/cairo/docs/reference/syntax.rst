@@ -456,12 +456,13 @@ can be referenced inside a hint
 
 .. tested-code:: cairo syntax_hints
 
+    alloc_locals
     %{ memory[ap] = 100 %}  # Assign to memory.
     [ap] = [ap]; ap++  # Increment ap after using it in the hint.
     assert [ap - 1] = 100  # Assert the value has some property.
 
-    let a = 4
-    let b = 7
+    local a
+    local b = 7
     %{
         ids.a = 3 ** 2  # Rebind reference outside the hint.
         c = ids.b * 2  # Read reference inside a hint.
