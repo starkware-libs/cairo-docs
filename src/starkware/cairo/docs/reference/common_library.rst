@@ -1,4 +1,3 @@
-
 Common Library
 ==============
 
@@ -147,9 +146,7 @@ module.
 ``find_element()``
 ******************
 
-Returns the pointer to an element in an array whose key matches a specified key.
-The function has the ability to receive the index
-of that element via a hint, which saves proving time. The function
+Returns the pointer to an element in an array whose key matches a specified key. The function
 requires the implicit argument ``range_check_ptr``. Note that if the array contains
 multiple elements with the requested key, the function may return a pointer to any of them.
 
@@ -164,10 +161,13 @@ The function requires four explicit arguments:
 The function returns:
 
 -   ``elm_ptr``, the pointer to an element whose first memory cell is ``key``
-    (namely ``[elm_ptr]=key``). If key is not found then a ``ValueError`` exception
-    will be raised while processing the library's hint. Note that a malicious prover
-    can't cause ``find_element()`` to succeed by changing the hint, as the Cairo
-    program will fail when the key is not present in the array.
+    (namely, ``[elm_ptr]=key``).
+
+The function has the ability to receive the index of that element via a hint, which may
+save proving time. If ``key`` is not found then a ``ValueError`` exception
+will be raised while processing the library's hint. Note that a malicious prover
+can't cause ``find_element()`` to succeed by changing the hint, as the Cairo
+program will fail when the key is not present in the array.
 
 .. tested-code:: cairo library_find_element
 
@@ -184,9 +184,9 @@ The function returns:
         # Create an array with MyStruct elements (1,2), (3,4), (5,6).
         alloc_locals
         let (local array_ptr : MyStruct*) = alloc()
-        assert [array_ptr + 0 * MyStruct.SIZE] = MyStruct(a=1, b=2)
-        assert [array_ptr + 1 * MyStruct.SIZE] = MyStruct(a=3, b=4)
-        assert [array_ptr + 2 * MyStruct.SIZE] = MyStruct(a=5, b=6)
+        assert array_ptr[0] = MyStruct(a=1, b=2)
+        assert array_ptr[1] = MyStruct(a=3, b=4)
+        assert array_ptr[2] = MyStruct(a=5, b=6)
 
         # Find any element with key '5'.
         let (element_ptr : MyStruct*) = find_element(
