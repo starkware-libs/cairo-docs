@@ -308,7 +308,7 @@ This will only be enforced if we eventually call ``squash_dict()``.
         assert [dict_ptr + DictAccess.SIZE] = DictAccess(
             key=b, prev_value=value_b, new_value=value_b)
         let dict_end = dict_ptr + 2 * DictAccess.SIZE
-        # A call to dict_squash() will ensure that the prover
+        # A call to squash_dict() will ensure that the prover
         # used values that are consistent with the input dictionary.
         return ()
     end
