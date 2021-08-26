@@ -447,8 +447,9 @@ any additional paths specified at compile time. See :ref:`import_search_path` fo
 Hints
 -----
 
-Python code can be invoked with the ``%{`` ``%}`` block. The hint can interact with the
-program's variables/memory as shown in the following code sample.
+Python code can be invoked with the ``%{`` ``%}`` block called a hint, which is executed right
+before the next Cairo instruction. The hint can interact
+with the program's variables/memory as shown in the following code sample.
 Note that the hint is not actually part of the Cairo program,
 and can thus be replaced by a malicious prover. We can run a Cairo program with
 the ``--program_input`` flag, which allows providing a json input file that
@@ -464,6 +465,7 @@ can be referenced inside a hint
     local a
     let b = 7
     %{
-        ids.a = 3 ** 2  # Assigns the value '9' to the local 'a'.
+        # Assigns the value '9' to the local variable 'a'.
+        ids.a = 3 ** 2
         c = ids.b * 2  # Read reference inside a hint.
     %}
