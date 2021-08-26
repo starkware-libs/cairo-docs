@@ -1,3 +1,5 @@
+.. _starknet_intro:
+
 Writing StarkNet contracts
 ==========================
 
@@ -5,7 +7,7 @@ In order to follow this tutorial you should have basic familiarity with writing
 Cairo code. For example, you can read the first few pages of the
 ":ref:`Hello, Cairo <hello_cairo>`" tutorial.
 You should also :ref:`set up your environment <quickstart>` and make sure your
-installed Cairo version is at least ``0.2.0``
+installed Cairo version is at least ``0.3.1``
 (you can check your version by running ``cairo-compile --version``).
 
 Your first contract
@@ -18,10 +20,10 @@ Let's start by looking at the following StarkNet contract:
     # Declare this file as a StarkNet contract and set the required
     # builtins.
     %lang starknet
-    %builtins pedersen
+    %builtins pedersen range_check
 
     from starkware.cairo.common.cairo_builtins import HashBuiltin
-    from starkware.starknet.core.storage.storage import Storage
+    from starkware.starknet.common.storage import Storage
 
     # Define a storage variable.
     @storage_var
@@ -31,8 +33,8 @@ Let's start by looking at the following StarkNet contract:
     # Increases the balance by the given amount.
     @external
     func increase_balance{
-            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*}(
-            amount : felt):
+            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
+            range_check_ptr}(amount : felt):
         let (res) = balance.read()
         balance.write(res + amount)
         return ()
@@ -41,8 +43,8 @@ Let's start by looking at the following StarkNet contract:
     # Returns the current balance.
     @view
     func get_balance{
-            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*}(
-            ) -> (res : felt):
+            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
+            range_check_ptr}() -> (res : felt):
         let (res) = balance.read()
         return (res)
     end
@@ -67,6 +69,8 @@ The ``@storage_var`` decorator declares a variable which will be kept as part of
 In our case, this variable consists of a single ``felt``, called ``balance``.
 To use this variable, we will use the ``balance.read()`` and ``balance.write()`` functions
 which are automatically created by the ``@storage_var`` decorator.
+When a contract is deployed, all its storage cells are initialized to zero.
+In particular, all storage variables are initially zero.
 
 StarkNet contracts have no ``main()`` function. Instead, each function may be
 annotated as an external function (using the ``@external`` decorator).
@@ -88,12 +92,13 @@ The only difference is that the method is *annotated* as a method that only quer
 rather than modifying it.
 Note that in the current version this is not enforced by the compiler.
 
-Consider the two implicit arguments: ``storage_ptr`` and ``pedersen_ptr``:
+Consider the three implicit arguments: ``storage_ptr``, ``pedersen_ptr`` and ``range_check_ptr``:
 
 1.  You should be familiar with ``pedersen_ptr``, which allows to compute the Pedersen
-    hash function. But it seems that the contract doesn't use any hash function,
-    so why is it needed?
-    The reason is that storage variables require the ``pedersen_ptr`` argument in order to compute
+    hash function, and ``range_check_ptr``, which allows to compare integers.
+    But it seems that the contract doesn't use any hash function or integer comparison,
+    so why are they needed?
+    The reason is that storage variables require these implicit arguments in order to compute
     the actual memory address of this variable. This may not be needed in simple variables
     such as ``balance``, but with maps (see :ref:`storage_maps`) computing the Pedersen hash
     is part of what ``read()`` and ``write()`` do.
@@ -136,8 +141,8 @@ Run the following command to compile your contract:
 .. tested-code:: bash compile_starknet
 
     starknet-compile contract.cairo \
-        --output=contract_compiled.json \
-        --abi=contract_abi.json
+        --output contract_compiled.json \
+        --abi contract_abi.json
 
 As mentioned above, we can't compile StarkNet contract using ``cairo-compile``
 and we need to use ``starknet-compile`` instead.
@@ -181,7 +186,8 @@ Deploy the contract on the StarkNet testnet
 -------------------------------------------
 
 In order to instruct the CLI to work with the StarkNet testnet you should either
-pass ``--network=alpha`` or set the ``STARKNET_NETWORK`` environment variable as follows:
+pass ``--network=alpha`` on every use, or set the ``STARKNET_NETWORK`` environment variable
+as follows:
 
 .. tested-code:: bash starknet_env
 
@@ -201,8 +207,8 @@ The output should look like:
 .. tested-code:: none starknet_deploy_output
 
     Deploy transaction was sent.
-    Contract address: 0x039564c4f6d9f45a963a6dc8cf32737f0d51a08e446304626173fd838bd70e1c.
-    Transaction ID: 0.
+    Contract address: 0x039564c4f6d9f45a963a6dc8cf32737f0d51a08e446304626173fd838bd70e1c
+    Transaction ID: 0
 
 You can see here the address of your new contract. You'll need this address to interact with
 the contract.
@@ -226,8 +232,11 @@ The result should look like:
 .. tested-code:: none starknet_invoke_output
 
     Invoke transaction was sent.
-    Contract address: 0x039564c4f6d9f45a963a6dc8cf32737f0d51a08e446304626173fd838bd70e1c.
-    Transaction ID: 1.
+    Contract address: 0x039564c4f6d9f45a963a6dc8cf32737f0d51a08e446304626173fd838bd70e1c
+    Transaction ID: 1
+
+
+.. _tx_status:
 
 The following command allows you to query the transaction status based on the transaction ID
 that you got (here you'll have to replace ``TRANSACTION_ID`` with the transaction ID printed by
@@ -235,7 +244,7 @@ that you got (here you'll have to replace ``TRANSACTION_ID`` with the transactio
 
 .. tested-code:: bash starknet_tx_status
 
-    starknet tx_status --id=TRANSACTION_ID
+    starknet tx_status --id TRANSACTION_ID
 
 The result should look like:
 
@@ -281,3 +290,9 @@ Note that to see the up-to-date balance you should wait until the ``increase_bal
 transaction status is at least ``PENDING`` (that is, ``PENDING`` or ``ACCEPTED_ONCHAIN``).
 Otherwise, you'll see the balance before the execution of the ``increase_balance`` transaction
 (that is, 0).
+
+In the next section we will describe other CLI functions for querying StarkNet's state.
+Note that while ``deploy`` and ``invoke`` affect StarkNet's state, all other functions are
+read-only. In particular, using ``call`` instead of ``invoke`` on a function that may change the
+state, such as ``increase_balance``, will return the result of the function without actually
+applying it to the current state, allowing the user to dry-run before committing to a state update.
