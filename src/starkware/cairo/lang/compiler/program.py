@@ -2,9 +2,8 @@ import dataclasses
 import string
 from abc import ABC, abstractmethod
 from dataclasses import field
-from typing import ClassVar, Dict, List, Optional, Type, Union
+from typing import Dict, List, Optional, Type, Union
 
-import marshmallow
 import marshmallow.fields as mfields
 import marshmallow_dataclass
 
@@ -17,6 +16,7 @@ from starkware.cairo.lang.compiler.identifier_manager_field import IdentifierMan
 from starkware.cairo.lang.compiler.preprocessor.flow import FlowTrackingDataActual, ReferenceManager
 from starkware.cairo.lang.compiler.references import Reference
 from starkware.cairo.lang.compiler.scoped_name import ScopedName, ScopedNameAsStr
+from starkware.starkware_utils.validated_dataclass import SerializableMarshmallowDataclass
 
 
 @dataclasses.dataclass
@@ -68,10 +68,10 @@ class StrippedProgram(ProgramBase):
 
 
 @marshmallow_dataclass.dataclass(repr=False)
-class Program(ProgramBase):
+class Program(ProgramBase, SerializableMarshmallowDataclass):
     prime: int
     data: List[int]
-    hints: Dict[int, CairoHint]
+    hints: Dict[int, List[CairoHint]]
     builtins: List[str]
     main_scope: ScopedName = field(metadata=dict(marshmallow_field=ScopedNameAsStr()))
     identifiers: IdentifierManager = field(
@@ -79,7 +79,6 @@ class Program(ProgramBase):
     # Holds all the allocated references in the program.
     reference_manager: ReferenceManager
     debug_info: Optional[DebugInfo] = None
-    Schema: ClassVar[Type[marshmallow.Schema]] = marshmallow.Schema
 
     def stripped(self) -> StrippedProgram:
         assert self.main is not None

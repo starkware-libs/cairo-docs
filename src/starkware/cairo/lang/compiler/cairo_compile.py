@@ -3,7 +3,7 @@ import json
 import os
 import sys
 import time
-from typing import Callable, List, Optional, Sequence, Set, Tuple, Union
+from typing import Callable, Dict, List, Optional, Sequence, Set, Tuple, Union
 
 from starkware.cairo.lang.cairo_constants import DEFAULT_PRIME
 from starkware.cairo.lang.compiler.assembler import assemble
@@ -53,16 +53,28 @@ def cairo_compile_add_common_args(parser: argparse.ArgumentParser):
 
 
 def cairo_compile_common(
-    args: argparse.Namespace,
-    pass_manager_factory: Callable[[argparse.Namespace, ModuleReader], PassManager]) -> \
-        PreprocessedProgram:
+        args: argparse.Namespace,
+        pass_manager_factory: Callable[[argparse.Namespace, ModuleReader], PassManager],
+        assemble_func: Callable) -> PreprocessedProgram:
+    """
+    Common code for CLI Cairo compilation.
+
+    Arguments:
+    args - Parsed arguments.
+    pass_manager_factory - A pass manager factory.
+    assemble_func - a function that converts a preprocessed program to the final output,
+        the return value should be a Marshmallow dataclass.
+    """
+
     start_time = time.time()
     debug_info = args.debug_info or args.debug_info_with_source
 
     try:
         codes = get_codes(args.files)
+        file_contents_for_debug_info = {}
         if getattr(args, 'proof_mode', False):
             codes = add_start_code(codes)
+            file_contents_for_debug_info[START_FILE_NAME] = codes[0][0]
         out = args.output if args.output is not None else sys.stdout
 
         cairo_path: List[str] = list(filter(
@@ -71,22 +83,27 @@ def cairo_compile_common(
 
         pass_manager = pass_manager_factory(args, module_reader)
 
+        preprocessed = preprocess_codes(
+            codes=codes,
+            pass_manager=pass_manager,
+            main_scope=MAIN_SCOPE)
+
         if args.preprocess:
-            preprocessed = preprocess_codes(
-                codes=codes,
-                pass_manager=pass_manager,
-                main_scope=MAIN_SCOPE)
             print(preprocessed.format(with_locations=debug_info), end='', file=out)
         else:
-            program, preprocessed = compile_cairo_ex(
-                codes, debug_info=debug_info, pass_manager=pass_manager)
             if args.debug_info_with_source:
-                assert program.debug_info is not None, 'program.debug_info is missing.'
                 for source_file in module_reader.source_files | set(args.files):
-                    program.debug_info.file_contents[source_file] = open(source_file).read()
-            json.dump(Program.Schema().dump(program), out, indent=4, sort_keys=True)
+                    file_contents_for_debug_info[source_file] = open(source_file).read()
+
+            assembled_program = assemble_func(
+                preprocessed, main_scope=MAIN_SCOPE, add_debug_info=debug_info,
+                file_contents_for_debug_info=file_contents_for_debug_info)
+
+            json.dump(
+                assembled_program.Schema().dump(assembled_program), out, indent=4, sort_keys=True)
             # Print a new line at the end.
             print(file=out)
+
         return preprocessed
     finally:
         if args.cairo_dependencies:
@@ -170,11 +187,9 @@ def compile_cairo_ex(
         codes=codes_with_filenames,
         pass_manager=pass_manager,
         main_scope=main_scope)
-    program = assemble(
+    program = cairo_assemble_program(
         preprocessed_program, main_scope=main_scope, add_debug_info=debug_info,
         file_contents_for_debug_info=file_contents_for_debug_info)
-
-    check_main_args(program)
 
     return program, preprocessed_program
 
@@ -271,6 +286,16 @@ def generate_cairo_dependencies_file(dependencies_path: str, files: Set[str], st
     os.utime(dependencies_path, (start_time, start_time))
 
 
+def cairo_assemble_program(
+        preprocessed_program: PreprocessedProgram, main_scope: ScopedName,
+        add_debug_info: bool, file_contents_for_debug_info: Dict[str, str]) -> Program:
+    program = assemble(
+        preprocessed_program, main_scope=MAIN_SCOPE, add_debug_info=add_debug_info,
+        file_contents_for_debug_info=file_contents_for_debug_info)
+    check_main_args(program)
+    return program
+
+
 def main():
     parser = argparse.ArgumentParser(description='A tool to compile Cairo code.')
     parser.add_argument(
@@ -290,7 +315,9 @@ def main():
     try:
         cairo_compile_add_common_args(parser)
         args = parser.parse_args()
-        cairo_compile_common(args=args, pass_manager_factory=pass_manager_factory)
+        cairo_compile_common(
+            args=args, pass_manager_factory=pass_manager_factory,
+            assemble_func=cairo_assemble_program)
     except LocationError as err:
         print(err, file=sys.stderr)
         return 1

@@ -72,6 +72,7 @@ python_lib(cairo_compile_lib
     cairo_version_lib
     starkware_expression_string_lib
     starkware_python_utils_lib
+    starkware_utils_lib
     pip_marshmallow_dataclass
     pip_marshmallow_enum
     pip_marshmallow_oneofschema
@@ -118,6 +119,7 @@ full_python_test(cairo_compile_test
     ast/formatting_utils_test.py
     cairo_compile_test.py
     conftest.py
+    debug_info_test.py
     encode_test.py
     error_handling_test.py
     expression_evaluator_test.py

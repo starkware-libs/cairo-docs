@@ -286,7 +286,7 @@ Since ``loc_tuple`` is a tuple of 5 locations, Cairo allocates ``5 * Location.SI
 cells. Each ``Location`` instance is assigned some coordinates (according to the example above).
 
 Since ``verify_location_list`` requires a pointer to a list of locations,
-we pass ``&loc_tuple``, which represents the address in memory of ``loc_tuple``.  Since the type
+we pass ``&loc_tuple``, which represents the address in memory of ``loc_tuple``. Since the type
 of ``&loc_tuple`` is a pointer to a tuple rather than ``Location*``, we need the cast operation
 to instruct the compiler to treat this address as ``Location*``. See :ref:`casting` for
 more information.
