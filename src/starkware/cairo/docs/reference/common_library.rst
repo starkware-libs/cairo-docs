@@ -116,16 +116,15 @@ module.
 ``bitwise_and()``
 *****************
 
-Returns the result of the bitwise AND operation on two elements. Must be passed an implicit
-argument, ``bitwise_ptr`` of type ``BitwiseBuiltin``, a pointer to the ``bitwise`` builtin
-struct which stores the bitwise elements.
+Returns the result of the bitwise AND operation of two elements. Requires an implicit
+argument, ``bitwise_ptr`` of type ``BitwiseBuiltin``.
 
 The function accepts the explicit arguments:
 
 -   ``x`` of type ``felt``, the first operand.
 -   ``y`` of type ``felt``, the second operand.
 
-The function returns the argument:
+The function returns the value:
 
 -   ``x_and_y`` of type ``felt``, the result of the bitwise ``AND`` operation ``a & b``.
 
@@ -142,16 +141,15 @@ results in ``1000``:
 ``bitwise_xor()``
 *****************
 
-Returns the result of the bitwise XOR operation on two elements. Must be passed an implicit
-argument, ``bitwise_ptr`` of type ``BitwiseBuiltin``, a pointer to the ``bitwise`` builtin
-struct which stores the bitwise elements.
+Returns the result of the bitwise XOR operation on two elements. Requires an implicit
+argument, ``bitwise_ptr`` of type ``BitwiseBuiltin``.
 
 The function accepts the explicit arguments:
 
 -   ``x`` of type ``felt``, the first operand.
 -   ``y`` of type ``felt``, the second operand.
 
-The function returns the argument:
+The function returns the value:
 
 -   ``x_xor_y`` of type ``felt``, the result of the bitwise ``XOR`` operation ``a ^ b``.
 
@@ -177,7 +175,7 @@ The function accepts the explicit arguments:
 -   ``x`` of type ``felt``, the first operand.
 -   ``y`` of type ``felt``, the second operand.
 
-The function returns the argument:
+The function returns the value:
 
 -   ``x_or_y`` of type ``felt``, the result of the bitwise ``OR`` operation ``a | b``.
 
@@ -203,7 +201,7 @@ The function accepts the explicit arguments:
 -   ``x`` of type ``felt``, the first operand.
 -   ``y`` of type ``felt``, the second operand.
 
-The function returns the arguments:
+The function returns the values:
 
 -   ``x_and_y`` of type ``felt``, the result of the bitwise ``AND`` operation ``a & b``.
 -   ``x_xor_y`` of type ``felt``, the result of the bitwise ``XOR`` operation ``a ^ b``.
