@@ -46,6 +46,8 @@ The punctuation marks used in Cairo are described below:
 *   ``_`` (underscore, underline). A placeholder to handle values that are not used, such as an
     unused function return value.
 
+.. _syntax_type:
+
 Type system
 -----------
 
@@ -53,6 +55,7 @@ Cairo have the following types:
 
 * ``felt`` -- a field element (see :ref:`field_elements`).
 * ``MyStruct`` where ``MyStruct`` is a :ref:`struct <syntax_structs>` name.
+* A tuple -- For example ``(a, b)`` where ``a`` and ``b`` are types (see :ref:`syntax_tuples`).
 * ``T*`` where ``T`` is any type -- a pointer to type ``T``. For example: ``MyStruct*`` or
   ``felt**``.
 
@@ -85,7 +88,7 @@ You can define a constant value as follows:
 
 .. tested-code:: cairo syntax_consts
 
-   const CONSTANT_NAME = const_value
+    const CONSTANT_NAME = const_value
 
 ``const_value`` must be an expression that evaluates to an integer (field element) at compile time.
 For example: ``5`` or ``4 + 2 * VAL`` where ``VAL`` is another constant.
@@ -123,17 +126,17 @@ See :ref:`revoked_references` for more information.
 
 .. tested-code:: cairo syntax_revoked_references
 
-    func foo():
-        let x = 0
-
-        # The Prover may choose to enter the if or the else statement.
+    func foo(x):
+        # The compiler cannot deduce whether the if or the else
+        # block will be executed.
         if x == 0:
             let a = 23
         else:
             let a = 8
         end
 
-        # A cannot be accessed, because it has conflicting values: 23 vs 8.
+        # 'a' cannot be accessed, because it has
+        # conflicting values: 23 vs 8.
 
         return ()
     end
@@ -174,10 +177,10 @@ You can define a struct as follows:
 
 .. tested-code:: cairo structs
 
-   struct MyStruct:
-       member first_member : felt
-       member second_member : MyStruct*
-   end
+    struct MyStruct:
+        member first_member : felt
+        member second_member : MyStruct*
+    end
 
 Each member is defined using the syntax ``member <member_name> : <member_type>``.
 
@@ -190,6 +193,47 @@ the second is assigned offset according to the size of the first member and so o
 The offset can be retrieved using ``MyStruct.member_name``.
 For example, ``MyStruct.first_member == 0`` and ``MyStruct.second_member == 1``
 (since the size of ``felt`` is 1).
+
+Pointers
+--------
+
+A pointer is used to signify the address of the first field element in the memory of an element.
+The pointer can be used to access the element in an efficient manner. For example, a function
+may accept a pointer as an argument, and then access the element at the address of the pointer.
+The following example shows how to use this type of expression to access a tuple element:
+
+.. tested-code:: cairo syntax_pointer
+
+    from starkware.cairo.common.registers import get_fp_and_pc
+
+    # Accepts a pointer called my_tuple.
+    func foo(my_tuple : felt*):
+        # 'my_tuple' points to the 'numbers' tuple.
+        let a = my_tuple[1]  # a = 2
+        return ()
+    end
+
+    func main():
+        alloc_locals
+        # Get the value of the fp register.
+        let (__fp__, _) = get_fp_and_pc()
+        # Define a tuple.
+        local numbers : (felt, felt, felt) = (1, 2, 3)
+        # Send the address of the 'numbers' tuple.
+        foo(&numbers)
+        return ()
+    end
+
+.. test::
+
+    from starkware.cairo.lang.compiler.cairo_compile import compile_cairo
+
+    PRIME = 2**64 + 13
+    code = codes['syntax_pointer']
+    compile_cairo(code, PRIME)
+
+The above example shows how ``foo()`` accepts a pointer, which is then used to access the tuple.
+Passing an argument as a pointer, instead of by value, may be cheaper.
 
 Struct constructor
 ------------------
@@ -211,6 +255,92 @@ Members must be declared in order of appearance. Struct constructors may be nest
 Where ``A`` is a struct with members ``v`` and ``w`` and ``B`` is a struct with members ``x`` and
 ``y``.
 
+Arrays
+------
+
+Arrays can be defined as a pointer (``felt*``) to the first element of the array. As an array is
+populated, the elements take up contiguous memory cells. The ``alloc()`` function is used to
+define a memory segment that expands its size whenever each new element in the array is written.
+
+.. tested-code:: cairo syntax_array
+
+    from starkware.cairo.common.alloc import alloc
+
+    # An array of felts.
+    local felt_array : felt*
+    # An array of structs.
+    let (local struct_array : MyStruct*) = alloc()
+    # Populate the first element with a struct.
+    assert struct_array[0] = MyStruct(
+        first_member=1, second_member=2)
+
+.. test::
+
+    from starkware.cairo.lang.compiler.cairo_compile import compile_cairo
+
+    PRIME = 2**64 + 13
+    code = codes['syntax_array']
+    code = f"""
+        struct MyStruct:
+            member first_member : felt
+            member second_member : felt
+        end
+        func main():
+            alloc_locals
+            {code}
+            ret
+        end
+    """
+    program = compile_cairo(code, PRIME)
+
+Each element uses the same amount of memory cells and may be accessed by a zero based index
+as follows:
+
+.. tested-code:: cairo array_index
+
+    assert felt_array[2] = 85  # (1)
+
+    let a = struct_array[1].first_member  # (2)
+
+Where: (1) the third element in the array is assigned the value ``85``, and (2) ``a``
+is bound to a value from the second struct in the array of structs.
+
+.. _syntax_tuples:
+
+Tuples
+------
+
+A tuple is a finite, ordered, unchangeable list of elements. It is represented as a
+comma-separated list of elements enclosed by parentheses (e.g., ``(3, x)``).
+Their elements may be of any combination of valid :ref:`types <syntax_type>`. A tuple
+that contains only one element must be defined in one of the two following ways: the element is
+a named tuple or has a trailing comma. When a tuple is passed as an argument, the type of each
+element may be specified on a per-element basis (e.g., ``my_tuple : (felt, felt, MyStruct)``).
+Tuple values may be accessed with a zero-based index in brackets ``[index]``, including access to
+nested tuple elements as shown below.
+
+.. tested-code:: cairo syntax_tuples
+
+    # A tuple with three elements.
+    local tuple0 : (felt, felt, felt) = (7, 9, 13)
+    local tuple1 : (felt) = (5,)  # (5) is not a valid tuple.
+    # A named tuple does not require a trailing comma.
+    local tuple2 : (felt) = (a=5)
+    # Tuple contains another tuple.
+    local tuple3 : (felt, (felt, felt, felt), felt) = (1, tuple0, 5)
+    local tuple4 : ((felt, (felt, felt, felt), felt), felt, felt) = (
+        tuple3, 2, 11)
+    let a = tuple0[2]  # let a = 13.
+    let b = tuple4[0][1][2]  # let b = 13.
+
+.. test::
+
+    from starkware.cairo.lang.compiler.cairo_compile import compile_cairo
+
+    PRIME = 2**64 + 13
+    code = codes['syntax_tuples']
+    code = f'func main():\n alloc_locals \n {code}\n ret \n end'
+    compile_cairo(code, PRIME)
 
 Functions
 ---------
@@ -219,11 +349,11 @@ You can define a function as follows:
 
 .. tested-code:: cairo syntax_function
 
-   func func_name{implicit_arg1 : felt, implicit_arg2 : felt*}(
-           arg1 : felt, arg2 : MyStruct*) -> (
-           ret1 : felt, fet2 : felt):
-       # Function body.
-   end
+    func func_name{implicit_arg1 : felt, implicit_arg2 : felt*}(
+            arg1 : felt, arg2 : MyStruct*) -> (
+            ret1 : felt, fet2 : felt):
+        # Function body.
+    end
 
 The implicit argument part ``{implicit_arg1 : felt, implicit_arg2 : felt*}``
 and the return value ``(ret1 : felt, fet2 : felt)`` are optional.
@@ -235,10 +365,47 @@ Return statement
 
 A function must end with a ``return`` statement, which takes the following form:
 
-.. tested-code:: cairo syntax_function_return
+.. tested-code:: cairo syntax_return
 
-   return (ret1=val1, ret2=val2)
+    return (ret1=val1, ret2=val2)
 
+Return values may either be positional or named, where positional values are identified
+by the order in which they appear in the ``-> ()`` syntax. Positional arguments
+must appear before named arguments.
+
+.. tested-code:: cairo syntax_return_position
+
+    # Permitted.
+    return (2, b=3)  # positional, named.
+
+    # Not permitted.
+    # return (a=2, 3)  # named, positional.
+
+Function return values
+----------------------
+
+A function can return values to the caller function. The return values are
+designated by the ``-> ()`` syntax.
+
+.. tested-code:: cairo syntax_return_val
+
+    func my_function() -> (a, b):
+        return (2, b=3)
+    end
+
+    func main():
+        let (val_a, val_b) = my_function()
+        return ()
+    end
+
+Functions can specify that a return value should be of a specific type.
+The function below returns two values, ``a``, a value of type ``felt``
+and ``b``, a pointer.
+
+.. tested-code:: cairo syntax_return_val_typed
+
+    func my_function() -> (a : felt, b : felt*):
+    end
 
 Call statement
 --------------
@@ -247,10 +414,10 @@ You can call a function in the following ways:
 
 .. tested-code:: cairo syntax_function_call
 
-   foo(x=1, y=2)  # (1)
-   let x = foo(x=1, y=2)  # (2)
-   let (ret1, ret2) = foo(x=1, y=2)  # (3)
-   return foo(x=1, y=2)  # (4)
+    foo(x=1, y=2)  # (1)
+    let x = foo(x=1, y=2)  # (2)
+    let (ret1, ret2) = foo(x=1, y=2)  # (3)
+    return foo(x=1, y=2)  # (4)
 
 Option (1) can be used when there is no return value or it should be ignored.
 
