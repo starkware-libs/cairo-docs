@@ -432,8 +432,7 @@ Literals
 --------
 
 Python code can be invoked with the ``%[`` ``%]`` block, where all contained code is converted
-to memory at compile time, and cannot be modified during proof construction. See :ref:`literals`
-for more information.
+to memory at compile time, and cannot be modified during proof construction.
 
 .. tested-code:: cairo syntax_literals
 
@@ -441,7 +440,7 @@ for more information.
 
     let b = %[ pow(8,2) %]  # b = 8 to the power 3 = 512.
 
-    let c = %[ len([6,7,8,9]) %]  # c = length of the list [6,7,8,9] = 4.
+    let c = %[ len([6,7,8,9]) %]  # c = length of [6,7,8,9] = 4.
 
 Library imports
 ---------------
