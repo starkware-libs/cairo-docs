@@ -1,3 +1,4 @@
+import re
 from dataclasses import field
 from typing import ClassVar, Dict, List, Set, Type
 
@@ -14,7 +15,7 @@ class SetField(mfields.List):
         if value is None:
             return None
         res = super()._serialize(value, attr, obj, **kwargs)
-        return sorted(res, key=lambda x: x['name'])
+        return sorted(res, key=lambda x: (x['name'], x['expr']))
 
     def _deserialize(self, *args, **kwargs):
         return set(super()._deserialize(*args, **kwargs))
@@ -59,7 +60,7 @@ class HintsWhitelistDict(mfields.Field):
         return [
             HintsWhitelistEntry(
                 hint_lines.split('\n'), allowed_expressions=allowed_expressions).serialize()
-            for hint_lines, allowed_expressions in value.items()]
+            for hint_lines, allowed_expressions in sorted(value.items())]
 
     def _deserialize(self, value, attr, data, **kwargs) -> Dict[str, Set[NamedExpression]]:
         entries = [HintsWhitelistEntry.Schema().load(entry) for entry in value]
@@ -89,8 +90,9 @@ class HintsWhitelist:
         Creates a whitelist from all the hints in an existing program.
         """
         whitelist = cls(allowed_reference_expressions_for_hint={})
-        for hint in program.hints.values():
-            whitelist.add_hint_to_whitelist(hint, program.reference_manager)
+        for hints in program.hints.values():
+            for hint in hints:
+                whitelist.add_hint_to_whitelist(hint, program.reference_manager)
         return whitelist
 
     def add_hint_to_whitelist(self, hint: CairoHint, reference_manager: ReferenceManager):
@@ -103,9 +105,10 @@ class HintsWhitelist:
         Determines whether a Cairo program is hint-secure. This happens when all the
         hints and their associated reference expressions exist within a given whitelist.
         """
-        for hint in program.hints.values():
-            self.verify_hint_secure(
-                hint=hint, reference_manager=program.reference_manager)
+        for hints in program.hints.values():
+            for hint in hints:
+                self.verify_hint_secure(
+                    hint=hint, reference_manager=program.reference_manager)
 
     def verify_hint_secure(self, hint: CairoHint, reference_manager: ReferenceManager):
         allowed_expressions = self.allowed_reference_expressions_for_hint.get(hint.code)
@@ -123,6 +126,8 @@ class HintsWhitelist:
             Set[NamedExpression]:
         ref_exprs: Set[NamedExpression] = set()
         for ref_name, ref_id in hint.flow_tracking_data.reference_ids.items():
+            if re.match('^__temp[0-9]+$', ref_name.path[-1]):
+                continue
             ref = reference_manager.get_ref(ref_id)
             ref_exprs.add(NamedExpression(name=str(ref_name), expr=ref.value.format()))
         return ref_exprs

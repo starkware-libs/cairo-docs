@@ -4,7 +4,7 @@ import re
 import sys
 import traceback
 from functools import lru_cache
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
 from starkware.cairo.lang.compiler.debug_info import DebugInfo, InstructionLocation
 from starkware.cairo.lang.compiler.encode import decode_instruction, is_call_instruction
@@ -47,15 +47,18 @@ class VmExceptionBase(Exception):
 class VmException(LocationError, VmExceptionBase):
     def __init__(
             self, pc, inst_location: Optional[InstructionLocation], inner_exc,
-            traceback: Optional[str] = None, notes: Optional[List[str]] = None, hint: bool = False):
+            traceback: Optional[str] = None, notes: Optional[List[str]] = None,
+            hint_index: Optional[int] = None):
         self.pc = pc
         self.inner_exc = inner_exc
         location = None
         if inst_location is not None:
             location = inst_location.inst
             # If the hint location is missing, fall back to the instruction location.
-            if hint and inst_location.hint is not None:
-                location = inst_location.hint.location
+            if hint_index is not None:
+                hint_location = inst_location.hints[hint_index]
+                if hint_location is not None:
+                    location = hint_location.location
         super().__init__(
             f'Error at pc={self.pc}:\n{inner_exc}', location=location, traceback=traceback)
         if notes is not None:
@@ -93,14 +96,16 @@ class HintException(VmExceptionBase):
             m = re.match('^<hint(?P<index>[0-9]+)>$', item.filename)
             if not m:
                 return item
-            location = vm.get_location(vm.hint_pcs[int(m.group('index'))])
-            if not (location and location.hint):
+            pc, index = vm.hint_pc_and_index[int(m.group('index'))]
+            location = vm.get_location(pc)
+            if location is None or location.hints[index] is None:
                 return item
+            hint_location = location.hints[index]
             line_num = (
-                item.lineno + location.hint.location.start_line +
-                location.hint.n_prefix_newlines - 1)
+                item.lineno + hint_location.location.start_line +
+                hint_location.n_prefix_newlines - 1)
             return traceback.FrameSummary(
-                filename=location.hint.location.input_file.filename,
+                filename=hint_location.location.input_file.filename,
                 lineno=line_num,
                 name=item.name)
         tb_exception.stack = traceback.StackSummary.from_list(
@@ -238,14 +243,18 @@ class VirtualMachine:
         self.exec_scopes: List[dict] = []
         self.enter_scope(dict(hint_locals))
         self.run_context = copy.copy(run_context)  # Shallow copy.
-        self.hints: Dict[MaybeRelocatable, CompiledHint] = {}
-        # A map from hint index to pc.
-        self.hint_pcs: Dict[int, MaybeRelocatable] = {}
+        self.hints: Dict[MaybeRelocatable, List[CompiledHint]] = {}
+        # A map from hint id to pc and index.
+        self.hint_pc_and_index: Dict[int, Tuple[MaybeRelocatable, int]] = {}
         self.instruction_debug_info: Dict[MaybeRelocatable, InstructionLocation] = {}
         self.debug_file_contents: Dict[str, str] = {}
         self.program = program
         self.program_base = program_base if program_base is not None else self.run_context.pc
         self.validated_memory = ValidatedMemoryDict(memory=self.run_context.memory)
+        # A set to track the memory addresses accessed by actual Cairo instructions (as opposed to
+        # hints), necessary for accurate counting of memory holes.
+        self.accessed_addresses: Set[MaybeRelocatable] = {
+            self.program_base + i for i in range(len(self.program.data))}
 
         # If program is a StrippedProgram, there are no hints or debug information to load.
         if isinstance(program, Program):
@@ -289,22 +298,26 @@ class VirtualMachine:
         self.validated_memory.validate_existing_memory()
 
     def load_hints(self, program: Program, program_base: MaybeRelocatable):
-        for i, (pc, hint) in enumerate(program.hints.items(), len(self.hint_pcs)):
-            self.hints[pc + program_base] = CompiledHint(
-                compiled=self.compile_hint(hint.code, f'<hint{i}>'),
-                # Use hint=hint in the lambda's arguments to capture this value (otherwise, it
-                # will use the same hint object for all iterations).
-                consts=lambda pc, ap, fp, memory, hint=hint: VmConsts(
-                    context=VmConstsContext(
-                        identifiers=program.identifiers,
-                        evaluator=ExpressionEvaluator(
-                            self.prime, ap, fp, memory, program.identifiers).eval,
-                        reference_manager=program.reference_manager,
-                        flow_tracking_data=hint.flow_tracking_data,
-                        memory=memory,
-                        pc=pc),
-                    accessible_scopes=hint.accessible_scopes))
-            self.hint_pcs[i] = pc + program_base
+        for pc, hints in program.hints.items():
+            compiled_hints = []
+            for i, hint in enumerate(hints):
+                hint_id = len(self.hint_pc_and_index)
+                compiled_hints.append(CompiledHint(
+                    compiled=self.compile_hint(hint.code, f'<hint{hint_id}>'),
+                    # Use hint=hint in the lambda's arguments to capture this value (otherwise, it
+                    # will use the same hint object for all iterations).
+                    consts=lambda pc, ap, fp, memory, hint=hint: VmConsts(
+                        context=VmConstsContext(
+                            identifiers=program.identifiers,
+                            evaluator=ExpressionEvaluator(
+                                self.prime, ap, fp, memory, program.identifiers).eval,
+                            reference_manager=program.reference_manager,
+                            flow_tracking_data=hint.flow_tracking_data,
+                            memory=memory,
+                            pc=pc),
+                        accessible_scopes=hint.accessible_scopes)))
+                self.hint_pc_and_index[hint_id] = (pc + program_base, i)
+            self.hints[pc + program_base] = compiled_hints
 
     def load_debug_info(self, debug_info: Optional[DebugInfo], program_base: MaybeRelocatable):
         if debug_info is None:
@@ -337,6 +350,7 @@ class VirtualMachine:
         self.exec_scopes.append({**new_scope_locals, **self.builtin_runners})
 
     def exit_scope(self):
+        assert len(self.exec_scopes) > 1, 'Cannot exit main scope.'
         self.exec_scopes.pop()
 
     def update_registers(self, instruction: Instruction, operands: Operands):
@@ -582,9 +596,7 @@ class VirtualMachine:
     def step(self):
         self.skip_instruction_execution = False
         # Execute hints.
-        hint = self.hints.get(self.run_context.pc)
-
-        if hint is not None:
+        for hint_index, hint in enumerate(self.hints.get(self.run_context.pc, [])):
             exec_locals = self.exec_scopes[-1]
             exec_locals['memory'] = memory = self.validated_memory
             exec_locals['ap'] = ap = self.run_context.ap
@@ -598,7 +610,7 @@ class VirtualMachine:
             exec_locals['vm_exit_scope'] = self.exit_scope
             exec_locals.update(self.static_locals)
 
-            self.exec_hint(hint.compiled, exec_locals)
+            self.exec_hint(hint.compiled, exec_locals, hint_index=hint_index)
 
             # Clear ids (which will be rewritten by the next hint anyway) to make the VM instance
             # smaller and faster to copy.
@@ -620,7 +632,7 @@ class VirtualMachine:
         """
         return compile(source, filename, mode='exec')
 
-    def exec_hint(self, code, globals_):
+    def exec_hint(self, code, globals_, hint_index):
         """
         Executes the given code with the given globals.
         This function can be overridden by subclasses.
@@ -630,7 +642,8 @@ class VirtualMachine:
         except Exception:
             hint_exception = HintException(self, *sys.exc_info())
             raise self.as_vm_exception(
-                hint_exception, notes=[hint_exception.exception_str], hint=True) from None
+                hint_exception, notes=[hint_exception.exception_str],
+                hint_index=hint_index) from None
 
     def run_instruction(self, instruction, instruction_encoding):
         try:
@@ -652,6 +665,9 @@ class VirtualMachine:
             ap=self.run_context.ap,
             fp=self.run_context.fp,
         ))
+
+        self.accessed_addresses.update(operands_mem_addresses)
+        self.accessed_addresses.add(self.run_context.pc)
 
         try:
             # Update registers.
@@ -677,7 +693,9 @@ class VirtualMachine:
         """
         return self.trace[-1].pc
 
-    def as_vm_exception(self, exc, pc=None, notes: Optional[List[str]] = None, hint: bool = False):
+    def as_vm_exception(
+            self, exc, pc=None, notes: Optional[List[str]] = None,
+            hint_index: Optional[int] = None):
         """
         Wraps the exception with a VmException, adding to it location information. If pc is not
         given the current pc is used.
@@ -693,7 +711,7 @@ class VirtualMachine:
             inner_exc=exc,
             traceback=traceback,
             notes=notes,
-            hint=hint,
+            hint_index=hint_index,
         )
 
     def get_location(self, pc) -> Optional[InstructionLocation]:
@@ -763,8 +781,8 @@ class VirtualMachine:
 
     def end_run(self):
         self.verify_auto_deductions()
-        assert len(self.exec_scopes) == 1, \
-            'Every enter_scope() requires a corresponding exit_scope().'
+        if len(self.exec_scopes) != 1:
+            raise VmExceptionBase('Every enter_scope() requires a corresponding exit_scope().')
 
 
 def get_perm_range_check_limits(

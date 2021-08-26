@@ -7,16 +7,18 @@ from dataclasses import field
 from typing import Any, ClassVar, Dict, List, Type
 
 import marshmallow
+import marshmallow.decorators
 import marshmallow_dataclass
-from marshmallow.decorators import post_dump, pre_load
 from marshmallow_oneofschema import OneOfSchema
 
 from services.everest.api.gateway.transaction import (
     EverestAddTransactionRequest, EverestTransaction)
 from services.everest.definitions import fields as everest_fields
 from starkware.starknet.definitions import fields
+from starkware.starknet.definitions.error_codes import StarknetErrorCode
 from starkware.starknet.definitions.transaction_type import TransactionType
 from starkware.starknet.services.api.contract_definition import ContractDefinition
+from starkware.starkware_utils.error_handling import wrap_with_stark_exception
 
 
 class Transaction(EverestTransaction):
@@ -37,7 +39,7 @@ class Transaction(EverestTransaction):
 @marshmallow_dataclass.dataclass(frozen=True)
 class Deploy(Transaction):
     """
-    Represents a transaction in the StarkNet network, that is a deployment of a StarkNet contract.
+    Represents a transaction in the StarkNet network that is a deployment of a StarkNet contract.
     """
 
     contract_address: int = field(metadata=fields.contract_address_metadata)
@@ -46,20 +48,32 @@ class Deploy(Transaction):
     # Class variables.
     tx_type: ClassVar[TransactionType] = TransactionType.DEPLOY
 
-    @post_dump
-    def compress_program(self, data: Dict[str, Any], many: bool, **kwargs) -> Dict[str, Any]:
-        full_program = json.dumps(data['contract_definition']['program'])
+    @staticmethod
+    def compress_program(program_json: dict):
+        full_program = json.dumps(program_json)
         compressed_program = gzip.compress(data=full_program.encode('ascii'))
         compressed_program = base64.b64encode(compressed_program)
-        data['contract_definition']['program'] = compressed_program.decode('ascii')
+        return compressed_program.decode('ascii')
+
+    @marshmallow.decorators.post_dump
+    def compress_program_post_dump(
+            self, data: Dict[str, Any], many: bool, **kwargs) -> Dict[str, Any]:
+        data['contract_definition']['program'] = Deploy.compress_program(
+            program_json=data['contract_definition']['program'])
         return data
 
-    @pre_load
+    @marshmallow.decorators.pre_load
     def decompress_program(self, data: Dict[str, Any], many: bool, **kwargs) -> Dict[str, Any]:
         compressed_program: str = data['contract_definition']['program']
-        compressed_program_bytes = base64.b64decode(compressed_program.encode('ascii'))
-        decompressed_program = gzip.decompress(data=compressed_program_bytes)
-        data['contract_definition']['program'] = json.loads(decompressed_program.decode('ascii'))
+
+        with wrap_with_stark_exception(
+                code=StarknetErrorCode.INVALID_PROGRAM, message='Invalid compressed program.',
+                exception_types=[Exception]):
+            compressed_program_bytes = base64.b64decode(compressed_program.encode('ascii'))
+            decompressed_program = gzip.decompress(data=compressed_program_bytes)
+            data['contract_definition']['program'] = json.loads(
+                decompressed_program.decode('ascii'))
+
         return data
 
     def _remove_debug_info(self) -> 'Deploy':
@@ -76,7 +90,7 @@ class Deploy(Transaction):
 @marshmallow_dataclass.dataclass(frozen=True)
 class InvokeFunction(Transaction):
     """
-    Represents a transaction in the StarkNet network, that is an invocation of a Cairo contract
+    Represents a transaction in the StarkNet network that is an invocation of a Cairo contract
     function.
     """
 

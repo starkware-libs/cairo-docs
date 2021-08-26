@@ -4,7 +4,7 @@ from pygments.lexer import RegexLexer, words
 KEYWORDS = [
     'func', 'struct', 'namespace', 'end', 'call', 'ret', 'jmp', 'if', 'let', 'const',
     'import', 'from', 'as', 'abs', 'rel', 'static_assert', 'local', 'tempvar', 'felt',
-    'return', 'assert', 'member', 'cast', 'else', 'alloc_locals', 'with']
+    'return', 'assert', 'member', 'cast', 'else', 'alloc_locals', 'with', 'nondet']
 
 
 class CairoLexer(RegexLexer):
