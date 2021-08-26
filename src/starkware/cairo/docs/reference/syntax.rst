@@ -466,7 +466,7 @@ Program output
 Cairo programs can produce outputs that a smart contract can verify. These outputs require the
 ``output`` builtin. The program can product multiple outputs with calls to the ``serialize_word()``
 function. Outputs can also be structs which are saved to an output file.
-See :ref:`program_output` for more information.
+See :ref:`here <program_output>` for more information.
 
 The following program outputs two values, 7 and 13.
 
@@ -476,12 +476,12 @@ The following program outputs two values, 7 and 13.
 
     from starkware.cairo.common.serialize import serialize_word
 
-    func main{output_ptr: felt*}():
+    func main{output_ptr : felt*}():
         let a = 7
         let b = 13
         serialize_word(a)
         serialize_word(b)
-        return()
+        return ()
     end
 
 The following program excerpt outlines how a program may output a struct by referencing its size
@@ -499,5 +499,5 @@ and location in memory.
         let output = cast(output_ptr, MyStruct*)
         let output_ptr = output_ptr + Mystruct.SIZE
 
-        return()
+        return ()
     end
