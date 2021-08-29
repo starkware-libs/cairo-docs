@@ -115,19 +115,23 @@ module.
 ``default_dict_new()``
 **********************
 
-Returns a new dictionary, with a default value. At the end of using the dictionary,
-``default_dict_finalize()`` must be called. Default dictionaries are useful for efficient
-population of a dictionary where many keys have the same value.
-The dictionary can be initialized without using a hint, compared with ``dict_new()``,
-which requires a hint.
+Returns a new dictionary where all keys are initialized with a given default value.
+One can interact with the dictionary either using the ``dict_read()``, ``dict_write()`` operations
+discussed in the ``dict`` module, or manually as seen in the ``DictAccess`` section.
+Note that in order to enforce the consistency of subsequent dictionary accesses with
+the default values, one must eventually call ``default_dict_finalize()`` (which in turn calls
+``dict_squash()``, as discussed in that section). Otherwise, this is only enforced at the
+hints level which can be changed by a malicious prover.
+
+..  TODO (perama, 29/08/21): Add links when available (dict module, DictAccess dict_squash).
 
 The function requires the explicit argument:
 
--   ``default_value``, of type ``felt``, the value that will be set for all keys.
+-   ``default_value``, the default value.
 
 The function returns:
 
--   ``res``, of type ``DictAccess*``, a pointer to a the new dictionary.
+-   ``res``, of type ``DictAccess*``, a pointer to the new dictionary.
 
 In the code below, an empty default dictionary is made and finalized.
 The values provided in the hint are replaced by the default value.
@@ -135,61 +139,77 @@ The values provided in the hint are replaced by the default value.
 .. tested-code:: cairo library_default_dict_new
 
     from starkware.cairo.common.default_dict import default_dict_new
+    from starkware.cairo.common.dict import dict_read, dict_write
 
     alloc_locals
-    # Hint to initialise the dictionary
-    %{
-        initial_dict = {
-        17: 35,
-        57: 9
-        }
-    %}
-    # A new default dict. Values 35 and 9 are overriden by 7.
-    let (local my_dict) = default_dict_new(7)  # {17: 7, 57: 7}.
+    let (local my_dict) = default_dict_new(7)
+    let (value) = dict_read{dict_ptr=my_dict}(key=1)
+    # Since we haven't written any values yet,
+    # all keys have the default value.
+    assert value = 7
+    dict_write{dict_ptr=my_dict}(key=1, new_value=6)
+    let (value) = dict_read{dict_ptr=my_dict}(1)
+    assert value = 6
 
 ``default_dict_finalize()``
 ***************************
 
-Returns the squashed version of a default dictionary. The function is
-used to remove the intermediate dictionary states. All updates to the dictionary
-are sequentially applied and a new dictionary is returned with the final values.
-The value of ``default_value`` in the original call to ``default_dict_new()`` is
-checked ensure it matches that supplied in this function call.
+Squashes the dictionary and verifies consistency with respect to the default value.
+A squashed dictionary is one whose intermediate updates have been summarized and each
+key appears exactly once with its most recent value.
+For more details see ``dict_squash()`` from the ``dict`` module.
+
+..  TODO (perama, 29/08/21): Add link when available (dict_squash).
 
 The function requires the explicit arguments:
 
--   ``dict_accesses_start``, of type ``DictAccess*``, a pointer to the initial
-    dictionary instance.
--   ``dict_accesses_end``, of type ``DictAccess*``, a pointer to the latest
-    value of the dictionary.
--   ``default_value``, of type ``felt``, the default value specified when the
-    dictionary was created.
+-   ``dict_accesses_start``, a pointer to the initial dictionary (first operation).
+-   ``dict_accesses_end``, a pointer to the end of the dictionary (last operation)
+-   ``default_value``, the default value specified when the dictionary was created.
 
-The function returns the arguments:
+The function returns the values:
 
--   ``squashed_dict_start``, of type ``DictAccess*``, a pointer to the initial state
-    of the dictionary.
--   ``squashed_dict_end``, of type ``DictAccess*``, a pointer to the final state
-    of the dictionary.
+-   ``squashed_dict_start``, a pointer to the start of the squashed dictionary.
+-   ``squashed_dict_end``, a pointer to the end of the squashed dictionary.
 
-In order for the program to verify that the prover used the specified default value
-for a call to ``default_dict_new()``, ``default_dict_finalize()`` is required.
-The function asserts that each value is equal to the supplied ``default_value``.
+Note that one must eventually call ``default_dict_finalize()`` to verify both the internal
+consistency of the ``DictAccess`` entries forming the dictionary and of the consistency
+with the default value.
 
 In the example below, ``my_dict`` is the output of a previous call to
 ``default_dict_new`` with a``default_value`` of ``7``.
 
 .. tested-code:: cairo library_default_dict_finalize
 
-    from starkware.cairo.common.default_dict import (
-        default_dict_finalize)
-    from starkware.cairo.common.dict import dict_read
+    %builtins range_check
 
-    # Finalize, ensuring that the values are all 7.
-    let (local original, my_dict_final) = default_dict_finalize(
-        my_dict, my_dict, 7)
-    # Equivalent to: let val = 7.
-    let (local val : felt) = dict_read{dict_ptr=my_dict_final}(57)
+    from starkware.cairo.common.default_dict import (
+        default_dict_new, default_dict_finalize)
+    from starkware.cairo.common.dict import dict_write, dict_update
+
+    func main{range_check_ptr}() -> ():
+        alloc_locals
+        let (local dict_start) = default_dict_new(default_value=7)
+        let dict_end = dict_start
+        dict_update{dict_ptr=dict_end}(
+            key=0, prev_value=7, new_value=8)
+        let (squashed_dict_start,
+            squashed_dict_end) = default_dict_finalize(
+            dict_start, dict_end, 7)
+        # The following is an inconsistent update, the entry with
+        # key 1 still contains the default value 7.
+        # This will fail while using the library's hints
+        # but can be made to pass by a malicious prover.
+
+        # Update fails for an honest prover.
+        dict_update{dict_ptr=squashed_dict_end}(
+            key=1, prev_value=6, new_value=9)
+        # Finalize fails for the malicious prover.
+        let (squashed_dict_start,
+            squashed_dict_end) = default_dict_finalize(
+            squashed_dict_start, squashed_dict_end, 7)
+        return ()
+    end
 
 .. .. _common_library_dict:
 
