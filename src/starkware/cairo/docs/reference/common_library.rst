@@ -116,8 +116,8 @@ module.
 **********************
 
 Returns a new dictionary where all keys are initialized with a given default value.
-One can interact with the dictionary either using the ``dict_read()``, ``dict_write()`` operations
-discussed in the ``dict`` module, or manually as seen in the ``DictAccess`` section.
+One can interact with the dictionary either by using the ``dict_read()``, ``dict_write()``
+operations discussed in the ``dict`` module, or manually as seen in the ``DictAccess`` section.
 Note that in order to enforce the consistency of subsequent dictionary accesses with
 the default values, one must eventually call ``default_dict_finalize()`` (which in turn calls
 ``dict_squash()``, as discussed in that section). Otherwise, this is only enforced at the
@@ -164,8 +164,8 @@ For more details see ``dict_squash()`` from the ``dict`` module.
 The function requires the explicit arguments:
 
 -   ``dict_accesses_start``, a pointer to the initial dictionary (first operation).
--   ``dict_accesses_end``, a pointer to the end of the dictionary (last operation)
--   ``default_value``, the default value specified when the dictionary was created.
+-   ``dict_accesses_end``, a pointer to the end of the dictionary (last operation).
+-   ``default_value``, the expected initial value of each key.
 
 The function returns the values:
 
