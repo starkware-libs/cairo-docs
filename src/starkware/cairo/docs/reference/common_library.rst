@@ -263,9 +263,9 @@ and manually incrementing a pointer to the end of the array.
     func main{range_check_ptr}() -> ():
         alloc_locals
         let (dict_start : DictAccess*) = alloc()
-        assert [dict_start] = DictAccess(
+        assert dict_start[0] = DictAccess(
             key=0, prev_value=100, new_value=100)
-        assert [dict_start + DictAccess.SIZE] = DictAccess(
+        assert dict_start[1] = DictAccess(
             key=1, prev_value=200, new_value=200)
 
         let dict_end = dict_start + 2 * DictAccess.SIZE
@@ -303,9 +303,9 @@ This will only be enforced if we eventually call ``squash_dict()``.
         assert value_a * 2 = value_b
         # Simulate dictionary read by appending a 'DictAccess'
         # instruction with 'prev_value=new_value=current_value'.
-        assert [dict_ptr] = DictAccess(
+        assert dict_ptr[0] = DictAccess(
             key=a, prev_value=value_a, new_value=value_a)
-        assert [dict_ptr + DictAccess.SIZE] = DictAccess(
+        assert dict_ptr[1] = DictAccess(
             key=b, prev_value=value_b, new_value=value_b)
         let dict_end = dict_ptr + 2 * DictAccess.SIZE
         # A call to squash_dict() will ensure that the prover
