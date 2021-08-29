@@ -269,7 +269,7 @@ and manually incrementing a pointer to the end of the array.
             key=1, prev_value=200, new_value=200)
 
         let dict_end = dict_start + 2 * DictAccess.SIZE
-        # (dict_start, dict_end) now represent the dictionary
+        # (dict_start, dict_end) now represents the dictionary
         # {0: 100, 1: 200}.
 
         # Now pass the dictionary to a function for inspection.
