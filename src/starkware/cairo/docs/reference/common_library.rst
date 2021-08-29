@@ -13,13 +13,13 @@ within each library are outlined under the relevant library heading.
 
 -   :ref:`common_library_alloc`.
 -   :ref:`common_library_bitwise`.
+-   :ref:`common_library_find_element`
 
 ..  TODO (perama, 16/06/2021): Move the link above when the section is complete.
     -   :ref:`common_library_cairo_builtins`
     -   :ref:`common_library_default_dict`
     -   :ref:`common_library_dict`
     -   :ref:`common_library_dict_access`
-    -   :ref:`common_library_find_element`
     -   :ref:`common_library_hash`
     -   :ref:`common_library_hash_chain`
     -   :ref:`common_library_hash_state`
@@ -166,9 +166,8 @@ results in ``0110``:
 ``bitwise_or()``
 ****************
 
-Returns the result of the bitwise OR operation on two elements. Must be passed an implicit
-argument, ``bitwise_ptr`` of type ``BitwiseBuiltin*``, a pointer to the ``bitwise`` builtin
-struct which stores the bitwise elements.
+Returns the result of the bitwise OR operation on two elements. Requires an implicit
+argument, ``bitwise_ptr`` of type ``BitwiseBuiltin*``.
 
 The function accepts the explicit arguments:
 
@@ -192,9 +191,8 @@ results in ``1110``:
 ``bitwise_operations()``
 ************************
 
-Returns the result of the bitwise AND, XOR and OR operations on two elements. Must be
-passed an implicit argument, ``bitwise_ptr`` of type ``BitwiseBuiltin*``, a pointer to
-the ``bitwise`` builtin struct which stores the bitwise elements.
+Returns the result of the bitwise AND, XOR and OR operations on two elements. Requires
+an implicit argument, ``bitwise_ptr`` of type ``BitwiseBuiltin*``.
 
 The function accepts the explicit arguments:
 
@@ -250,15 +248,82 @@ results in ``1000``, ``0110`` and ``1110``:
     `common_dict_access <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/dict_access.cairo>`_
     module.
 
-.. .. _common_library_find_element:
+.. _common_library_find_element:
 
-..  ``find_element``
-..  ----------------
+``find_element``
+----------------
 
-..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's
-    `common_find_element <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/find_element.cairo>`_
-    module.
+This section refers to the common library's
+`find_element <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/find_element.cairo>`_
+module.
+
+
+``find_element()``
+******************
+
+Returns the pointer to an element in an array whose key matches a specified key. The function
+requires the implicit argument ``range_check_ptr``. Note that if the array contains
+multiple elements with the requested key, the function may return a pointer to any of them.
+
+The function requires four explicit arguments:
+
+-   ``array_ptr``, a pointer to an array.
+-   ``elm_size``, the size (in memory cells) of each element in the array.
+-   ``n_elms``, the number of elements in the array.
+-   ``key``, the key to look for (the key is assumed to be the first member of
+    each element in the array).
+
+The function returns:
+
+-   ``elm_ptr``, the pointer to an element whose first memory cell is ``key``
+    (namely, ``[elm_ptr]=key``).
+
+The function has the ability to receive the index of that element via a hint, which may
+save proving time. If ``key`` is not found then a ``ValueError`` exception
+will be raised while processing the library's hint. Note that a malicious prover
+can't cause ``find_element()`` to succeed by changing the hint, as the Cairo
+program will fail when the key is not present in the array.
+
+.. tested-code:: cairo library_find_element
+
+    %builtins range_check
+    from starkware.cairo.common.find_element import find_element
+    from starkware.cairo.common.alloc import alloc
+
+    struct MyStruct:
+        member a : felt
+        member b : felt
+    end
+
+    func main{range_check_ptr}() -> ():
+        # Create an array with MyStruct elements (1,2), (3,4), (5,6).
+        alloc_locals
+        let (local array_ptr : MyStruct*) = alloc()
+        assert array_ptr[0] = MyStruct(a=1, b=2)
+        assert array_ptr[1] = MyStruct(a=3, b=4)
+        assert array_ptr[2] = MyStruct(a=5, b=6)
+
+        # Find any element with key '5'.
+        let (element_ptr : MyStruct*) = find_element(
+            array_ptr=array_ptr,
+            elm_size=MyStruct.SIZE,
+            n_elms=3,
+            key=5)
+        # A pointer to the element with index 2 is returned.
+        assert element_ptr.a = 5
+        assert element_ptr.b = 6
+
+        # Pass a known index in a hint to save proving time.
+        %{ __find_element_index = 2 %}
+        let (element_ptr : MyStruct*) = find_element(
+            array_ptr=array_ptr,
+            elm_size=MyStruct.SIZE,
+            n_elms=3,
+            key=5)
+        assert element_ptr.a = 5
+        assert element_ptr.b = 6
+        return ()
+    end
 
 .. .. _common_library_hash:
 
