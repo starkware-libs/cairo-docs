@@ -465,16 +465,13 @@ Unpacking
 
 The values returned by a function can be ignored, or bound, to either a reference or local
 variable. The ``_`` character is used to handle returned values that are ignored.
-Consider the function ``foo()`` that returns two values, ``7`` and ``5`` in that order.
+Consider the function ``foo()`` that returns two values.
 
 .. tested-code:: cairo syntax_unpacking
 
-    let (a, b) = foo() #  Two references bound (a=7, b=5).
-
-    let (_, b) = foo() #  One reference bound (b=5).
-
-    let (local a, local b) = foo() #  Two locals bound (a=7, b=5).
-
-    let (local a, _) = foo() #  One local bound (a=7).
+    let (a, b) = foo()
+    let (_, b) = foo()
+    let (local a, local b) = foo()
+    let (local a, _) = foo()
 
 For more information see :ref:`return_values_unpacking`.
