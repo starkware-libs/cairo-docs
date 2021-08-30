@@ -469,7 +469,7 @@ with the program's variables/memory as shown in the following code sample.
 Note that the hint is not actually part of the Cairo program,
 and can thus be replaced by a malicious prover. We can run a Cairo program with
 the ``--program_input`` flag, which allows providing a json input file that
-can be referenced inside a hint
+can be referenced inside a hint.
 
 .. tested-code:: cairo syntax_hints
 
@@ -483,5 +483,5 @@ can be referenced inside a hint
     %{
         # Assigns the value '9' to the local variable 'a'.
         ids.a = 3 ** 2
-        c = ids.b * 2  # Read reference inside a hint.
+        c = ids.b * 2  # Read a reference inside a hint.
     %}
