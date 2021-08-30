@@ -133,7 +133,7 @@ The function returns:
 
 -   ``res``, of type ``DictAccess*``, a pointer to the new dictionary.
 
-In the code below, an empty default dictionary is made and finalized.
+In the code below, an empty default dictionary is created and interacted with.
 The values provided in the hint are replaced by the default value.
 
 .. tested-code:: cairo library_default_dict_new
@@ -176,8 +176,8 @@ Note that one must eventually call ``default_dict_finalize()`` to verify both th
 consistency of the ``DictAccess`` entries forming the dictionary and of the consistency
 with the default value.
 
-In the example below, ``my_dict`` is the output of a previous call to
-``default_dict_new`` with a``default_value`` of ``7``.
+In the example below we create and finalize a default dictionary, and explain what
+may happen if ``default_dict_finalize()`` is not called.
 
 .. tested-code:: cairo library_default_dict_finalize
 
