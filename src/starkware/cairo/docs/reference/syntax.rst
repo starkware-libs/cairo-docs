@@ -431,16 +431,19 @@ same return value.
 Literals
 --------
 
-Python code can be invoked with the ``%[`` ``%]`` block, where all contained code is converted
-to memory at compile time, and cannot be modified during proof construction.
+Rather than using explicit constants in the Cairo program, python code evaluating to
+the constant can be invoked with the ``%[`` ``%]`` syntax. Evaluation is preformed during
+compilation. Note that, unlike hints, the soundness of the program may rely on the
+correct evaluation of those literals, as constants are eventually an explicit
+part of the program.
 
 .. tested-code:: cairo syntax_literals
 
-    let a = %[ 2 * 2 %]  # a = 2 x 2 = 4.
+    let a = %[ 2 * 2 %]  # Equivalent to `let a=4`.
 
-    let b = %[ pow(8,2) %]  # b = 8 to the power 3 = 512.
+    let b = %[ pow(8,2) %]  # Equivalent to `let b=64`.
 
-    let c = %[ len([6,7,8,9]) %]  # c = length of [6,7,8,9] = 4.
+    let c = %[ len([6,7,8,9]) %]  # Equivalent to `let c=4`.
 
 Library imports
 ---------------
