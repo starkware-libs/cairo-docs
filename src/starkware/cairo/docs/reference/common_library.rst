@@ -36,38 +36,9 @@ within each library are outlined under the relevant library heading.
     -   :ref:`common_library_squash_dict`
     -   :ref:`common_library_uint256`
 
-**A note about implicit arguments**: Some descriptions state that the library function
-"requires the implicit argument ``<argument>``". Where this is the case, the decision to
-pass the argument follows the rule: If the parent function already has the
-required argument as an implicit argument, the braces can be omitted. Otherwise, it
-should be given explicitly. For example, implicit
-arguments may be ``range_check_ptr`` or ``dict_ptr``. See :ref:`implicit_arguments`
-for more information.
-
-In the example below, two of the three functions require the implicit argument ``x``.
-In ``function_without_implicit_arg()``, a function is called passing argument ``x`` explicitly.
-In ``function_with_implicit_arg{x}()``, a function is called passing argument ``x`` implicitly.
-
-.. tested-code:: cairo library_implicits0
-
-    func function_without_implicit_arg():
-        let x = 0
-        # x must be passed explicitly since it's not an
-        # implicit argument of this function.
-        function_with_implicit_arg{x=x}()
-        return ()
-    end
-
-    func function_with_implicit_arg{x}():
-        # x is an implicit argument of this function
-        # so it does not need to be passed explicitly.
-        another_function_with_implicit_arg()
-        return ()
-    end
-
-    func another_function_with_implicit_arg{x}():
-        return ()
-    end
+Some descriptions state that the library function
+"requires the implicit argument ``<argument>``". See :ref:`syntax_implicit_arguments`
+for more information on this topic.
 
 .. _common_library_alloc:
 
