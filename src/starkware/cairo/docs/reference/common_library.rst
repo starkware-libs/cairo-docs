@@ -249,7 +249,6 @@ The function returns:
 -   ``res``, of type ``DictAccess*``, a pointer to the new dictionary.
 
 In the code below, an empty default dictionary is created and interacted with.
-The values provided in the hint are replaced by the default value.
 
 .. tested-code:: cairo library_default_dict_new
 
