@@ -463,10 +463,13 @@ See :ref:`program_inputs` for more information.
 Program output
 --------------
 
-Cairo programs can produce outputs that a smart contract can verify. These outputs require the
-``output`` builtin. The program can product multiple outputs with calls to the ``serialize_word()``
-function. Outputs can also be structs which are saved to an output file.
-See :ref:`here <program_output>` for more information.
+Cairo programs can share information with the verifier using outputs. Whenever the program
+wishes to communicate information to the verifier, it can do so by writing it to a designated
+memory segment which can be accessed by using the output builtin. Instead of directly handling
+with the output pointer, one can call the ``serialize_word()`` library function which abstracts
+this from the user. Note that in real applications there is only need to output information
+if it's meaningful in some way for the verifier. See :ref:`here <program_output>` for more
+information.
 
 The following program outputs two values, 7 and 13.
 
@@ -484,20 +487,20 @@ The following program outputs two values, 7 and 13.
         return ()
     end
 
-The following program excerpt outlines how a program may output a struct by referencing its size
-and location in memory.
+The following program excerpt outlines how a program may output a struct.
 
 .. tested-code:: cairo syntax_program_output_struct
 
     %builtins output
 
-    # Code defining the struct goes here
+    struct MyStruct:
+        member a : felt
+        member b : felt
+    end
 
     func main{output_ptr : felt*}():
-        # Code defining the struct contents goes here
-
         let output = cast(output_ptr, MyStruct*)
-        let output_ptr = output_ptr + Mystruct.SIZE
-
+        assert [output] = MyStruct(a=3, b=4)
+        let output_ptr = output_ptr + MyStruct.SIZE
         return ()
     end
