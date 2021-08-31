@@ -444,22 +444,48 @@ any additional paths specified at compile time. See :ref:`import_search_path` fo
         assert_not_zero, assert_not_equal)
     from starkware.cairo.common.registers import get_ap
 
+.. _syntax_implicit_arguments:
+
 Implicit arguments
 ------------------
 
-Implicit arguments are specified as part of the function expression, and are designated by
-braces ``{}``. Expressions within the braces are passed between functions. If no implicit
-arguments are required, the braces can be omitted.
+Implicit arguments are specified as part of the function signature, and are declared
+inside curly braces ``{implicit_arg_name}``. Implicit arguments are automatically added as an
+argument and a return value to the function. If the implicit argument is not explicitly
+returned, the Cairo compiler takes care to return the current binding of the reference
+``implicit_arg_name``. If no implicit arguments are required the braces can be omitted.
 
-.. tested-code:: cairo syntax_implicit_arguments
+.. tested-code:: cairo syntax_implicit_arguments0
 
     %builtins output
 
-    func main{output_ptr}():
+    func write_to_output{output_ptr : felt*}(value : felt):
+        assert [output_ptr] = value
+        let output_ptr = output_ptr + 1
+        # The current binding for output_ptr is implicitly
+        # added as a returned value.
         return ()
     end
 
-For more information about builtins see :ref:`implicit_arguments`
+The function above accepts an impicit argument, ``output_ptr``, whose new binding
+is implicitly added as a return value.
+
+.. tested-code:: cairo syntax_implicit_arguments1
+
+    func main{output_ptr : felt*}():
+        alloc_locals
+        local start_output_ptr : felt* = output_ptr
+        write_to_output(value=5)
+        # The compiler automatically rebinds the name of the given
+        # implicit argument to the function's implicit return value.
+        assert output_ptr = start_output_ptr + 1
+        return ()
+    end
+
+In the function above, it is not necessary to write
+``write_to_output{output_ptr=output_ptr}(value=4)``. The
+the parent function ``main()`` has already declared ``output_ptr`` and the compiler
+will pass the argument automatically. For more information, see :ref:`implicit_arguments`.
 
 Program input
 -------------
@@ -476,4 +502,3 @@ See :ref:`program_inputs` for more information.
         # provided in the .json file.
         a = program_input['user_ids']
     %}
-
