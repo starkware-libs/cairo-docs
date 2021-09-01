@@ -459,7 +459,7 @@ returned, the Cairo compiler takes care to return the current binding of the ref
 
     %builtins output
 
-    func write_to_output{output_ptr : felt*}(value : felt):
+    func serialize_word{output_ptr : felt*}(value : felt):
         assert [output_ptr] = value
         let output_ptr = output_ptr + 1
         # The current binding for output_ptr is implicitly
@@ -467,15 +467,15 @@ returned, the Cairo compiler takes care to return the current binding of the ref
         return ()
     end
 
-The function above accepts an impicit argument, ``output_ptr``, whose new binding
-is implicitly added as a return value.
+The function, which is available in the common library, above accepts an impicit argument,
+``output_ptr``, whose new binding is implicitly added as a return value.
 
 .. tested-code:: cairo syntax_implicit_arguments1
 
     func main{output_ptr : felt*}():
         alloc_locals
         local start_output_ptr : felt* = output_ptr
-        write_to_output(value=5)
+        serialize_word(value=5)
         # The compiler automatically rebinds the name of the given
         # implicit argument to the function's implicit return value.
         assert output_ptr = start_output_ptr + 1
