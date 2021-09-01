@@ -467,7 +467,7 @@ returned, the Cairo compiler takes care to return the current binding of the ref
         return ()
     end
 
-The function, which is available in the common library, above accepts an impicit argument,
+The function above which is available in the common library, above accepts an impicit argument,
 ``output_ptr``, whose new binding is implicitly added as a return value.
 
 .. tested-code:: cairo syntax_implicit_arguments1
@@ -482,10 +482,10 @@ The function, which is available in the common library, above accepts an impicit
         return ()
     end
 
-In the function above, it is not necessary to write
-``write_to_output{output_ptr=output_ptr}(value=4)``. The
-the parent function ``main()`` has already declared ``output_ptr`` and the compiler
-will pass the argument automatically. For more information, see :ref:`implicit_arguments`.
+Note that it was not necessary to explicitly pass the implicit argument via
+``serialize_word{output_ptr=output_ptr}(value=5)``, since the parent function ``main()``
+already has a binding for ``output_ptr`` and the compiler will automatically pass it to
+``serialize_word()``. For more information, see :ref:`implicit_arguments`.
 
 Program input
 -------------
