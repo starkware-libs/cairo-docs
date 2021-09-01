@@ -138,7 +138,7 @@ The struct has the following members of type ``felt``:
 
 -   ``x``, the first input being hashed.
 -   ``y``, the second input being hashed.
--   ``result`` -- the hash of ``x`` and ``y``.
+-   ``result``, the hash of ``x`` and ``y``.
 
 A pointer to the ``pedersen`` builtin, ``pedersen_ptr``, has the type ``HashBuiltin*``.
 
