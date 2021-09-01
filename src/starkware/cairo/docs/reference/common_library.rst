@@ -12,6 +12,7 @@ The libraries available are listed below, organized alphabetically. The function
 within each library are outlined under the relevant library heading.
 
 -   :ref:`common_library_alloc`.
+-   :ref:`common_library_bitwise`.
 -   :ref:`common_library_cairo_builtins`.
 -   :ref:`common_library_find_element`
 
@@ -157,6 +158,120 @@ The struct has the following members of type ``felt``:
 -   ``message``, a message signed by the ``pub_key``.
 
 A pointer to the ``ecdsa`` builtin, ``ecdsa_ptr``, has the type ``SignatureBuiltin*``.
+
+.. _common_library_bitwise:
+
+``bitwise``
+-----------
+
+This section refers to the common library's
+`common_bitwise <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/bitwise.cairo>`_
+module.
+
+``bitwise_and()``
+*****************
+
+Returns the result of the bitwise AND operation of two elements. Requires an implicit
+argument, ``bitwise_ptr`` of type ``BitwiseBuiltin*``.
+
+The function accepts the explicit arguments:
+
+-   ``x`` of type ``felt``, the first operand.
+-   ``y`` of type ``felt``, the second operand.
+
+The function returns the value:
+
+-   ``x_and_y`` of type ``felt``, the result of the bitwise ``AND`` operation ``a & b``.
+
+The example below shows the operation on binary inputs ``1100`` and ``1010``
+results in ``1000``:
+
+.. tested-code:: cairo library_bitwise_and
+
+    from starkware.cairo.common.bitwise import bitwise_and
+
+    let (result) = bitwise_and(12, 10)  # Binary (1100, 1010).
+    assert result = 8  # Binary 1000.
+
+``bitwise_xor()``
+*****************
+
+Returns the result of the bitwise XOR operation on two elements. Requires an implicit
+argument, ``bitwise_ptr`` of type ``BitwiseBuiltin*``.
+
+The function accepts the explicit arguments:
+
+-   ``x`` of type ``felt``, the first operand.
+-   ``y`` of type ``felt``, the second operand.
+
+The function returns the value:
+
+-   ``x_xor_y`` of type ``felt``, the result of the bitwise ``XOR`` operation ``a ^ b``.
+
+The example below shows the operation on binary inputs ``1100`` and ``1010``
+results in ``0110``:
+
+.. tested-code:: cairo library_bitwise_xor
+
+    from starkware.cairo.common.bitwise import bitwise_xor
+
+    let (result) = bitwise_xor(12, 10)  # Binary (1100, 1010).
+    assert result = 6  # Binary 0110.
+
+``bitwise_or()``
+****************
+
+Returns the result of the bitwise OR operation on two elements. Requires an implicit
+argument, ``bitwise_ptr`` of type ``BitwiseBuiltin*``.
+
+The function accepts the explicit arguments:
+
+-   ``x`` of type ``felt``, the first operand.
+-   ``y`` of type ``felt``, the second operand.
+
+The function returns the value:
+
+-   ``x_or_y`` of type ``felt``, the result of the bitwise ``OR`` operation ``a | b``.
+
+The example below shows the operation on binary inputs ``1100`` and ``1010``
+results in ``1110``:
+
+.. tested-code:: cairo library_bitwise_or
+
+    from starkware.cairo.common.bitwise import bitwise_or
+
+    let (result) = bitwise_or(12, 10)  # Binary (1100, 1010).
+    assert result = 14  # Binary 1110.
+
+``bitwise_operations()``
+************************
+
+Returns the result of the bitwise AND, XOR and OR operations on two elements. Requires
+an implicit argument, ``bitwise_ptr`` of type ``BitwiseBuiltin*``.
+
+The function accepts the explicit arguments:
+
+-   ``x`` of type ``felt``, the first operand.
+-   ``y`` of type ``felt``, the second operand.
+
+The function returns the values:
+
+-   ``x_and_y`` of type ``felt``, the result of the bitwise ``AND`` operation ``a & b``.
+-   ``x_xor_y`` of type ``felt``, the result of the bitwise ``XOR`` operation ``a ^ b``.
+-   ``x_or_y`` of type ``felt``, the result of the bitwise ``OR`` operation ``a | b``.
+
+The example below shows the operation on binary inputs ``1100`` and ``1010``
+results in ``1000``, ``0110`` and ``1110``:
+
+.. tested-code:: cairo library_bitwise_operations
+
+    from starkware.cairo.common.bitwise import bitwise_operations
+
+    # Binary (1100, 1010).
+    let (and, xor, or) = bitwise_operations(12, 10)
+    assert and = 8  # Binary 1000.
+    assert xor = 6  # Binary 0110.
+    assert or = 14  # Binary 1110.
 
 .. .. _common_library_default_dict:
 
