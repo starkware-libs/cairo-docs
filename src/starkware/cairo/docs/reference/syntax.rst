@@ -485,3 +485,6 @@ can be referenced inside a hint.
         ids.a = 3 ** 2
         c = ids.b * 2  # Read a reference inside a hint.
     %}
+
+Note that for technical reasons, in order to dereference a struct pointer inside a hint, one
+should use the syntax ``memory[struct_ptr.address_]``.
