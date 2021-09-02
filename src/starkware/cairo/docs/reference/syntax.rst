@@ -486,5 +486,6 @@ can be referenced inside a hint.
         c = ids.b * 2  # Read a reference inside a hint.
     %}
 
-Note that for technical reasons, in order to dereference a struct pointer inside a hint, one
-should use the syntax ``memory[struct_ptr.address_]``.
+Note that you can access the address of a pointer to a struct using ``ids.struct_ptr.address_``
+and you can use ``memory[addr]`` for the value of the memory cell at address ``addr``.
+
