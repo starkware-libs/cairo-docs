@@ -103,7 +103,7 @@ This section refers to the common library's
 `cairo_builtins <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/cairo_builtins.cairo>`_
 module.
 
-``BitWiseBuiltin``
+``BitwiseBuiltin``
 ******************
 
 A struct specifying the bitwise builtin memory structure.
