@@ -467,7 +467,7 @@ returned, the Cairo compiler takes care to return the current binding of the ref
         return ()
     end
 
-The function above which is available in the common library, above accepts an impicit argument,
+The function above, which is available in the common library, accepts an impicit argument,
 ``output_ptr``, whose new binding is implicitly added as a return value.
 
 .. tested-code:: cairo syntax_implicit_arguments1
