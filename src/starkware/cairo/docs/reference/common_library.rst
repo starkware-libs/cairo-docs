@@ -13,10 +13,10 @@ within each library are outlined under the relevant library heading.
 
 -   :ref:`common_library_alloc`.
 -   :ref:`common_library_bitwise`.
+-   :ref:`common_library_cairo_builtins`.
 -   :ref:`common_library_find_element`
 
 ..  TODO (perama, 16/06/2021): Move the link above when the section is complete.
-    -   :ref:`common_library_cairo_builtins`
     -   :ref:`common_library_default_dict`
     -   :ref:`common_library_dict`
     -   :ref:`common_library_dict_access`
@@ -94,15 +94,70 @@ arrays. As more elements are added, more memory will be allocated.
     # Allocate a memory segment for an array of structs.
     let (local my_array : MyStruct*) = alloc()
 
-.. .. _common_library_cairo_builtins:
+.. _common_library_cairo_builtins:
 
-..  ``cairo_builtins``
-..  ------------------
+``cairo_builtins``
+------------------
 
-..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's
-    `common_cairo_builtins <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/cairo_builtins.cairo>`_
-    module.
+This section refers to the common library's
+`cairo_builtins <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/cairo_builtins.cairo>`_
+module.
+
+``BitwiseBuiltin``
+******************
+
+A struct specifying the bitwise builtin memory structure.
+This struct is used by functions from the common library that use the ``bitwise`` builtin.
+For example, the ``bitwise_xor()`` function accepts an implicit
+argument of type ``BitWiseBuiltin*``, which is used internally to track the next available
+builtin instance. See the function
+`here <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/bitwise.cairo>`__.
+
+The struct has the following members of type ``felt``:
+
+-   ``x``, the first oprand.
+-   ``y``, the second operand.
+-   ``x_and_y``, the result of bitwise AND operation on x and y.
+-   ``x_xor_y``, the result of bitwise XOR operation on x and y.
+-   ``x_or_y``, the result of bitwise OR operation on x and y.
+
+A pointer to the ``bitwise`` builtin, ``bitwise_ptr``, has the type ``BitWiseBuiltin*``.
+
+
+``HashBuiltin``
+***************
+
+A struct specifying the hash builtin memory structure.
+This struct is used by functions from the common library that use a hash builtin,
+such as the ``pedersen`` builtin. For example, the ``hash2()`` function accepts an implicit
+argument of type ``HashBuiltin*``, which is used internally to track the next available
+builtin instance. See the function
+`here <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/hash.cairo>`__.
+
+The struct has the following members of type ``felt``:
+
+-   ``x``, the first input being hashed.
+-   ``y``, the second input being hashed.
+-   ``result``, the hash of ``x`` and ``y``.
+
+A pointer to the ``pedersen`` builtin, ``pedersen_ptr``, has the type ``HashBuiltin*``.
+
+``SignatureBuiltin``
+********************
+
+A struct specifying the signature builtin memory structure.
+This struct is used by functions from the common library that use a signature builtin,
+such as the ``ecdsa`` builtin. For example, the ``verify_ecdsa_signature()`` function
+accepts an implicit argument of type ``SignatureBulitin*``, which is used internally
+to track the next available builtin instance. See the function
+`here <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/signature.cairo>`__.
+
+The struct has the following members of type ``felt``:
+
+-   ``pub_key``, an ECDSA public key.
+-   ``message``, a message signed by the ``pub_key``.
+
+A pointer to the ``ecdsa`` builtin, ``ecdsa_ptr``, has the type ``SignatureBuiltin*``.
 
 .. _common_library_bitwise:
 
