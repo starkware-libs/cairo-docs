@@ -15,6 +15,7 @@ within each library are outlined under the relevant library heading.
 -   :ref:`common_library_bitwise`.
 -   :ref:`common_library_cairo_builtins`.
 -   :ref:`common_library_find_element`
+-   :ref:`common_library_set`
 
 ..  TODO (perama, 16/06/2021): Move the link above when the section is complete.
     -   :ref:`common_library_default_dict`
@@ -30,7 +31,6 @@ within each library are outlined under the relevant library heading.
     -   :ref:`common_library_merkle_update`
     -   :ref:`common_library_registers`
     -   :ref:`common_library_serialize`
-    -   :ref:`common_library_set`
     -   :ref:`common_library_signature`
     -   :ref:`common_library_small_merkle_tree`
     -   :ref:`common_library_squash_dict`
