@@ -500,9 +500,9 @@ a duplicate entry will not be created. The function requires the implicit argume
 
 The function requires three explicit arguments:
 
-- `set_ptr`, the pointer to the start of the list.
-- `elm_size`, the size of each list element.
-- `elm_ptr`, a pointer to the element being added.
+- ``set_ptr``, the pointer to the start of the list.
+- ``elm_size``, the size of each list element.
+- ``elm_ptr``, a pointer to the element being added.
 
 .. TODO (perama, 08/09/2021): The code below does not yet compile.
 .. .. tested-code:: cairo library_set
