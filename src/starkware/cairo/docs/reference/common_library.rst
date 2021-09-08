@@ -480,15 +480,68 @@ program will fail when the key is not present in the array.
     `common_serialize <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/serialize.cairo>`_
     module.
 
-.. .. _common_library_set:
+.. _common_library_set:
 
-..  ``set``
-..  -------
 
-..  TODO (perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's
-    `common_set <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/set.cairo>`_
-    module.
+
+``set``
+-------
+
+This section refers to the common library's
+`common_set <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/set.cairo>`_
+module.
+
+``set_add()``
+*************
+
+An element may be added to a list with the condition that if the element already exists,
+a duplicate entry will not be created. The function requires the implicit arguments
+``set_end_ptr``, the pointer to the end of the list, and ``range_check_ptr``.
+
+The function requires three explicit arguments:
+
+- `set_ptr`, the pointer to the start of the list.
+- `elm_size`, the size of each list element.
+- `elm_ptr`, a pointer to the element being added.
+
+.. TODO (perama, 08/09/2021): The code below does not yet compile.
+.. .. tested-code:: cairo library_set
+
+        %builtins range_check
+
+        from starkware.cairo.common.set import set_add
+
+        struct MyStruct:
+            member a : felt
+            member b : felt
+        end
+
+        func main{range_check_ptr}():
+            alloc_locals
+            # An array containing two structs.
+            local my_list : MyStruct*
+            assert my_list[0] = MyStruct(a=1, b=3)
+            assert my_list[1] = MyStruct(a=5, b=7)
+
+            # Suppose a need to add element MyStruct(a=1, b=3)
+            # but unclear if present, and duplicate not desired.
+            let list_end = my_list + 2 * MyStruct.SIZE
+            local new_elm : MyStruct = MyStruct(a=1, b=3)
+            local new_elm_ptr = new_elm*
+
+            set_add{set_end_ptr=list_end}(
+                set_ptr=my_list,
+                elm_size=MyStruct.SIZE,
+                elm_ptr=new_elm_ptr)
+
+            # For completeness, show that the list contains the element.
+            assert my_list[0] = MyStruct(a=1, b=3)
+            # Check that the list length is still 2.
+            tempvar list_mem = cast(list_end, felt) - cast(my_list, felt)
+            tempvar n_elms = list_mem / MyStruct.Size
+            assert n_elms = 2
+            return ()
+        end
 
 .. .. _common_library_signature:
 
