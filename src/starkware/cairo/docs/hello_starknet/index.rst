@@ -17,7 +17,9 @@ This tutorial walks you through writing and deploying a StarkNet contract.
     cli
     user_auth
     more_features
+    calling_contracts
     l1l2
+    unit_tests
     amm
 
 Some useful links
@@ -25,11 +27,12 @@ Some useful links
 
 *  `The StarkNet website <http://starkware.co/product/starknet>`_
 *  `StarkNet Planets Alpha on Ropsten <https://starkware.medium.com/starknet-planets-alpha-on-ropsten-e7494929cb95>`_
+*  `StarkNet Alpha 1 release post <https://medium.com/starkware/starknet-alpha-1-90c3348cca4f>`_
 *  `On the Road to StarkNet <https://medium.com/starkware/on-the-road-to-starknet-a-permissionless-stark-powered-l2-zk-rollup-83be53640880>`_
 *  `Voyager <https://voyager.online>`_ -- The StarkNet block explorer.
 *  `The AMM demo <http://amm-demo.starknet.starkware.co/>`_
 
-StarkNet Alpha version 1
+StarkNet Alpha version 2
 ************************
-*  `The StarkNet core contract <https://ropsten.etherscan.io/address/0x0d761163e8BDc22fec278FEa0C7A95e7B2dfa3C3>`_
-*  `Sequencer URL <https://alpha1.starknet.io>`_
+*  `The StarkNet core contract <https://goerli.etherscan.io/address/0x5e6229F2D4d977d20A50219E521dE6Dd694d45cc>`_
+*  `Sequencer URL <https://alpha2.starknet.io>`_

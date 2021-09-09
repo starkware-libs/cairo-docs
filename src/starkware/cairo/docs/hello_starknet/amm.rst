@@ -337,7 +337,7 @@ apps/amm_sample/amm_sample.cairo>`_.
 
 To use the StarkNet CLI, start by generating the ABI of the contract:
 
-.. tested-code:: bash compile_amm_sample
+.. tested-code:: bash amm_sample_compile
 
     starknet-compile amm_sample.cairo \
         --output amm_sample_compiled.json \

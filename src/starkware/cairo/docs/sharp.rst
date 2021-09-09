@@ -41,7 +41,7 @@ Create a file named ``input.json`` with the program input:
 
 The following command will compile the program, run it on the given input and send
 it to SHARP. Make sure you have the latest version of the cairo-lang package installed
-(currently, 0.3.1), see :ref:`quickstart`.
+(currently, 0.4.0), see :ref:`quickstart`.
 
 .. code-block:: bash
 

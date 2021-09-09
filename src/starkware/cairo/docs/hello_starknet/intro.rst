@@ -7,8 +7,10 @@ In order to follow this tutorial you should have basic familiarity with writing
 Cairo code. For example, you can read the first few pages of the
 ":ref:`Hello, Cairo <hello_cairo>`" tutorial.
 You should also :ref:`set up your environment <quickstart>` and make sure your
-installed Cairo version is at least ``0.3.1``
+installed Cairo version is at least ``0.4.0``
 (you can check your version by running ``cairo-compile --version``).
+
+.. _first_contract:
 
 Your first contract
 -------------------
@@ -130,6 +132,8 @@ This means that not all the Cairo library functions can be used when writing
 a StarkNet contract. See
 `here <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/starknet/security/starknet_common.cairo>`_
 for a list of the whitelisted library functions.
+
+.. _compile_contract:
 
 Compile the contract
 --------------------
