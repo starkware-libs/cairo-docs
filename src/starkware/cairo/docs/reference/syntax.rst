@@ -459,4 +459,3 @@ See :ref:`program_inputs` for more information.
         # provided in the .json file.
         a = program_input['user_ids']
     %}
-

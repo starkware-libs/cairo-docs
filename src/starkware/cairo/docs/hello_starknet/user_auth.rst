@@ -67,9 +67,9 @@ and add the following import statement:
 
     from starkware.cairo.common.cairo_builtins import (
         HashBuiltin, SignatureBuiltin)
+    from starkware.cairo.common.hash import hash2
     from starkware.cairo.common.signature import (
         verify_ecdsa_signature)
-    from starkware.cairo.common.hash import hash2
     from starkware.starknet.common.storage import Storage
 
 Next, we will change the code of ``increase_balance()`` to:
@@ -245,7 +245,7 @@ component to 1, and then invoke ``increase_balance()`` again with this invalid s
         --inputs \
             1628448741648245036800002906075225705100596136133912895015035902954123957052 \
             4321 \
-            2620967193230873397198710803425457084022525354559824107385923461037870205486 \
+            1225578735933442828068102633747590437426782890965066746429241472187377583468 \
             1
 
 After this, when querying the transaction status, you should get:
@@ -255,7 +255,7 @@ After this, when querying the transaction status, you should get:
     {
         "tx_failure_reason": {
             "code": "TRANSACTION_FAILED",
-            "error_message": "Error at pc=0:71:\nSignature (2620967193230873397198710803425457084022525354559824107385923461037870205486, 1), is invalid, with respect to the public key 1628448741648245036800002906075225705100596136133912895015035902954123957052, and the message hash 4321.\nCairo traceback (most recent call last):\nUnknown location (pc=0:152)\nUnknown location (pc=0:121)",
+            "error_message": "Error at pc=0:71:\nSignature (1225578735933442828068102633747590437426782890965066746429241472187377583468, 1), is invalid, with respect to the public key 1628448741648245036800002906075225705100596136133912895015035902954123957052, and the message hash 2145928028330445730928899764978337236302436665109337681432022680924515407233.\nCairo traceback (most recent call last):\nUnknown location (pc=0:155)\nUnknown location (pc=0:127)",
             "tx_id": 2
         },
         "tx_status": "REJECTED"
@@ -283,14 +283,14 @@ The output should look like:
     .../signature.cairo:11:5: Error at pc=0:71:
         assert ecdsa_ptr.pub_key = public_key
         ^***********************************^
-    Signature (2620967193230873397198710803425457084022525354559824107385923461037870205486, 1), is invalid, with respect to the public key 1628448741648245036800002906075225705100596136133912895015035902954123957052, and the message hash 4321.
+    Signature (1225578735933442828068102633747590437426782890965066746429241472187377583468, 1), is invalid, with respect to the public key 1628448741648245036800002906075225705100596136133912895015035902954123957052, and the message hash 2145928028330445730928899764978337236302436665109337681432022680924515407233.
     Cairo traceback (most recent call last):
-    user_auth.cairo:15:6
+    user_auth.cairo:16:6
     func increase_balance{
          ^**************^
-    user_auth.cairo:19:5
-        verify_ecdsa_signature(message=amount, public_key=user, signature_r=sig_r, signature_s=sig_s)
-        ^*******************************************************************************************^
+    user_auth.cairo:24:5
+        verify_ecdsa_signature(
+        ^*********************^
 
 .. test::
 
