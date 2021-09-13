@@ -495,7 +495,9 @@ module.
 *************
 
 An element may be added to a list with the condition that if the element already exists,
-a duplicate entry will not be created. The function requires the implicit arguments
+a duplicate entry will not be created. An element may be added even if it exists by a
+malicious prover. An honest prover will not append the element if it is already present,
+but this is not verified. The function requires the implicit arguments
 ``set_end_ptr``, the pointer to the end of the list, and ``range_check_ptr``.
 
 The function requires three explicit arguments:
@@ -504,44 +506,43 @@ The function requires three explicit arguments:
 - ``elm_size``, the size of each list element.
 - ``elm_ptr``, a pointer to the element being added.
 
-.. TODO (perama, 08/09/2021): The code below does not yet compile.
-.. .. tested-code:: cairo library_set
+.. tested-code:: cairo library_set
 
-        %builtins range_check
+    %builtins range_check
 
-        from starkware.cairo.common.set import set_add
+    from starkware.cairo.common.set import set_add
+    from starkware.cairo.common.registers import get_fp_and_pc
+    from starkware.cairo.common.alloc import alloc
 
-        struct MyStruct:
-            member a : felt
-            member b : felt
-        end
+    struct MyStruct:
+        member a : felt
+        member b : felt
+    end
 
-        func main{range_check_ptr}():
-            alloc_locals
-            # An array containing two structs.
-            local my_list : MyStruct*
-            assert my_list[0] = MyStruct(a=1, b=3)
-            assert my_list[1] = MyStruct(a=5, b=7)
+    func main{range_check_ptr}():
+        alloc_locals
 
-            # Suppose a need to add element MyStruct(a=1, b=3)
-            # but unclear if present, and duplicate not desired.
-            let list_end = my_list + 2 * MyStruct.SIZE
-            local new_elm : MyStruct = MyStruct(a=1, b=3)
-            local new_elm_ptr = new_elm*
+        # An array containing two structs.
+        let (local my_list : MyStruct*) = alloc()
+        assert my_list[0] = MyStruct(a=1, b=3)
+        assert my_list[1] = MyStruct(a=5, b=7)
 
-            set_add{set_end_ptr=list_end}(
-                set_ptr=my_list,
-                elm_size=MyStruct.SIZE,
-                elm_ptr=new_elm_ptr)
+        # Suppose that we want to add the element
+        # MyStruct(a=1, b=3), but only if it is note already
+        # present (for the purpose of the example the contents
+        # of the array are known, but this doesn't have to be
+        # the case)
+        let list_end = cast(my_list + 2 * MyStruct.SIZE, felt*)
+        local new_elm : MyStruct = MyStruct(a=1, b=3)
+        let (local __fp__, _) = get_fp_and_pc()
+        local new_elm_ptr : felt* = cast(&new_elm, felt*)
 
-            # For completeness, show that the list contains the element.
-            assert my_list[0] = MyStruct(a=1, b=3)
-            # Check that the list length is still 2.
-            tempvar list_mem = cast(list_end, felt) - cast(my_list, felt)
-            tempvar n_elms = list_mem / MyStruct.Size
-            assert n_elms = 2
-            return ()
-        end
+        set_add{set_end_ptr=list_end}(
+            set_ptr=my_list,
+            elm_size=MyStruct.SIZE,
+            elm_ptr=new_elm_ptr)
+        return ()
+    end
 
 .. .. _common_library_signature:
 
