@@ -493,9 +493,8 @@ module.
 ``set_add()``
 *************
 
-An element may be added to a list with the condition that if the element already exists,
-a duplicate entry will not be created. An element may be added even if it exists by a
-malicious prover. An honest prover will not append the element if it is already present,
+The function either appends an element to a given array or asserts that it exists.
+An honest prover will not append the element if it is already present,
 but this is not verified. The function requires the implicit arguments
 ``set_end_ptr``, the pointer to the end of the list, and ``range_check_ptr``.
 
@@ -527,19 +526,17 @@ The function requires three explicit arguments:
         assert my_list[1] = MyStruct(a=5, b=7)
 
         # Suppose that we want to add the element
-        # MyStruct(a=1, b=3), but only if it is note already
-        # present (for the purpose of the example the contents
-        # of the array are known, but this doesn't have to be
-        # the case)
-        let list_end = cast(my_list + 2 * MyStruct.SIZE, felt*)
-        local new_elm : MyStruct = MyStruct(a=1, b=3)
-        let (local __fp__, _) = get_fp_and_pc()
-        local new_elm_ptr : felt* = cast(&new_elm, felt*)
+        # MyStruct(a=1, b=3), but only if it is not already
+        # present (for the purpose of the example the contents of the
+        # array are known, but this doesn't have to be the case)
+        let list_end : felt* = &my_list[2]
+        let (new_elm : MyStruct*) = alloc()
+        assert new_elm[0] = MyStruct(a=2, b=3)
 
         set_add{set_end_ptr=list_end}(
             set_ptr=my_list,
             elm_size=MyStruct.SIZE,
-            elm_ptr=new_elm_ptr)
+            elm_ptr=new_elm)
         return ()
     end
 
