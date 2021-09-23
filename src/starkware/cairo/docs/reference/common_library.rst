@@ -508,9 +508,8 @@ The function requires three explicit arguments:
 
     %builtins range_check
 
-    from starkware.cairo.common.set import set_add
-    from starkware.cairo.common.registers import get_fp_and_pc
     from starkware.cairo.common.alloc import alloc
+    from starkware.cairo.common.set import set_add
 
     struct MyStruct:
         member a : felt
