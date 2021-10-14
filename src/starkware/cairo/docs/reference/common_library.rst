@@ -13,7 +13,7 @@ within each library are outlined under the relevant library heading.
 
 -   :ref:`common_library_alloc`.
 -   :ref:`common_library_dict`.
--   :ref:`common_library_find_element`
+-   :ref:`common_library_find_element`.
 
 ..  TODO (perama, 16/06/2021): Move the link above when the section is complete.
     -   :ref:`common_library_cairo_builtins`
@@ -119,7 +119,7 @@ arrays. As more elements are added, more memory will be allocated.
 --------
 
 This section refers to the common library's
-`common_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/dict.cairo>`_
+`dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/dict.cairo>`_
 module for working with user defined dictionaries, abstracting away Cairo's simulation
 of dictionaries as an array of read/write logs.
 
@@ -136,9 +136,10 @@ with the ``initial_dict`` hint (this is only enforced at the python level). Tech
 return value is a pointer to an empty ``DictAccess`` array. Soundness with respect to the
 initial values can only be achieved with explicit initialization of the dictionary or
 by using the ``default_dict_new()`` from the
-`common_default_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/default_dict.cairo>`_
+`default_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/default_dict.cairo>`_
 module instead, which is not based on user-defined hints (and is thus also
-available in StarkNet, unlike ``dict_new()``).
+available in StarkNet, unlike ``dict_new()``). One must call `dict_squash()`
+before reading from a dictionary.
 
 The function returns the argument:
 
@@ -220,6 +221,7 @@ Note how the pointer ``my_dict`` is passed as an implicit argument.
     # The value associated with key=12 is changed.
     dict_write{dict_ptr=my_dict}(key=12, new_value=34)
 
+    # dict_squash() must be called here (omitted for brevity).
     let key_12_val = dict_read{dict_ptr=my_dict}(key=12)
     assert key_12_val = 34
 
