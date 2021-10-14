@@ -214,13 +214,13 @@ program will fail when the key is not present in the array.
 
 Returns the pointer to the first element in the array whose first field is at least ``key``.
 The array elements must be sorted by the first field in ascending order. If no such item exists,
-it returns a pointer to the end of the array. The function requires the implicit argument
-``range_check_ptr``.
+it returns a pointer to the end of the array (after the last item). The function requires the
+implicit argument ``range_check_ptr``.
 
 The function accepts the arguments:
 
 -  ``array_ptr``, a pointer to a sorted array.
--  ``elm_size``, the size of (in memory cells) of each element in the array.
+-  ``elm_size``, the size (in memory cells) of each element in the array.
 -  ``n_elms``, the number of elements in the array.
 -  ``key``, the key lower bound (the key is assumed to be the first member of
    each element in the array).
@@ -275,6 +275,10 @@ Continuing with the same example, since the array is sorted, searching for the k
     assert success_val = 1
     assert first_ptr.a = 5
     assert first_ptr.b = 6
+    # There is no element with key=2.
+    let (first_ptr : MyStruct*, success_val) = search_sorted(
+        array_ptr=array_ptr, elm_size=2, n_elms=3, key=2)
+    assert success_val = 0
 
 .. .. _common_library_hash:
 
