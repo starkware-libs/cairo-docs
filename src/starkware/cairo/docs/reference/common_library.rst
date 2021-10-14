@@ -231,8 +231,8 @@ module.
 **********************
 
 Returns a new dictionary where all keys are initialized with a given default value.
-One can interact with the dictionary either by using the ``dict_read()``, ``dict_write()``
-operations discussed in the ``dict`` module, or manually as seen in the ``DictAccess`` section.
+One can interact with the dictionary using the ``dict_read()``, ``dict_write()``
+operations discussed in the ``dict`` module.
 Note that in order to enforce the consistency of subsequent dictionary accesses with
 the default values, one must eventually call ``default_dict_finalize()`` (which in turn calls
 ``dict_squash()``, as discussed in that section). Otherwise, this is only enforced at the
@@ -247,23 +247,6 @@ The function requires the explicit argument:
 The function returns:
 
 -   ``res``, of type ``DictAccess*``, a pointer to the new dictionary.
-
-In the code below, an empty default dictionary is created and interacted with.
-
-.. tested-code:: cairo library_default_dict_new
-
-    from starkware.cairo.common.default_dict import default_dict_new
-    from starkware.cairo.common.dict import dict_read, dict_write
-
-    alloc_locals
-    let (local my_dict) = default_dict_new(7)
-    let (value) = dict_read{dict_ptr=my_dict}(key=1)
-    # Since we haven't written any values yet,
-    # all keys have the default value.
-    assert value = 7
-    dict_write{dict_ptr=my_dict}(key=1, new_value=6)
-    let (value) = dict_read{dict_ptr=my_dict}(1)
-    assert value = 6
 
 ``default_dict_finalize()``
 ***************************
@@ -293,6 +276,9 @@ with the default value.
 In the example below we create and finalize a default dictionary, and explain what
 may happen if ``default_dict_finalize()`` is not called.
 
+Example
+*******
+
 .. tested-code:: cairo library_default_dict_finalize
 
     %builtins range_check
@@ -303,25 +289,22 @@ may happen if ``default_dict_finalize()`` is not called.
 
     func main{range_check_ptr}() -> ():
         alloc_locals
-        let (local dict_start) = default_dict_new(default_value=7)
-        let dict_end = dict_start
-        dict_update{dict_ptr=dict_end}(
-            key=0, prev_value=7, new_value=8)
-        let (squashed_dict_start,
-            squashed_dict_end) = default_dict_finalize(
-            dict_start, dict_end, 7)
+        let (local my_dict_start) = default_dict_new(default_value=7)
+        let my_dict = my_dict_start
+        dict_write{dict_ptr=my_dict}(key=0, new_value=8)
+        let (my_dict_start, my_dict) = default_dict_finalize(
+            my_dict_start, my_dict, 7)
         # The following is an inconsistent update, the entry with
         # key 1 still contains the default value 7.
         # This will fail while using the library's hints
         # but can be made to pass by a malicious prover.
 
-        # Update fails for an honest prover.
-        dict_update{dict_ptr=squashed_dict_end}(
-            key=1, prev_value=6, new_value=9)
-        # Finalize fails for the malicious prover.
-        let (squashed_dict_start,
-            squashed_dict_end) = default_dict_finalize(
-            squashed_dict_start, squashed_dict_end, 7)
+        # Update fails for an honest prover (commented out).
+        # dict_update{dict_ptr=my_dict}(key=1, prev_value=8, new_value=9)
+
+        # Finalize fails for the malicious prover with extra update.
+        let (my_dict_start, my_dict) = default_dict_finalize(
+            my_dict_start, my_dict, 7)
         return ()
     end
 
