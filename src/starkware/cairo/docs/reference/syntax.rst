@@ -434,7 +434,7 @@ Literals
 Cairo allows using python code in order to specify constants, using the ``%[ ... %]`` syntax.
 Evaluation is preformed during compilation. Note that, unlike hints, the soundness of the
 program may rely on the correct evaluation of those literals, as constants eventually
-become an explicit part of the program. Please add that this feature is experimental and may be
+become an explicit part of the program. This feature is experimental and may be
 removed/restricted in future versions.
 
 .. tested-code:: cairo syntax_literals
