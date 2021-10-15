@@ -428,14 +428,32 @@ Option (3) unpacks the return value into ``ret1`` and ``ret2``.
 Option (4) is a tail recursion -- after ``foo`` returns, the calling function returns the
 same return value.
 
+Literals
+--------
+
+Cairo allows using python code in order to specify constants, using the ``%[ ... %]`` syntax.
+Evaluation is preformed during compilation. Note that, unlike hints, the soundness of the
+program may rely on the correct evaluation of those literals, as constants eventually
+become an explicit part of the program. This feature is experimental and may be
+removed/restricted in future versions.
+
+.. tested-code:: cairo syntax_literals
+
+    let a = %[ 2 * 2 %]  # Equivalent to `let a = 4`.
+
+    let b = %[ pow(8, 2) %]  # Equivalent to `let b = 64`.
+
+    let c = %[ len([6, 7, 8, 9]) %]  # Equivalent to `let c = 4`.
+
 Library imports
 ---------------
 
-Library functions are imported at the top of the file or right below the ``%builtins`` directive if
-it is used. The statement consists of the module name and the functions to ``import`` from it.
-Multiple functions from the same library can be separated by commas. Functions from different libraries
-are imported on different lines. Cairo searches each module in a default directory path and in
-any additional paths specified at compile time. See :ref:`import_search_path` for more information.
+Library functions are imported at the top of the file or right below the ``%builtins``
+directive if it is used. The statement consists of the module name and the functions to
+``import`` from it. Multiple functions from the same library can be separated by commas.
+Functions from different libraries are imported on different lines. Cairo searches each
+module in a default directory path and in any additional paths specified at compile time.
+See :ref:`import_search_path` for more information.
 
 .. tested-code:: cairo syntax_library_imports
 
@@ -443,6 +461,21 @@ any additional paths specified at compile time. See :ref:`import_search_path` fo
     from starkware.cairo.common.math import (
         assert_not_zero, assert_not_equal)
     from starkware.cairo.common.registers import get_ap
+
+Segments
+--------
+
+When running the Cairo code, the memory is separated into different sections called segments.
+For example, each builtin occupies a different memory segment. The memory locations are
+designated by two numbers, a segment index and an offset in the segment.
+In this format, these numbers are separated by a colon ``:``.
+When the program ends, the segments are glued and each value of the form ``*:*``
+is replaced with a number. See :ref:`segments` for more information. Some examples
+of segments and their interpretation are listed below:
+
+* ``0:3``, memory address 3 within segment 0.
+* ``1:7``, memory address 7 within segment 1.
+* ``2:12``, memory address 12 within segment 2.
 
 Program input
 -------------
@@ -488,4 +521,20 @@ can be referenced inside a hint.
 
 Note that you can access the address of a pointer to a struct using ``ids.struct_ptr.address_``
 and you can use ``memory[addr]`` for the value of the memory cell at address ``addr``.
+
+Unpacking
+---------
+
+The values returned by a function can be ignored, or bound, to either a reference or local
+variable. The ``_`` character is used to handle returned values that are ignored.
+Consider the function ``foo()`` that returns two values.
+
+.. tested-code:: cairo syntax_unpacking
+
+    let (a, b) = foo()
+    let (_, b) = foo()
+    let (local a, local b) = foo()
+    let (local a, _) = foo()
+
+For more information see :ref:`return_values_unpacking`.
 

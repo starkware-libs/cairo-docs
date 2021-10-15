@@ -372,7 +372,7 @@ Exercise
 
 2.  Can you spot an inefficiency in the following code? Hint: take a look
     :ref:`here <continuous_memory>`.
-    Fix the inefficienty in two ways (implement each of the following fixes separately):
+    Fix the inefficiency in two ways (implement each of the following fixes separately):
 
     a. Move the instruction ``alloc_locals``.
     b. Use ``tempvar`` instead of ``local``.
