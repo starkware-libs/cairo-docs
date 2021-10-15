@@ -8,15 +8,12 @@ interface IStarknetCore {
         uint256 to_address,
         uint256 selector,
         uint256[] calldata payload
-    ) virtual external;
+    ) external virtual;
 
     /**
       Consumes a message that was sent from an L2 contract.
     */
-    function consumeMessageFromL2(
-        uint256 fromAddress,
-        uint256[] calldata payload
-    ) virtual external;
+    function consumeMessageFromL2(uint256 fromAddress, uint256[] calldata payload) external virtual;
 }
 
 /**
@@ -27,7 +24,7 @@ contract L1L2Example {
     // The StarkNet core contract.
     IStarknetCore starknetCore;
 
-    mapping (uint256 => uint256) public userBalances;
+    mapping(uint256 => uint256) public userBalances;
 
     uint256 constant MESSAGE_WITHDRAW = 0;
 
@@ -38,19 +35,15 @@ contract L1L2Example {
     /**
       Initializes the contract state.
     */
-    constructor(
-        IStarknetCore starknetCore_)
-        public
-    {
+    constructor(IStarknetCore starknetCore_) public {
         starknetCore = starknetCore_;
     }
 
     function withdraw(
         uint256 l2ContractAddress,
         uint256 user,
-        uint256 amount)
-        external
-    {
+        uint256 amount
+    ) external {
         // Construct the withdrawal message's payload.
         uint256[] memory payload = new uint256[](3);
         payload[0] = MESSAGE_WITHDRAW;
@@ -68,10 +61,9 @@ contract L1L2Example {
     function deposit(
         uint256 l2ContractAddress,
         uint256 user,
-        uint256 amount)
-        external
-    {
-        require(amount < 2 ** 64, "Invalid amount.");
+        uint256 amount
+    ) external {
+        require(amount < 2**64, "Invalid amount.");
         require(amount <= userBalances[user], "The user's balance is not large enough.");
 
         // Update the L1 balance.
