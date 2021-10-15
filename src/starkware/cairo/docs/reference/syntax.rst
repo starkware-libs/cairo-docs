@@ -468,7 +468,8 @@ specific label via ``jmp LABEL``, or a specific location defined by a value of t
 This may be an absolute value with ``jmp abs VALUE`` or an offset relative to the current
 instruction with ``jmp rel OFFSET``.
 Cairo supports conditional jumps with the syntax ``if <expr> != 0`` following a jump instruction.
-It is preferable to use `if` rather than `jmp` where possible.
+It is preferable to use `if` rather than `jmp` where possible. An example use of `if` can be seen
+here :ref:`syntax_reference`.
 
 When the jump condition depends on a value that is determined by the prover, it
 gets to decide whether or not the jump is executed, de facto making this a non deterministic jump.
