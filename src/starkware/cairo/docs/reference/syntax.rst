@@ -493,6 +493,35 @@ See :ref:`program_inputs` for more information.
         a = program_input['user_ids']
     %}
 
+Hints
+-----
+
+Python code can be invoked with the ``%{`` ``%}`` block called a hint, which is executed right
+before the next Cairo instruction. The hint can interact
+with the program's variables/memory as shown in the following code sample.
+Note that the hint is not actually part of the Cairo program,
+and can thus be replaced by a malicious prover. We can run a Cairo program with
+the ``--program_input`` flag, which allows providing a json input file that
+can be referenced inside a hint.
+
+.. tested-code:: cairo syntax_hints
+
+    alloc_locals
+    %{ memory[ap] = 100 %}  # Assign to memory.
+    [ap] = [ap]; ap++  # Increment ap after using it in the hint.
+    assert [ap - 1] = 100  # Assert the value has some property.
+
+    local a
+    let b = 7
+    %{
+        # Assigns the value '9' to the local variable 'a'.
+        ids.a = 3 ** 2
+        c = ids.b * 2  # Read a reference inside a hint.
+    %}
+
+Note that you can access the address of a pointer to a struct using ``ids.struct_ptr.address_``
+and you can use ``memory[addr]`` for the value of the memory cell at address ``addr``.
+
 Unpacking
 ---------
 
@@ -508,3 +537,4 @@ Consider the function ``foo()`` that returns two values.
     let (local a, _) = foo()
 
 For more information see :ref:`return_values_unpacking`.
+
