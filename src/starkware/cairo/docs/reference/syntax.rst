@@ -428,6 +428,23 @@ Option (3) unpacks the return value into ``ret1`` and ``ret2``.
 Option (4) is a tail recursion -- after ``foo`` returns, the calling function returns the
 same return value.
 
+Literals
+--------
+
+Cairo allows using python code in order to specify constants, using the ``%[ ... %]`` syntax.
+Evaluation is preformed during compilation. Note that, unlike hints, the soundness of the
+program may rely on the correct evaluation of those literals, as constants eventually
+become an explicit part of the program. This feature is experimental and may be
+removed/restricted in future versions.
+
+.. tested-code:: cairo syntax_literals
+
+    let a = %[ 2 * 2 %]  # Equivalent to `let a = 4`.
+
+    let b = %[ pow(8, 2) %]  # Equivalent to `let b = 64`.
+
+    let c = %[ len([6, 7, 8, 9]) %]  # Equivalent to `let c = 4`.
+
 Library imports
 ---------------
 
