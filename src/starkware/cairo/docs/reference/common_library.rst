@@ -313,7 +313,6 @@ This section refers to the common library's
 `find_element <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/find_element.cairo>`_
 module.
 
-
 ``find_element()``
 ******************
 
@@ -380,6 +379,77 @@ program will fail when the key is not present in the array.
         assert element_ptr.b = 6
         return ()
     end
+
+``search_sorted_lower()``
+*************************
+
+Returns the pointer to the first element in the array whose first field is at least ``key``.
+The array elements must be sorted by the first field in ascending order. If no such item exists,
+it returns a pointer to the end of the array (after the last item). The function requires the
+implicit argument ``range_check_ptr``.
+
+The function accepts the arguments:
+
+-  ``array_ptr``, a pointer to a sorted array.
+-  ``elm_size``, the size (in memory cells) of each element in the array.
+-  ``n_elms``, the number of elements in the array.
+-  ``key``, the key lower bound (the key is assumed to be the first member of
+   each element in the array).
+
+The function returns:
+
+-  ``elm_ptr``, the pointer to the first element whose key is greater or equal to the lower bound.
+
+Continuing with the example above, with lower bound ``2``, the middle element is returned.
+
+.. tested-code:: cairo library_search_sorted_lower
+
+    from starkware.cairo.common.find_element import (
+        search_sorted_lower)
+
+    let (smallest_ptr : MyStruct*) = search_sorted_lower(
+        array_ptr=array_ptr, elm_size=2, n_elms=3, key=2)
+    assert smallest_ptr.a = 3
+    assert smallest_ptr.b = 4
+
+``search_sorted()``
+*******************
+
+Returns both the pointer to the first element in the array whose key matches a specified key, and
+an indicator for the success of the search. The array elements must be sorted by the
+first field in ascending order. If no such item exists, returns an undefined pointer,
+and ``success=0``. The function requires the implicit argument ``range_check_ptr``.
+
+The function accepts the arguments:
+
+-  ``array_ptr``, the pointer to a sorted array.
+-  ``elm_size``, the size (in memory cells) of each element in the array.
+-  ``n_elms``, the number of elements in the array.
+-  ``key``, the key to look for (the key is assumed to be the first member of
+   each element in the array).
+
+The function returns:
+
+-  ``elm_ptr``, the pointer to the first element whose first member is ``key``,
+   namely ``[elm_ptr] = key``.
+-  ``success``, a ``felt`` which equals ``1`` if the key was found and ``0`` otherwise.
+
+Continuing with the same example, since the array is sorted, searching for the key
+``5`` leads to the last element.
+
+.. tested-code:: cairo library_search_sorted
+
+    from starkware.cairo.common.find_element import search_sorted
+
+    let (first_ptr : MyStruct*, success_val) = search_sorted(
+        array_ptr=array_ptr, elm_size=2, n_elms=3, key=5)
+    assert success_val = 1
+    assert first_ptr.a = 5
+    assert first_ptr.b = 6
+    # There is no element with key=2.
+    let (first_ptr : MyStruct*, success_val) = search_sorted(
+        array_ptr=array_ptr, elm_size=2, n_elms=3, key=2)
+    assert success_val = 0
 
 .. .. _common_library_hash:
 
