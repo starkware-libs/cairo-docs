@@ -433,9 +433,10 @@ Library imports
 
 Library functions are imported at the top of the file or right below the ``%builtins`` directive if
 it is used. The statement consists of the module name and the functions to ``import`` from it.
-Multiple functions from the same library can be separated by commas. Functions from different libraries
-are imported on different lines. Cairo searches each module in a default directory path and in
-any additional paths specified at compile time. See :ref:`import_search_path` for more information.
+Multiple functions from the same library can be separated by commas. Functions from different
+libraries are imported on different lines. Cairo searches each module in a default directory
+path and in any additional paths specified at compile time. See :ref:`import_search_path`
+for more information.
 
 .. tested-code:: cairo syntax_library_imports
 
@@ -447,8 +448,8 @@ any additional paths specified at compile time. See :ref:`import_search_path` fo
 Builtins
 --------
 
-Builtin declarations appear at the top of the Cairo code file. They are declared with the  ``%builtins``
-directive, followed by the name of the builtins.
+Builtin declarations appear at the top of the Cairo code file. They are declared with the
+``%builtins`` directive, followed by the name of the builtins.
 A builtin is utilized by writing the inputs to a dedicated memory segment accessed via the
 builtin pointer. The builtin directive adds those pointers as
 parameters to main (abstracted in StarkNet contracts), which can then be passed to any
