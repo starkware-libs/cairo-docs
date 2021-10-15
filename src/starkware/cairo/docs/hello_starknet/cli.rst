@@ -128,7 +128,7 @@ The result contains:
 *   ``previous_block_id`` -- the block ID of the previous block.
 *   ``sequence_number`` -- The sequence number of the block, which is the number of
     blocks prior to this block.
-*   ``state_root`` -- The root of a Merkle tree representing the StarkNet's state after the given
+*   ``state_root`` -- The root of a commitment tree representing the StarkNet's state after the given
     block.
 *   ``status`` -- The status of the block (for example, ``PENDING``, which means that the block
     was created but has not been accepted on-chain yet).
