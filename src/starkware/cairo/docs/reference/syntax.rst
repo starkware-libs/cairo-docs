@@ -493,6 +493,49 @@ See :ref:`program_inputs` for more information.
         a = program_input['user_ids']
     %}
 
+Program output
+--------------
+
+Cairo programs can share information with the verifier using outputs. Whenever the program
+wishes to communicate information to the verifier, it can do so by writing it to a designated
+memory segment which can be accessed by using the output builtin. Instead of directly handling
+the output pointer, one can call the ``serialize_word()`` library function which abstracts
+this from the user. Note that in real applications there is only need to output information
+if it's meaningful in some way for the verifier. See :ref:`here <program_output>` for more
+information.
+
+The following program outputs two values, 7 and 13.
+
+.. tested-code:: cairo syntax_program_output
+
+    %builtins output
+
+    from starkware.cairo.common.serialize import serialize_word
+
+    func main{output_ptr : felt*}():
+        serialize_word(7)
+        serialize_word(13)
+        return ()
+    end
+
+The following program excerpt outlines how a program may output a struct.
+
+.. tested-code:: cairo syntax_program_output_struct
+
+    %builtins output
+
+    struct MyStruct:
+        member a : felt
+        member b : felt
+    end
+
+    func main{output_ptr : felt*}():
+        let output = cast(output_ptr, MyStruct*)
+        assert [output] = MyStruct(a=3, b=4)
+        let output_ptr = output_ptr + MyStruct.SIZE
+        return ()
+    end
+
 Hints
 -----
 
