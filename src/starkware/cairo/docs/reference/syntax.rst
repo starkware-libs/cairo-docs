@@ -462,6 +462,65 @@ See :ref:`import_search_path` for more information.
         assert_not_zero, assert_not_equal)
     from starkware.cairo.common.registers import get_ap
 
+Builtins
+--------
+
+Builtin declarations appear at the top of the Cairo code file. They are declared with the
+``%builtins`` directive, followed by the name of the builtins.
+A builtin is utilized by writing the inputs to a dedicated memory segment accessed via the
+builtin pointer. The builtin directive adds those pointers as
+parameters to main (abstracted in StarkNet contracts), which can then be passed to any
+function making use of them.
+
+Pointer names follow the convention ``<builtin name>_ptr``
+and pointer types can be found in the ``cairo_builtins``
+module of the common library. The builtins, and their respective pointer expressions and
+pointer types are are listed below.
+
+-   ``output``, for writing program output which appears explicitly in an execution proof.
+    Access with a pointer to type ``felt``.
+-   ``pedersen``, for computing the Pedersen hash function. Access with a pointer to
+    type ``HashBuiltin``.
+-   ``range_check``, for checking that a field element is within a range ``[0, 2^128)``,
+    and doing various comparisons.
+    Due to historical reasons, unlike ``output_ptr``, the ``range_check_ptr`` passed as an
+    argument to main is of type ``felt`` rather than ``felt*``.
+-   ``ecdsa``, for verifying ECDSA signatures. Access with a pointer to type ``SignatureBuiltin``.
+-   ``bitwise``, for performing bitwise operations on felts. Access with a pointer to
+    type ``BitwiseBuiltin``.
+
+Below is a function, ``foo()``, which accepts all five builtins, illustrating their
+different pointers and pointer types. Note that the pointers must be passed in the
+same order that they appear in the ``%builtins`` directive and that the order follows
+the convention:
+
+1. ``output``.
+2. ``pedersen``.
+3. ``range_check``.
+4. ``ecdsa``.
+5. ``bitwise``.
+
+.. tested-code:: cairo syntax_builtins
+
+    %builtins output pedersen range_check ecdsa bitwise
+
+    from starkware.cairo.common.cairo_builtins import (
+        BitwiseBuiltin, HashBuiltin, SignatureBuiltin)
+
+    func main{
+            output_ptr : felt*, pedersen_ptr : HashBuiltin*,
+            range_check_ptr, ecdsa_ptr : SignatureBuiltin*,
+            bitwise_ptr : BitwiseBuiltin*}():
+        # Code body here.
+        return ()
+    end
+
+For more information about builtins see :ref:`builtins`, and the ``cairo_builtins``
+section in the common library.
+
+..  TODO (perama, 06/06/21): Add link to common library once merged.
+    (:ref:`common_library_cairo_builtins` )
+
 Segments
 --------
 
