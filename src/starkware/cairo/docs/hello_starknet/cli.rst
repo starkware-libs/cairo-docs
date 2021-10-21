@@ -1,3 +1,8 @@
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+
 More CLI commands
 =================
 

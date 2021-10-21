@@ -76,3 +76,22 @@ BUT getting:
 config directory doesn't contain a conf.py file (src)`
 
 but I did give it a conf.py in source!
+
+
+
+# Heading 1
+
+Equals Sign
+===========
+
+> Note caps case
+
+## Heading 2
+
+Hyphen it
+---------
+
+### Heading 3
+
+Star it
+********

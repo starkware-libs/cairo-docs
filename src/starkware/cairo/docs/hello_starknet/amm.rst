@@ -1,3 +1,12 @@
+.. proofedDate:: null
+
+.. comment:: null
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+
 .. _amm_starknet:
 
 A simple Automated Market Maker (AMM)

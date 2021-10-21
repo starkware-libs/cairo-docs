@@ -1,4 +1,13 @@
+.. proofedDate:: null
+
+.. comment:: Restructure not needed -- but toc will assist users
+
+
 .. _user_authentication:
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
 
 Adding User Authentication
 ==========================

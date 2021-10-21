@@ -1,3 +1,7 @@
+.. proofedDate:: null
+
+.. comment:: null
+
 .. _hello_starknet:
 
 Hello, StarkNet
@@ -8,6 +12,7 @@ where any dApp can achieve unlimited scale for its computation,
 without compromising Ethereum's composability and security.
 
 Currently, StarkNet's first step, StarkNet Planets Alpha, is deployed.
+
 This tutorial walks you through writing and deploying a StarkNet contract.
 
 .. toctree::

@@ -1,3 +1,12 @@
+.. proofedDate:: null
+
+.. comment:: null
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+
 Writing unit tests
 ==================
 
@@ -6,11 +15,14 @@ The ``cairo-lang`` package provides a set of python classes that simulates the
 behavior of the StarkNet system.
 We'll use `pytest <https://docs.pytest.org/en/6.2.x/>`_ as the unit test infrastructure.
 
-Start by installing pytest:
 
-.. code-block:: bash
+.. topic:: Prerequisites
 
-    pip install pytest pytest-asyncio
+    Ensure your environment has pytest. To install:
+
+    .. code-block:: bash
+
+        pip install pytest pytest-asyncio
 
 Let's write a unit test for the contract from :ref:`first_contract`.
 Create a file named ``contract.cairo`` and copy the contract code into it.
