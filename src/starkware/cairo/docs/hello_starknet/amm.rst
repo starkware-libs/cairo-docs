@@ -1,11 +1,12 @@
-.. proofedDate:: null
+.. proofedDate null
 
-.. comment:: null
+.. comment I am failing to get the toc
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
    :caption: Contents:
 
+   self
 
 .. _amm_starknet:
 

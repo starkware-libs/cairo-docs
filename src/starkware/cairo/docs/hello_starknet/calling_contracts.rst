@@ -1,6 +1,6 @@
-.. proofedDate:: null
+.. proofedDate null
 
-.. comment:: Not convinced that the H1 is level above the current H2
+.. comment Not convinced that the H1 is level above the current H2
 
 .. toctree::
    :maxdepth: 2

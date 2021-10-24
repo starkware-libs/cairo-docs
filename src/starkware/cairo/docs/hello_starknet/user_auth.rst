@@ -1,6 +1,6 @@
-.. proofedDate:: null
+.. proofedDate null
 
-.. comment:: Restructure not needed -- but toc will assist users
+.. comment Restructure not needed -- but toc will assist users
 
 
 .. _user_authentication:

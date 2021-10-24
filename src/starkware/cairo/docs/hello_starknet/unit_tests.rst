@@ -1,6 +1,6 @@
-.. proofedDate:: null
+.. proofedDate null
 
-.. comment:: null
+.. comment null
 
 .. toctree::
    :maxdepth: 2

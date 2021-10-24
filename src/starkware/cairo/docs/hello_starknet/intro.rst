@@ -1,6 +1,6 @@
-.. proofedDate:: null
+.. proofedDate null
 
-.. comment:: Restructure suggested. toc will also assist in page breakdown and nav.
+.. comment Restructure suggested. toc will also assist in page breakdown and nav.
 
 .. toctree::
    :maxdepth: 2
