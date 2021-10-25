@@ -1,10 +1,6 @@
 .. proofedDate null
 
-.. comment Restructure suggested. toc will also assist in page breakdown and nav.
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+.. comment Restructure suggested. toc/overview will assist in page breakdown and nav.
 
 
 .. _starknet_intro:
@@ -14,13 +10,24 @@ Writing StarkNet Contracts
 
 In this exercise you will create, deploy, and interact with your first contract.
 
-.. topic:: Prerequisites
+.. topic:: Overview
 
-    1. :ref:`Set up your environment <quickstart>`
-    2. Ensure your Cairo version is at least ``0.4.0``
-    (you can check your version by running ``cairo-compile --version``).
-    3. In order to follow this tutorial you should have basic familiarity with writing Cairo code. For example, read the first few pages of the
-    ":ref:`Hello, Cairo <hello_cairo>`" tutorial.
+    :ref:`Examine a contract <first_contract>`
+
+    :ref:`Compile a contract <compile_contract>`
+
+    :ref:`Deploy a contract <Deploy>`
+
+    :ref:`Update and query the balance <update balance>`
+
+
+
+    **Prerequisites**
+
+        - :ref:`Set up your environment <quickstart>`.
+        - Ensure your Cairo version is at least ``0.4.0`` (you can check your version by running ``cairo-compile --version``).
+        - In order to follow this tutorial you should have basic familiarity with writing Cairo code. For example, read the first few pages of the ":ref:`Hello, Cairo <hello_cairo>`" tutorial.
+
 
 
 .. _first_contract:
@@ -215,6 +222,8 @@ Let's examine the file ``contract_abi.json`` that was created during the contrac
 
 The ABI file contains a list of all the callable functions and their expected inputs.
 
+.. _Deploy:
+
 Deploy the contract on the StarkNet testnet
 -------------------------------------------
 
@@ -245,6 +254,8 @@ The output should look like:
 
 You can see here the address of your new contract. You'll need this address to interact with
 the contract.
+
+.. _update balance:
 
 Interact with the contract
 --------------------------

@@ -1,17 +1,31 @@
 .. proofedDate null
 
-.. comment I am failing to get the toc
-
-.. toctree::
-   :maxdepth: 4
-   :caption: Contents:
-
-   self
+.. comment Does "For those who read the previous tutorial" refer to the "Writing Unit Tests" page?
 
 .. _amm_starknet:
 
 A simple Automated Market Maker (AMM)
 =====================================
+
+
+.. topic:: Overview
+
+    :ref:`Implement AMM <Implement AMM>`
+
+    :ref:`Understand the AMM state <The AMM state>`
+
+    :ref:`Swap tokens <Swap tokens>`
+
+    :ref:`Initialize the AMM <Initialize the AMM>`
+
+    :ref:`Explore examples <Explore examples>`
+
+    **Prerequisites**
+
+    In order to understand the basics of automated market making, you may:
+
+        - refer to the `Uniswap docs <https://uniswap.org/docs/v2/protocol-overview/how-uniswap-works/>`_, or
+        - check the short description in our previous :ref:`AMM tutorial <amm_cairo>`.
 
 In this tutorial, we'll review the code of a simple AMM, written as a StarkNet contract,
 highlighting specific implementation details. The contract is deployable (and is actually deployed
@@ -28,12 +42,11 @@ Before we begin, you can review the full contract code `here
 <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/starknet/
 apps/amm_sample/amm_sample.cairo>`_
 
+.. _Implement AMM:
+
 AMM implementation in StarkNet Planets Alpha
 --------------------------------------------
 
-In order to understand the basics of automated market making, you may refer
-to the `Uniswap docs <https://uniswap.org/docs/v2/protocol-overview/how-uniswap-works/>`_, or
-check the short description in our previous :ref:`AMM tutorial <amm_cairo>`.
 For those who read the previous tutorial -- comparing the code written there to the contract code
 in this tutorial can be a fun exercise that highlights the power of StarkNet.
 
@@ -53,6 +66,9 @@ application to focus on specifying his verifiable business logic and constraints
 all while enjoying massive scalability without compromising security. In other words,
 only the invocable functions and the relevant storage variables used to maintain the state of the
 application need to be specified by the developer.
+
+
+.. _The AMM state:
 
 The AMM state
 --------------
@@ -166,6 +182,8 @@ Similarly, for the pool balance:
         return pool_balance.read(token_type)
     end
 
+.. _Swap tokens:
+
 Swapping tokens
 ----------------
 
@@ -266,6 +284,8 @@ amount to be swapped essentially implements the AMM constant product formula:
 We use Cairo's common math library, specifically ``unsigned_div_rem``
 (unsigned division with remainder) to calculate the amount of tokens to be received.
 
+.. _Initialize the AMM:
+
 Initializing the AMM
 ---------------------
 
@@ -322,6 +342,8 @@ at some number calculated as a ratio from the pool cap. Specifically, ``ACCOUNT_
 is defined as ``POOL_UPPER_BOUND`` divided by 1000, so the cap for an account is 1/1000 that of a
 pool.
 All constants are defined at the top of the contract file.
+
+.. _Explore examples:
 
 Interaction examples
 --------------------

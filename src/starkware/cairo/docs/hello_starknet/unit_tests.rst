@@ -1,10 +1,6 @@
 .. proofedDate null
 
-.. comment null
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+.. comment "To install" in prerequisites -- should this be "Linux install"?
 
 
 Writing unit tests

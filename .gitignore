@@ -3,4 +3,3 @@ __pycache__/
 cairo-lang-*.zip
 /.vscode/
 .gitignore
-/src/conf.py

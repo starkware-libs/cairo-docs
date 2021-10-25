@@ -1,6 +1,6 @@
 .. proofedDate null
 
-.. comment null
+.. comment Did I kill the next page and back links somehow?!
 
 .. _hello_starknet:
 
@@ -17,6 +17,7 @@ This tutorial walks you through writing and deploying a StarkNet contract.
 
 .. toctree::
     :maxdepth: 2
+    :caption: Contents:
 
     intro
     cli

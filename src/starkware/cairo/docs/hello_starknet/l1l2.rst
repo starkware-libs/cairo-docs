@@ -2,10 +2,6 @@
 
 .. comment null
 
-.. toctree::
-   :maxdepth: 3
-   :caption: Contents:
-
 
 Interacting with L1 contracts
 =============================
