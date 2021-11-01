@@ -71,7 +71,7 @@ Let's start by looking at the following StarkNet contract:
         return (res)
     end
 
-Declare the file:
+File declaration:
 *****************
 
 The first line, ``%lang starknet`` declares that this file should be read as a StarkNet contract
@@ -80,14 +80,14 @@ will result in a compilation error. Compiling StarkNet contracts should be done 
 ``starknet-compile`` command as we shall see below.
 
 
-Add what you require:
-*********************
+Add builtins:
+*************
 
 Next, we have the ``%builtins`` directive and two import statements. If you're not familiar with
 these types of statements, refer to the ":ref:`Hello, Cairo <hello_cairo>`" tutorial.
 
-Define variables:
-******************
+Define storage variables:
+*************************
 
 The first new primitive that we see in the code is ``@storage_var``.
 Unlike a Cairo program, which is stateless, StarkNet contracts have a state,
@@ -104,7 +104,7 @@ which are automatically created by the ``@storage_var`` decorator.
 When a contract is deployed, all its storage cells are initialized to zero.
 In particular, all storage variables are initially zero.
 
-Apply the function/s:
+Write the function/s:
 *********************
 
 StarkNet contracts have no ``main()`` function. Instead, each function may be
@@ -127,8 +127,8 @@ The only difference is that the method is *annotated* as a method that only quer
 rather than modifying it.
 Note that in the current version this is not enforced by the compiler.
 
-Consider the arguments
-**********************
+Implicit arguments:
+*******************
 
 Consider the three implicit arguments: ``storage_ptr``, ``pedersen_ptr`` and ``range_check_ptr``:
 
@@ -145,8 +145,8 @@ Consider the three implicit arguments: ``storage_ptr``, ``pedersen_ptr`` and ``r
     This is also an implicit argument of ``read()`` and ``write()``
     (this time, for more obvious reasons).
 
-Programming without hints
-*************************
+Programming without hints:
+**************************
 
 If you are familiar with programming in Cairo,
 you are probably familiar with :ref:`hints <hints>`.

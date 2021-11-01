@@ -64,20 +64,7 @@ From Windows with Ubuntu I am using Sphinx:
 
 https://www.sphinx-doc.org/en/master/usage/quickstart.html
 
-Not running quickstart as the files are already setup.
-
-Trying:
-
-sphinx-build -b html src build
-
-BUT getting:
-
-`Application error:
-config directory doesn't contain a conf.py file (src)`
-
-but I did give it a conf.py in source!
-
-
+Build with `PYTHONPATH=src python3 -m sphinx.cmd.build -b html src/starkware/cairo/docs build`
 
 # Heading 1
 

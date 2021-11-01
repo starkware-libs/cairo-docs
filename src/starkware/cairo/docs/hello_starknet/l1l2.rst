@@ -65,7 +65,7 @@ This should be taken into account when designing the message protocol between th
 Notes
 *****
 
-.. topic:: Warning
+.. topic:: Note
 
     The StarkNet Alpha system is still under development, and therefore
     from time to time the state of the system will reset and all contracts will be removed.

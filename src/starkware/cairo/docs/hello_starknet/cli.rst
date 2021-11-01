@@ -1,3 +1,6 @@
+.. proofedDate null
+
+.. comments null
 
 More CLI commands
 =================
