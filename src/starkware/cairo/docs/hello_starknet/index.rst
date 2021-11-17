@@ -1,3 +1,7 @@
+.. proofedDate proof done pre PR approval
+
+.. comment Did I kill the next page and back links somehow?!
+
 .. _hello_starknet:
 
 Hello, StarkNet
@@ -6,7 +10,7 @@ Hello, StarkNet
 StarkNet is a permissionless, decentralized ZK-Rollup operating as an L2 network over Ethereum. StarkNet allows any dApp to achieve unlimited scale for its computation --
 without compromising Ethereum's composability and security.
 
-StarkNet Alpha, the Mainnet release candidate is currently deployed.
+StarkNet Alpha, the Mainnet release candidate, is currently deployed.
 
 This tutorial walks you through writing and deploying a StarkNet contract.
 
