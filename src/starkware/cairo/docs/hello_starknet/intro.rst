@@ -1,14 +1,39 @@
+.. proofedDate 2021/11/23
+
+.. comment For consideration: whitelisting (along with the master branch) are typically deprecated. To be PC the term is allow-list > Please consider (NB affects code base also).
+
+.. _list: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/starknet/security/starknet_common.cairo
+
+.. comment Restructure suggested. toc/overview will assist in page breakdown and nav.
+
 .. _starknet_intro:
 
-Writing StarkNet contracts
-==========================
+Write StarkNet Contracts
+========================
 
-In order to follow this tutorial you should have basic familiarity with writing
-Cairo code. For example, you can read the first few pages of the
-":ref:`Hello, Cairo <hello_cairo>`" tutorial.
-You should also :ref:`set up your environment <quickstart>` and make sure your
-installed Cairo version is at least ``0.6.0``
-(you can check your version by running ``cairo-compile --version``).
+In this exercise, you will create, deploy, and interact with your first contract.
+
+.. topic:: Overview
+
+    :ref:`Examine a contract <first_contract>`
+
+    :ref:`Compile a contract <compile_contract>`
+
+    :ref:`Deploy a contract <Deploy>`
+
+    :ref:`Update and query the balance <update balance>`
+
+
+
+    **Prerequisites**
+
+        - :ref:`Set up your environment <quickstart>`.
+        - Ensure your Cairo version is at least ``0.6.0`` (you can check your version by running
+          ``cairo-compile --version``).
+        - To follow this tutorial, you should have basic familiarity with writing Cairo code. For
+          example, read the first few pages of the ":ref:`Hello, Cairo <hello_cairo>`" tutorial.
+
+
 
 .. _first_contract:
 
@@ -50,45 +75,54 @@ Let's start by looking at the following StarkNet contract:
         return (res)
     end
 
-The first line, ``%lang starknet`` declares that this file should be read as a StarkNet contract
-file, rather than a regular Cairo program file. Trying to compile this file with ``cairo-compile``
-will result in a compilation error. Compiling StarkNet contracts should be done with the
-``starknet-compile`` command as we shall see below.
+Declarations:
+*************
+
+The first line, ``%lang starknet``, declares that this file should be read as a StarkNet contract
+file; rather than a regular Cairo program file. Trying to compile this file with ``cairo-compile``
+will result in a compilation error. StarkNet contracts should be compiled with the
+``starknet-compile`` command, as we shall see below.
 
 Next, we have the ``%builtins`` directive and two import statements. If you're not familiar with
 these types of statements, refer to the ":ref:`Hello, Cairo <hello_cairo>`" tutorial.
 
+Define storage variables:
+*************************
+
 The first new primitive that we see in the code is ``@storage_var``.
-Unlike a Cairo program, which is stateless, StarkNet contracts have a state,
-called "the contract's storage".
-Transactions invoked on such contracts may modify this state, in a way
+Unlike a Cairo program, which is stateless, StarkNet contracts have a state called "the contract's
+storage".
+Transactions invoked on such contracts may modify this state; in a way
 defined by the contract.
 
 .. _storage_var:
 
-The ``@storage_var`` decorator declares a variable which will be kept as part of this storage.
+The ``@storage_var`` decorator declares a variable that will be kept as part of this storage.
 In our case, this variable consists of a single ``felt``, called ``balance``.
-To use this variable, we will use the ``balance.read()`` and ``balance.write()`` functions
+To use this variable, we use the ``balance.read()`` and ``balance.write()`` functions
 which are automatically created by the ``@storage_var`` decorator.
-When a contract is deployed, all its storage cells are initialized to zero.
-In particular, all storage variables are initially zero.
+When a contract is deployed, all its storage cells are initialized to zero, i.e., all storage
+variables are initially zero.
+
+Write the function/s:
+*********************
 
 StarkNet contracts have no ``main()`` function. Instead, each function may be
 annotated as an external function (using the ``@external`` decorator).
-External functions may be called by the users of StarkNet, and by other contracts
+External functions may be called by the Users of StarkNet, and by other contracts
 (see :ref:`calling_contracts`).
 
 In our case, the contract has two external functions: ``increase_balance`` reads
-the current value of balance from the storage, adds the given amount to it
+the current value of balance from the storage, adds the given amount,
 and writes the new value back to storage.
 ``get_balance`` simply reads the balance and returns its value.
 
 .. _view_decorator:
 
 The ``@view`` decorator is identical to the ``@external`` decorator.
-The only difference is that the method is *annotated* as a method that only queries the state
-rather than modifying it.
-Note that in the current version this is not enforced by the compiler.
+The only difference is that the ``@view`` method is *annotated* as a method that may query the state
+and not modify it.
+Note that in the current version, this is not enforced by the compiler.
 
 Consider the four implicit arguments:
 ``syscall_ptr``, ``pedersen_ptr`` and ``range_check_ptr``:
@@ -106,29 +140,27 @@ Consider the four implicit arguments:
     It is also implicit arguments of ``read()`` and ``write()``
     (this time, because storage access is done using system calls).
 
-Programming without hints
-*************************
+Programming without hints:
+**************************
 
-If you are familiar with programming in Cairo,
-you are probably familiar with :ref:`hints <hints>`.
-Unfortunately (or fortunately, depending on your personal opinion), using hints
-in StarkNet is not possible. This is due to the fact that
-the contract's author, the user invoking the function and the operator running it are
-likely to be different entities:
+If you are familiar with programming in Cairo, you are probably familiar with :ref:`hints <hints>`.
+Unfortunately (or fortunately, depending on your personal opinion), using hints in StarkNet is
+not possible. This is due to the fact that the contract's author, the User invoking the function,
+and the Operator running it are likely to be different entities:
 
-1.  The operator cannot run arbitrary python code due to security concerns.
-2.  The user won't be able to verify that the operator ran the hint the contract author supplied.
-3.  It is not possible to prove that nondeterministic code *failed*, since you should
-    either prove you executed the hint or prove that for any hint the code would've failed.
+1.  The Operator cannot run arbitrary python code due to security concerns.
+2.  The User won't be able to verify that the Operator ran the hint the contract author supplied.
+3.  It is not possible to prove that nondeterministic code *failed* -- since you should either
+    prove you executed the hint or prove that, for any hint, the code would have failed.
 
-For efficiency, hints are still used by the standard library functions, through a mechanism
-of whitelisting (a function is whitelisted by an operator if it agrees to run it,
-when it knows that it can run its hints successfully. It doesn't have to do with the question
-of the soundness of the library function, which should be verified separately).
-This means that not all the Cairo library functions can be used when writing
-a StarkNet contract. See
-`here <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/starknet/security/starknet_common.cairo>`_
-for a list of the whitelisted library functions.
+For efficiency, hints are still used by the standard library functions through a mechanism of
+whitelisting. A hint may be whitelisted by an Operator if they agree to run it.
+
+Note, this does not guarantee the soundness of the library function, which should be verified
+separately.
+
+This means that not all the Cairo library functions can be used when writing a StarkNet contract,
+only those on the list. See a list_ of the whitelisted library functions.
 
 .. _compile_contract:
 
@@ -145,8 +177,8 @@ Run the following command to compile your contract:
         --output contract_compiled.json \
         --abi contract_abi.json
 
-As mentioned above, we can't compile StarkNet contract using ``cairo-compile``
-and we need to use ``starknet-compile`` instead.
+Remember, we can't compile a StarkNet contract using ``cairo-compile``, and we must use
+``starknet-compile`` instead.
 
 The contract's ABI
 ------------------
@@ -183,19 +215,20 @@ Let's examine the file ``contract_abi.json`` that was created during the contrac
 
 The ABI file contains a list of all the callable functions and their expected inputs.
 
+.. _Deploy:
+
 Deploy the contract on the StarkNet testnet
 -------------------------------------------
 
-In order to instruct the CLI to work with the StarkNet testnet you should either
-pass ``--network=alpha`` on every use, or set the ``STARKNET_NETWORK`` environment variable
-as follows:
+In order to instruct the CLI to work with the StarkNet testnet, you should either pass
+``--network=alpha`` on every use or set the ``STARKNET_NETWORK`` environment variable as follows:
 
 .. tested-code:: bash starknet_env
 
     export STARKNET_NETWORK=alpha
 
-**Important note**: The alpha release is an experimental release. Newer versions may
-require a reset of the network's state (resulting in the removal of the deployed contracts).
+**Important note**: The alpha release is an experimental release. Newer versions may require a
+reset of the network's state (resulting in the removal of the deployed contracts).
 
 Run the following command to deploy your contract on the StarkNet testnet:
 
@@ -203,7 +236,7 @@ Run the following command to deploy your contract on the StarkNet testnet:
 
     starknet deploy --contract contract_compiled.json
 
-The output should look like:
+The output should resemble this:
 
 .. tested-code:: none starknet_deploy_output
 
@@ -211,14 +244,15 @@ The output should look like:
     Contract address: 0x039564c4f6d9f45a963a6dc8cf32737f0d51a08e446304626173fd838bd70e1c
     Transaction hash: 0x125e4bc5251af8ee2664ea0d1495b36c593f25f78f1a78f637a3f7aafa9e22
 
-You can see here the address of your new contract. You'll need this address to interact with
-the contract.
+Note the address of your new contract. You will need this address to interact with the contract.
+
+.. _update balance:
 
 Interact with the contract
 --------------------------
 
-Run the following command to invoke the ``increase_balance()`` function (note that you'll
-have to replace ``CONTRACT_ADDRESS`` with the address you got during the contract deployment):
+Run the following command to invoke the ``increase_balance()`` function (note that you'll have to
+replace ``CONTRACT_ADDRESS`` with the address you got during the contract deployment):
 
 .. tested-code:: bash starknet_invoke
 
@@ -228,7 +262,7 @@ have to replace ``CONTRACT_ADDRESS`` with the address you got during the contrac
         --function increase_balance \
         --inputs 1234
 
-The result should look like:
+The result should resemble this:
 
 .. tested-code:: none starknet_invoke_output
 
@@ -239,15 +273,14 @@ The result should look like:
 
 .. _tx_status:
 
-The following command allows you to query the transaction status based on the transaction hash
-that you got (here you'll have to replace ``TRANSACTION_HASH`` with the transaction hash printed by
-``starknet invoke``):
+The following command allows you to query the transaction status based on your transaction hash
+(i.e., replace ``TRANSACTION_HASH`` with the transaction hash printed by ``starknet invoke``):
 
 .. tested-code:: bash starknet_tx_status
 
     starknet tx_status --hash TRANSACTION_HASH
 
-The result should look like:
+The result should resemble this:
 
 .. tested-code:: none starknet_tx_status_output
 
@@ -261,7 +294,7 @@ The possible statuses are:
 *   ``NOT_RECEIVED``:
     The transaction has not been received yet (i.e., not written to storage).
 *   ``RECEIVED``:
-    The transaction was received by the operator.
+    The transaction was received by the Operator.
 *   ``PENDING``:
     The transaction passed the validation and is waiting to be sent on-chain.
 *   ``REJECTED``:
@@ -287,13 +320,13 @@ The result should be:
 
     1234
 
-Note that to see the up-to-date balance you should wait until the ``increase_balance``
-transaction status is at least ``PENDING`` (that is, ``PENDING`` or ``ACCEPTED_ONCHAIN``).
-Otherwise, you'll see the balance before the execution of the ``increase_balance`` transaction
+Note that to see the up-to-date balance, you should wait until the ``increase_balance`` transaction
+status is at least ``PENDING`` (that is, ``PENDING`` or ``ACCEPTED_ONCHAIN``). Otherwise, you'll see
+the balance before the execution of the ``increase_balance`` transaction
 (that is, 0).
 
-In the next section we will describe other CLI functions for querying StarkNet's state.
-Note that while ``deploy`` and ``invoke`` affect StarkNet's state, all other functions are
-read-only. In particular, using ``call`` instead of ``invoke`` on a function that may change the
+In the next section, we will describe other CLI functions for querying StarkNet's state.
+Note that while ``deploy`` and ``invoke`` affect StarkNet's state, all other functions are read-only.
+In particular, using ``call`` instead of ``invoke`` on a function that *may* change the
 state, such as ``increase_balance``, will return the result of the function without actually
-applying it to the current state, allowing the user to dry-run before committing to a state update.
+applying it to the current state, allowing the User to dry-run before committing to a state update.

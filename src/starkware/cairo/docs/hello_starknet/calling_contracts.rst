@@ -1,18 +1,27 @@
+.. proofedDate 2021/11/23
+
 .. _calling_contracts:
 
+Call another contract
+=====================
 
-Calling another contract
-========================
+.. topic:: Overview
 
-A contract function may invoke an external function of another contract.
+    :ref:`Invoke another contract's function <contract function>`
 
-Start by deploying the example contract in :ref:`starknet_intro`
-(the compilation and deployment instructions can be found at
-:ref:`the bottom of the page <compile_contract>`).
-Denote the address of this contract by ``BALANCE_CONTRACT``.
+    :ref:`Retrieve a caller's address <get address>`
 
-In order to call this contract from another contract, define an interface
-by copying the declarations of the external functions:
+    **Prerequisites**
+
+        - Start by deploying the example contract in :ref:`starknet_intro` (as per
+          the :ref:`compilation and deployment instructions <compile_contract>`).
+
+        - Denote the address of this contract by ``BALANCE_CONTRACT``.
+
+.. _contract function:
+
+A contract function may invoke an external function of another contract. To call this contract
+from another contract, define an interface by copying the declarations of the external functions:
 
 .. tested-code:: cairo call_contract_interface
 
@@ -25,8 +34,7 @@ by copying the declarations of the external functions:
         end
     end
 
-Note that the body of the functions and the implicit arguments should be removed
-from the definitions.
+Note that the body of the functions and the implicit arguments should be removed from the definitions.
 
 You can use ``IBalanceContract.increase_balance()`` and ``IBalanceContract.get_balance()``
 to invoke these functions on another contract.
@@ -79,7 +87,7 @@ This will increase the balance stored in ``BALANCE_CONTRACT``.
 Note that in our case, ``PROXY_CONTRACT`` does not have a storage of its own.
 
 Wait until the transaction is added to a block, and then
-check the balance using the following two ways:
+check the balance using one of the following methods:
 
 1.  Directly through ``BALANCE_CONTRACT``
 
@@ -102,11 +110,12 @@ check the balance using the following two ways:
 
 Both commands should return ``10000``.
 
-Getting the caller address
---------------------------
+.. _get address:
 
-You can retrieve the address of the contract that invoked your function
-(if the function was called by another contract)
+Get the caller address
+----------------------
+
+If your function was called by another contract, you can retrieve the address of that contract
 using the ``get_caller_address()`` library function:
 
 .. tested-code:: cairo get_caller_address
@@ -117,18 +126,16 @@ using the ``get_caller_address()`` library function:
 
     let (caller_address) = get_caller_address()
 
-When the contract is called by a user (rather than another contract),
-the function returns 0.
+When the contract is called by a User (rather than another contract), the function returns 0.
 
 Consider what would happen if you added a call to ``get_caller_address()``
 to the ``increase_balance()`` function of ``BALANCE_CONTRACT``:
 It would return ``PROXY_CONTRACT`` if called from
-``PROXY_CONTRACT``, and 0 if called directly.
+``PROXY_CONTRACT`` and 0 if called directly.
 
-Note that if you use ``get_caller_address()`` in a function ``foo()`` that was called by
-another function ``bar()`` within your contract,
-it will still return the address of the contract that invoked ``bar()``
-(or 0 if it was invoked by a user).
+Note that if you use ``get_caller_address()`` in a function ``foo()`` , that was called by another
+function ``bar()`` within your contract, it will still return the address of the contract that
+invoked ``bar()`` (or 0 if it was invoked by a User).
 
 Getting the current contract's address
 --------------------------------------

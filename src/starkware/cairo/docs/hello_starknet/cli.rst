@@ -1,16 +1,39 @@
+.. proofedDate 2021/11/23
+
+.. comments .. _change_query_context link not working on Ariel's build think it is fine on mine (Harries), just dropping to bottom of page, yes?
+
+.. suggestedEdit1 ?I did not see this in last reviewable sweep?{wip "transaction_id": 1, looks like the actualy property and its value, so why do we SHOUT it in the bash command as TRANSACTION_ID ? Is the capitalization genuine?} > If Not Consider a less shouty form [output is transaction_id, seems nice!]
+
 More CLI commands
 =================
+
+
+.. topic:: Overview
+
+    :ref:`Get transaction information <get_transaction>`
+
+    :ref:`Get contract code <get_code>`
+
+    :ref:`Query a block <get_block>`
+
+    :ref:`Get storage by key <get_storage_at>`
+
+    :ref:`Change query context <change_query_context>`
+
+    And remember, you can always ask for ``--help``.
+
+.. _get_transaction:
 
 get_transaction
 ---------------
 
-To get transaction information run the following:
+To get transaction information, run the following:
 
 .. tested-code:: bash starknet_get_transaction
 
     starknet get_transaction --hash TRANSACTION_HASH
 
-The output should look like:
+The output should resemble this:
 
 .. tested-code:: none starknet_get_transaction_output
 
@@ -38,7 +61,7 @@ The result contains:
 *   ``transaction_hash`` -- The hash of the transaction, out of all sent transactions.
 *   ``status`` -- The status of the transaction. For a detailed list of supported transaction
     statuses, refer to the :ref:`tx_status <tx_status>` usage example.
-*   ``transaction`` -- The transaction data.
+*   ``transaction``: The transaction data.
 
 It may also include each of the following optional fields (according to the transaction's status):
 
@@ -99,12 +122,14 @@ The result contains (in addition to get_transaction fields):
 *   ``l1_to_l2_consumed_message`` -- The consumed message, in case the transaction was sent from L1.
 *   ``execution_resources`` -- Resources consumed by the transaction execution.
 
+.. _get_code:
+
 get_code
 --------
 
 Once the ``deploy`` transaction is accepted on-chain, you will be able to see the code of the
-contract you have just deployed. The output consists of a list of bytecodes, rather than
-the source code. This is because the StarkNet network gets the contract after compilation.
+contract you have just deployed. The output consists of a list of bytecodes rather than the source
+code. This is because the StarkNet network gets the contract after compilation.
 
 To get the contract at a specific address, run the following command:
 
@@ -112,7 +137,7 @@ To get the contract at a specific address, run the following command:
 
     starknet get_code --contract_address CONTRACT_ADDRESS
 
-The output should look like:
+The output should resemble this:
 
 .. tested-code:: none starknet_get_code_output
 
@@ -139,6 +164,7 @@ The output should look like:
         ]
     }
 
+.. _get_block:
 
 get_block
 ---------
@@ -151,7 +177,7 @@ To do this, run the following:
 
     starknet get_block --number BLOCK_NUMBER
 
-The output should look like:
+The output should resemble this:
 
 .. tested-code:: none starknet_get_block_output
 
@@ -224,18 +250,18 @@ The output should look like:
 
 The result contains:
 
-*   ``block_hash`` -- The block hash, a unique identifier of the block.
-*   ``parent_block_hash`` -- the block hash of the parent block.
-*   ``block_number`` -- The sequence number of the block, which is the number of
+*   ``block_hash``: The block hash, a unique identifier of the block.
+*   ``parent_block_hash``: The block hash of the parent block.
+*   ``block_number``: The sequence number of the block, which is the number of
     blocks prior to this block.
-*   ``state_root`` -- The root of a commitment tree representing the StarkNet's state after the given
+*   ``state_root``: The root of a commitment tree representing the StarkNet's state after the given
     block.
-*   ``status`` -- The status of the block (for example, ``PENDING``, which means that the block
+*   ``status``: The status of the block (for example, ``PENDING``, which means that the block
     was created but has not been accepted on-chain yet).
-*   ``timestamp`` -- A timestamp representing the time this block was created.
-*   ``transaction_receipts`` -- Information about the transaction status and the corresponding
+*   ``timestamp``: A timestamp representing the time this block was created.
+*   ``transaction_receipts``: Information about the transaction status and the corresponding
     L1<->L2 interaction, for every transaction included in the block.
-*   ``transactions`` -- A mapping of the transactions included in the block, according to their
+*   ``transactions``: A mapping of the transactions included in the block, according to their
     transaction hashes. Note that these are the same hashes used in the ``transaction_receipts`` mapping.
 
 To query the last block, simply remove the ``--number`` argument.
@@ -247,11 +273,11 @@ given.
 get_storage_at
 --------------
 
-Other than querying the contract's code, you may also want to query the contract's storage at a
+Besides querying the contract's code, you may also want to query the contract's storage at a
 specific key. To do so, you first need to understand which key is of interest to you.
-As you saw before, StarkNet introduces a new primitive, which is
-:ref:`storage variables <storage_var>`. Each storage variable is mapped to a storage key (a field
-element).
+As you saw before, StarkNet introduces a new primitive:
+:ref:`storage variables <storage_var>`. Each storage variable is mapped to a storage key
+(a field element).
 To compute this key, run the following python code:
 
 .. tested-code:: python get_variable_key
@@ -284,20 +310,21 @@ Using the same contract we have used so far, you should get:
 Note that this is the same result obtained by the call to ``get_balance``.
 
 
-Later on, at the :ref:`user authentication <user_authentication>` section, you will see :ref:`a
-generalization of storage variables <storage_maps>`, which allow, for example, a balance
-variable for each user. This will require minor adjustments to the code above, which we will review
-in the relevant section.
+Later on, at the :ref:`User authentication <user_authentication>` section, you will see :ref:`a
+generalization of storage variables <storage_maps>`, which allow, for example, a balance variable
+for each User. This will require minor adjustments to the code above, which we will review in the
+relevant section.
 
-.. TODO(Adi, 15/08/2021): At the end of the second paragraph below, change to last *accepted* block.
+
+.. _change_query_context:
 
 Block-specific queries
-**********************
+----------------------
 
-Some of the aforementioned CLI functions have an additional argument, ``--block_hash``, which
-applies the given query to a specific block.
-For example, you may want to query the balance variable at some specific point in time.
+Some of these CLI functions accept an additional argument, ``--block_hash``, which applies the given
+query to a specific block.
+This assists, for example, when you want to query the balance variable at a specific point in time.
 
-To find out whether a CLI function can be executed as a block-specific query, simply use the
-``--help`` argument to see if ``--block_hash`` is part of the optional arguments for that function.
-In case you do not use the ``--block_hash`` argument, the query will be applied to the last block.
+To determine whether a CLI function can be executed as a block-specific query, use the ``--help``
+argument to see if ``--block_hash`` is an optional argument for that function.
+Without the ``--block_hash`` argument, the query is applied to the last accepted block.
