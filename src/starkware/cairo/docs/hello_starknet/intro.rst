@@ -2,12 +2,20 @@
 
 .. comment Restructure suggested. toc/overview will assist in page breakdown and nav.
 
+.. suggestedEdits1 {wip The @storage_var decorator declares a variable that will be kept as part of this storage}> Consider [The @storage_var decorator declares which variables will be stored.]
+
+.. suggestedEdits2 {wip If you want to restrict it,} > This is weaving around the matter. Consider [Restrictions and authentication requirements can be implemented using the ecdsa builtin](note I exclude the user's signature part as I believe this is covered by "authentication") ALT Split it [Suppose you want to restrict user access to external functions, or enforce authentication. In that case, you can use the edca ...]
+
+.. suggestedEdits3 {wip Note that in the current version, this is not enforced by the compiler.} What is not enforced -- that a method may only annotate? Consider clarifying [or explaining to me, so that I can clarify]
+
+.. suggestedEdits4 {wip Note that in our PC world, whitelisting is being slain (along with the master branch). If you want to be PC the term is allow-list} > Please confirm yes/no to change and I can apply.
+
 .. _starknet_intro:
 
 Writing StarkNet Contracts
 ==========================
 
-In this exercise you will create, deploy, and interact with your first contract.
+In this exercise, you will create, deploy, and interact with your first contract.
 
 .. topic:: Overview
 
@@ -25,7 +33,7 @@ In this exercise you will create, deploy, and interact with your first contract.
 
         - :ref:`Set up your environment <quickstart>`.
         - Ensure your Cairo version is at least ``0.4.0`` (you can check your version by running ``cairo-compile --version``).
-        - In order to follow this tutorial you should have basic familiarity with writing Cairo code. For example, read the first few pages of the ":ref:`Hello, Cairo <hello_cairo>`" tutorial.
+        - To follow this tutorial, you should have basic familiarity with writing Cairo code. For example, read the first few pages of the ":ref:`Hello, Cairo <hello_cairo>`" tutorial.
 
 
 
@@ -73,35 +81,30 @@ Let's start by looking at the following StarkNet contract:
 File declaration:
 *****************
 
-The first line, ``%lang starknet`` declares that this file should be read as a StarkNet contract
-file, rather than a regular Cairo program file. Trying to compile this file with ``cairo-compile``
-will result in a compilation error. Compiling StarkNet contracts should be done with the
-``starknet-compile`` command as we shall see below.
+The first line, ``%lang starknet``, declares that this file should be read as a StarkNet contract file; rather than a regular Cairo program file. Trying to compile this file with ``cairo-compile``
+will result in a compilation error. StarkNet contracts should be compiled with the ``starknet-compile`` command, as we shall see below.
 
 
 Add builtins:
 *************
 
-Next, we have the ``%builtins`` directive and two import statements. If you're not familiar with
-these types of statements, refer to the ":ref:`Hello, Cairo <hello_cairo>`" tutorial.
+Next, we have the ``%builtins`` directive and two import statements. If you're not familiar with these types of statements, refer to the ":ref:`Hello, Cairo <hello_cairo>`" tutorial.
 
 Define storage variables:
 *************************
 
 The first new primitive that we see in the code is ``@storage_var``.
-Unlike a Cairo program, which is stateless, StarkNet contracts have a state,
-called "the contract's storage".
-Transactions invoked on such contracts may modify this state, in a way
+Unlike a Cairo program, which is stateless, StarkNet contracts have a state called "the contract's storage".
+Transactions invoked on such contracts may modify this state; in a way
 defined by the contract.
 
 .. _storage_var:
 
-The ``@storage_var`` decorator declares a variable which will be kept as part of this storage.
+The ``@storage_var`` decorator declares a variable that will be kept as part of this storage.
 In our case, this variable consists of a single ``felt``, called ``balance``.
-To use this variable, we will use the ``balance.read()`` and ``balance.write()`` functions
+To use this variable, we use the ``balance.read()`` and ``balance.write()`` functions
 which are automatically created by the ``@storage_var`` decorator.
-When a contract is deployed, all its storage cells are initialized to zero.
-In particular, all storage variables are initially zero.
+When a contract is deployed, all its storage cells are initialized to zero, i.e., all storage variables are initially zero.
 
 Write the function/s:
 *********************
@@ -115,56 +118,41 @@ you can use the ``ecdsa`` builtin to verify a user's signature
 as part of the internal implementation of the contract's function.
 
 In our case, the contract has two external functions: ``increase_balance`` reads
-the current value of balance from the storage, adds the given amount to it
+the current value of balance from the storage, adds the given amount,
 and writes the new value back to storage.
 ``get_balance`` simply reads the balance and returns its value.
 
 .. _view_decorator:
 
 The ``@view`` decorator is identical to the ``@external`` decorator.
-The only difference is that the method is *annotated* as a method that only queries the state
-rather than modifying it.
-Note that in the current version this is not enforced by the compiler.
+The only difference is that the ``@view``method is *annotated* as a method that only queries the state rather than modifying it.
+Note that in the current version, this is not enforced by the compiler.
 
 Implicit arguments:
 *******************
 
 Consider the three implicit arguments: ``storage_ptr``, ``pedersen_ptr`` and ``range_check_ptr``:
 
-1.  You should be familiar with ``pedersen_ptr``, which allows to compute the Pedersen
-    hash function, and ``range_check_ptr``, which allows to compare integers.
-    But it seems that the contract doesn't use any hash function or integer comparison,
-    so why are they needed?
-    The reason is that storage variables require these implicit arguments in order to compute
-    the actual memory address of this variable. This may not be needed in simple variables
-    such as ``balance``, but with maps (see :ref:`storage_maps`) computing the Pedersen hash
-    is part of what ``read()`` and ``write()`` do.
-2.  ``storage_ptr`` is a new primitive unique to StarkNet contracts (it doesn't exist in Cairo)
-    it allows the code to talk with the contract's storage.
-    This is also an implicit argument of ``read()`` and ``write()``
-    (this time, for more obvious reasons).
+1.  You should be familiar with ``pedersen_ptr``, computes the Pedersen hash function, and ``range_check_ptr``, which compares integers. But, it seems that the contract doesn't use any hash function or integer comparison, so why are they needed? The reason is that storage variables require these implicit arguments to compute the actual memory address of this variable. This may not be needed in simple variables such as ``balance``, but with maps (see :ref:`storage_maps`), computing the Pedersen hash is part of what ``read()`` and ``write()`` do.
+2.  ``storage_ptr`` is a new primitive unique to StarkNet contracts (it doesn't exist in Cairo); it allows the code to talk with the contract's storage. This is also an implicit argument of ``read()`` and ``write()`` (this time, for more obvious reasons).
 
 Programming without hints:
 **************************
 
-If you are familiar with programming in Cairo,
-you are probably familiar with :ref:`hints <hints>`.
-Unfortunately (or fortunately, depending on your personal opinion), using hints
-in StarkNet is not possible. This is due to the fact that
-the contract's author, the user invoking the function and the operator running it are
+If you are familiar with programming in Cairo, you are probably familiar with :ref:`hints <hints>`. Unfortunately (or fortunately, depending on your personal opinion), using hints in StarkNet is not possible. This is due to the fact that the contract's author, the user invoking the function, and the operator running it are
 likely to be different entities:
 
 1.  The operator cannot run arbitrary python code due to security concerns.
 2.  The user won't be able to verify that the operator ran the hint the contract author supplied.
-3.  It is not possible to prove that nondeterministic code *failed*, since you should
-    either prove you executed the hint or prove that for any hint the code would've failed.
+3.  It is not possible to prove that nondeterministic code *failed* -- since you should either prove you executed the hint or prove that, for any hint, the code would have failed.
 
-For efficiency, hints are still used by the standard library functions, through a mechanism
-of whitelisting (a function is whitelisted by an operator if it agrees to run it,
-when it knows that it can run its hints successfully. It doesn't have to do with the question
-of the soundness of the library function, which should be verified separately).
-This means that not all the Cairo library functions can be used when writing
-a StarkNet contract. See
+For efficiency, hints are still used by the standard library functions.
+
+A function may be whitelisted by an operator if they agree to run it, i.e., when it knows that it can run its hints successfully.
+
+NB this does not guarantee the soundness of the library function, which should be verified separately.
+
+This means that not all the Cairo library functions can be used when writing a StarkNet contract, only those on the list. See
 `here <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/starknet/security/starknet_common.cairo>`_
 for a list of the whitelisted library functions.
 
@@ -183,8 +171,7 @@ Run the following command to compile your contract:
         --output contract_compiled.json \
         --abi contract_abi.json
 
-As mentioned above, we can't compile StarkNet contract using ``cairo-compile``
-and we need to use ``starknet-compile`` instead.
+Remember, we can't compile a StarkNet contract using ``cairo-compile``, and we must use ``starknet-compile`` instead.
 
 The contract's ABI
 ------------------
@@ -226,16 +213,13 @@ The ABI file contains a list of all the callable functions and their expected in
 Deploy the contract on the StarkNet testnet
 -------------------------------------------
 
-In order to instruct the CLI to work with the StarkNet testnet you should either
-pass ``--network=alpha`` on every use, or set the ``STARKNET_NETWORK`` environment variable
-as follows:
+In order to instruct the CLI to work with the StarkNet testnet, you should either pass ``--network=alpha`` on every use or set the ``STARKNET_NETWORK`` environment variable as follows:
 
 .. tested-code:: bash starknet_env
 
     export STARKNET_NETWORK=alpha
 
-**Important note**: The alpha release is an experimental release. Newer versions may
-require a reset of the network's state (resulting in the removal of the deployed contracts).
+**Important note**: The alpha release is an experimental release. Newer versions may require a reset of the network's state (resulting in the removal of the deployed contracts).
 
 Run the following command to deploy your contract on the StarkNet testnet:
 
@@ -243,7 +227,7 @@ Run the following command to deploy your contract on the StarkNet testnet:
 
     starknet deploy --contract contract_compiled.json
 
-The output should look like:
+The output should resemble this:
 
 .. tested-code:: none starknet_deploy_output
 
@@ -251,16 +235,14 @@ The output should look like:
     Contract address: 0x039564c4f6d9f45a963a6dc8cf32737f0d51a08e446304626173fd838bd70e1c
     Transaction ID: 0
 
-You can see here the address of your new contract. You'll need this address to interact with
-the contract.
+Note the address of your new contract. You will need this address to interact with the contract.
 
 .. _update balance:
 
 Interact with the contract
 --------------------------
 
-Run the following command to invoke the ``increase_balance()`` function (note that you'll
-have to replace ``CONTRACT_ADDRESS`` with the address you got during the contract deployment):
+Run the following command to invoke the ``increase_balance()`` function (note that you'll have to replace ``CONTRACT_ADDRESS`` with the address you got during the contract deployment):
 
 .. tested-code:: bash starknet_invoke
 
@@ -270,7 +252,7 @@ have to replace ``CONTRACT_ADDRESS`` with the address you got during the contrac
         --function increase_balance \
         --inputs 1234
 
-The result should look like:
+The result should resemble this:
 
 .. tested-code:: none starknet_invoke_output
 
@@ -281,15 +263,13 @@ The result should look like:
 
 .. _tx_status:
 
-The following command allows you to query the transaction status based on the transaction ID
-that you got (here you'll have to replace ``TRANSACTION_ID`` with the transaction ID printed by
-``starknet invoke``):
+The following command allows you to query the transaction status based on your transaction ID (i.e., replace ``TRANSACTION_ID`` with the transaction ID printed by ``starknet invoke``):
 
 .. tested-code:: bash starknet_tx_status
 
     starknet tx_status --id TRANSACTION_ID
 
-The result should look like:
+The result should resemble this:
 
 .. tested-code:: none starknet_tx_status_output
 
@@ -329,13 +309,9 @@ The result should be:
 
     1234
 
-Note that to see the up-to-date balance you should wait until the ``increase_balance``
-transaction status is at least ``PENDING`` (that is, ``PENDING`` or ``ACCEPTED_ONCHAIN``).
-Otherwise, you'll see the balance before the execution of the ``increase_balance`` transaction
+Note that to see the up-to-date balance, you should wait until the ``increase_balance`` transaction status is at least ``PENDING`` (that is, ``PENDING`` or ``ACCEPTED_ONCHAIN``). Otherwise, you'll see the balance before the execution of the ``increase_balance`` transaction
 (that is, 0).
 
-In the next section we will describe other CLI functions for querying StarkNet's state.
-Note that while ``deploy`` and ``invoke`` affect StarkNet's state, all other functions are
-read-only. In particular, using ``call`` instead of ``invoke`` on a function that may change the
-state, such as ``increase_balance``, will return the result of the function without actually
-applying it to the current state, allowing the user to dry-run before committing to a state update.
+In the next section, we will describe other CLI functions for querying StarkNet's state.
+Note that while ``deploy`` and ``invoke`` affect StarkNet's state, all other functions are read-only. In particular, using ``call`` instead of ``invoke`` on a function that *may* change the
+state, such as ``increase_balance``, will return the result of the function without actually applying it to the current state, allowing the user to dry-run before committing to a state update.
