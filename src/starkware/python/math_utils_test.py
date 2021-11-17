@@ -1,8 +1,19 @@
 import pytest
 
 from starkware.python.math_utils import (
-    div_ceil, div_mod, ec_add, ec_double, ec_mult, is_power_of_2, is_quad_residue, next_power_of_2,
-    safe_div, safe_log2, sqrt)
+    div_ceil,
+    div_mod,
+    ec_add,
+    ec_double,
+    ec_mult,
+    is_power_of_2,
+    is_quad_residue,
+    next_power_of_2,
+    prev_power_of_2,
+    safe_div,
+    safe_log2,
+    sqrt,
+)
 
 
 def test_ec_add():
@@ -64,6 +75,22 @@ def test_next_power_of_2():
     assert next_power_of_2(2 ** 128 + 1) == 2 ** 129
     assert next_power_of_2(2 ** 129 - 1) == 2 ** 129
     assert next_power_of_2(2 ** 129) == 2 ** 129
+    with pytest.raises(AssertionError):
+        next_power_of_2(-2)
+
+
+def test_prev_power_of_2():
+    assert prev_power_of_2(1) == 1
+    assert prev_power_of_2(2) == 2
+    assert prev_power_of_2(3) == 2
+    assert prev_power_of_2(4) == 4
+    assert prev_power_of_2(5) == 4
+    assert prev_power_of_2(2 ** 128) == 2 ** 128
+    assert prev_power_of_2(2 ** 128 + 1) == 2 ** 128
+    assert prev_power_of_2(2 ** 129 - 1) == 2 ** 128
+    assert prev_power_of_2(2 ** 129) == 2 ** 129
+    with pytest.raises(AssertionError):
+        next_power_of_2(0)
     with pytest.raises(AssertionError):
         next_power_of_2(-2)
 

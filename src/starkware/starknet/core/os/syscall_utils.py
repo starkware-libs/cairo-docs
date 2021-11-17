@@ -2,7 +2,7 @@ import asyncio
 import contextlib
 import dataclasses
 from abc import ABC, abstractmethod
-from typing import Dict, Iterator, List, Optional, Tuple, Type, Union, cast
+from typing import Iterator, List, Mapping, Type, Union, cast
 
 from starkware.cairo.common.structs import CairoStructFactory, CairoStructProxy
 from starkware.cairo.lang.compiler.ast.cairo_types import CairoType, TypeFelt, TypePointer
@@ -10,7 +10,7 @@ from starkware.cairo.lang.compiler.identifier_definition import StructDefinition
 from starkware.cairo.lang.vm.memory_segments import MemorySegmentManager
 from starkware.cairo.lang.vm.relocatable import RelocatableValue
 from starkware.cairo.lang.vm.utils import RunResources
-from starkware.python.utils import safe_zip
+from starkware.python.utils import camel_to_snake_case, safe_zip
 from starkware.starknet.business_logic.internal_transaction_interface import (
     ContractCall,
     ContractCallResponse,
@@ -21,9 +21,12 @@ from starkware.starknet.business_logic.state import CarriedState
 from starkware.starknet.core.os.os_program import get_os_program
 from starkware.starknet.definitions.error_codes import StarknetErrorCode
 from starkware.starknet.definitions.general_config import StarknetGeneralConfig
-from starkware.starknet.services.api.gateway.transaction import InvokeFunction
-from starkware.starknet.storage.starknet_storage import BusinessLogicStarknetStorage
-from starkware.starkware_utils.error_handling import StarkException, wrap_with_stark_exception
+from starkware.starknet.services.api.contract_definition import EntryPointType
+from starkware.starknet.storage.starknet_storage import (
+    BusinessLogicStarknetStorage,
+    StarknetStorageInterface,
+)
+from starkware.starkware_utils.error_handling import StarkException
 
 
 @dataclasses.dataclass
@@ -49,8 +52,12 @@ class SysCallHandlerBase(ABC):
     base class for execution of system calls in the StarkNet OS.
     """
 
-    def __init__(self):
+    def __init__(self, general_config: StarknetGeneralConfig):
         os_program = get_os_program()
+
+        # StarkNet general configuration.
+        self.general_config = general_config
+
         self.structs = CairoStructFactory.from_program(
             program=os_program,
             additional_imports=[
@@ -60,7 +67,20 @@ class SysCallHandlerBase(ABC):
                 "starkware.starknet.common.syscalls.GetCallerAddress",
                 "starkware.starknet.common.syscalls.GetCallerAddressRequest",
                 "starkware.starknet.common.syscalls.GetCallerAddressResponse",
+                "starkware.starknet.common.syscalls.GetSequencerAddress",
+                "starkware.starknet.common.syscalls.GetSequencerAddressRequest",
+                "starkware.starknet.common.syscalls.GetSequencerAddressResponse",
+                "starkware.starknet.common.syscalls.GetContractAddress",
+                "starkware.starknet.common.syscalls.GetContractAddressRequest",
+                "starkware.starknet.common.syscalls.GetContractAddressResponse",
+                "starkware.starknet.common.syscalls.GetTxSignature",
+                "starkware.starknet.common.syscalls.GetTxSignatureRequest",
+                "starkware.starknet.common.syscalls.GetTxSignatureResponse",
                 "starkware.starknet.common.syscalls.SendMessageToL1SysCall",
+                "starkware.starknet.common.syscalls.StorageRead",
+                "starkware.starknet.common.syscalls.StorageReadRequest",
+                "starkware.starknet.common.syscalls.StorageReadResponse",
+                "starkware.starknet.common.syscalls.StorageWrite",
             ],
         ).structs
 
@@ -76,29 +96,68 @@ class SysCallHandlerBase(ABC):
                 syscall_request_struct=self.structs.CallContractRequest,
                 syscall_size=self.structs.CallContract.size,
             ),
+            "delegate_call": SysCallInfo(
+                selector=get_selector("delegate_call"),
+                syscall_request_struct=self.structs.CallContractRequest,
+                syscall_size=self.structs.CallContract.size,
+            ),
             "get_caller_address": SysCallInfo(
                 selector=get_selector("get_caller_address"),
                 syscall_request_struct=self.structs.GetCallerAddressRequest,
                 syscall_size=self.structs.GetCallerAddress.size,
+            ),
+            "get_sequencer_address": SysCallInfo(
+                selector=get_selector("get_sequencer_address"),
+                syscall_request_struct=self.structs.GetSequencerAddressRequest,
+                syscall_size=self.structs.GetSequencerAddress.size,
+            ),
+            "get_contract_address": SysCallInfo(
+                selector=get_selector("get_contract_address"),
+                syscall_request_struct=self.structs.GetContractAddressRequest,
+                syscall_size=self.structs.GetContractAddress.size,
             ),
             "send_message_to_l1": SysCallInfo(
                 selector=get_selector("send_message_to_l1"),
                 syscall_request_struct=self.structs.SendMessageToL1SysCall,
                 syscall_size=self.structs.SendMessageToL1SysCall.size,
             ),
+            "get_tx_signature": SysCallInfo(
+                selector=get_selector("get_tx_signature"),
+                syscall_request_struct=self.structs.GetTxSignatureRequest,
+                syscall_size=self.structs.GetTxSignature.size,
+            ),
+            "storage_read": SysCallInfo(
+                selector=get_selector("storage_read"),
+                syscall_request_struct=self.structs.StorageReadRequest,
+                syscall_size=self.structs.StorageRead.size,
+            ),
+            "storage_write": SysCallInfo(
+                selector=get_selector("storage_write"),
+                syscall_request_struct=self.structs.StorageWrite,
+                syscall_size=self.structs.StorageWrite.size,
+            ),
         }
 
     # Public API.
 
     def call_contract(self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue):
-        retdata, updated_storage_ptr = self._call_contract(
-            segments=segments, syscall_ptr=syscall_ptr
+        retdata = self._call_contract(
+            segments=segments, syscall_ptr=syscall_ptr, syscall_name="call_contract"
         )
         self._write_call_contract_response(
             segments=segments,
             syscall_ptr=syscall_ptr,
             retdata=retdata,
-            updated_storage_ptr=updated_storage_ptr,
+        )
+
+    def delegate_call(self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue):
+        retdata = self._call_contract(
+            segments=segments, syscall_ptr=syscall_ptr, syscall_name="delegate_call"
+        )
+        self._write_call_contract_response(
+            segments=segments,
+            syscall_ptr=syscall_ptr,
+            retdata=retdata,
         )
 
     def get_caller_address(self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue):
@@ -108,16 +167,86 @@ class SysCallHandlerBase(ABC):
         caller_address = self._get_caller_address(segments=segments, syscall_ptr=syscall_ptr)
 
         response = self.structs.GetCallerAddressResponse(caller_address=caller_address)
-        response_offset = self.structs.GetCallerAddress.struct_definition_.members[
-            "response"
-        ].offset
-        segments.write_arg(
-            ptr=syscall_ptr + response_offset,
-            arg=response,
+        self._write_syscall_response(
+            syscall_name="GetCallerAddress",
+            response=response,
+            segments=segments,
+            syscall_ptr=syscall_ptr,
+        )
+
+    def get_contract_address(self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue):
+        contract_address = self._get_contract_address(segments=segments, syscall_ptr=syscall_ptr)
+
+        response = self.structs.GetContractAddressResponse(contract_address=contract_address)
+        self._write_syscall_response(
+            syscall_name="GetContractAddress",
+            response=response,
+            segments=segments,
+            syscall_ptr=syscall_ptr,
+        )
+
+    def get_sequencer_address(self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue):
+        """
+        Handles the get_sequencer_address system call.
+        """
+        self._read_and_validate_syscall_request(
+            syscall_name="get_sequencer_address",
+            segments=segments,
+            syscall_ptr=syscall_ptr,
+        )
+
+        response = self.structs.GetSequencerAddressResponse(
+            sequencer_address=self.general_config.sequencer_address
+        )
+        self._write_syscall_response(
+            syscall_name="GetSequencerAddress",
+            response=response,
+            segments=segments,
+            syscall_ptr=syscall_ptr,
         )
 
     def send_message_to_l1(self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue):
         self._send_message_to_l1(segments=segments, syscall_ptr=syscall_ptr)
+
+    def get_tx_signature(self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue):
+        signature = self._get_tx_signature(segments=segments, syscall_ptr=syscall_ptr)
+        response = self.structs.GetTxSignatureResponse(
+            signature_len=len(signature), signature=signature
+        )
+
+        self._write_syscall_response(
+            syscall_name="GetTxSignature",
+            response=response,
+            segments=segments,
+            syscall_ptr=syscall_ptr,
+        )
+
+    def storage_read(self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue):
+        """
+        Handles the storage_read system call.
+        """
+        request = self._read_and_validate_syscall_request(
+            syscall_name="storage_read", segments=segments, syscall_ptr=syscall_ptr
+        )
+
+        value = self._storage_read(cast(int, request.address))
+        response = self.structs.StorageReadResponse(value=value)
+
+        self._write_syscall_response(
+            syscall_name="StorageRead",
+            response=response,
+            segments=segments,
+            syscall_ptr=syscall_ptr,
+        )
+
+    def storage_write(self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue):
+        """
+        Handles the storage_write system call.
+        """
+        request = self._read_and_validate_syscall_request(
+            syscall_name="storage_write", segments=segments, syscall_ptr=syscall_ptr
+        )
+        self._storage_write(address=cast(int, request.address), value=cast(int, request.value))
 
     def enter_call(self):
         raise NotImplementedError(f"{type(self).__name__} does not support enter_call.")
@@ -127,12 +256,49 @@ class SysCallHandlerBase(ABC):
 
     # Private helpers.
 
+    def _read_syscall_request(
+        self, syscall_name: str, segments: MemorySegmentManager, syscall_ptr: RelocatableValue
+    ) -> CairoStructProxy:
+        """
+        Returns the system call request written in the syscall segment, starting at syscall_ptr.
+        """
+        syscall_info = self.syscall_info[syscall_name]
+        return syscall_info.syscall_request_struct.from_ptr(
+            memory=segments.memory, addr=syscall_ptr
+        )
+
+    @abstractmethod
+    def _read_and_validate_syscall_request(
+        self, syscall_name: str, segments: MemorySegmentManager, syscall_ptr: RelocatableValue
+    ) -> CairoStructProxy:
+        """
+        Returns the system call request written in the syscall segment, starting at syscall_ptr.
+        Performs validations on the request.
+        """
+
+    def _write_syscall_response(
+        self,
+        syscall_name: str,
+        response: CairoStructProxy,
+        segments: MemorySegmentManager,
+        syscall_ptr: RelocatableValue,
+    ):
+        assert (
+            camel_to_snake_case(syscall_name) in self.syscall_info
+        ), f"Illegal system call {syscall_name}."
+
+        syscall_struct: CairoStructProxy = getattr(self.structs, syscall_name)
+        response_offset = syscall_struct.struct_definition_.members["response"].offset
+        segments.write_arg(ptr=syscall_ptr + response_offset, arg=response)
+
     @abstractmethod
     def _call_contract(
-        self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue
-    ) -> Tuple[List[int], RelocatableValue]:
+        self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue, syscall_name: str
+    ) -> List[int]:
         """
-        Returns the call retdata and the updated storage ptr.
+        Returns the call retdata.
+
+        syscall_name can be "call_contract" or "delegate_call".
         """
 
     def _write_call_contract_response(
@@ -140,7 +306,6 @@ class SysCallHandlerBase(ABC):
         segments: MemorySegmentManager,
         syscall_ptr: RelocatableValue,
         retdata: List[int],
-        updated_storage_ptr: RelocatableValue,
     ):
         """
         Fills the CallContractResponse struct.
@@ -148,24 +313,53 @@ class SysCallHandlerBase(ABC):
         response = self.structs.CallContractResponse(
             retdata_size=len(retdata),
             retdata=self._allocate_segment(segments=segments),
-            storage_ptr=updated_storage_ptr,
         )
-        response_offset = self.structs.CallContract.struct_definition_.members["response"].offset
-        segments.write_arg(
-            ptr=syscall_ptr + response_offset,
-            arg=response,
+        self._write_syscall_response(
+            syscall_name="CallContract",
+            response=response,
+            segments=segments,
+            syscall_ptr=syscall_ptr,
         )
         segments.write_arg(ptr=response.retdata, arg=retdata)
 
     @abstractmethod
-    def _get_caller_address(self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue):
+    def _get_caller_address(
+        self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue
+    ) -> int:
         """
         Specific implementation of the get_caller_address system call.
+        """
+
+    @abstractmethod
+    def _get_contract_address(self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue):
+        """
+        Specific implementation of the get_contract_address system call.
         """
 
     def _send_message_to_l1(self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue):
         """
         Specific implementation of the send_message_to_l1 system call.
+        """
+        return
+
+    @abstractmethod
+    def _get_tx_signature(
+        self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue
+    ) -> List[int]:
+        """
+        Returns the signature information for the transaction.
+        """
+
+    @abstractmethod
+    def _storage_read(self, address: int) -> int:
+        """
+        Returns the value of the contract's storage at the given address.
+        """
+
+    @abstractmethod
+    def _storage_write(self, address: int, value: int):
+        """
+        Write the value to the contract's storage at the given address.
         """
 
     @abstractmethod
@@ -197,24 +391,22 @@ class BusinessLogicSysCallHandler(SysCallHandlerBase):
         self,
         run_resources: RunResources,
         state: CarriedState,
-        caller_address: Optional[int],
+        caller_address: int,
         contract_address: int,
+        signature: List[int],
         starknet_storage: BusinessLogicStarknetStorage,
         general_config: StarknetGeneralConfig,
-        internal_transaction_factory: Type[InternalTransactionInterface],
         initial_syscall_ptr: RelocatableValue,
-        initial_storage_ptr: RelocatableValue,
     ):
-        super().__init__()
+        super().__init__(general_config=general_config)
 
         self.run_resources = run_resources
         self.state = state
         self.caller_address = caller_address
         self.contract_address = contract_address
+        self.signature = signature
         self.starknet_storage = starknet_storage
         self.loop = starknet_storage.loop
-        self.general_config = general_config
-        self.internal_transaction_factory = internal_transaction_factory
 
         # Accumulated execution info.
         self.internal_call_responses: List[ContractCallResponse] = []
@@ -225,13 +417,8 @@ class BusinessLogicSysCallHandler(SysCallHandlerBase):
         # The output length does not include internal transactions.
         self.output_length = 0
 
-        # A mapping from contract address to its accumulated storage_ptr length; kept for the parent
-        # call to know as to where to advance the storage ptr after this call ends.
-        self.storage_ptr_diff_by_address: Dict[int, int] = {}
-
         # Kept for validations during the run.
         self.expected_syscall_ptr = initial_syscall_ptr
-        self.current_storage_ptr = initial_storage_ptr
 
         # Kept for post-run validations.
         self.storage_stop_pointers: List[RelocatableValue] = []
@@ -239,17 +426,22 @@ class BusinessLogicSysCallHandler(SysCallHandlerBase):
     def _allocate_segment(self, segments: MemorySegmentManager) -> RelocatableValue:
         return segments.add()
 
-    def get_and_validate_syscall_request(
+    def _read_and_validate_syscall_request(
         self, syscall_name: str, segments: MemorySegmentManager, syscall_ptr: RelocatableValue
     ) -> CairoStructProxy:
+        """
+        Returns the system call request written in the syscall segment, starting at syscall_ptr.
+        Performs validations on the request.
+        """
+        request = self._read_syscall_request(
+            syscall_name=syscall_name, segments=segments, syscall_ptr=syscall_ptr
+        )
+
         assert (
             syscall_ptr == self.expected_syscall_ptr
         ), f"Bad syscall_ptr, Expected {self.expected_syscall_ptr}, got {syscall_ptr}."
 
         syscall_info = self.syscall_info[syscall_name]
-        request = syscall_info.syscall_request_struct.from_ptr(
-            memory=segments.memory, addr=syscall_ptr
-        )
         self.expected_syscall_ptr += syscall_info.syscall_size
         selector = request.selector  # type: ignore
         assert (
@@ -267,60 +459,59 @@ class BusinessLogicSysCallHandler(SysCallHandlerBase):
         return request
 
     def _call_contract(
-        self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue
-    ) -> Tuple[List[int], RelocatableValue]:
+        self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue, syscall_name: str
+    ) -> List[int]:
         # Parse request and prepare the call.
-        request = self.get_and_validate_syscall_request(
-            syscall_name="call_contract", segments=segments, syscall_ptr=syscall_ptr
+        request = self._read_and_validate_syscall_request(
+            syscall_name=syscall_name, segments=segments, syscall_ptr=syscall_ptr
         )
         calldata = segments.memory.get_range_as_ints(
             addr=request.calldata, size=request.calldata_size
         )
-        external_tx = InvokeFunction(
-            contract_address=cast(int, request.contract_address),
-            entry_point_selector=cast(int, request.function_selector),
-            calldata=calldata,
-        )
-        tx = self.internal_transaction_factory.from_external(
-            external_tx=external_tx, general_config=self.general_config
-        )
 
-        # The storage_ptr of the request is the end of the current storage segment;
-        # Add it to the list, to be verified at the end.
-        self.storage_stop_pointers.append(cast(RelocatableValue, request.storage_ptr))
+        code_address = cast(int, request.contract_address)
+        if syscall_name == "delegate_call":
+            contract_address = self.contract_address
+            caller_address = self.caller_address
+        elif syscall_name == "call_contract":
+            contract_address = code_address
+            caller_address = self.contract_address
+        else:
+            raise NotImplemented(f"Unsupported call type {syscall_name}.")
+
+        from starkware.starknet.business_logic.internal_transaction import InternalInvokeFunction
+
+        tx = InternalInvokeFunction(
+            contract_address=contract_address,
+            code_address=code_address,
+            entry_point_selector=cast(int, request.function_selector),
+            entry_point_type=EntryPointType.EXTERNAL,
+            calldata=calldata,
+            signature=[],
+            hash_value=0,
+            caller_address=caller_address,
+        )
 
         with self.contract_call_execution_context(
-            tx=tx, called_contract_address=external_tx.contract_address, segments=segments
+            tx=tx, called_contract_address=tx.contract_address, segments=segments
         ):
             # Execute contract call.
-            execution_objects = tx._synchronous_apply_specific_state_updates(
+            execution_info = tx._synchronous_apply_specific_state_updates(
                 state=self.state,
                 general_config=self.general_config,
                 loop=self.loop,
-                caller_address=self.contract_address,
                 run_resources=self.run_resources,
             )
-
-        execution_info, current_storage_ptr_diff_by_address = execution_objects
 
         # Update execution info.
         self.l2_to_l1_messages.extend(execution_info.l2_to_l1_messages)
         call_response = ContractCallResponse(
             retdata=execution_info.retdata,
-            storage_ptr_diff=current_storage_ptr_diff_by_address.get(self.contract_address, 0),
         )
         self.internal_call_responses.append(call_response)
         self.internal_calls.extend(execution_info.contract_calls)
 
-        # Update storage_ptr_diff_by_address.
-        for address, diff in current_storage_ptr_diff_by_address.items():
-            prev_diff = self.storage_ptr_diff_by_address.get(address, 0)
-            self.storage_ptr_diff_by_address[address] = prev_diff + diff
-
-        # Update current storage_ptr.
-        self.current_storage_ptr = segments.add()
-
-        return call_response.retdata, self.current_storage_ptr
+        return call_response.retdata
 
     @contextlib.contextmanager
     def contract_call_execution_context(
@@ -330,7 +521,6 @@ class BusinessLogicSysCallHandler(SysCallHandlerBase):
         segments: MemorySegmentManager,
     ):
         # Pre-execution preperation and validations.
-        self._validate_current_storage_segment(segments=segments)
         self._enrich_state(tx=tx)
 
         try:
@@ -352,47 +542,6 @@ class BusinessLogicSysCallHandler(SysCallHandlerBase):
 
         # Post-execution updates.
         self._update_starknet_storage()
-
-    def _validate_current_storage_segment(self, segments: MemorySegmentManager):
-        with wrap_with_stark_exception(
-            code=StarknetErrorCode.SECURITY_ERROR, exception_types=[AssertionError, KeyError]
-        ):
-            size = self.storage_stop_pointers[-1] - self.current_storage_ptr
-            assert size >= 0, "The stop_ptr of the storage segment must be ahead of the initial."
-            dict_accesses = segments.memory.get_range(addr=self.current_storage_ptr, size=size)
-            for value in dict_accesses:
-                assert isinstance(
-                    value, int
-                ), f"The values in a storage dict access must be integers. Found: {value}."
-
-            self.starknet_storage.validate_dict_accesses(
-                dict_accesses=cast(List[int], dict_accesses)
-            )
-
-    def finalize_storage_validations(
-        self, segments: MemorySegmentManager, storage_stop_ptr: RelocatableValue
-    ):
-        """
-        Completes storage validations that can only be done at the very end of the run.
-        """
-        self.storage_stop_pointers.append(storage_stop_ptr)
-        self._validate_current_storage_segment(segments=segments)
-
-        with wrap_with_stark_exception(code=StarknetErrorCode.SECURITY_ERROR):
-            for storage_ptr in self.storage_stop_pointers:
-                segment_index = storage_ptr.segment_index
-                expected_offset = segments.get_segment_used_size(segment_index=segment_index)
-
-                assert storage_ptr.offset == expected_offset, (
-                    f"Invalid stop pointer for segment. "
-                    f"Expected: {segment_index}:{expected_offset}, found: {storage_ptr}."
-                )
-
-        # Update storage_ptr_diff_by_address with this call's storage_ptr length.
-        prev_diff = self.storage_ptr_diff_by_address.get(self.contract_address, 0)
-        self.storage_ptr_diff_by_address[self.contract_address] = prev_diff + sum(
-            storage_ptr.offset for storage_ptr in self.storage_stop_pointers
-        )
 
     def _enrich_state(self, tx: InternalTransactionInterface):
         """
@@ -424,7 +573,7 @@ class BusinessLogicSysCallHandler(SysCallHandlerBase):
         self.starknet_storage.reset_state(storage_updates=contract_storage_updates)
 
     def _send_message_to_l1(self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue):
-        request = self.get_and_validate_syscall_request(
+        request = self._read_and_validate_syscall_request(
             syscall_name="send_message_to_l1", segments=segments, syscall_ptr=syscall_ptr
         )
 
@@ -446,15 +595,39 @@ class BusinessLogicSysCallHandler(SysCallHandlerBase):
     def _get_caller_address(
         self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue
     ) -> int:
-        """
-        Batcher specific implementation of the get_caller_address.
-        """
-
-        self.get_and_validate_syscall_request(
+        self._read_and_validate_syscall_request(
             syscall_name="get_caller_address", segments=segments, syscall_ptr=syscall_ptr
         )
 
-        return 0 if self.caller_address is None else self.caller_address
+        return self.caller_address
+
+    def _get_contract_address(
+        self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue
+    ) -> int:
+        self._read_and_validate_syscall_request(
+            syscall_name="get_contract_address", segments=segments, syscall_ptr=syscall_ptr
+        )
+
+        return self.contract_address
+
+    def _get_tx_signature(
+        self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue
+    ) -> List[int]:
+        self._read_and_validate_syscall_request(
+            syscall_name="get_tx_signature", segments=segments, syscall_ptr=syscall_ptr
+        )
+
+        return self.signature
+
+    def _storage_read(self, address: int) -> int:
+        return self.starknet_storage.read(address=address)
+
+    def _storage_write(self, address: int, value: int):
+        # Read the value before the write operation in order to log it in the read_values list.
+        # This value is needed to create the DictAccess while executing the corresponding
+        # storage_write system call.
+        self.starknet_storage.read(address=address)
+        self.starknet_storage.write(address=address, value=value)
 
 
 class OsSysCallHandler(SysCallHandlerBase):
@@ -462,12 +635,42 @@ class OsSysCallHandler(SysCallHandlerBase):
     The SysCallHandler implementation that is used by the gps ambassador.
     """
 
-    def __init__(self, contract_calls: List[ContractCall]):
-        super().__init__()
+    def __init__(
+        self,
+        contract_calls: List[ContractCall],
+        general_config: StarknetGeneralConfig,
+        starknet_storage_by_address: Mapping[int, StarknetStorageInterface],
+    ):
+        super().__init__(general_config=general_config)
 
         self._call_response_iterator: Iterator[ContractCallResponse] = iter([])
         self._contract_calls_iterator = iter(contract_calls)
+
+        # The following members are stacks that represent the calls being executed now (the last
+        # item is the current execution; the one before it, is the caller function; and so on).
         self.call_stack: List[ContractCall] = []
+        # For each call an iterator to the read_values array which is consumed when the transaction
+        # code is executed.
+        self.execute_code_read_iterators: List[Iterator[int]] = []
+        # Same as execute_code_read_iterators except that the iterator is consumed when the
+        # system calls are executed by the OS.
+        # Namely, the former is used the guess the values during the contract execution
+        # and the latter to fill the DictAccess array during the system call execution.
+        self.execute_syscall_read_iterators: List[Iterator[int]] = []
+
+        # StarkNet storage members.
+        self.starknet_storage_by_address = starknet_storage_by_address
+
+    def _read_and_validate_syscall_request(
+        self, syscall_name: str, segments: MemorySegmentManager, syscall_ptr: RelocatableValue
+    ) -> CairoStructProxy:
+        """
+        Returns the system call request written in the syscall segment, starting at syscall_ptr.
+        Does not perform validations on the request, since it was validated in the BL.
+        """
+        return self._read_syscall_request(
+            syscall_name=syscall_name, segments=segments, syscall_ptr=syscall_ptr
+        )
 
     def _allocate_segment(self, segments: MemorySegmentManager) -> RelocatableValue:
         """
@@ -476,33 +679,66 @@ class OsSysCallHandler(SysCallHandlerBase):
         return segments.add_temp_segment()
 
     def _call_contract(
-        self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue
-    ) -> Tuple[List[int], RelocatableValue]:
+        self,
+        segments: MemorySegmentManager,
+        syscall_ptr: RelocatableValue,
+        syscall_name: str,
+    ) -> List[int]:
         request = self.structs.CallContractRequest.from_ptr(
             memory=segments.memory, addr=syscall_ptr
         )
         call_response = next(self._call_response_iterator)
-        retdata = call_response.retdata
-        updated_storage_ptr = request.storage_ptr + call_response.storage_ptr_diff
-
-        return retdata, updated_storage_ptr
+        return call_response.retdata
 
     def _get_caller_address(
         self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue
     ) -> int:
+        return self.call_stack[-1].from_address
+
+    def _get_contract_address(
+        self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue
+    ) -> int:
+        return self.call_stack[-1].to_address
+
+    def _get_tx_signature(
+        self, segments: MemorySegmentManager, syscall_ptr: RelocatableValue
+    ) -> List[int]:
+        return self.call_stack[-1].signature
+
+    def _storage_read(self, address: int) -> int:
+        return next(self.execute_code_read_iterators[-1])
+
+    def _storage_write(self, address: int, value: int):
+        # Advance execute_code_read_iterators since the previous storage value is written
+        # in each write operation. See BusinessLogicSysCallHandler._storage_write().
+        next(self.execute_code_read_iterators[-1])
+
+    def execute_syscall_storage_read(self):
         """
-        OS specific implementation of the get_caller_address.
+        Advances execute_syscall_read_iterators.
         """
-        from_address = self.call_stack[-1].from_address
-        return 0 if from_address is None else from_address
+        next(self.execute_syscall_read_iterators[-1])
+
+    def execute_syscall_storage_write(self) -> int:
+        """
+        Returns the storage value before the write operation.
+        """
+        return next(self.execute_syscall_read_iterators[-1])
 
     def enter_call(self):
         call_info = next(self._contract_calls_iterator)
         self._call_response_iterator = iter(call_info.internal_call_responses)
         self.call_stack.append(call_info)
+        # Create two iterators for call_info.storage_read_values.
+        self.execute_code_read_iterators.append(iter(call_info.storage_read_values))
+        self.execute_syscall_read_iterators.append(iter(call_info.storage_read_values))
 
     def exit_call(self):
         assert (
             next(self._call_response_iterator, None) is None
         ), "internal_call_responses should be consumed before calling exit_call."
         self.call_stack.pop()
+        # Remove the top iterators in execute_code_read_iterators and execute_syscall_read_iterators
+        # and make sure it is empty.
+        assert all(False for x in self.execute_code_read_iterators.pop())
+        assert all(False for x in self.execute_syscall_read_iterators.pop())

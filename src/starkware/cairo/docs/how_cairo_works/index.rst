@@ -23,3 +23,4 @@ take a look at the :ref:`"Hello, Cairo" tutorial <hello_cairo>`.
     segments
     non_deterministic_jumps
     builtins
+    define_word

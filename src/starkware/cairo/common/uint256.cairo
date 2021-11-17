@@ -58,9 +58,11 @@ func split_64{range_check_ptr}(a : felt) -> (low : felt, high : felt):
         ids.low = ids.a & ((1<<64) - 1)
         ids.high = ids.a >> 64
     %}
-    assert_nn_le(low, HALF_SHIFT)
-    [range_check_ptr] = high
-    let range_check_ptr = range_check_ptr + 1
+    assert a = low + high * HALF_SHIFT
+    assert [range_check_ptr + 0] = low
+    assert [range_check_ptr + 1] = HALF_SHIFT - 1 - low
+    assert [range_check_ptr + 2] = high
+    let range_check_ptr = range_check_ptr + 3
     return (low, high)
 end
 
@@ -98,6 +100,45 @@ func uint256_signed_lt{range_check_ptr}(a : Uint256, b : Uint256) -> (res):
     let (a, _) = uint256_add(a, cast((low=0, high=2 ** 127), Uint256))
     let (b, _) = uint256_add(b, cast((low=0, high=2 ** 127), Uint256))
     return uint256_lt(a, b)
+end
+
+# Returns 1 if the first unsigned integer is less than or equal to the second unsigned integer.
+func uint256_le{range_check_ptr}(a : Uint256, b : Uint256) -> (res):
+    let (not_le) = uint256_lt(a=b, b=a)
+    return (1 - not_le)
+end
+
+# Returns 1 if the first signed integer is less than or equal to the second signed integer.
+func uint256_signed_le{range_check_ptr}(a : Uint256, b : Uint256) -> (res):
+    let (not_le) = uint256_signed_lt(a=b, b=a)
+    return (1 - not_le)
+end
+
+# Returns 1 if the signed integer is nonnegative.
+@known_ap_change
+func uint256_signed_nn{range_check_ptr}(a : Uint256) -> (res):
+    %{ memory[ap] = 1 if 0 <= (ids.a.high % PRIME) < 2 ** 127 else 0 %}
+    jmp non_negative if [ap] != 0; ap++
+
+    assert [range_check_ptr] = a.high - 2 ** 127
+    let range_check_ptr = range_check_ptr + 1
+    return (res=0)
+
+    non_negative:
+    assert [range_check_ptr] = a.high + 2 ** 127
+    let range_check_ptr = range_check_ptr + 1
+    return (res=1)
+end
+
+# Returns 1 if the first signed integer is less than or equal to the second signed integer
+# and is greater than or equal to zero.
+func uint256_signed_nn_le{range_check_ptr}(a : Uint256, b : Uint256) -> (res):
+    let (is_le) = uint256_signed_le(a=a, b=b)
+    if is_le == 0:
+        return (res=0)
+    end
+    let (is_nn) = uint256_signed_nn(a=a)
+    return (res=is_nn)
 end
 
 # Unsigned integer division between two integers. Returns the quotient and the remainder.

@@ -5,7 +5,7 @@ from starkware.cairo.common.hash import hash2
 from starkware.cairo.common.patricia import patricia_update
 from starkware.cairo.common.segments import relocate_segment
 
-const MERKLE_HEIGHT = %[ PRIME.bit_length() - 1 %]
+const MERKLE_HEIGHT = 251  # PRIME.bit_length() - 1.
 
 struct CommitmentTreeUpdateOutput:
     member initial_storage_root : felt
@@ -17,20 +17,20 @@ struct StateEntry:
     member storage_ptr : DictAccess*
 end
 
-func serialize_da_changes{da_output_ptr : felt*}(update_ptr : DictAccess*, n_updates : felt):
+func serialize_da_changes{storage_updates_ptr : felt*}(update_ptr : DictAccess*, n_updates : felt):
     if n_updates == 0:
         return ()
     end
-    assert [da_output_ptr] = update_ptr.key
-    assert [da_output_ptr + 1] = update_ptr.new_value
-    let da_output_ptr = da_output_ptr + 2
+    assert [storage_updates_ptr] = update_ptr.key
+    assert [storage_updates_ptr + 1] = update_ptr.new_value
+    let storage_updates_ptr = storage_updates_ptr + 2
     return serialize_da_changes(update_ptr=update_ptr + DictAccess.SIZE, n_updates=n_updates - 1)
 end
 
 # Performs the commitment tree updates required for (validating and) updating the global state.
 # Returns a CommitmentTreeUpdateOutput struct.
 # Checks that [state_changes_dict, state_changes_dict_end) is a valid according to squash_dict.
-func state_update{hash_ptr : HashBuiltin*, range_check_ptr, da_output_ptr : felt*}(
+func state_update{hash_ptr : HashBuiltin*, range_check_ptr, storage_updates_ptr : felt*}(
         state_changes_dict : DictAccess*, state_changes_dict_end : DictAccess*) -> (
         commitment_tree_update_output : CommitmentTreeUpdateOutput*):
     alloc_locals
@@ -46,28 +46,27 @@ func state_update{hash_ptr : HashBuiltin*, range_check_ptr, da_output_ptr : felt
     # multi-update.
     let (local hashed_state_changes : DictAccess*) = alloc()
     local n_state_changes = (squashed_dict_end - squashed_dict) / DictAccess.SIZE
-    assert [da_output_ptr] = n_state_changes
-    let da_output_ptr = da_output_ptr + 1
+    assert [storage_updates_ptr] = n_state_changes
+    let storage_updates_ptr = storage_updates_ptr + 1
     hash_state_changes(
         n_state_changes=n_state_changes,
         state_changes=squashed_dict,
         hashed_state_changes=hashed_state_changes)
     local range_check_ptr = range_check_ptr
-    local da_output_ptr : felt* = da_output_ptr
+    local storage_updates_ptr : felt* = storage_updates_ptr
 
     # Compute the initial and final roots of the global state.
     let (local commitment_tree_update_output : CommitmentTreeUpdateOutput*) = alloc()
 
     %{
-        def as_int(x):
-            return int.from_bytes(x, 'big')
+        from starkware.python.utils import from_bytes
 
-        ids.commitment_tree_update_output.initial_storage_root = as_int(
+        ids.commitment_tree_update_output.initial_storage_root = from_bytes(
             os_input.global_state_commitment_tree.root)
         new_tree, commitment_tree_facts = global_state_storage.commitment_update()
-        ids.commitment_tree_update_output.final_storage_root = as_int(new_tree.root)
+        ids.commitment_tree_update_output.final_storage_root = from_bytes(new_tree.root)
         preimage = {
-            as_int(root): tuple(map(as_int, children))
+            int(root): children
             for root, children in commitment_tree_facts.items()
         }
         assert global_state_storage.commitment_tree.height == ids.MERKLE_HEIGHT
@@ -85,20 +84,28 @@ end
 
 func get_contract_state_hash{hash_ptr : HashBuiltin*}(
         contract_hash : felt, storage_root : felt) -> (hash : felt):
+    const CONTRACT_STATE_HASH_VERSION = 0
+    const RESERVED = 0
     if contract_hash == 0:
         if storage_root == 0:
             return (hash=0)
         end
     end
 
-    return hash2(contract_hash, storage_root)
+    # Set res = H(H(contract_hash, storage_root), RESERVED).
+    let (hash_value) = hash2(contract_hash, storage_root)
+    let (hash_value) = hash2(hash_value, RESERVED)
+
+    # Return H(hash_value, CONTRACT_STATE_HASH_VERSION). CONTRACT_STATE_HASH_VERSION must be in the
+    # outermost hash to guarantee unique "decoding".
+    return hash2(hash_value, CONTRACT_STATE_HASH_VERSION)
 end
 
 # Takes a dict of StateEntry structs and produces a dict of hashes by hashing
 # every entry of the input dict. The output is written to 'hashed_state_changes'
 #
 # Additionally, all the updates are written to the 'global_state_storage' hint variable.
-func hash_state_changes{hash_ptr : HashBuiltin*, range_check_ptr, da_output_ptr : felt*}(
+func hash_state_changes{hash_ptr : HashBuiltin*, range_check_ptr, storage_updates_ptr : felt*}(
         n_state_changes, state_changes : DictAccess*, hashed_state_changes : DictAccess*):
     if n_state_changes == 0:
         return ()
@@ -112,15 +119,14 @@ func hash_state_changes{hash_ptr : HashBuiltin*, range_check_ptr, da_output_ptr 
     local final_storage_root
 
     %{
-        def as_int(x):
-            return int.from_bytes(x, 'big')
+        from starkware.python.utils import from_bytes
 
         storage = storage_by_address[ids.state_changes.key]
-        ids.initial_storage_root = as_int(storage.commitment_tree.root)
+        ids.initial_storage_root = from_bytes(storage.commitment_tree.root)
         new_tree, commitment_tree_facts = storage.commitment_update()
-        ids.final_storage_root = as_int(new_tree.root)
+        ids.final_storage_root = from_bytes(new_tree.root)
         preimage = {
-            as_int(root): tuple(map(as_int, children))
+            int(root): children
             for root, children in commitment_tree_facts.items()
         }
         assert storage.commitment_tree.height == ids.MERKLE_HEIGHT
@@ -141,14 +147,14 @@ func hash_state_changes{hash_ptr : HashBuiltin*, range_check_ptr, da_output_ptr 
     local range_check_ptr = range_check_ptr
 
     # Write contract address.
-    assert [da_output_ptr] = state_changes.key
+    assert [storage_updates_ptr] = state_changes.key
     # Write n_updates.
-    assert [da_output_ptr + 1] = n_updates
-    let da_output_ptr = da_output_ptr + 2
+    assert [storage_updates_ptr + 1] = n_updates
+    let storage_updates_ptr = storage_updates_ptr + 2
     # Write updates.
     local hash_ptr : HashBuiltin* = hash_ptr
     serialize_da_changes(update_ptr=squashed_storage_dict, n_updates=n_updates)
-    local da_output_ptr : felt* = da_output_ptr
+    local storage_updates_ptr : felt* = storage_updates_ptr
 
     let (prev_value) = get_contract_state_hash(
         contract_hash=prev_state.contract_hash, storage_root=initial_storage_root)
