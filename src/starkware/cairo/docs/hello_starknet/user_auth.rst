@@ -1,7 +1,25 @@
+.. proofedDate null
+
+.. comment
+
+
 .. _user_authentication:
+
 
 Adding User Authentication
 ==========================
+
+.. topic:: Overview
+
+    :ref:`Handle multiple users <storage_maps>`
+
+    :ref:`Verify signatures <verify signature>`
+
+    :ref:`Compile and deploy <Compile and deploy>`
+
+    :ref:`Update and query the balance <update a balance>`
+
+    :ref:`Handle invalid signatures <invalid signature>`
 
 .. _storage_maps:
 
@@ -40,6 +58,8 @@ The functions ``balance.read()`` and ``balance.write()`` will now have the follo
         user : felt, value : felt)
 
 Note that the default value of all the entries in the map is 0.
+
+.. _verify signature:
 
 Signature verification
 ----------------------
@@ -124,6 +144,8 @@ so the change is simpler:
         return (res)
     end
 
+.. _Compile and deploy:
+
 Compile and deploy
 ------------------
 
@@ -141,6 +163,8 @@ Compile and deploy the file:
     starknet deploy --contract user_auth_compiled.json
 
 Don't forget to set ``STARKNET_NETWORK=alpha`` before running ``starknet deploy``.
+
+.. _update a balance:
 
 Interacting with the contract
 -----------------------------
@@ -229,6 +253,8 @@ You should get:
 
     Storage key for user 1628448741648245036800002906075225705100596136133912895015035902954123957052:
     142452623821144136554572927896792266630776240502820879601186867231282346767
+
+.. _invalid signature:
 
 What if we have an invalid signature?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -1,3 +1,8 @@
+.. proofedDate null
+
+.. comment null
+
+
 Interacting with L1 contracts
 =============================
 
@@ -60,15 +65,17 @@ This should be taken into account when designing the message protocol between th
 Notes
 *****
 
-**Important note**: The StarkNet Alpha system is still under development, and therefore
-from time to time the state of the system will reset and all contracts will be removed.
-This means that you shouldn't move valuable assets
-to the StarkNet system, unless
-you have a way to withdraw them given the removal of the L2 contract.
-That being said,
-recall that StarkNet Alpha only runs on the Ropsten *testnet*.
+.. topic:: Note
 
-**Note**: In the current version of StarkNet, contracts cannot interact with one another.
+    The StarkNet Alpha system is still under development, and therefore
+    from time to time the state of the system will reset and all contracts will be removed.
+    This means that you shouldn't move valuable assets
+    to the StarkNet system, unless
+    you have a way to withdraw them given the removal of the L2 contract.
+    That being said,
+    recall that StarkNet Alpha only runs on the Ropsten *testnet*.
+
+In the current version of StarkNet, contracts cannot interact with one another.
 This means that any contract that needs some kind of interaction with L1, such as deposit/withdraw
 of tokens, needs to use this message mechanism. In the future,
 token transfers between L1 and L2 will be handled by bridge token contracts

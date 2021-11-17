@@ -58,3 +58,27 @@ Once the docker image is built, you can fetch the python package zip file using:
 > docker rm -v ${container_id}
 ```
 
+## Building the Documentation Site
+
+From Windows with Ubuntu I am using Sphinx:
+
+https://www.sphinx-doc.org/en/master/usage/quickstart.html
+
+Build with `PYTHONPATH=src python3 -m sphinx.cmd.build -b html src/starkware/cairo/docs build`
+
+# Heading 1
+
+Equals Sign
+===========
+
+> Note caps case
+
+## Heading 2
+
+Hyphen it
+---------
+
+### Heading 3
+
+Star it
+********

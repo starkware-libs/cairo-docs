@@ -1,15 +1,25 @@
+.. proofedDate null
+
+.. comment null
+
 Calling another contract
 ========================
 
-A contract function may invoke an external function of another contract.
+.. topic:: Overview
 
-Start by deploying the example contract in :ref:`starknet_intro`
-(the compilation and deployment instructions can be found at
-:ref:`the bottom of the page <compile_contract>`).
-Denote the address of this contract by ``BALANCE_CONTRACT``.
+    :ref:`Invoke another contract's function <contract function>`
 
-In order to call this contract from another contract, define an interface
-by copying the declarations of the external functions:
+    :ref:`Retrieve a caller's address <get address>`
+
+    **Prerequisites**
+
+        - Start by deploying the example contract in :ref:`starknet_intro` (as per the :ref:`compilation and deployment instructions <compile_contract>`).
+
+        - Denote the address of this contract by ``BALANCE_CONTRACT``.
+
+.. _contract function:
+
+A contract function may invoke an external function of another contract. In order to call this contract from another contract, define an interface by copying the declarations of the external functions:
 
 .. tested-code:: cairo call_contract_interface
 
@@ -101,6 +111,8 @@ check the balance using the following two ways:
             --inputs BALANCE_CONTRACT
 
 Both commands should return ``10000``.
+
+.. _get address:
 
 Getting the caller address
 --------------------------

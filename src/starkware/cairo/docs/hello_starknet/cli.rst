@@ -1,5 +1,26 @@
+.. proofedDate null
+
+.. comments null
+
 More CLI commands
 =================
+
+
+.. topic:: Overview
+
+    :ref:`Get transaction information <get_transaction>`
+
+    :ref:`Get contract code <get_code>`
+
+    :ref:`Query a block <get_block>`
+
+    :ref:`Get storage by key <get_storage_at>`
+
+    :ref:`Filter by block <filter block>`
+
+    And remember, you can always ask for ``--help``.
+
+.. _get_transaction:
 
 get_transaction
 ---------------
@@ -47,6 +68,8 @@ It may also include each of the following optional fields (according to the tran
 *   ``transaction_failure_reason`` -- The reason for the transaction failure.
 
 
+.. _get_code:
+
 get_code
 --------
 
@@ -87,12 +110,12 @@ The output should look like:
         ]
     }
 
+.. _get_block:
 
 get_block
 ---------
 
-Instead of querying a specific contract or transaction, you may want to query an entire block and
-examine the transactions contained within it.
+Instead of querying a specific contract or transaction, you may want to query an entire block and examine the transactions contained within it.
 To do this, run the following:
 
 .. tested-code:: bash starknet_get_block
@@ -188,6 +211,8 @@ variable for each user. This will require minor adjustments to the code above, w
 in the relevant section.
 
 .. TODO(Adi, 15/08/2021): At the end of the second paragraph below, change to last *accepted* block.
+
+.. _filter block:
 
 Block-specific queries
 **********************

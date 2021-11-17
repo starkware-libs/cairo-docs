@@ -1,5 +1,19 @@
+.. proofedDate null
+
+.. comment null
+
+
 More Features
 =============
+
+.. topic:: Overview
+
+    :ref:`Store multiple values <multiple values>`
+
+    :ref:`Handle arrays <calldata arrays>`
+
+
+.. _multiple values:
 
 Storage variable with multiple values
 -------------------------------------
@@ -30,6 +44,8 @@ You can read and write this value as follows:
 
 Note that in this case the ``range.read()`` returns one item that is a pair.
 Thus, ``let (min, max) = range.read(user)`` will not work.
+
+.. _calldata arrays:
 
 Array arguments in calldata
 ---------------------------

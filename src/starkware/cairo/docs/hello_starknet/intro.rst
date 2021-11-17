@@ -4,15 +4,30 @@
 
 .. _starknet_intro:
 
-Writing StarkNet contracts
+Writing StarkNet Contracts
 ==========================
 
-In order to follow this tutorial you should have basic familiarity with writing
-Cairo code. For example, you can read the first few pages of the
-":ref:`Hello, Cairo <hello_cairo>`" tutorial.
-You should also :ref:`set up your environment <quickstart>` and make sure your
-installed Cairo version is at least ``0.4.0``
-(you can check your version by running ``cairo-compile --version``).
+In this exercise you will create, deploy, and interact with your first contract.
+
+.. topic:: Overview
+
+    :ref:`Examine a contract <first_contract>`
+
+    :ref:`Compile a contract <compile_contract>`
+
+    :ref:`Deploy a contract <Deploy>`
+
+    :ref:`Update and query the balance <update balance>`
+
+
+
+    **Prerequisites**
+
+        - :ref:`Set up your environment <quickstart>`.
+        - Ensure your Cairo version is at least ``0.4.0`` (you can check your version by running ``cairo-compile --version``).
+        - In order to follow this tutorial you should have basic familiarity with writing Cairo code. For example, read the first few pages of the ":ref:`Hello, Cairo <hello_cairo>`" tutorial.
+
+
 
 .. _first_contract:
 
@@ -55,13 +70,23 @@ Let's start by looking at the following StarkNet contract:
         return (res)
     end
 
+File declaration:
+*****************
+
 The first line, ``%lang starknet`` declares that this file should be read as a StarkNet contract
 file, rather than a regular Cairo program file. Trying to compile this file with ``cairo-compile``
 will result in a compilation error. Compiling StarkNet contracts should be done with the
 ``starknet-compile`` command as we shall see below.
 
+
+Add builtins:
+*************
+
 Next, we have the ``%builtins`` directive and two import statements. If you're not familiar with
 these types of statements, refer to the ":ref:`Hello, Cairo <hello_cairo>`" tutorial.
+
+Define storage variables:
+*************************
 
 The first new primitive that we see in the code is ``@storage_var``.
 Unlike a Cairo program, which is stateless, StarkNet contracts have a state,
@@ -77,6 +102,9 @@ To use this variable, we will use the ``balance.read()`` and ``balance.write()``
 which are automatically created by the ``@storage_var`` decorator.
 When a contract is deployed, all its storage cells are initialized to zero.
 In particular, all storage variables are initially zero.
+
+Write the function/s:
+*********************
 
 StarkNet contracts have no ``main()`` function. Instead, each function may be
 annotated as an external function (using the ``@external`` decorator).
@@ -98,6 +126,9 @@ The only difference is that the method is *annotated* as a method that only quer
 rather than modifying it.
 Note that in the current version this is not enforced by the compiler.
 
+Implicit arguments:
+*******************
+
 Consider the three implicit arguments: ``storage_ptr``, ``pedersen_ptr`` and ``range_check_ptr``:
 
 1.  You should be familiar with ``pedersen_ptr``, which allows to compute the Pedersen
@@ -113,8 +144,8 @@ Consider the three implicit arguments: ``storage_ptr``, ``pedersen_ptr`` and ``r
     This is also an implicit argument of ``read()`` and ``write()``
     (this time, for more obvious reasons).
 
-Programming without hints
-*************************
+Programming without hints:
+**************************
 
 If you are familiar with programming in Cairo,
 you are probably familiar with :ref:`hints <hints>`.
@@ -190,6 +221,8 @@ Let's examine the file ``contract_abi.json`` that was created during the contrac
 
 The ABI file contains a list of all the callable functions and their expected inputs.
 
+.. _Deploy:
+
 Deploy the contract on the StarkNet testnet
 -------------------------------------------
 
@@ -220,6 +253,8 @@ The output should look like:
 
 You can see here the address of your new contract. You'll need this address to interact with
 the contract.
+
+.. _update balance:
 
 Interact with the contract
 --------------------------
