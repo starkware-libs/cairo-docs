@@ -41,7 +41,6 @@ The punctuation marks used in Cairo are described below:
 *   ``; ap++`` Used to increment the allocation pointer ``ap`` by one after the preceeding
     instruction has finished.
 *   ``%`` Percent sign. Appears at the start of a directive, such as ``%builtins`` or ``%lang``.
-*   ``%[`` ``%]`` Represents python literals.
 *   ``%{`` ``%}`` Represents python hints.
 *   ``_`` (underscore, underline). A placeholder to handle values that are not used, such as an
     unused function return value.
@@ -152,9 +151,15 @@ information.
 
     local a = 3
 
-Any function that uses a local variable, must have the ``alloc_locals`` instruction at the beginning
-of the function. This instruction is responsible for allocating the memory cells used by the local
-variables.
+Any function that uses a local variable must have the ``alloc_locals`` statement, usually
+at the beginning of the function.
+This statement is responsible for allocating the memory cells used by the local
+variables within the function's scope.
+
+In addition, it allows the compiler to allocate local variables for references
+that would have otherwise been revoked (see :ref:`revoked_implicit_arguments`).
+In order to use local variables, without this feature, you can replace the ``alloc_locals``
+statement with ``ap += SIZEOF_LOCALS``.
 
 .. tested-code:: cairo syntax_alloc_locals
 

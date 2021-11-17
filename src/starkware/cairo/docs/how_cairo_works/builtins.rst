@@ -216,6 +216,8 @@ the pointer.
         assert runner.vm_memory[ap - 1] == \
             2592987851775965742543459319508348457290966253241455514226127639100457844774
 
+.. _revoked_implicit_arguments:
+
 Revoked implicit arguments
 --------------------------
 
@@ -266,10 +268,12 @@ The call to ``foo()`` revokes this reference since the compiler cannot track the
 to the ``ap`` register. On the other hand, the line ``hash2(1, 2)`` requires this reference,
 which is the reason we got that the error.
 
-To solve it, add the line ``local hash_ptr : HashBuiltin* = hash_ptr``
+To solve it, you can add the line ``local hash_ptr : HashBuiltin* = hash_ptr``
 which copies the value of the reference
 to a local variable (and rebinds the reference accordingly) just after the call to ``hash2(1, 2)``
-(where the revoked reference was defined):
+(where the revoked reference was defined).
+In fact, it suffices to add ``alloc_locals`` to the function, and the Cairo compiler will
+automatically add this instruction for you.
 
 .. tested-code:: cairo revoked_imp_args_fixed
 
@@ -287,6 +291,8 @@ to a local variable (and rebinds the reference accordingly) just after the call 
     func bar{hash_ptr : HashBuiltin*}():
         alloc_locals
         hash2(1, 2)
+        # You can skip the line below, and the compiler will add it automatically, because of
+        # the alloc_locals keyword.
         local hash_ptr : HashBuiltin* = hash_ptr
         foo(3)
         hash2(3, 4)
@@ -296,10 +302,9 @@ to a local variable (and rebinds the reference accordingly) just after the call 
 After the line ``local hash_ptr = hash_ptr`` the reference ``hash_ptr`` is relative to ``fp``
 (rather than ``ap``) so it's not revoked by the call to ``foo()``.
 
-It is possible that in future versions of Cairo the compiler will automatically add
-such statements, but for now you will have to add them manually.
-
-Let's consider another example:
+The compiler is not always able to add such instructions automatically, for example where
+if-blocks and jumps are involved. In such cases you will have to add them manually.
+Consider the following example:
 
 .. tested-code:: cairo revoked_imp_args_if
 
@@ -354,27 +359,34 @@ whether ``x == 0`` or not
     from starkware.cairo.lang.compiler.preprocessor.preprocessor_error import PreprocessorError
 
     try:
-        program = compile_cairo([(codes['revoked_imp_args'], 'test.cairo')], DEFAULT_PRIME)
+        program = compile_cairo([(codes["revoked_imp_args"], "test.cairo")], DEFAULT_PRIME)
     except PreprocessorError as exc:
         error_str = str(exc)
     else:
-        raise Exception('Exception was not raised during compilation of revoked_imp_args.')
+        raise Exception("Exception was not raised during compilation of revoked_imp_args.")
 
-    error_str = re.sub('.*hash\.cairo', 'hash.cairo', error_str)
-    assert error_str.strip() == codes['revoked_imp_args_err'].strip()
+    error_str = re.sub(".*hash\.cairo", "hash.cairo", error_str)
+    assert error_str.strip() == codes["revoked_imp_args_err"].strip()
 
     # Make sure the fixed version compiles successfully.
-    compile_cairo(codes['revoked_imp_args_fixed'], DEFAULT_PRIME)
+    fixed_code = codes["revoked_imp_args_fixed"]
+    compile_cairo(fixed_code, DEFAULT_PRIME)
+
+    # Same with the "local" line removed.
+    line_removed = fixed_code.replace(
+        "local hash_ptr : HashBuiltin* = hash_ptr", "")
+    assert line_removed != fixed_code, "Line is missing from the code example."
+    compile_cairo(line_removed, DEFAULT_PRIME)
 
     try:
-        program = compile_cairo([(codes['revoked_imp_args_if'], 'test.cairo')], DEFAULT_PRIME)
+        program = compile_cairo([(codes["revoked_imp_args_if"], "test.cairo")], DEFAULT_PRIME)
     except PreprocessorError as exc:
         pass
     else:
-        raise Exception('Exception was not raised during compilation of revoked_imp_args_if.')
+        raise Exception("Exception was not raised during compilation of revoked_imp_args_if.")
 
     # Make sure the fixed version compiles successfully.
-    compile_cairo(codes['revoked_imp_args_if_fixed'], DEFAULT_PRIME)
+    compile_cairo(codes["revoked_imp_args_if_fixed"], DEFAULT_PRIME)
 
 .. _layouts:
 

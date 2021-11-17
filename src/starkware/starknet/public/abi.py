@@ -1,6 +1,7 @@
 from eth_hash.auto import keccak
 
 from starkware.cairo.lang.vm.crypto import pedersen_hash
+from starkware.python.utils import from_bytes
 
 MASK_250 = 2 ** 250 - 1
 
@@ -11,7 +12,6 @@ ADDR_BOUND = 2 ** 251 - MAX_STORAGE_ITEM_SIZE
 
 # OS context offset.
 SYSCALL_PTR_OFFSET = 0
-STORAGE_PTR_OFFSET = 1
 
 
 def starknet_keccak(data: bytes) -> int:
@@ -19,7 +19,7 @@ def starknet_keccak(data: bytes) -> int:
     A variant of eth-keccak that computes a value that fits in a StarkNet field element.
     """
 
-    return int.from_bytes(keccak(data), "big") & MASK_250
+    return from_bytes(keccak(data)) & MASK_250
 
 
 def get_selector_from_name(func_name: str) -> int:
@@ -30,7 +30,7 @@ def get_storage_var_address(var_name: str, *args) -> int:
     """
     Returns the storage address of a StarkNet storage variable given its name and arguments.
     """
-    res = starknet_keccak(var_name.encode("utf8"))
+    res = starknet_keccak(var_name.encode("ascii"))
 
     for arg in args:
         assert isinstance(arg, int), f"Expected arguments to be integers. Found: {arg}."

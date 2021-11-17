@@ -3,13 +3,14 @@ from abc import ABC, abstractmethod
 from typing import Generic, Iterator, Optional, Type, TypeVar
 
 from starkware.python.object_utils import generic_object_repr
+from starkware.starkware_utils.commitment_tree.binary_fact_tree import BinaryFactDict
 from starkware.starkware_utils.config_base import Config
 from starkware.storage.storage import FactFetchingContext
 
-TStateSelector = TypeVar('TStateSelector', bound='StateSelectorBase')
-TCarriedState = TypeVar('TCarriedState', bound='CarriedStateBase')
-TSharedState = TypeVar('TSharedState', bound='SharedStateBase')
-TGeneralConfig = TypeVar('TGeneralConfig', bound=Config)
+TStateSelector = TypeVar("TStateSelector", bound="StateSelectorBase")
+TCarriedState = TypeVar("TCarriedState", bound="CarriedStateBase")
+TSharedState = TypeVar("TSharedState", bound="SharedStateBase")
+TGeneralConfig = TypeVar("TGeneralConfig", bound=Config)
 
 
 class StateSelectorBase(ABC):
@@ -96,8 +97,9 @@ class CarriedStateBase(Generic[TCarriedState], ABC):
         Fills missing entries from another CarriedState instance.
         """
         state_selector = self.state_selector
-        assert state_selector & other.state_selector == type(state_selector).empty(), \
-            'Selectors must be disjoint.'
+        assert (
+            state_selector & other.state_selector == type(state_selector).empty()
+        ), "Selectors must be disjoint."
         self._fill_missing(other=other)
 
     @abstractmethod
@@ -135,6 +137,7 @@ class CarriedStateBase(Generic[TCarriedState], ABC):
     @contextlib.contextmanager
     def copy_and_apply(self) -> Iterator[TCarriedState]:
         copied_state = self._copy()
+        # The exit logic will not be called in case an exception is raised inside the context.
         yield copied_state
         copied_state._apply()  # Apply to self.
 
@@ -150,8 +153,8 @@ class SharedStateBase(ABC):
     @classmethod
     @abstractmethod
     async def empty(
-            cls: Type[TSharedState], ffc: FactFetchingContext,
-            general_config: Config) -> TSharedState:
+        cls: Type[TSharedState], ffc: FactFetchingContext, general_config: Config
+    ) -> TSharedState:
         """
         Returns an empty state. This is called before creating very first batch.
         """
@@ -164,12 +167,16 @@ class SharedStateBase(ABC):
 
     @abstractmethod
     async def get_filled_carried_state(
-            self: TSharedState, ffc: FactFetchingContext,
-            state_selector: StateSelectorBase) -> CarriedStateBase:
+        self: TSharedState, ffc: FactFetchingContext, state_selector: StateSelectorBase
+    ) -> CarriedStateBase:
         pass
 
     @abstractmethod
     async def apply_state_updates(
-            self: TSharedState, ffc: FactFetchingContext, previous_carried_state: CarriedStateBase,
-            current_carried_state: CarriedStateBase) -> TSharedState:
+        self: TSharedState,
+        ffc: FactFetchingContext,
+        previous_carried_state: CarriedStateBase,
+        current_carried_state: CarriedStateBase,
+        facts: Optional[BinaryFactDict] = None,
+    ) -> TSharedState:
         pass

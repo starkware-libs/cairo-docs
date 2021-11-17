@@ -2,8 +2,16 @@ from contextlib import contextmanager
 from typing import List, Optional
 
 from starkware.cairo.lang.compiler.ast.code_elements import (
-    CodeBlock, CodeElementDirective, CodeElementFunction, CodeElementScoped, CodeElementWith,
-    CommentedCodeElement, LangDirective)
+    CodeBlock,
+    CodeElementDirective,
+    CodeElementFunction,
+    CodeElementIf,
+    CodeElementScoped,
+    CodeElementWith,
+    CodeElementWithAttr,
+    CommentedCodeElement,
+    LangDirective,
+)
 from starkware.cairo.lang.compiler.ast.module import CairoFile, CairoModule
 from starkware.cairo.lang.compiler.ast.node import AstNode
 from starkware.cairo.lang.compiler.error_handling import LocationError
@@ -29,10 +37,10 @@ class Visitor:
         Visits an object by calling its type's 'visit_{type}'. If no corresponding visit function
         is found, calls '_visit_default'.
         """
-        return getattr(self, f'visit_{type(obj).__name__}', self._visit_default)(obj)
+        return getattr(self, f"visit_{type(obj).__name__}", self._visit_default)(obj)
 
     def visit_CodeElementFunction(self, elm: CodeElementFunction):
-        if elm.element_type == 'struct':
+        if elm.element_type == "struct":
             return elm
 
         new_scope = self.current_scope + elm.name
@@ -48,8 +56,9 @@ class Visitor:
             )
 
     def visit_CairoModule(self, module: CairoModule):
-        with self.scoped(module.module_name, parent=module), \
-                self.with_file_lang(get_lang_from_file(module.cairo_file)):
+        with self.scoped(module.module_name, parent=module), self.with_file_lang(
+            get_lang_from_file(module.cairo_file)
+        ):
             return CairoModule(
                 cairo_file=CairoFile(code_block=self.visit(module.cairo_file.code_block)),
                 module_name=module.module_name,
@@ -63,13 +72,35 @@ class Visitor:
             )
 
     def visit_CodeBlock(self, elm: CodeBlock):
-        return CodeBlock(code_elements=[
-            CommentedCodeElement(
-                code_elm=self.visit(commented_code_elm.code_elm),
-                comment=commented_code_elm.comment,
-                location=commented_code_elm.location)
-            for commented_code_elm in elm.code_elements
-        ])
+        return CodeBlock(
+            code_elements=[
+                CommentedCodeElement(
+                    code_elm=self.visit(commented_code_elm.code_elm),
+                    comment=commented_code_elm.comment,
+                    location=commented_code_elm.location,
+                )
+                for commented_code_elm in elm.code_elements
+            ]
+        )
+
+    def visit_CodeElementIf(self, elm: CodeElementIf):
+        return CodeElementIf(
+            condition=elm.condition,
+            main_code_block=self.visit(elm.main_code_block),
+            else_code_block=(
+                self.visit(elm.else_code_block) if elm.else_code_block is not None else None
+            ),
+            label_neq=elm.label_neq,
+            label_end=elm.label_end,
+            location=elm.location,
+        )
+
+    def visit_CodeElementWithAttr(self, elm: CodeElementWithAttr):
+        return CodeElementWithAttr(
+            attribute_name=elm.attribute_name,
+            attribute_value=elm.attribute_value,
+            code_block=self.visit(elm.code_block),
+        )
 
     def visit_CodeElementWith(self, elm: CodeElementWith):
         return CodeElementWith(identifiers=elm.identifiers, code_block=self.visit(elm.code_block))
@@ -79,7 +110,8 @@ class Visitor:
         Default behavior for visitor if 'obj' type isn't handled. By default, raise exception.
         """
         raise NotImplementedError(
-            f'No handler found for type {type(obj).__name__} in {type(self).__name__}.')
+            f"No handler found for type {type(obj).__name__} in {type(self).__name__}."
+        )
 
     @contextmanager
     def scoped(self, new_scope: ScopedName, parent: Optional[AstNode]):
@@ -128,6 +160,6 @@ def get_lang_from_file(cairo_file: CairoFile) -> Optional[str]:
         if not isinstance(directive, LangDirective):
             continue
         if lang is not None:
-            raise VisitorError('Found two %lang directives', location=code_elm.location)
+            raise VisitorError("Found two %lang directives", location=code_elm.location)
         lang = directive.name
     return lang
