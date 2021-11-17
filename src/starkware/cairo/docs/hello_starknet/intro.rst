@@ -1,3 +1,7 @@
+.. proofedDate null
+
+.. comment Restructure suggested. toc/overview will assist in page breakdown and nav.
+
 .. _starknet_intro:
 
 Writing StarkNet contracts
