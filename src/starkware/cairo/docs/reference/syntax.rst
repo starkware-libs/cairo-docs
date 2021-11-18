@@ -523,7 +523,7 @@ the convention:
 For more information about builtins see :ref:`builtins`, and the ``cairo_builtins``
 section in the common library.
 
-..  TODO (perama, 06/06/21): Add link to common library once merged.
+..  TODO(perama, 06/06/2021): Add link to common library once merged.
     (:ref:`common_library_cairo_builtins` )
 
 Segments
@@ -644,4 +644,3 @@ Consider the function ``foo()`` that returns two values.
     let (local a, _) = foo()
 
 For more information see :ref:`return_values_unpacking`.
-

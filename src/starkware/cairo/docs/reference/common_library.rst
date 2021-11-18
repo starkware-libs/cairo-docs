@@ -390,11 +390,11 @@ implicit argument ``range_check_ptr``.
 
 The function accepts the arguments:
 
--  ``array_ptr``, a pointer to a sorted array.
--  ``elm_size``, the size (in memory cells) of each element in the array.
--  ``n_elms``, the number of elements in the array.
--  ``key``, the key lower bound (the key is assumed to be the first member of
-   each element in the array).
+-   ``array_ptr``, a pointer to a sorted array.
+-   ``elm_size``, the size (in memory cells) of each element in the array.
+-   ``n_elms``, the number of elements in the array.
+-   ``key``, the key lower bound (the key is assumed to be the first member of
+    each element in the array).
 
 The function returns:
 
@@ -422,17 +422,17 @@ and ``success=0``. The function requires the implicit argument ``range_check_ptr
 
 The function accepts the arguments:
 
--  ``array_ptr``, the pointer to a sorted array.
--  ``elm_size``, the size (in memory cells) of each element in the array.
--  ``n_elms``, the number of elements in the array.
--  ``key``, the key to look for (the key is assumed to be the first member of
-   each element in the array).
+-   ``array_ptr``, the pointer to a sorted array.
+-   ``elm_size``, the size (in memory cells) of each element in the array.
+-   ``n_elms``, the number of elements in the array.
+-   ``key``, the key to look for (the key is assumed to be the first member of
+    each element in the array).
 
 The function returns:
 
--  ``elm_ptr``, the pointer to the first element whose first member is ``key``,
-   namely ``[elm_ptr] = key``.
--  ``success``, a ``felt`` which equals ``1`` if the key was found and ``0`` otherwise.
+-   ``elm_ptr``, the pointer to the first element whose first member is ``key``,
+    namely ``[elm_ptr] = key``.
+-   ``success``, a ``felt`` which equals ``1`` if the key was found and ``0`` otherwise.
 
 Continuing with the same example, since the array is sorted, searching for the key
 ``5`` leads to the last element.
