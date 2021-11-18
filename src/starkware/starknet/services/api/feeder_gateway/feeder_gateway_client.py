@@ -100,6 +100,23 @@ class FeederGatewayClient(EverestFeederGatewayClient):
         )
         return json.loads(raw_response)
 
+    async def get_block_hash_by_id(self, block_id: int) -> str:
+        raw_response = await self._send_request(
+            send_method="GET",
+            uri=f"/get_block_hash_by_id?blockId={block_id}",
+        )
+        return json.loads(raw_response)
+
+    async def get_block_id_by_hash(self, block_hash: CastableToHash) -> int:
+        raw_response = await self._send_request(
+            send_method="GET",
+            uri=(
+                "/get_block_id_by_hash?"
+                f"blockHash={format_hash(hash_value=block_hash, hash_field=fields.BlockHashField)}"
+            ),
+        )
+        return json.loads(raw_response)
+
 
 def format_hash(hash_value: CastableToHash, hash_field: RangeValidatedField) -> str:
     if isinstance(hash_value, int):

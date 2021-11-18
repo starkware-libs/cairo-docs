@@ -436,11 +436,12 @@ same return value.
 Library imports
 ---------------
 
-Library functions are imported at the top of the file or right below the ``%builtins`` directive if
-it is used. The statement consists of the module name and the functions to ``import`` from it.
-Multiple functions from the same library can be separated by commas. Functions from different libraries
-are imported on different lines. Cairo searches each module in a default directory path and in
-any additional paths specified at compile time. See :ref:`import_search_path` for more information.
+Library functions are imported at the top of the file or right below the ``%builtins``
+directive if it is used. The statement consists of the module name and the functions to
+``import`` from it. Multiple functions from the same library can be separated by commas.
+Functions from different libraries are imported on different lines. Cairo searches each
+module in a default directory path and in any additional paths specified at compile time.
+See :ref:`import_search_path` for more information.
 
 .. tested-code:: cairo syntax_library_imports
 
@@ -448,6 +449,80 @@ any additional paths specified at compile time. See :ref:`import_search_path` fo
     from starkware.cairo.common.math import (
         assert_not_zero, assert_not_equal)
     from starkware.cairo.common.registers import get_ap
+
+Builtins
+--------
+
+Builtin declarations appear at the top of the Cairo code file. They are declared with the
+``%builtins`` directive, followed by the name of the builtins.
+A builtin is utilized by writing the inputs to a dedicated memory segment accessed via the
+builtin pointer. The builtin directive adds those pointers as
+parameters to main (abstracted in StarkNet contracts), which can then be passed to any
+function making use of them.
+
+Pointer names follow the convention ``<builtin name>_ptr``
+and pointer types can be found in the ``cairo_builtins``
+module of the common library. The builtins, and their respective pointer expressions and
+pointer types are are listed below.
+
+-   ``output``, for writing program output which appears explicitly in an execution proof.
+    Access with a pointer to type ``felt``.
+-   ``pedersen``, for computing the Pedersen hash function. Access with a pointer to
+    type ``HashBuiltin``.
+-   ``range_check``, for checking that a field element is within a range ``[0, 2^128)``,
+    and doing various comparisons.
+    Due to historical reasons, unlike ``output_ptr``, the ``range_check_ptr`` passed as an
+    argument to main is of type ``felt`` rather than ``felt*``.
+-   ``ecdsa``, for verifying ECDSA signatures. Access with a pointer to type ``SignatureBuiltin``.
+-   ``bitwise``, for performing bitwise operations on felts. Access with a pointer to
+    type ``BitwiseBuiltin``.
+
+Below is a function, ``foo()``, which accepts all five builtins, illustrating their
+different pointers and pointer types. Note that the pointers must be passed in the
+same order that they appear in the ``%builtins`` directive and that the order follows
+the convention:
+
+1. ``output``.
+2. ``pedersen``.
+3. ``range_check``.
+4. ``ecdsa``.
+5. ``bitwise``.
+
+.. tested-code:: cairo syntax_builtins
+
+    %builtins output pedersen range_check ecdsa bitwise
+
+    from starkware.cairo.common.cairo_builtins import (
+        BitwiseBuiltin, HashBuiltin, SignatureBuiltin)
+
+    func main{
+            output_ptr : felt*, pedersen_ptr : HashBuiltin*,
+            range_check_ptr, ecdsa_ptr : SignatureBuiltin*,
+            bitwise_ptr : BitwiseBuiltin*}():
+        # Code body here.
+        return ()
+    end
+
+For more information about builtins see :ref:`builtins`, and the ``cairo_builtins``
+section in the common library.
+
+..  TODO(perama, 06/06/2021): Add link to common library once merged.
+    (:ref:`common_library_cairo_builtins` )
+
+Segments
+--------
+
+When running the Cairo code, the memory is separated into different sections called segments.
+For example, each builtin occupies a different memory segment. The memory locations are
+designated by two numbers, a segment index and an offset in the segment.
+In this format, these numbers are separated by a colon ``:``.
+When the program ends, the segments are glued and each value of the form ``*:*``
+is replaced with a number. See :ref:`segments` for more information. Some examples
+of segments and their interpretation are listed below:
+
+* ``0:3``, memory address 3 within segment 0.
+* ``1:7``, memory address 7 within segment 1.
+* ``2:12``, memory address 12 within segment 2.
 
 Program input
 -------------
@@ -464,3 +539,91 @@ See :ref:`program_inputs` for more information.
         # provided in the .json file.
         a = program_input['user_ids']
     %}
+
+Program output
+--------------
+
+Cairo programs can share information with the verifier using outputs. Whenever the program
+wishes to communicate information to the verifier, it can do so by writing it to a designated
+memory segment which can be accessed by using the output builtin. Instead of directly handling
+the output pointer, one can call the ``serialize_word()`` library function which abstracts
+this from the user. Note that in real applications there is only need to output information
+if it's meaningful in some way for the verifier. See :ref:`here <program_output>` for more
+information.
+
+The following program outputs two values, 7 and 13.
+
+.. tested-code:: cairo syntax_program_output
+
+    %builtins output
+
+    from starkware.cairo.common.serialize import serialize_word
+
+    func main{output_ptr : felt*}():
+        serialize_word(7)
+        serialize_word(13)
+        return ()
+    end
+
+The following program excerpt outlines how a program may output a struct.
+
+.. tested-code:: cairo syntax_program_output_struct
+
+    %builtins output
+
+    struct MyStruct:
+        member a : felt
+        member b : felt
+    end
+
+    func main{output_ptr : felt*}():
+        let output = cast(output_ptr, MyStruct*)
+        assert [output] = MyStruct(a=3, b=4)
+        let output_ptr = output_ptr + MyStruct.SIZE
+        return ()
+    end
+
+Hints
+-----
+
+Python code can be invoked with the ``%{`` ``%}`` block called a hint, which is executed right
+before the next Cairo instruction. The hint can interact
+with the program's variables/memory as shown in the following code sample.
+Note that the hint is not actually part of the Cairo program,
+and can thus be replaced by a malicious prover. We can run a Cairo program with
+the ``--program_input`` flag, which allows providing a json input file that
+can be referenced inside a hint.
+
+.. tested-code:: cairo syntax_hints
+
+    alloc_locals
+    %{ memory[ap] = 100 %}  # Assign to memory.
+    [ap] = [ap]; ap++  # Increment ap after using it in the hint.
+    assert [ap - 1] = 100  # Assert the value has some property.
+
+    local a
+    let b = 7
+    %{
+        # Assigns the value '9' to the local variable 'a'.
+        ids.a = 3 ** 2
+        c = ids.b * 2  # Read a reference inside a hint.
+    %}
+
+Note that you can access the address of a pointer to a struct using ``ids.struct_ptr.address_``
+and you can use ``memory[addr]`` for the value of the memory cell at address ``addr``.
+
+Unpacking
+---------
+
+The values returned by a function can be ignored, or bound, to either a reference or local
+variable. The ``_`` character is used to handle returned values that are ignored.
+Consider the function ``foo()`` that returns two values.
+
+.. tested-code:: cairo syntax_unpacking
+
+    let (a, b) = foo()
+    let (_, b) = foo()
+    let (local a, local b) = foo()
+    let (local a, _) = foo()
+
+For more information see :ref:`return_values_unpacking`.

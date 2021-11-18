@@ -13,10 +13,10 @@ within each library are outlined under the relevant library heading.
 
 -   :ref:`common_library_alloc`
 -   :ref:`common_library_bitwise`
+-   :ref:`common_library_cairo_builtins`
 -   :ref:`common_library_find_element`
 
 ..  TODO(perama, 16/06/2021): Move the link above when the section is complete.
-    -   :ref:`common_library_cairo_builtins`
     -   :ref:`common_library_default_dict`
     -   :ref:`common_library_dict`
     -   :ref:`common_library_dict_access`
@@ -95,15 +95,70 @@ arrays. As more elements are added, more memory will be allocated.
     # Allocate a memory segment for an array of structs.
     let (local struct_array_ptr : MyStruct*) = alloc()
 
-.. .. _common_library_cairo_builtins:
+.. _common_library_cairo_builtins:
 
-..  ``cairo_builtins``
-..  ------------------
+``cairo_builtins``
+------------------
 
-..  TODO(perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's
-    `common_cairo_builtins <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/cairo_builtins.cairo>`_
-    module.
+This section refers to the common library's
+`cairo_builtins <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/cairo_builtins.cairo>`_
+module.
+
+``BitwiseBuiltin``
+******************
+
+A struct specifying the bitwise builtin memory structure.
+This struct is used by functions from the common library that use the ``bitwise`` builtin.
+For example, the ``bitwise_xor()`` function accepts an implicit
+argument of type ``BitWiseBuiltin*``, which is used internally to track the next available
+builtin instance. See the function
+`here <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/bitwise.cairo>`__.
+
+The struct has the following members of type ``felt``:
+
+-   ``x``, the first oprand.
+-   ``y``, the second operand.
+-   ``x_and_y``, the result of bitwise AND operation on x and y.
+-   ``x_xor_y``, the result of bitwise XOR operation on x and y.
+-   ``x_or_y``, the result of bitwise OR operation on x and y.
+
+A pointer to the ``bitwise`` builtin, ``bitwise_ptr``, has the type ``BitWiseBuiltin*``.
+
+
+``HashBuiltin``
+***************
+
+A struct specifying the hash builtin memory structure.
+This struct is used by functions from the common library that use a hash builtin,
+such as the ``pedersen`` builtin. For example, the ``hash2()`` function accepts an implicit
+argument of type ``HashBuiltin*``, which is used internally to track the next available
+builtin instance. See the function
+`here <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/hash.cairo>`__.
+
+The struct has the following members of type ``felt``:
+
+-   ``x``, the first input being hashed.
+-   ``y``, the second input being hashed.
+-   ``result``, the hash of ``x`` and ``y``.
+
+A pointer to the ``pedersen`` builtin, ``pedersen_ptr``, has the type ``HashBuiltin*``.
+
+``SignatureBuiltin``
+********************
+
+A struct specifying the signature builtin memory structure.
+This struct is used by functions from the common library that use a signature builtin,
+such as the ``ecdsa`` builtin. For example, the ``verify_ecdsa_signature()`` function
+accepts an implicit argument of type ``SignatureBulitin*``, which is used internally
+to track the next available builtin instance. See the function
+`here <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/signature.cairo>`__.
+
+The struct has the following members of type ``felt``:
+
+-   ``pub_key``, an ECDSA public key.
+-   ``message``, a message signed by the ``pub_key``.
+
+A pointer to the ``ecdsa`` builtin, ``ecdsa_ptr``, has the type ``SignatureBuiltin*``.
 
 .. _common_library_bitwise:
 
@@ -258,7 +313,6 @@ This section refers to the common library's
 `find_element <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/find_element.cairo>`_
 module.
 
-
 ``find_element()``
 ******************
 
@@ -325,6 +379,77 @@ program will fail when the key is not present in the array.
         assert element_ptr.b = 6
         return ()
     end
+
+``search_sorted_lower()``
+*************************
+
+Returns the pointer to the first element in the array whose first field is at least ``key``.
+The array elements must be sorted by the first field in ascending order. If no such item exists,
+it returns a pointer to the end of the array (after the last item). The function requires the
+implicit argument ``range_check_ptr``.
+
+The function accepts the arguments:
+
+-   ``array_ptr``, a pointer to a sorted array.
+-   ``elm_size``, the size (in memory cells) of each element in the array.
+-   ``n_elms``, the number of elements in the array.
+-   ``key``, the key lower bound (the key is assumed to be the first member of
+    each element in the array).
+
+The function returns:
+
+-  ``elm_ptr``, the pointer to the first element whose key is greater or equal to the lower bound.
+
+Continuing with the example above, with lower bound ``2``, the middle element is returned.
+
+.. tested-code:: cairo library_search_sorted_lower
+
+    from starkware.cairo.common.find_element import (
+        search_sorted_lower)
+
+    let (smallest_ptr : MyStruct*) = search_sorted_lower(
+        array_ptr=array_ptr, elm_size=2, n_elms=3, key=2)
+    assert smallest_ptr.a = 3
+    assert smallest_ptr.b = 4
+
+``search_sorted()``
+*******************
+
+Returns both the pointer to the first element in the array whose key matches a specified key, and
+an indicator for the success of the search. The array elements must be sorted by the
+first field in ascending order. If no such item exists, returns an undefined pointer,
+and ``success=0``. The function requires the implicit argument ``range_check_ptr``.
+
+The function accepts the arguments:
+
+-   ``array_ptr``, the pointer to a sorted array.
+-   ``elm_size``, the size (in memory cells) of each element in the array.
+-   ``n_elms``, the number of elements in the array.
+-   ``key``, the key to look for (the key is assumed to be the first member of
+    each element in the array).
+
+The function returns:
+
+-   ``elm_ptr``, the pointer to the first element whose first member is ``key``,
+    namely ``[elm_ptr] = key``.
+-   ``success``, a ``felt`` which equals ``1`` if the key was found and ``0`` otherwise.
+
+Continuing with the same example, since the array is sorted, searching for the key
+``5`` leads to the last element.
+
+.. tested-code:: cairo library_search_sorted
+
+    from starkware.cairo.common.find_element import search_sorted
+
+    let (first_ptr : MyStruct*, success_val) = search_sorted(
+        array_ptr=array_ptr, elm_size=2, n_elms=3, key=5)
+    assert success_val = 1
+    assert first_ptr.a = 5
+    assert first_ptr.b = 6
+    # There is no element with key=2.
+    let (first_ptr : MyStruct*, success_val) = search_sorted(
+        array_ptr=array_ptr, elm_size=2, n_elms=3, key=2)
+    assert success_val = 0
 
 .. .. _common_library_hash:
 
