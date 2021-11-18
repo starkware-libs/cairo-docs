@@ -1,6 +1,6 @@
 .. proofedDate null
 
-.. comment null
+.. comment {wip Note that if you use ``get_caller_address()`` in a function ``foo()`` that was called by another function ``bar()`` within your contract, it will still return the address of the contract that invoked ``bar()`` (or 0 if it was invoked by a user).} > I am confused by the logic here can a user be the caller from within your own contract acting like a function? IF not, then the {(or 0 if it was invoked by a user)} is redundant.
 
 Calling another contract
 ========================
@@ -19,7 +19,7 @@ Calling another contract
 
 .. _contract function:
 
-A contract function may invoke an external function of another contract. In order to call this contract from another contract, define an interface by copying the declarations of the external functions:
+A contract function may invoke an external function of another contract. To call this contract from another contract, define an interface by copying the declarations of the external functions:
 
 .. tested-code:: cairo call_contract_interface
 
@@ -32,8 +32,7 @@ A contract function may invoke an external function of another contract. In orde
         end
     end
 
-Note that the body of the functions and the implicit arguments should be removed
-from the definitions.
+Note that the body of the functions and the implicit arguments should be removed from the definitions.
 
 You can use ``IBalanceContract.increase_balance()`` and ``IBalanceContract.get_balance()``
 to invoke these functions on another contract.
@@ -64,8 +63,7 @@ Note that calling a function of another contract requires passing one additional
 before the function's original arguments -- the address of the called contract.
 For example, ``IBalanceContract.increase_balance`` gets two arguments:
 ``contract_address`` and ``amount`` (rather than just ``amount``).
-In addition, the ``syscall_ptr``, the ``storage_ptr`` and the ``range_check_ptr`` implicit arguments
-are required.
+In addition, the ``syscall_ptr``, the ``storage_ptr``, and the ``range_check_ptr`` implicit arguments are required.
 
 Create a file named ``proxy_contract.cairo`` containing the interface declaration and the two
 functions ``call_increase_balance()`` and ``call_get_balance()``,
@@ -89,7 +87,7 @@ This will increase the balance stored in ``BALANCE_CONTRACT``.
 Note that in our case, ``PROXY_CONTRACT`` does not have a storage of its own.
 
 Wait until the transaction is added to a block, and then
-check the balance using the following two ways:
+check the balance using one of the following methods:
 
 1.  Directly through ``BALANCE_CONTRACT``
 
@@ -117,9 +115,7 @@ Both commands should return ``10000``.
 Getting the caller address
 --------------------------
 
-You can retrieve the address of the contract that invoked your function
-(if the function was called by another contract)
-using the ``get_caller_address()`` library function:
+If your function was called by another contract, you can retrieve the address of that contract using the ``get_caller_address()`` library function:
 
 .. tested-code:: cairo get_caller_address
 
@@ -135,9 +131,8 @@ the function returns 0.
 Consider what would happen if you added a call to ``get_caller_address()``
 to the ``increase_balance()`` function of ``BALANCE_CONTRACT``:
 It would return ``PROXY_CONTRACT`` if called from
-``PROXY_CONTRACT``, and 0 if called directly.
+``PROXY_CONTRACT`` and 0 if called directly.
 
-Note that if you use ``get_caller_address()`` in a function ``foo()`` that was called by
-another function ``bar()`` within your contract,
+Note that if you use ``get_caller_address()`` in a function ``foo()`` that was called by another function ``bar()`` within your contract,
 it will still return the address of the contract that invoked ``bar()``
 (or 0 if it was invoked by a user).

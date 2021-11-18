@@ -1,6 +1,10 @@
-.. proofedDate null
+.. proofedDate proof done pre PR approval
 
 .. comment
+
+.. suggestedEdit1 {wip ECDSA this is the only instance in the Hello Stark tutorial where ECDSA is referred to in caps} > consider applying one of the other usages [``ecdsa`` builtin or just ecdsa signature]
+
+.. suggestedEdit2 {wip Similarly, change the code of ``get_balance()``.} > Similary to the verify_ecdsa_signature behaving like an asset OR similar to the code change for increase_balance == Link is lost this far on Consider clarifying
 
 
 .. _user_authentication:
@@ -26,13 +30,13 @@ Adding User Authentication
 Storage maps
 ------------
 
-Suppose that instead of maintaining one global variable ``balance``,
-we would like to have a balance for each user (users will be identified by
-their STARK public keys).
+Suppose that, instead of maintaining one global variable ``balance``,
+we would like to have a balance for each user (as identified by
+their STARK public key).
 
-Our first task will be to change the ``balance`` storage variable
+Our first task is to change the ``balance`` storage variable
 to a map from public key (user) to balance
-(instead of a single value). This can be done by simply adding an argument:
+(instead of a single value). This can be achieved by adding an argument:
 
 .. tested-code:: cairo balance_map
 
@@ -41,8 +45,7 @@ to a map from public key (user) to balance
     func balance(user : felt) -> (res : felt):
     end
 
-In fact, the ``@storage_var`` decorator allows you to add multiple arguments to create
-even more complicated maps.
+In fact, the ``@storage_var`` decorator allows you to add multiple arguments to create even more complicated maps.
 The functions ``balance.read()`` and ``balance.write()`` will now have the following signatures:
 
 .. code-block:: cairo
@@ -69,13 +72,11 @@ We now have to modify ``increase_balance`` to do the following:
 1.  Write to the appropriate ``balance`` entry.
 2.  Verify that the user has signed on this change.
 
-For the signature, we will use the STARK-friendly ECDSA signature,
-which is natively supported in Cairo.
-For technical details about this cryptographic primitive see
+For the signature, we will use the STARK-friendly ECDSA signature, which is natively supported in Cairo.
+For technical details about this cryptographic primitive, see
 `STARK Curve <https://docs.starkware.co/starkex-docs/crypto/stark-curve>`_.
 
-We will need the ``ecdsa`` builtin to verify the signature, so we will change the ``%builtins``
-line to:
+We will need the ``ecdsa`` builtin to verify the signature, so we will change the ``%builtins`` line to:
 
 .. tested-code:: cairo user_auth_builtins
 
@@ -118,16 +119,16 @@ Next, we will change the code of ``increase_balance()`` to:
         return ()
     end
 
-``verify_ecdsa_signature`` behaves like an assert -- in case the signature is invalid, the function
-will revert the entire transaction.
+``verify_ecdsa_signature`` behaves like an assert -- in case the signature is invalid, the function will revert the entire transaction.
 
-Note that we don't handle replay attacks here -- once the user signs a transaction
-someone may call it multiple times. One way to prevent replay attacks is to
-add a ``nonce`` argument to ``increase_balance``, change the signed message to
-the Pedersen hash of the nonce and the amount and define
-another storage map from the signed message to a flag (either 0 or 1)
-indicating whether or not that transaction was executed by the system.
-Future versions of StarkNet will handle user authentication and prevent replay attack.
+.. topic:: Note
+
+    Note that we don't handle replay attacks here. In a replay, once the user signs a transaction, someone may call it multiple times.
+    One way to prevent replay attacks is to add a ``nonce`` argument to ``increase_balance``, change the signed message to
+    the Pedersen hash of the nonce and the amount, and define
+    another storage map from the signed message to a flag (either 0 or 1) -- indicating whether or not that transaction was executed by the system.
+    Future versions of StarkNet will handle user authentication and prevent replay attacks.
+
 
 Similarly, change the code of ``get_balance()``. Here we don't need to verify the signature
 (since StarkNet's storage is not private anyway),
@@ -162,7 +163,9 @@ Compile and deploy the file:
 
     starknet deploy --contract user_auth_compiled.json
 
-Don't forget to set ``STARKNET_NETWORK=alpha`` before running ``starknet deploy``.
+.. topic:: Important
+
+    Don't forget to set ``STARKNET_NETWORK=alpha`` before running ``starknet deploy``.
 
 .. _update a balance:
 
@@ -216,8 +219,7 @@ You can query the transaction status:
 
     starknet tx_status --id TX_ID
 
-Finally, after the transaction is executed (status ``PENDING`` or ``ACCEPTED_ONCHAIN``)
-we may query the user's balance.
+Finally, after the transaction is executed (status ``PENDING`` or ``ACCEPTED_ONCHAIN``), we may query the user's balance.
 
 .. tested-code:: bash user_auth_call
 
@@ -233,11 +235,8 @@ You should get:
 
     4321
 
-Note that if you want to use the :ref:`get_storage_at` CLI command to query the balance of a
-specific user, you can no longer compute the relevant key by only supplying the name of the storage
-variable. That is because the balance storage variable now requires an additional argument, namely,
-the user key. Hence, you will need to supply the additional arguments when acquiring the key used in
-``get_storage_at``. In our case, this translates to the following python code:
+Note that if you want to use the :ref:`get_storage_at` CLI command to query the balance of a specific user, you can no longer compute the relevant key by only supplying the name of the storage variable. That is because the balance storage variable now requires an additional argument, namely,
+the user key. Hence, you will need to supply the additional arguments when acquiring the key used in ``get_storage_at``. In our case, this translates to the following python code:
 
 .. tested-code:: python user_auth_balance_key
 
@@ -288,12 +287,8 @@ After this, when querying the transaction status, you should get:
     }
 
 
-This indicates that the transaction was reverted due to an invalid signature.
-Notice that the error message entry states that the error location is unknown. This is because
-the StarkNet network is not aware of the source code and debug information of a contract.
-To retrieve the error location and reconstruct the traceback, add the path to the relevant
-compiled contract in the transaction status query, using the ``--contract`` argument. To better
-display the error (and only it), add the ``--error_message`` flag as well:
+This indicates that the transaction was reverted due to an invalid signature. Notice that the error message entry states that the error location is unknown. This is because the StarkNet network is not aware of the contract's source code and debug information.
+To retrieve the error location and reconstruct the traceback, add the path to the relevant compiled contract in the transaction status query, using the ``--contract`` argument. To better display the error (and only it), add the ``--error_message`` flag as well:
 
 .. tested-code:: bash user_auth_get_error_message
 
@@ -302,7 +297,7 @@ display the error (and only it), add the ``--error_message`` flag as well:
         --contract user_auth_compiled.json \
         --error_message
 
-The output should look like:
+The output should resemble this:
 
 .. tested-code:: none user_auth_get_error_message_output
 

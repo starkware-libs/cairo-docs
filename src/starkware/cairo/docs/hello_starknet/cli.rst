@@ -1,6 +1,8 @@
-.. proofedDate null
+.. proofedDate proof done pre PR approval
 
 .. comments null
+
+.. suggestedEdit1 {wip "transaction_id": 1, looks like the actualy property and its value, so why do we SHOUT it in the bash command as TRANSACTION_ID ? Is the capitalization genuine?} > If Not Consider a less shouty form [output is transaction_id, seems nice!]
 
 More CLI commands
 =================
@@ -25,13 +27,13 @@ More CLI commands
 get_transaction
 ---------------
 
-To get transaction information run the following:
+To get transaction information, run the following:
 
 .. tested-code:: bash starknet_get_transaction
 
     starknet get_transaction --id TRANSACTION_ID
 
-The output should look like:
+The output should resemble this:
 
 .. tested-code:: none starknet_get_transaction_output
 
@@ -55,17 +57,17 @@ The output should look like:
 
 The result contains:
 
-*   ``transaction_id`` -- The ID of the transaction, out of all sent transactions.
-*   ``status`` -- The status of the transaction. For a detailed list of supported transaction
+*   ``transaction_id``: The Id of the transaction, out of all sent transactions.
+*   ``status``: The status of the transaction. For a detailed list of supported transaction
     statuses, refer to the :ref:`tx_status <tx_status>` usage example.
-*   ``transaction`` -- The transaction data.
+*   ``transaction``: The transaction data.
 
 It may also include each of the following optional fields (according to the transaction's status):
 
-*   ``block_id`` -- The ID of the block containing the transaction.
-*   ``block_number`` -- The sequence number of the block containing the transaction.
-*   ``transaction_index`` -- The index of the transaction within the block containing it.
-*   ``transaction_failure_reason`` -- The reason for the transaction failure.
+*   ``block_id``: The Id of the block containing the transaction.
+*   ``block_number``: The sequence number of the block containing the transaction.
+*   ``transaction_index``: The index of the transaction within its containing block.
+*   ``transaction_failure_reason``: The reason for the transaction's failure.
 
 
 .. _get_code:
@@ -73,9 +75,7 @@ It may also include each of the following optional fields (according to the tran
 get_code
 --------
 
-Once the ``deploy`` transaction is accepted on-chain, you will be able to see the code of the
-contract you have just deployed. The output consists of a list of bytecodes, rather than
-the source code. This is because the StarkNet network gets the contract after compilation.
+Once the ``deploy`` transaction is accepted on-chain, you will be able to see the code of the contract you have just deployed. The output consists of a list of bytecodes rather than the source code. This is because the StarkNet network gets the contract after compilation.
 
 To get the contract at a specific address, run the following command:
 
@@ -83,7 +83,7 @@ To get the contract at a specific address, run the following command:
 
     starknet get_code --contract_address CONTRACT_ADDRESS
 
-The output should look like:
+The output should resemble this:
 
 .. tested-code:: none starknet_get_code_output
 
@@ -122,7 +122,7 @@ To do this, run the following:
 
     starknet get_block --id BLOCK_ID
 
-The output should look like:
+The output should resemble this:
 
 .. tested-code:: none starknet_get_block_output
 
@@ -147,32 +147,25 @@ The output should look like:
 
 The result contains:
 
-*   ``block_id`` -- The block ID, a unique identifier of the block.
-*   ``previous_block_id`` -- the block ID of the previous block.
-*   ``sequence_number`` -- The sequence number of the block, which is the number of
-    blocks prior to this block.
-*   ``state_root`` -- The root of a commitment tree representing the StarkNet's state after the given
-    block.
-*   ``status`` -- The status of the block (for example, ``PENDING``, which means that the block
-    was created but has not been accepted on-chain yet).
-*   ``timestamp`` -- A timestamp representing the time this block was created.
-*   ``transaction_receipts`` -- Information about the transaction status and the corresponding
-    L1<->L2 interaction, for every transaction included in the block.
-*   ``transactions`` -- A mapping of the transactions included in the block, according to their
-    transaction IDs. Note that these are the same IDs used in the ``transaction_receipts`` mapping.
+*   ``block_id``: The block Id, a unique identifier of the block.
+*   ``previous_block_id``: The block Id of the previous block.
+*   ``sequence_number``: The block's sequence number, i.e., the number of blocks prior to this block.
+*   ``state_root``: The root of a commitment tree representing the StarkNet's state after the given block.
+*   ``status``: The status of the block (for example, ``PENDING`` -- i.e., the block was created but has not been accepted on-chain yet).
+*   ``timestamp``: A timestamp representing the time this block was created.
+*   ``transaction_receipts``: Information about the transaction status and the corresponding L1<->L2 interaction for every transaction included in the block.
+*   ``transactions``: A mapping of the transactions included in the block, according to their transaction Ids. Note that these are the same Ids used in the ``transaction_receipts`` mapping.
 
-To query the last block, simply remove the ``--id`` argument.
+To query the last block, remove the ``--id`` argument.
 
 .. _get_storage_at:
 
 get_storage_at
 --------------
 
-Other than querying the contract's code, you may also want to query the contract's storage at a
-specific key. To do so, you first need to understand which key is of interest to you.
-As you saw before, StarkNet introduces a new primitive, which is
-:ref:`storage variables <storage_var>`. Each storage variable is mapped to a storage key (a field
-element).
+Besides querying the contract's code, you may also want to query the contract's storage at a specific key. To do so, you first need to understand which key is of interest to you.
+As you saw before, StarkNet introduces a new primitive:
+:ref:`storage variables <storage_var>`. Each storage variable is mapped to a storage key (a field element).
 To compute this key, run the following python code:
 
 .. tested-code:: python get_variable_key
@@ -210,17 +203,14 @@ generalization of storage variables <storage_maps>`, which allow, for example, a
 variable for each user. This will require minor adjustments to the code above, which we will review
 in the relevant section.
 
-.. TODO(Adi, 15/08/2021): At the end of the second paragraph below, change to last *accepted* block.
 
 .. _filter block:
 
 Block-specific queries
 **********************
 
-Some of the aforementioned CLI functions have an additional argument, ``--block_id``, which
-applies the given query to a specific block.
-For example, you may want to query the balance variable at some specific point in time.
+Some of these CLI functions accept an additional argument, ``--block_id``, which applies the given query to a specific block.
+This assists, for example, when you want to query the balance variable at a specific point in time.
 
-To find out whether a CLI function can be executed as a block-specific query, simply use the
-``--help`` argument to see if ``--block_id`` is part of the optional arguments for that function.
-In case you do not use the ``--block_id`` argument, the query will be applied to the last block.
+To determine whether a CLI function can be executed as a block-specific query, use the ``--help`` argument to see if ``--block_id`` is an optional argument for that function.
+Without the ``--block_id`` argument, the query is applied to the last accepted block.

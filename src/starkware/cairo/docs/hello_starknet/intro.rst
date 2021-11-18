@@ -263,7 +263,7 @@ The result should resemble this:
 
 .. _tx_status:
 
-The following command allows you to query the transaction status based on your transaction ID (i.e., replace ``TRANSACTION_ID`` with the transaction ID printed by ``starknet invoke``):
+The following command allows you to query the transaction status based on your transaction Id (i.e., replace ``TRANSACTION_ID`` with the transaction Id printed by ``starknet invoke``):
 
 .. tested-code:: bash starknet_tx_status
 

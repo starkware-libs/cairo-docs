@@ -1,6 +1,6 @@
-.. proofedDate null
+.. proofedDate proof done pre PR approval
 
-.. comment null
+.. comment {wip - I am confused by this: Note that calling ``compare_arrays`` with the aforementioned arguments will fail as the arrays are different.} > Should this be that it will fail as the arrays are different lengths?
 
 
 More Features
@@ -11,7 +11,6 @@ More Features
     :ref:`Store multiple values <multiple values>`
 
     :ref:`Handle arrays <calldata arrays>`
-
 
 .. _multiple values:
 
@@ -42,7 +41,7 @@ You can read and write this value as follows:
         return ()
     end
 
-Note that in this case the ``range.read()`` returns one item that is a pair.
+Note that in this case, the ``range.read()`` returns one item that is a pair.
 Thus, ``let (min, max) = range.read(user)`` will not work.
 
 .. _calldata arrays:
@@ -70,8 +69,7 @@ For example:
             a_len=a_len - 1, a=a + 1, b_len=b_len - 1, b=b + 1)
     end
 
-In order to call ``compare_arrays`` with the arrays ``[10, 20, 30, 40]`` and ``[50, 60]``,
-you should pass the following inputs to ``starknet invoke``:
+In order to call ``compare_arrays`` with the arrays ``[10, 20, 30, 40]`` and ``[50, 60]``, you should pass the following inputs to ``starknet invoke``:
 
 .. tested-code:: bash invoke_compare_arrays
 
@@ -82,11 +80,8 @@ you should pass the following inputs to ``starknet invoke``:
         --inputs 4 10 20 30 40 2 50 60
 
 The first value, 4, is the length of the first array,
-then its 4 entires. After that, we have the length of the second arrays (2) followed by
-its entries.
-Note that calling ``compare_arrays`` with the aforementioned
-arguments will fail as the arrays are different.
+then its 4 entries. After that, we have the length of the second array (2) followed by its entries.
+Note that calling ``compare_arrays`` with the aforementioned arguments will fail as the arrays are different.
 
 A StarkNet contract using array arguments in external functions
-must have the range_check builtin, which is used
-to validate that the array's length is nonnegative.
+must have the range_check builtin, which is used to validate that the array's length is nonnegative.
