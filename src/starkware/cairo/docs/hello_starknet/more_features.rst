@@ -23,7 +23,7 @@ For example:
 
 .. tested-code:: cairo storage_var_range
 
-    # A mapping from user to a pair (min, max).
+    # A mapping from User to a pair (min, max).
     @storage_var
     func range(user : felt) -> (res : (felt, felt)):
     end

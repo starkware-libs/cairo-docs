@@ -11,7 +11,7 @@ const L1_CONTRACT_ADDRESS = (
     0xce08635cc6477f3634551db7613cc4f36b4e49dc)
 const MESSAGE_WITHDRAW = 0
 
-# A mapping from a user (L1 Ethereum address) to their balance.
+# A mapping from a User (L1 Ethereum address) to their balance.
 @storage_var
 func balance(user : felt) -> (res : felt):
 end

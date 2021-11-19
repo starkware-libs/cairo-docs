@@ -148,7 +148,7 @@ Note, this flow covers cases where we subtract an amount from, or add an amount 
 
     The assert functions used here are imported from Cairo's `common math library <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/math.cairo>`_. In this case, ``assert_nn_le`` asserts that the first argument is non-negative and is less than or equal to the second argument (as *per* **3** above).
 
-To allow a user to read the balance of an account, we define the following:
+To allow a User to read the balance of an account, we define the following:
 
 :ref:`view function <view_decorator>`:
 
@@ -202,7 +202,7 @@ Next, the primary function of the contract -- swapping tokens.
         # Check requested amount_from is valid.
         assert_nn_le(amount_from, BALANCE_UPPER_BOUND - 1)
 
-        # Check user has enough funds.
+        # Check User has enough funds.
         let (account_from_balance) = get_account_token_balance(
             account_id=account_id, token_type=token_from)
         assert_le(amount_from, account_from_balance)

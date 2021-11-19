@@ -198,10 +198,8 @@ Using the same contract we have used so far, you should get:
 Note that this is the same result obtained by the call to ``get_balance``.
 
 
-Later on, at the :ref:`user authentication <user_authentication>` section, you will see :ref:`a
-generalization of storage variables <storage_maps>`, which allow, for example, a balance
-variable for each user. This will require minor adjustments to the code above, which we will review
-in the relevant section.
+Later on, at the :ref:`User authentication <user_authentication>` section, you will see :ref:`a
+generalization of storage variables <storage_maps>`, which allow, for example, a balance variable for each User. This will require minor adjustments to the code above, which we will review in the relevant section.
 
 
 .. _filter block:

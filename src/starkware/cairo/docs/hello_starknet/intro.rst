@@ -111,10 +111,10 @@ Write the function/s:
 
 StarkNet contracts have no ``main()`` function. Instead, each function may be
 annotated as an external function (using the ``@external`` decorator).
-External functions may be called by the users of StarkNet.
-Currently, StarkNet has no authentication mechanism, so any user can invoke any external
+External functions may be called by the Users of StarkNet.
+Currently, StarkNet has no authentication mechanism, so any User can invoke any external
 function. If you want to restrict it, or have some authentication,
-you can use the ``ecdsa`` builtin to verify a user's signature
+you can use the ``ecdsa`` builtin to verify a User's signature
 as part of the internal implementation of the contract's function.
 
 In our case, the contract has two external functions: ``increase_balance`` reads
@@ -139,11 +139,11 @@ Consider the three implicit arguments: ``storage_ptr``, ``pedersen_ptr`` and ``r
 Programming without hints:
 **************************
 
-If you are familiar with programming in Cairo, you are probably familiar with :ref:`hints <hints>`. Unfortunately (or fortunately, depending on your personal opinion), using hints in StarkNet is not possible. This is due to the fact that the contract's author, the user invoking the function, and the operator running it are
+If you are familiar with programming in Cairo, you are probably familiar with :ref:`hints <hints>`. Unfortunately (or fortunately, depending on your personal opinion), using hints in StarkNet is not possible. This is due to the fact that the contract's author, the User invoking the function, and the operator running it are
 likely to be different entities:
 
 1.  The operator cannot run arbitrary python code due to security concerns.
-2.  The user won't be able to verify that the operator ran the hint the contract author supplied.
+2.  The User won't be able to verify that the operator ran the hint the contract author supplied.
 3.  It is not possible to prove that nondeterministic code *failed* -- since you should either prove you executed the hint or prove that, for any hint, the code would have failed.
 
 For efficiency, hints are still used by the standard library functions.
@@ -314,4 +314,4 @@ Note that to see the up-to-date balance, you should wait until the ``increase_ba
 
 In the next section, we will describe other CLI functions for querying StarkNet's state.
 Note that while ``deploy`` and ``invoke`` affect StarkNet's state, all other functions are read-only. In particular, using ``call`` instead of ``invoke`` on a function that *may* change the
-state, such as ``increase_balance``, will return the result of the function without actually applying it to the current state, allowing the user to dry-run before committing to a state update.
+state, such as ``increase_balance``, will return the result of the function without actually applying it to the current state, allowing the User to dry-run before committing to a state update.

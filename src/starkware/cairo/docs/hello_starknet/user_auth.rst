@@ -15,7 +15,7 @@ Adding User Authentication
 
 .. topic:: Overview
 
-    :ref:`Handle multiple users <storage_maps>`
+    :ref:`Handle multiple Users <storage_maps>`
 
     :ref:`Verify signatures <verify signature>`
 
@@ -31,16 +31,16 @@ Storage maps
 ------------
 
 Suppose that, instead of maintaining one global variable ``balance``,
-we would like to have a balance for each user (as identified by
+we would like to have a balance for each User (as identified by
 their STARK public key).
 
 Our first task is to change the ``balance`` storage variable
-to a map from public key (user) to balance
+to a map from public key (User) to balance
 (instead of a single value). This can be achieved by adding an argument:
 
 .. tested-code:: cairo balance_map
 
-    # A map from user (public key) to a balance.
+    # A map from User (public key) to a balance.
     @storage_var
     func balance(user : felt) -> (res : felt):
     end
@@ -70,7 +70,7 @@ Signature verification
 We now have to modify ``increase_balance`` to do the following:
 
 1.  Write to the appropriate ``balance`` entry.
-2.  Verify that the user has signed on this change.
+2.  Verify that the User has signed on this change.
 
 For the signature, we will use the STARK-friendly ECDSA signature, which is natively supported in Cairo.
 For technical details about this cryptographic primitive, see
@@ -97,7 +97,7 @@ Next, we will change the code of ``increase_balance()`` to:
 
 .. tested-code:: cairo user_auth_increase_balance
 
-    # Increases the balance of the given user by the given amount.
+    # Increases the balance of the given User by the given amount.
     @external
     func increase_balance{
             storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
@@ -107,7 +107,7 @@ Next, we will change the code of ``increase_balance()`` to:
         # The hash of (x, 0) is equivalent to the hash of (x).
         let (amount_hash) = hash2{hash_ptr=pedersen_ptr}(amount, 0)
 
-        # Verify the user's signature.
+        # Verify the User's signature.
         verify_ecdsa_signature(
             message=amount_hash,
             public_key=user,
@@ -123,11 +123,11 @@ Next, we will change the code of ``increase_balance()`` to:
 
 .. topic:: Note
 
-    Note that we don't handle replay attacks here. In a replay, once the user signs a transaction, someone may call it multiple times.
+    Note that we don't handle replay attacks here. In a replay, once the User signs a transaction, someone may call it multiple times.
     One way to prevent replay attacks is to add a ``nonce`` argument to ``increase_balance``, change the signed message to
     the Pedersen hash of the nonce and the amount, and define
     another storage map from the signed message to a flag (either 0 or 1) -- indicating whether or not that transaction was executed by the system.
-    Future versions of StarkNet will handle user authentication and prevent replay attacks.
+    Future versions of StarkNet will handle User authentication and prevent replay attacks.
 
 
 Similarly, change the code of ``get_balance()``. Here we don't need to verify the signature
@@ -136,7 +136,7 @@ so the change is simpler:
 
 .. tested-code:: cairo user_auth_get_balance
 
-    # Returns the balance of the given user.
+    # Returns the balance of the given User.
     @view
     func get_balance{
             storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
@@ -219,7 +219,7 @@ You can query the transaction status:
 
     starknet tx_status --id TX_ID
 
-Finally, after the transaction is executed (status ``PENDING`` or ``ACCEPTED_ONCHAIN``), we may query the user's balance.
+Finally, after the transaction is executed (status ``PENDING`` or ``ACCEPTED_ONCHAIN``), we may query the User's balance.
 
 .. tested-code:: bash user_auth_call
 
@@ -235,8 +235,8 @@ You should get:
 
     4321
 
-Note that if you want to use the :ref:`get_storage_at` CLI command to query the balance of a specific user, you can no longer compute the relevant key by only supplying the name of the storage variable. That is because the balance storage variable now requires an additional argument, namely,
-the user key. Hence, you will need to supply the additional arguments when acquiring the key used in ``get_storage_at``. In our case, this translates to the following python code:
+Note that if you want to use the :ref:`get_storage_at` CLI command to query the balance of a specific User, you can no longer compute the relevant key by only supplying the name of the storage variable. That is because the balance storage variable now requires an additional argument, namely,
+the User key. Hence, you will need to supply the additional arguments when acquiring the key used in ``get_storage_at``. In our case, this translates to the following python code:
 
 .. tested-code:: python user_auth_balance_key
 

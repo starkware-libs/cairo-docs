@@ -6,12 +6,12 @@ from starkware.cairo.common.hash import hash2
 from starkware.cairo.common.signature import verify_ecdsa_signature
 from starkware.starknet.common.storage import Storage
 
-# A map from user (public key) to a balance.
+# A map from User (public key) to a balance.
 @storage_var
 func balance(user : felt) -> (res : felt):
 end
 
-# Increases the balance of the given user by the given amount.
+# Increases the balance of the given User by the given amount.
 @external
 func increase_balance{
         storage_ptr : Storage*, pedersen_ptr : HashBuiltin*, range_check_ptr,
@@ -20,7 +20,7 @@ func increase_balance{
     # The hash of (x, 0) is equivalent to the hash of (x).
     let (amount_hash) = hash2{hash_ptr=pedersen_ptr}(amount, 0)
 
-    # Verify the user's signature.
+    # Verify the User's signature.
     verify_ecdsa_signature(
         message=amount_hash, public_key=user, signature_r=sig_r, signature_s=sig_s)
 
@@ -29,7 +29,7 @@ func increase_balance{
     return ()
 end
 
-# Returns the balance of the given user.
+# Returns the balance of the given User.
 @view
 func get_balance{storage_ptr : Storage*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         user : felt) -> (res : felt):

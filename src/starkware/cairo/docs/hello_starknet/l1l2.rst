@@ -74,7 +74,7 @@ Then, the message mechanism will be required only if a developer needs a custom 
 An example of a simple token bridge
 -----------------------------------
 
-Next, we build a simple token bridge. The user will be able to deposit L1 tokens, and their L2 balance will increase. Then, they will be able to withdraw some tokens, which will decrease their L2 balance and produce a corresponding increase of their L1 balance.
+Next, we build a simple token bridge. The User will be able to deposit L1 tokens, and their L2 balance will increase. Then, they will be able to withdraw some tokens, which will decrease their L2 balance and produce a corresponding increase of their L1 balance.
 
 Preparation
 ***********
@@ -104,7 +104,7 @@ Then, define the storage variable that holds the balances, together with a gette
 
 .. tested-code:: cairo l1l2_balance
 
-    # A mapping from a user (L1 Ethereum address) to their balance.
+    # A mapping from a User (L1 Ethereum address) to their balance.
     @storage_var
     func balance(user : felt) -> (res : felt):
     end
@@ -117,7 +117,7 @@ Then, define the storage variable that holds the balances, together with a gette
         return (res)
     end
 
-Just so we'll have some "funds" to play with, define a function that can mint new tokens (in real applications you probably wouldn't want a function that lets the user effectively "print" money. In addition, you'll want to check that ``amount`` is nonnegative):
+Just so we'll have some "funds" to play with, define a function that can mint new tokens (in real applications you probably wouldn't want a function that lets the User effectively "print" money. In addition, you'll want to check that ``amount`` is nonnegative):
 
 .. tested-code:: cairo l1l2_increase_balance
 
@@ -133,9 +133,9 @@ Just so we'll have some "funds" to play with, define a function that can mint ne
 Send a message to L1
 ********************
 
-Sending a message to L1 can be useful for withdrawals. The user requesting the withdrawal invokes a ``withdraw`` (L2) transaction.
-The transaction decreases their L2 balance and sends a message to the L1 contract, indicating that the user's L1 balance should be increased by the withdrawn amount.
-The L1 counterpart should allow the user to consume the message and increase their balance on L1 when doing so.
+Sending a message to L1 can be useful for withdrawals. The User requesting the withdrawal invokes a ``withdraw`` (L2) transaction.
+The transaction decreases their L2 balance and sends a message to the L1 contract, indicating that the User's L1 balance should be increased by the withdrawn amount.
+The L1 counterpart should allow the User to consume the message and increase their balance on L1 when doing so.
 
 .. tested-code:: cairo l1l2_withdraw
 
@@ -176,11 +176,11 @@ Sending a message is done at the end of ``withdraw()`` by calling
 ``send_message_to_l1()``. This gets the L1 contract address,
 the size of the message, and the message itself (as a ``felt*``).
 Note that the message itself is given as a pointer and, therefore, the message length must be passed explicitly.
-In our example, the message data is: ``MESSAGE_WITHDRAW, user, amount``. We choose to use the first element as an indicator of the message type (note that we don't really need it here since we only have one message type).
+In our example, the message data is: ``MESSAGE_WITHDRAW, User, amount``. We choose to use the first element as an indicator of the message type (note that we don't really need it here since we only have one message type).
 
 Now let's take a look at how the `L1 contract counterpart <../_static/L1L2Example.sol>`_
 may be written.
-Consider the ``withdraw()`` function: it gets the user and the amount, consumes the message (this part will fail if the message wasn't received on-chain), and updates the user's balance accordingly.
+Consider the ``withdraw()`` function: it gets the User and the amount, consumes the message (this part will fail if the message wasn't received on-chain), and updates the User's balance accordingly.
 
 .. topic:: Note
 
@@ -300,10 +300,10 @@ of the example contract, deployed at address
 with the following arguments:
 ``CONTRACT_ADDRESS, 12345678, 1000``
 (where, as before, ``CONTRACT_ADDRESS`` is the address of the **L2** contract you deployed).
-After the ``withdraw()`` transaction, the user's L1 balance should be 1000, and their L2 balance should be 2333.
+After the ``withdraw()`` transaction, the User's L1 balance should be 1000, and their L2 balance should be 2333.
 
 After your ``withdraw()`` transaction is accepted on-chain, call the ``deposit()`` function of the example contract. Use the following arguments: ``CONTRACT_ADDRESS, 12345678, 600`` to simulate a partial deposit of the 1000 tokens.
-It may take some time until StarkNet processes the incoming message and calls the L1 handler (for example, the system waits for a few blockchain confirmations). But, after that time, you will be able to see the updated balance of the user
+It may take some time until StarkNet processes the incoming message and calls the L1 handler (for example, the system waits for a few blockchain confirmations). But, after that time, you will be able to see the updated balance of the User
 by invoking ``starknet call`` for ``get_balance`` again.
 The new balances should be L1 balance: 400 and L2 balance: 2933.
 
