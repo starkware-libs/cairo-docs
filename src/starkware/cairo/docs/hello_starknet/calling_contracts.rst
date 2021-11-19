@@ -125,14 +125,11 @@ If your function was called by another contract, you can retrieve the address of
 
     let (caller_address) = get_caller_address()
 
-When the contract is called by a user (rather than another contract),
-the function returns 0.
+When the contract is called by a user (rather than another contract), the function returns 0.
 
 Consider what would happen if you added a call to ``get_caller_address()``
 to the ``increase_balance()`` function of ``BALANCE_CONTRACT``:
 It would return ``PROXY_CONTRACT`` if called from
 ``PROXY_CONTRACT`` and 0 if called directly.
 
-Note that if you use ``get_caller_address()`` in a function ``foo()`` that was called by another function ``bar()`` within your contract,
-it will still return the address of the contract that invoked ``bar()``
-(or 0 if it was invoked by a user).
+Note that if you use ``get_caller_address()`` in a function ``foo()`` that was called by another function ``bar()`` within your contract, it will still return the address of the contract that invoked ``bar()`` (or 0 if it was invoked by a user).

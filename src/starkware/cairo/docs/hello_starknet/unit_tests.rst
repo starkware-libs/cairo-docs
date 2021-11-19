@@ -1,6 +1,6 @@
-.. proofedDate null
+.. proofedDate proof done pre PR approval
 
-.. comment "To install" in prerequisites -- should this be "Linux install"?
+.. comment "To install" in prerequisites -- should this be "Linux install"? OR "To install in Linux"
 
 
 Writing unit tests
@@ -9,7 +9,7 @@ Writing unit tests
 This page demonstrates how to write unit tests for your StarkNet contracts.
 The ``cairo-lang`` package provides a set of python classes that simulates the
 behavior of the StarkNet system.
-We'll use `pytest <https://docs.pytest.org/en/6.2.x/>`_ as the unit test infrastructure.
+We will use `pytest <https://docs.pytest.org/en/6.2.x/>`_ as the unit test infrastructure.
 
 
 .. topic:: Prerequisites
@@ -20,7 +20,7 @@ We'll use `pytest <https://docs.pytest.org/en/6.2.x/>`_ as the unit test infrast
 
         pip install pytest pytest-asyncio
 
-Let's write a unit test for the contract from :ref:`first_contract`.
+Next we will write a unit test for the contract from :ref:`first_contract`.
 Create a file named ``contract.cairo`` and copy the contract code into it.
 
 Now, copy the following code into a python file named ``contract_test.py``:
@@ -69,9 +69,9 @@ Now, copy the following code into a python file named ``contract_test.py``:
         assert await contract.get_balance().call() == (30,)
 
 This test creates an instance of the Starknet testing class.
-This class allows deploying StarkNet contracts and interacting with them.
+This class supports the deployment of, and interaction with, StarkNet contracts.
 The test deploys our contract and invokes increase_balance twice.
-At the end it verifies that calling the ``get_balance()`` method returns the expected result.
+At the end, it verifies that calling the ``get_balance()`` method returns the expected result.
 
 Run the test using pytest:
 
