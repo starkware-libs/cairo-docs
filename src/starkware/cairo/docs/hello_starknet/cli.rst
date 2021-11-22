@@ -18,7 +18,7 @@ More CLI commands
 
     :ref:`Get storage by key <get_storage_at>`
 
-    :ref:`Filter by block <filter block>`
+    :ref:`Change query context <change_query_context>`
 
     And remember, you can always ask for ``--help``.
 
@@ -202,10 +202,10 @@ Later on, at the :ref:`User authentication <user_authentication>` section, you w
 generalization of storage variables <storage_maps>`, which allow, for example, a balance variable for each User. This will require minor adjustments to the code above, which we will review in the relevant section.
 
 
-.. _filter block:
+.. _change_query_context:
 
 Block-specific queries
-**********************
+----------------------
 
 Some of these CLI functions accept an additional argument, ``--block_id``, which applies the given query to a specific block.
 This assists, for example, when you want to query the balance variable at a specific point in time.

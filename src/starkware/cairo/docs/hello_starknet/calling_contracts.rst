@@ -1,4 +1,4 @@
-.. proofedDate null
+.. proofedDate proof done pre PR approval
 
 .. comment {wip Note that if you use ``get_caller_address()`` in a function ``foo()`` that was called by another function ``bar()`` within your contract, it will still return the address of the contract that invoked ``bar()`` (or 0 if it was invoked by a user).} > I am confused by the logic here can a user be the caller from within your own contract acting like a function? IF not, then the {(or 0 if it was invoked by a user)} is redundant.
 

@@ -2,7 +2,7 @@
 
 .. comment
 
-.. suggestedEdit1 {wip ECDSA this is the only instance in the Hello Stark tutorial where ECDSA is referred to in caps} > consider applying one of the other usages [``ecdsa`` builtin or just ecdsa signature]
+.. suggestedEdit1 DONE-LEAVE{wip ECDSA this is the only instance in the Hello Stark tutorial where ECDSA is referred to in caps} > consider applying one of the other usages [``ecdsa`` builtin or just ecdsa signature]
 
 .. suggestedEdit2 {wip Similarly, change the code of ``get_balance()``.} > Similary to the verify_ecdsa_signature behaving like an asset OR similar to the code change for increase_balance == Link is lost this far on Consider clarifying
 
@@ -119,7 +119,7 @@ Next, we will change the code of ``increase_balance()`` to:
         return ()
     end
 
-``verify_ecdsa_signature`` behaves like an assert -- in case the signature is invalid, the function will revert the entire transaction.
+``verify_ecdsa_signature`` behaves like an assert -- in the case that the signature is invalid, the function will revert the entire transaction.
 
 .. topic:: Note
 
@@ -130,7 +130,7 @@ Next, we will change the code of ``increase_balance()`` to:
     Future versions of StarkNet will handle User authentication and prevent replay attacks.
 
 
-Similarly, change the code of ``get_balance()``. Here we don't need to verify the signature
+Similar to the code change for ``increase_balance()`` , we change the code of ``get_balance()``. Here we don't need to verify the signature
 (since StarkNet's storage is not private anyway),
 so the change is simpler:
 

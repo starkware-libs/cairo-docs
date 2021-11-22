@@ -2,7 +2,7 @@
 
 .. comment NB this is the only instance of {StarkNet Core contract} > if this change is not accepted, knock on is to update all other instances to caps
 
-.. suggestedEdit1 {wip Ropsten *testnet*} this is out of date now, yes? Also on Goerli > update if so
+.. suggestedEdit1 DONE to reflect master branch{wip Ropsten *testnet*} this is out of date now, yes? Also on Goerli > update if so
 
 
 
@@ -65,11 +65,11 @@ Notes
     The StarkNet Alpha system is still under development and, therefore, from time to time, the state of the system will reset, and all contracts will be removed.
     This means that you shouldn't move valuable assets
     to the StarkNet Alpha system unless you have a way to withdraw them, given the removal of the L2 contract.
-    That being said, recall that StarkNet Alpha only runs on the Ropsten *testnet*.
+    That being said, recall that StarkNet Alpha only runs on the Goerli *testnet*.
 
-In the current version of StarkNet, contracts cannot interact with one another.
-This means that any contract that needs to interact with L1, such as deposit/withdrawal of tokens, must use this message mechanism. In the future, token transfers between L1 and L2 will be handled by bridge token contracts (much like an L2 ERC20 contract), and the contract developer will be able to interact directly with those L2 contracts.
-Then, the message mechanism will be required only if a developer needs a custom messaging protocol.
+In early development versions of StarkNet Alpha, contracts could not interact with one another.
+This means that any contract that needed to interact with L1, such as deposit/withdrawal of tokens, used this message mechanism. Token transfers between L1 and L2 are now handled by bridge token contracts (much like an L2 ERC20 contract), and the contract developer will be able to interact directly with those L2 contracts.
+Thus, the message mechanism will be required only if a developer needs a custom messaging protocol.
 
 An example of a simple token bridge
 -----------------------------------

@@ -1,14 +1,14 @@
-.. proofedDate null
+.. proofedDate proof done pre PR approval
 
 .. comment Restructure suggested. toc/overview will assist in page breakdown and nav.
 
-.. suggestedEdits1 {wip The @storage_var decorator declares a variable that will be kept as part of this storage}> Consider [The @storage_var decorator declares which variables will be stored.]
+.. suggestedEdits1 DONE{Rejected The @storage_var decorator declares a variable that will be kept as part of this storage}> Consider [The @storage_var decorator declares which variables will be stored.]
 
-.. suggestedEdits2 {wip If you want to restrict it,} > This is weaving around the matter. Consider [Restrictions and authentication requirements can be implemented using the ecdsa builtin](note I exclude the user's signature part as I believe this is covered by "authentication") ALT Split it [Suppose you want to restrict user access to external functions, or enforce authentication. In that case, you can use the edca ...]
+.. suggestedEdits2 DONE{wip If you want to restrict it,} > This is weaving around the matter. Consider [Restrictions and authentication requirements can be implemented using the ecdsa builtin](note I exclude the user's signature part as I believe this is covered by "authentication") ALT Split it [Suppose you want to restrict user access to external functions, or enforce authentication. In that case, you can use the edca ...]
 
-.. suggestedEdits3 {wip Note that in the current version, this is not enforced by the compiler.} What is not enforced -- that a method may only annotate? Consider clarifying [or explaining to me, so that I can clarify]
+.. suggestedEdits3 Fix ATTEMPTED{wip Note that in the current version, this is not enforced by the compiler.} What is not enforced -- that a method may only annotate? Consider clarifying [or explaining to me, so that I can clarify]
 
-.. suggestedEdits4 {wip Note that in our PC world, whitelisting is being slain (along with the master branch). If you want to be PC the term is allow-list} > Please confirm yes/no to change and I can apply.
+.. suggestedEdits4 WHOSE PAYGRADE?{wip Note that in our PC world, whitelisting is being slain (along with the master branch). If you want to be PC the term is allow-list} > Please confirm yes/no to change and I can apply.
 
 .. _starknet_intro:
 
@@ -78,15 +78,11 @@ Let's start by looking at the following StarkNet contract:
         return (res)
     end
 
-File declaration:
-*****************
+Declarations:
+*************
 
 The first line, ``%lang starknet``, declares that this file should be read as a StarkNet contract file; rather than a regular Cairo program file. Trying to compile this file with ``cairo-compile``
 will result in a compilation error. StarkNet contracts should be compiled with the ``starknet-compile`` command, as we shall see below.
-
-
-Add builtins:
-*************
 
 Next, we have the ``%builtins`` directive and two import statements. If you're not familiar with these types of statements, refer to the ":ref:`Hello, Cairo <hello_cairo>`" tutorial.
 
@@ -113,9 +109,7 @@ StarkNet contracts have no ``main()`` function. Instead, each function may be
 annotated as an external function (using the ``@external`` decorator).
 External functions may be called by the Users of StarkNet.
 Currently, StarkNet has no authentication mechanism, so any User can invoke any external
-function. If you want to restrict it, or have some authentication,
-you can use the ``ecdsa`` builtin to verify a User's signature
-as part of the internal implementation of the contract's function.
+function. Restrictions and authentication requirements can be implemented using the ``ecdsa`` builtin to verify a User's signature as part of the internal implementation of the contract's function.
 
 In our case, the contract has two external functions: ``increase_balance`` reads
 the current value of balance from the storage, adds the given amount,
@@ -125,32 +119,28 @@ and writes the new value back to storage.
 .. _view_decorator:
 
 The ``@view`` decorator is identical to the ``@external`` decorator.
-The only difference is that the ``@view``method is *annotated* as a method that only queries the state rather than modifying it.
+The only difference is that the ``@view`` method is *annotated* as a method that may query the state and not modify it.
 Note that in the current version, this is not enforced by the compiler.
 
-Implicit arguments:
-*******************
+.. topic:: Implicit arguments:
 
-Consider the three implicit arguments: ``storage_ptr``, ``pedersen_ptr`` and ``range_check_ptr``:
+Consider the three implicit arguments: ``storage_ptr``, ``pedersen_ptr``, and ``range_check_ptr``:
 
-1.  You should be familiar with ``pedersen_ptr``, computes the Pedersen hash function, and ``range_check_ptr``, which compares integers. But, it seems that the contract doesn't use any hash function or integer comparison, so why are they needed? The reason is that storage variables require these implicit arguments to compute the actual memory address of this variable. This may not be needed in simple variables such as ``balance``, but with maps (see :ref:`storage_maps`), computing the Pedersen hash is part of what ``read()`` and ``write()`` do.
+1.  You should be familiar with ``pedersen_ptr``, which computes the Pedersen hash function, and ``range_check_ptr``, which compares integers. But, it seems that the contract doesn't use any hash function or integer comparison. So, why are they needed? The reason is that storage variables require these implicit arguments to compute the actual memory address of this variable. This may not be needed in simple variables such as ``balance``, but with maps (see :ref:`storage_maps`), computing the Pedersen hash is part of what ``read()`` and ``write()`` do.
 2.  ``storage_ptr`` is a new primitive unique to StarkNet contracts (it doesn't exist in Cairo); it allows the code to talk with the contract's storage. This is also an implicit argument of ``read()`` and ``write()`` (this time, for more obvious reasons).
 
 Programming without hints:
 **************************
 
-If you are familiar with programming in Cairo, you are probably familiar with :ref:`hints <hints>`. Unfortunately (or fortunately, depending on your personal opinion), using hints in StarkNet is not possible. This is due to the fact that the contract's author, the User invoking the function, and the operator running it are
-likely to be different entities:
+If you are familiar with programming in Cairo, you are probably familiar with :ref:`hints <hints>`. Unfortunately (or fortunately, depending on your personal opinion), using hints in StarkNet is not possible. This is due to the fact that the contract's author, the User invoking the function, and the Operator running it are likely to be different entities:
 
-1.  The operator cannot run arbitrary python code due to security concerns.
-2.  The User won't be able to verify that the operator ran the hint the contract author supplied.
+1.  The Operator cannot run arbitrary python code due to security concerns.
+2.  The User won't be able to verify that the Operator ran the hint the contract author supplied.
 3.  It is not possible to prove that nondeterministic code *failed* -- since you should either prove you executed the hint or prove that, for any hint, the code would have failed.
 
-For efficiency, hints are still used by the standard library functions.
+For efficiency, hints are still used by the standard library functions through a mechanism of whitelisting. A hint may be whitelisted by an Operator if they agree to run it.
 
-A function may be whitelisted by an operator if they agree to run it, i.e., when it knows that it can run its hints successfully.
-
-NB this does not guarantee the soundness of the library function, which should be verified separately.
+Note, this does not guarantee the soundness of the library function, which should be verified separately.
 
 This means that not all the Cairo library functions can be used when writing a StarkNet contract, only those on the list. See
 `here <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/starknet/security/starknet_common.cairo>`_
@@ -283,7 +273,7 @@ The possible statuses are:
 *   ``NOT_RECEIVED``:
     The transaction has not been received yet (i.e., not written to storage).
 *   ``RECEIVED``:
-    The transaction was received by the operator.
+    The transaction was received by the Operator.
 *   ``PENDING``:
     The transaction passed the validation and is waiting to be sent on-chain.
 *   ``REJECTED``:

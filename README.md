@@ -58,7 +58,7 @@ Once the docker image is built, you can fetch the python package zip file using:
 > docker rm -v ${container_id}
 ```
 
-## Building the Documentation Site
+## Building the Documentation Site Locally with Sphinx
 
 From Windows with Ubuntu I am using Sphinx:
 

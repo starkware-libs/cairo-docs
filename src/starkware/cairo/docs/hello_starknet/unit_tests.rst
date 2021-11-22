@@ -1,6 +1,6 @@
 .. proofedDate proof done pre PR approval
 
-.. comment "To install" in prerequisites -- should this be "Linux install"? OR "To install in Linux"
+.. comment LEAVE-OK pip command (not bash-specific)"To install" in prerequisites -- should this be "Linux install"? OR "To install in Linux"
 
 
 Writing unit tests

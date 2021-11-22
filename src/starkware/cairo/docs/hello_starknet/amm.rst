@@ -1,15 +1,15 @@
 .. proofedDate proof done pre PR approval
 
-.. comment Does "For those who read the previous tutorial" refer to the "Writing Unit Tests" page?
+.. comment DONE-Does "For those who read the previous tutorial" refer to the "Writing Unit Tests" page?
 
-.. suggestedEdit1 {wip "As mentioned, we assume that the reader is familiar with Cairo syntax.""} I have tried to separate this out as a note as it does not belong to the main flow, i.e. readers that are familiar with the Cairo syntax > problems are  {implicit arguments passed to this function inside the curly brackets} NOT clear which function "this function" refers to -- the view function that follows? i.e. the implicit function is passed to the view function??
+.. suggestedEdit1 DONE{wip "As mentioned, we assume that the reader is familiar with Cairo syntax.""} I have tried to separate this out as a note as it does not belong to the main flow, i.e. readers that are familiar with the Cairo syntax > problems are  {implicit arguments passed to this function inside the curly brackets} NOT clear which function "this function" refers to -- the view function that follows? i.e. the implicit function is passed to the view function??
 
-.. suggestedEdit2 {This functionality is not inherent to AMM functionality.} > I am not clear > is this saying that that AMMs do not have to include a minting function? > Consider clarification.
+.. suggestedEdit2 DONE{This functionality is not inherent to AMM functionality.} > I am not clear > is this saying that that AMMs do not have to include a minting function? > Consider clarification.
 
 
-.. suggestedEdit3 Code block:{".. test ":"":"assert codes['starknet_env'] == codes['amm_starknet_env']} Does not render
+.. suggestedEdit3 TEST-ONLY=DONECode block:{".. test ":"":"assert codes['starknet_env'] == codes['amm_starknet_env']} Does not render
 
-.. suggestedEdit4 {Pool’s balance of token 1.} > Should the tokens not be A and B as per the rest of the tutorial?
+.. suggestedEdit4 DONE{Pool’s balance of token 1.} > Should the tokens not be A and B as per the rest of the tutorial?
 
 .. _amm_starknet:
 
@@ -58,7 +58,7 @@ apps/amm_sample/amm_sample.cairo>`_.
 AMM implementation in StarkNet Planets Alpha
 --------------------------------------------
 
-For those who read the previous tutorial -- comparing the code written there to the contract code in this tutorial can be an illuminating exercise that highlights the power of StarkNet.
+For those who read the :ref:`previous tutorial <amm_cairo>` -- comparing the code written there to the contract code in this tutorial can be an illuminating exercise that highlights the power of StarkNet.
 
 In this sample contract, we will:
 
@@ -66,7 +66,7 @@ In this sample contract, we will:
     * implement a straightforward swap functionality (in both directions) using a simple curve, i.e., the constant product formula (:math:`x \cdot y = k`)
     * refer to the tokens managed by the AMM as token A and token B, which represent any type of fungible token
 
-Also, since StarkNet Planets Alpha does not support contract interaction, some aspects that ideally would have been implemented in other contracts, e.g., minting tokens in an ERC20 contract, are mocked in this sample contract. This functionality is not inherent to AMM functionality.
+For simplicity, some functionality related to interaction with ERC20 contracts will be mocked inside the AMM rather than implemented in a different contract, i.e., minting tokens in an ERC20 contract, are mocked in this sample contract. In practice, contracts would interact.
 
 The important point from this example is how StarkNet enables the developer of the Application to focus on specifying the verifiable business logic and constraints;
 while enjoying massive scalability -- without compromising security. In other words, only the invocable functions and the relevant storage variables used to maintain the state of the Application need to be specified by the developer.
@@ -77,7 +77,7 @@ while enjoying massive scalability -- without compromising security. In other wo
 The AMM state
 --------------
 
-Next, we do the implementation. We will start by reviewing how we maintain the state of the AMM.
+Next, we dive into the implementation. We will start by reviewing how we maintain the state of the AMM.
 
 We require the following fields in order to maintain the state:
 
@@ -137,14 +137,14 @@ The logic is fairly straightforward:
     3. assert it is not negative and doesn't exceed the upper bound
     4. write it to the account balance storage variable
 
-Note, this flow covers cases where we subtract an amount from, or add an amount to, the balance.
+Observie that this flow covers cases where we subtract an amount from, or add an amount to, the balance.
 
 .. topic:: Note
 
     As mentioned, we assume that the reader is familiar with Cairo syntax.
     For those who are not, briefly, the relevant concepts are:
 
-    The usage of :ref:`implicit arguments <implicit_arguments>` passed to this function inside the curly brackets. Specifically, the arguments necessary for the assertion and storage operations. Wherever such functionality is used, we will pass these implicit arguments.
+    The usage of :ref:`implicit arguments <implicit_arguments>` passed to the `modify_account_balance` function inside the curly brackets. Specifically, the arguments necessary for the assertion and storage operations. Wherever such functionality is used, we will pass these implicit arguments.
 
     The assert functions used here are imported from Cairo's `common math library <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/math.cairo>`_. In this case, ``assert_nn_le`` asserts that the first argument is non-negative and is less than or equal to the second argument (as *per* **3** above).
 
@@ -355,7 +355,7 @@ Interaction examples
 
     assert codes['starknet_env'] == codes['amm_starknet_env']
 
-We can now explore a few examples which demonstrate contract interaction using the StarkNet CLI tool. An instance of this contract is deployed and initialized at address ``0x05``.
+We can now explore a few examples which demonstrate how to interact with the contract using the StarkNet CLI tool. An instance of this contract is deployed and initialized at address ``0x05``.
 
 
 To use the StarkNet CLI, start by generating the ABI of the contract:
@@ -376,7 +376,7 @@ First, you can query the Pool's balance using:
         --function get_pool_token_balance \
         --inputs 1
 
-In response, you should get the Pool's balance of token 1.
+In response, you should get the Pool's balance of token A.
 
 Now let's add some tokens to our account's balance. Choose your favorite ``ACCOUNT_ID``, it should
 be a 251-bit integer value:
@@ -389,7 +389,7 @@ be a 251-bit integer value:
         --function add_demo_token \
         --inputs ACCOUNT_ID 1000 1000
 
-Now that we have some tokens, we can use the AMM and swap 500 units of token 1 in exchange for some units of token 2 (the exact number depends on the current balance of the Pool).
+Now that we have some tokens, we can use the AMM and swap 500 units of token A in exchange for some units of token B (the exact number depends on the current balance of the Pool).
 
 .. tested-code:: bash sn_amm_invoke_swap
 
@@ -399,7 +399,7 @@ Now that we have some tokens, we can use the AMM and swap 500 units of token 1 i
         --function swap \
         --inputs ACCOUNT_ID 1 500
 
-You can now query the account's balance of token 2 after the swap:
+You can now query the account's balance of token B after the swap:
 
 .. tested-code:: bash sn_amm_call_account_balance
 
