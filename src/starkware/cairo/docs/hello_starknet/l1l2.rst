@@ -1,6 +1,6 @@
 .. proofedDate 2021/11/23
 
-.. comment 1. There is still a TODO. 2. Decision needed on Glossary page; carry accross to here {StarkNet Core contract} vs {StarkNet Core Contract} vs {StarkNet core contract}
+.. comment 1. There is still a TODO.
 
 
 Interact with L1 contracts
@@ -29,8 +29,8 @@ Messages from L2 to L1 work as follows:
 
     The StarkNet OS adds the "from" address, which is the L2 address of the contract sending
     the message.
-2.  Once a state update containing the L2 transaction is accepted on-chain, the message is stored on the L1 StarkNet core contract, waiting to be consumed.
-3.  The L1 contract specified by the "to" address invokes the ``consumeMessageFromL2()`` of the StarkNet core contract.
+2.  Once a state update containing the L2 transaction is accepted on-chain, the message is stored on the L1 StarkNet Core Contract, waiting to be consumed.
+3.  The L1 contract specified by the "to" address invokes the ``consumeMessageFromL2()`` of the StarkNet Core Contract.
 
 .. topic:: Note
 
@@ -43,7 +43,7 @@ Messages from L1 to L2
 
 The other direction is similar:
 
-1.  The L1 contract calls (on L1) the ``send_message()`` function of the StarkNet core contract, which stores the message. In this case, the message includes an additional field -- the "selector", which determines what function to call in the corresponding L2 contract.
+1.  The L1 contract calls (on L1) the ``send_message()`` function of the StarkNet Core Contract, which stores the message. In this case, the message includes an additional field -- the "selector", which determines what function to call in the corresponding L2 contract.
 2.  The StarkNet Sequencer automatically consumes the message and invokes the requested L2 function of the contract designated by the "to" address.
 
 This direction is useful, for example, for "deposit" transactions.
@@ -224,7 +224,7 @@ You should get:
     352040181584456735608515580760888541466059565068553383579463728554843487745
 
 When an L1 contract wants to send a message, it calls the
-``sendMessageToL2()`` function of the StarkNet core contract, and it specifies the L2 contract address and the selector for the handler to be invoked.
+``sendMessageToL2()`` function of the StarkNet Core Contract, and it specifies the L2 contract address and the selector for the handler to be invoked.
 Take a look at the deposit function in the `example L1 contract <../_static/L1L2Example.sol>`_.
 
 Use the contract

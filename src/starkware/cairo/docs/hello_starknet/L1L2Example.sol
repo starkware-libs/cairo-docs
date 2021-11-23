@@ -21,7 +21,7 @@ interface IStarknetCore {
   contract.
 */
 contract L1L2Example {
-    // The StarkNet core contract.
+    // The StarkNet Core Contract.
     IStarknetCore starknetCore;
 
     mapping(uint256 => uint256) public userBalances;
@@ -50,7 +50,7 @@ contract L1L2Example {
         payload[1] = user;
         payload[2] = amount;
 
-        // Consume the message from the StarkNet core contract.
+        // Consume the message from the StarkNet Core Contract.
         // This will revert the (Ethereum) transaction if the message does not exist.
         starknetCore.consumeMessageFromL2(l2ContractAddress, payload);
 
@@ -74,7 +74,7 @@ contract L1L2Example {
         payload[0] = user;
         payload[1] = amount;
 
-        // Send the message to the StarkNet core contract.
+        // Send the message to the StarkNet Core Contract.
         starknetCore.sendMessageToL2(l2ContractAddress, DEPOSIT_SELECTOR, payload);
     }
 }

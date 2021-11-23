@@ -39,5 +39,5 @@ Useful links
 
 StarkNet Alpha version 2
 ************************
-*  `The StarkNet core contract <https://goerli.etherscan.io/address/0x5e6229F2D4d977d20A50219E521dE6Dd694d45cc>`_
+*  `The StarkNet Core Contract <https://goerli.etherscan.io/address/0x5e6229F2D4d977d20A50219E521dE6Dd694d45cc>`_
 *  `Sequencer URL <https://alpha2.starknet.io>`_
