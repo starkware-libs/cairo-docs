@@ -1,13 +1,10 @@
-.. proofedDate proof done pre PR approval
+.. proofedDate 2021/11/23
 
-.. comment NB this is the only instance of {StarkNet Core contract} > if this change is not accepted, knock on is to update all other instances to caps
-
-.. suggestedEdit1 DONE to reflect master branch{wip Ropsten *testnet*} this is out of date now, yes? Also on Goerli > update if so
+.. comment 1. There is still a TODO. 2. Decision needed on Glossary page; carry accross to here {StarkNet Core contract} vs {StarkNet Core Contract} vs {StarkNet core contract}
 
 
-
-Interacting with L1 contracts
-=============================
+Interact with L1 contracts
+==========================
 
 Background
 ----------
@@ -67,12 +64,9 @@ Notes
     to the StarkNet Alpha system unless you have a way to withdraw them, given the removal of the L2 contract.
     That being said, recall that StarkNet Alpha only runs on the Goerli *testnet*.
 
-In early development versions of StarkNet Alpha, contracts could not interact with one another.
-This means that any contract that needed to interact with L1, such as deposit/withdrawal of tokens, used this message mechanism. Token transfers between L1 and L2 are now handled by bridge token contracts (much like an L2 ERC20 contract), and the contract developer will be able to interact directly with those L2 contracts.
-Thus, the message mechanism will be required only if a developer needs a custom messaging protocol.
 
-An example of a simple token bridge
------------------------------------
+A simple token bridge
+----------------------
 
 Next, we build a simple token bridge. The User will be able to deposit L1 tokens, and their L2 balance will increase. Then, they will be able to withdraw some tokens, which will decrease their L2 balance and produce a corresponding increase of their L1 balance.
 
@@ -130,8 +124,8 @@ Just so we'll have some "funds" to play with, define a function that can mint ne
         return ()
     end
 
-Send a message to L1
-********************
+Message L1
+**********
 
 Sending a message to L1 can be useful for withdrawals. The User requesting the withdrawal invokes a ``withdraw`` (L2) transaction.
 The transaction decreases their L2 balance and sends a message to the L1 contract, indicating that the User's L1 balance should be increased by the withdrawn amount.
@@ -187,8 +181,8 @@ Consider the ``withdraw()`` function: it gets the User and the amount, consumes 
     As you'll see below, we passed the address of the L2 contract as an argument in the function -- so that the contract can be deployed once and used by anyone doing this tutorial.
     However, normally it doesn't make sense to get the address of the L2 contract as an argument -- the address should be fixed for each instance of the contract.
 
-Receiving a message from L1
-***************************
+Receive a message from L1
+*************************
 
 In order to handle a message that was sent from an L1 contract, you should declare an L1 handler:
 
@@ -233,8 +227,8 @@ When an L1 contract wants to send a message, it calls the
 ``sendMessageToL2()`` function of the StarkNet core contract, and it specifies the L2 contract address and the selector for the handler to be invoked.
 Take a look at the deposit function in the `example L1 contract <../_static/L1L2Example.sol>`_.
 
-Using the contract
-******************
+Use the contract
+****************
 
 Save the new contract file as ``l1l2.cairo``.
 You can find the full Cairo file `here <../_static/l1l2.cairo>`_.

@@ -1,17 +1,12 @@
-.. proofedDate proof done pre PR approval
+.. proofedDate 2021/11/23
 
-.. comment
-
-.. suggestedEdit1 DONE-LEAVE{wip ECDSA this is the only instance in the Hello Stark tutorial where ECDSA is referred to in caps} > consider applying one of the other usages [``ecdsa`` builtin or just ecdsa signature]
-
-.. suggestedEdit2 {wip Similarly, change the code of ``get_balance()``.} > Similary to the verify_ecdsa_signature behaving like an asset OR similar to the code change for increase_balance == Link is lost this far on Consider clarifying
-
+.. comment null
 
 .. _user_authentication:
 
 
-Adding User Authentication
-==========================
+Add User Authentication
+=======================
 
 .. topic:: Overview
 
@@ -131,8 +126,7 @@ Next, we will change the code of ``increase_balance()`` to:
 
 
 Similar to the code change for ``increase_balance()`` , we change the code of ``get_balance()``. Here we don't need to verify the signature
-(since StarkNet's storage is not private anyway),
-so the change is simpler:
+(since StarkNet's storage is not private anyway), so the change is simpler:
 
 .. tested-code:: cairo user_auth_get_balance
 
@@ -169,8 +163,8 @@ Compile and deploy the file:
 
 .. _update a balance:
 
-Interacting with the contract
------------------------------
+Interact with the contract
+--------------------------
 
 First, we need to generate a pair of public and private keys.
 We will use a constant private key (of course, in a real application choosing
@@ -339,3 +333,4 @@ The output should resemble this:
     # Uncomment below to fix the file:
     # open(user_auth_filename, 'w').write(code)
     assert open(user_auth_filename).read() == code, 'Please fix user_auth.cairo.'
+

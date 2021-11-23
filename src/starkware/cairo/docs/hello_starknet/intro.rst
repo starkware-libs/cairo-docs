@@ -1,19 +1,11 @@
-.. proofedDate proof done pre PR approval
+.. proofedDate 2021/11/23
 
-.. comment Restructure suggested. toc/overview will assist in page breakdown and nav.
-
-.. suggestedEdits1 DONE{Rejected The @storage_var decorator declares a variable that will be kept as part of this storage}> Consider [The @storage_var decorator declares which variables will be stored.]
-
-.. suggestedEdits2 DONE{wip If you want to restrict it,} > This is weaving around the matter. Consider [Restrictions and authentication requirements can be implemented using the ecdsa builtin](note I exclude the user's signature part as I believe this is covered by "authentication") ALT Split it [Suppose you want to restrict user access to external functions, or enforce authentication. In that case, you can use the edca ...]
-
-.. suggestedEdits3 Fix ATTEMPTED{wip Note that in the current version, this is not enforced by the compiler.} What is not enforced -- that a method may only annotate? Consider clarifying [or explaining to me, so that I can clarify]
-
-.. suggestedEdits4 WHOSE PAYGRADE?{wip Note that in our PC world, whitelisting is being slain (along with the master branch). If you want to be PC the term is allow-list} > Please confirm yes/no to change and I can apply.
+.. comment For consideration: Note that in our PC world, whitelisting is being slain (along with the master branch). If you want to be PC the term is allow-list} > Please consider (NB affects code base also).
 
 .. _starknet_intro:
 
-Writing StarkNet Contracts
-==========================
+Write StarkNet Contracts
+========================
 
 In this exercise, you will create, deploy, and interact with your first contract.
 
@@ -124,10 +116,10 @@ Note that in the current version, this is not enforced by the compiler.
 
 .. topic:: Implicit arguments:
 
-Consider the three implicit arguments: ``storage_ptr``, ``pedersen_ptr``, and ``range_check_ptr``:
+    Consider the three implicit arguments: ``storage_ptr``, ``pedersen_ptr``, and ``range_check_ptr``:
 
-1.  You should be familiar with ``pedersen_ptr``, which computes the Pedersen hash function, and ``range_check_ptr``, which compares integers. But, it seems that the contract doesn't use any hash function or integer comparison. So, why are they needed? The reason is that storage variables require these implicit arguments to compute the actual memory address of this variable. This may not be needed in simple variables such as ``balance``, but with maps (see :ref:`storage_maps`), computing the Pedersen hash is part of what ``read()`` and ``write()`` do.
-2.  ``storage_ptr`` is a new primitive unique to StarkNet contracts (it doesn't exist in Cairo); it allows the code to talk with the contract's storage. This is also an implicit argument of ``read()`` and ``write()`` (this time, for more obvious reasons).
+    1.  You should be familiar with ``pedersen_ptr``, which computes the Pedersen hash function, and ``range_check_ptr``, which compares integers. But, it seems that the contract doesn't use any hash function or integer comparison. So, why are they needed? The reason is that storage variables require these implicit arguments to compute the actual memory address of this variable. This may not be needed in simple variables such as ``balance``, but with maps (see :ref:`storage_maps`), computing the Pedersen hash is part of what ``read()`` and ``write()`` do.
+    2.  ``storage_ptr`` is a new primitive unique to StarkNet contracts (it doesn't exist in Cairo); it allows the code to talk with the contract's storage. This is also an implicit argument of ``read()`` and ``write()`` (this time, for more obvious reasons).
 
 Programming without hints:
 **************************

@@ -1,8 +1,8 @@
-.. proofedDate proof done pre PR approval
+.. proofedDate 2021/11/23
 
-.. comments null
+.. comments .. _change_query_context link not working on Ariel's build think it is fine on mine (Harries), just dropping to bottom of page, yes?
 
-.. suggestedEdit1 {wip "transaction_id": 1, looks like the actualy property and its value, so why do we SHOUT it in the bash command as TRANSACTION_ID ? Is the capitalization genuine?} > If Not Consider a less shouty form [output is transaction_id, seems nice!]
+.. suggestedEdit1 ?I did not see this in last reviewable sweep?{wip "transaction_id": 1, looks like the actualy property and its value, so why do we SHOUT it in the bash command as TRANSACTION_ID ? Is the capitalization genuine?} > If Not Consider a less shouty form [output is transaction_id, seems nice!]
 
 More CLI commands
 =================

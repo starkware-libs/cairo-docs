@@ -1,10 +1,10 @@
-.. proofedDate proof done pre PR approval
+.. proofedDate 2021/11/23
 
-.. comment LEAVE-OK pip command (not bash-specific)"To install" in prerequisites -- should this be "Linux install"? OR "To install in Linux"
+.. comment null
 
 
-Writing unit tests
-==================
+Write unit tests
+================
 
 This page demonstrates how to write unit tests for your StarkNet contracts.
 The ``cairo-lang`` package provides a set of python classes that simulates the
@@ -20,7 +20,7 @@ We will use `pytest <https://docs.pytest.org/en/6.2.x/>`_ as the unit test infra
 
         pip install pytest pytest-asyncio
 
-Next we will write a unit test for the contract from :ref:`first_contract`.
+Next, we will write a unit test for the contract from :ref:`first_contract`.
 Create a file named ``contract.cairo`` and copy the contract code into it.
 
 Now, copy the following code into a python file named ``contract_test.py``:

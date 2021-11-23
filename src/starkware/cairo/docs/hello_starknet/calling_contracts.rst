@@ -1,9 +1,9 @@
-.. proofedDate proof done pre PR approval
+.. proofedDate 2021/11/23
 
-.. comment {wip Note that if you use ``get_caller_address()`` in a function ``foo()`` that was called by another function ``bar()`` within your contract, it will still return the address of the contract that invoked ``bar()`` (or 0 if it was invoked by a user).} > I am confused by the logic here can a user be the caller from within your own contract acting like a function? IF not, then the {(or 0 if it was invoked by a user)} is redundant.
+.. comment null
 
-Calling another contract
-========================
+Call another contract
+=====================
 
 .. topic:: Overview
 
@@ -112,8 +112,8 @@ Both commands should return ``10000``.
 
 .. _get address:
 
-Getting the caller address
---------------------------
+Get the caller address
+----------------------
 
 If your function was called by another contract, you can retrieve the address of that contract using the ``get_caller_address()`` library function:
 
@@ -132,4 +132,4 @@ to the ``increase_balance()`` function of ``BALANCE_CONTRACT``:
 It would return ``PROXY_CONTRACT`` if called from
 ``PROXY_CONTRACT`` and 0 if called directly.
 
-Note that if you use ``get_caller_address()`` in a function ``foo()`` that was called by another function ``bar()`` within your contract, it will still return the address of the contract that invoked ``bar()`` (or 0 if it was invoked by a User).
+Note that if you use ``get_caller_address()`` in a function ``foo()`` , that was called by another function ``bar()`` within your contract, it will still return the address of the contract that invoked ``bar()`` (or 0 if it was invoked by a User).

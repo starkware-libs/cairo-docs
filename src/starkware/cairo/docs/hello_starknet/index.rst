@@ -1,6 +1,6 @@
-.. proofedDate proof done pre PR approval
+.. proofedDate 2021/11/23
 
-.. comment Did I kill the next page and back links somehow?!
+.. comment next page and back links not working on local build -- ok on live?
 
 .. _hello_starknet:
 
@@ -27,14 +27,14 @@ This tutorial walks you through writing and deploying a StarkNet contract.
     unit_tests
     amm
 
-Some useful links
-*****************
+Useful links
+*************
 
 *  `The StarkNet website <http://starkware.co/product/starknet>`_
 *  `StarkNet Planets Alpha on Ropsten <https://starkware.medium.com/starknet-planets-alpha-on-ropsten-e7494929cb95>`_
 *  `StarkNet Alpha 1 release post <https://medium.com/starkware/starknet-alpha-1-90c3348cca4f>`_
 *  `On the Road to StarkNet <https://medium.com/starkware/on-the-road-to-starknet-a-permissionless-stark-powered-l2-zk-rollup-83be53640880>`_
-*  `Voyager <https://voyager.online>`_ -- The StarkNet block explorer.
+*  `Voyager <https://voyager.online>`_ -- The StarkNet block explorer
 *  `The AMM demo <http://amm-demo.starknet.starkware.co/>`_
 
 StarkNet Alpha version 2

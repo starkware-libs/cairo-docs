@@ -1,6 +1,6 @@
-.. proofedDate proof done pre PR approval
+.. proofedDate 2021/11/23
 
-.. comment {wip - I am confused by this: Note that calling ``compare_arrays`` with the aforementioned arguments will fail as the arrays are different.} > Should this be that it will fail as the arrays are different lengths?
+.. comment null
 
 
 More Features

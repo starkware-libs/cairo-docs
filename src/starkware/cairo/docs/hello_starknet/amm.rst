@@ -1,15 +1,6 @@
-.. proofedDate proof done pre PR approval
+.. proofedDate 2021/11/23
 
-.. comment DONE-Does "For those who read the previous tutorial" refer to the "Writing Unit Tests" page?
-
-.. suggestedEdit1 DONE{wip "As mentioned, we assume that the reader is familiar with Cairo syntax.""} I have tried to separate this out as a note as it does not belong to the main flow, i.e. readers that are familiar with the Cairo syntax > problems are  {implicit arguments passed to this function inside the curly brackets} NOT clear which function "this function" refers to -- the view function that follows? i.e. the implicit function is passed to the view function??
-
-.. suggestedEdit2 DONE{This functionality is not inherent to AMM functionality.} > I am not clear > is this saying that that AMMs do not have to include a minting function? > Consider clarification.
-
-
-.. suggestedEdit3 TEST-ONLY=DONECode block:{".. test ":"":"assert codes['starknet_env'] == codes['amm_starknet_env']} Does not render
-
-.. suggestedEdit4 DONE{Pool’s balance of token 1.} > Should the tokens not be A and B as per the rest of the tutorial?
+.. comment
 
 .. _amm_starknet:
 
@@ -66,7 +57,7 @@ In this sample contract, we will:
     * implement a straightforward swap functionality (in both directions) using a simple curve, i.e., the constant product formula (:math:`x \cdot y = k`)
     * refer to the tokens managed by the AMM as token A and token B, which represent any type of fungible token
 
-For simplicity, some functionality related to interaction with ERC20 contracts will be mocked inside the AMM rather than implemented in a different contract, i.e., minting tokens in an ERC20 contract, are mocked in this sample contract. In practice, contracts would interact.
+For simplicity, some functionality related to interaction with ERC20 contracts will be mocked inside the AMM, i.e., minting tokens in an ERC20 contract are mocked in this sample contract. In practice, this logic would be implemented inside an ERC20 contract.
 
 The important point from this example is how StarkNet enables the developer of the Application to focus on specifying the verifiable business logic and constraints;
 while enjoying massive scalability -- without compromising security. In other words, only the invocable functions and the relevant storage variables used to maintain the state of the Application need to be specified by the developer.
@@ -137,7 +128,7 @@ The logic is fairly straightforward:
     3. assert it is not negative and doesn't exceed the upper bound
     4. write it to the account balance storage variable
 
-Observie that this flow covers cases where we subtract an amount from, or add an amount to, the balance.
+Observe that this flow covers cases where we subtract an amount from, or add an amount to, the balance.
 
 .. topic:: Note
 
@@ -184,8 +175,8 @@ Similarly, for the Pool balance:
 
 .. _Swap tokens:
 
-Swapping tokens
-----------------
+Swap tokens
+-----------
 
 Next, the primary function of the contract -- swapping tokens.
 
@@ -283,8 +274,8 @@ We use Cairo's common math library, specifically ``unsigned_div_rem`` (unsigned 
 
 .. _Initialize the AMM:
 
-Initializing the AMM
----------------------
+Initialize the AMM
+-------------------
 
 As we don't have contract interaction and liquidity providers in this version, we will now define how to initialize the AMM: both the liquidity Pool itself and some account balances.
 
