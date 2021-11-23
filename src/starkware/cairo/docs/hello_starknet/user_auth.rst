@@ -125,7 +125,7 @@ Next, we will change the code of ``increase_balance()`` to:
     Future versions of StarkNet will handle User authentication and prevent replay attacks.
 
 
-Similar to the code change for ``increase_balance()`` , we adjust ``get_balance()`` to handle the balance mapping . Here we don't need to verify the signature (since StarkNet's storage is not private anyway), so the change is simpler:
+Similar to the code change for ``increase_balance()`` , we adjust ``get_balance()`` to handle the balance mapping. Here we don't need to verify the signature (since StarkNet's storage is not private anyway), so the change is simpler:
 
 .. tested-code:: cairo user_auth_get_balance
 
