@@ -2,6 +2,8 @@
 
 .. comment
 
+.. _Uniswap: https://uniswap.org/docs/v2/protocol-overview/how-uniswap-works/
+
 .. _amm_starknet:
 
 A simple Automated Market Maker (AMM)
@@ -11,8 +13,8 @@ A simple Automated Market Maker (AMM)
 
     **TL;DR**
 
-        - Get: scalability & security for AMM
-        - By: constructing or calling functions and their storage variables
+    - Get: scalability & security for AMM
+    - By: constructing or calling functions
 
     **Contents**
 
@@ -30,7 +32,7 @@ A simple Automated Market Maker (AMM)
 
     In order to understand the basics of Automated Market Making (AMM), you may:
 
-        - refer to the `Uniswap docs <https://uniswap.org/docs/v2/protocol-overview/how-uniswap-works/>`_, or
+        - refer to the Uniswap_ docs, or
         - check the short description in our previous :ref:`AMM tutorial <amm_cairo>`.
 
 This tutorial reviews the code of a simple AMM written as a StarkNet contract; it highlights specific implementation details. The contract is deployable (and is actually deployed
