@@ -16,7 +16,7 @@ A simple Automated Market Maker (AMM)
     **TL;DR**
 
     - Get: scalability & security for AMM
-    - By: constructing or calling functions
+    - By: keeping the AMM state in a contract's storage and maintaining it with the contract's functions
 
     **Contents**
 

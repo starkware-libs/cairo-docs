@@ -1,7 +1,5 @@
 .. proofedDate 2021/11/23
 
-.. comment next page and back links not working on local build -- ok on live?
-
 .. _hello_starknet:
 
 Hello, StarkNet
