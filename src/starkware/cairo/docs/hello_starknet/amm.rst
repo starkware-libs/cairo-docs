@@ -64,10 +64,11 @@ StarkNet.
 In this sample contract, we will:
 
     * limit our functionality to exactly one Pool to be managed by the contract
-    * implement a straightforward swap functionality (in both directions) using a simple curve,
-    i.e., the constant product formula (:math:`x \cdot y = k`)
-    * refer to the tokens managed by the AMM as token A and token B, which represent any type of
-    fungible token
+
+    * implement a straightforward swap functionality (in both directions) using a simple curve, i.e., the constant product formula (:math:`x \cdot y = k`)
+
+    * refer to the tokens managed by the AMM as token A and token B, which represent any type of fungible token
+
 
 For simplicity, some functionality related to interaction with ERC20 contracts will be mocked
 inside the AMM, i.e., minting tokens in an ERC20 contract are mocked in this sample contract.
@@ -240,8 +241,8 @@ Next, the primary function of the contract -- swapping tokens.
 swapped. The function starts by verifying the validity of the inputs:
 
     *   the token type is a valid token by asserting that it is equal to one of the Pool's token types
-    *   the swap amount requested is valid, i.e., it does not exceed the upper bound, and the
-    account has enough funds to swap
+
+    *   the swap amount requested is valid, i.e., it does not exceed the upper bound, and the account has enough funds to swap
 
 If all checks pass, we proceed to execute the swap:
 
@@ -369,8 +370,7 @@ Interaction examples
 
 .. topic:: Prerequisites
 
-    * the reader is familiar with the StarkNet CLI. If this is not the case, we recommend you review
-    this :ref:`section <starknet_intro>`
+    * the reader is familiar with the StarkNet CLI. If this is not the case, we recommend you review this :ref:`section <starknet_intro>`
 
     * the ``STARKNET_NETWORK`` environment variable is set as alpha:
 
