@@ -9,12 +9,14 @@ Interact with L1 contracts
 Background
 ----------
 
-A critical property of a good L2 system is the ability to interact with the L1 system it's built on (since otherwise, the system is, in fact, isolated).
+A critical property of a good L2 system is the ability to interact with the L1 system it's built on
+(since otherwise, the system is, in fact, isolated).
 In this section, we describe how StarkNet contracts can interact with Ethereum L1 contracts.
 
 Every StarkNet contract may send and receive messages to/from any L1 contract.
 Usually, the message protocol between a pair of contracts,
-an L2 contract and its L1 contract counterpart (for example, written in Solidity), is determined at the design stage.
+an L2 contract and its L1 contract counterpart (for example, written in Solidity), is determined at
+the design stage.
 
 Messages from L2 to L1
 **********************
@@ -29,12 +31,15 @@ Messages from L2 to L1 work as follows:
 
     The StarkNet OS adds the "from" address, which is the L2 address of the contract sending
     the message.
-2.  Once a state update containing the L2 transaction is accepted on-chain, the message is stored on the L1 StarkNet Core Contract, waiting to be consumed.
-3.  The L1 contract specified by the "to" address invokes the ``consumeMessageFromL2()`` of the StarkNet Core Contract.
+2.  Once a state update containing the L2 transaction is accepted on-chain, the message is stored
+on the L1 StarkNet Core Contract, waiting to be consumed.
+3.  The L1 contract specified by the "to" address invokes the ``consumeMessageFromL2()`` of the
+StarkNet Core Contract.
 
 .. topic:: Note
 
-    **Note**: Since any L2 contract can send messages to any L1 contract, it is best practice for the L1 contract to check the "from" address before processing the transaction.
+    **Note**: Since any L2 contract can send messages to any L1 contract, it is best practice for
+    the L1 contract to check the "from" address before processing the transaction.
 
 Next, we will demonstrate how one can use this mechanism to implement a withdrawal transaction.
 
@@ -43,8 +48,11 @@ Messages from L1 to L2
 
 The other direction is similar:
 
-1.  The L1 contract calls (on L1) the ``send_message()`` function of the StarkNet Core Contract, which stores the message. In this case, the message includes an additional field -- the "selector", which determines what function to call in the corresponding L2 contract.
-2.  The StarkNet Sequencer automatically consumes the message and invokes the requested L2 function of the contract designated by the "to" address.
+1.  The L1 contract calls (on L1) the ``send_message()`` function of the StarkNet Core Contract,
+which stores the message. In this case, the message includes an additional field -- the "selector",
+which determines what function to call in the corresponding L2 contract.
+2.  The StarkNet Sequencer automatically consumes the message and invokes the requested L2 function
+of the contract designated by the "to" address.
 
 This direction is useful, for example, for "deposit" transactions.
 
@@ -59,16 +67,20 @@ Notes
 
 .. topic:: Note
 
-    The StarkNet Alpha system is still under development and, therefore, from time to time, the state of the system will reset, and all contracts will be removed.
+    The StarkNet Alpha system is still under development and, therefore, from time to time, the
+    state of the system will reset, and all contracts will be removed.
     This means that you shouldn't move valuable assets
-    to the StarkNet Alpha system unless you have a way to withdraw them, given the removal of the L2 contract.
+    to the StarkNet Alpha system unless you have a way to withdraw them, given the removal of the
+    L2 contract.
     That being said, recall that StarkNet Alpha only runs on the Goerli *testnet*.
 
 
 A simple token bridge
 ----------------------
 
-Next, we build a simple token bridge. The User will be able to deposit L1 tokens, and their L2 balance will increase. Then, they will be able to withdraw some tokens, which will decrease their L2 balance and produce a corresponding increase of their L1 balance.
+Next, we build a simple token bridge. The User will be able to deposit L1 tokens, and their L2
+balance will increase. Then, they will be able to withdraw some tokens, which will decrease their
+L2 balance and produce a corresponding increase of their L1 balance.
 
 Preparation
 ***********
@@ -92,7 +104,8 @@ Start with the ``%lang`` and ``%builtins`` directives, a few imports, and a few 
 
 .. topic:: Note
 
-    Note that in real applications, you may want to maintain the address of the L1 contract as a storage variable, rather than a constant.
+    Note that in real applications, you may want to maintain the address of the L1 contract as a
+    storage variable, rather than a constant.
 
 Then, define the storage variable that holds the balances, together with a getter ``@view`` function:
 
@@ -111,7 +124,9 @@ Then, define the storage variable that holds the balances, together with a gette
         return (res)
     end
 
-Just so we'll have some "funds" to play with, define a function that can mint new tokens (in real applications you probably wouldn't want a function that lets the User effectively "print" money. In addition, you'll want to check that ``amount`` is nonnegative):
+Just so we'll have some "funds" to play with, define a function that can mint new tokens (in real
+applications you probably wouldn't want a function that lets the User effectively "print" money. In
+addition, you'll want to check that ``amount`` is nonnegative):
 
 .. tested-code:: cairo l1l2_increase_balance
 
@@ -127,9 +142,12 @@ Just so we'll have some "funds" to play with, define a function that can mint ne
 Message L1
 **********
 
-Sending a message to L1 can be useful for withdrawals. The User requesting the withdrawal invokes a ``withdraw`` (L2) transaction.
-The transaction decreases their L2 balance and sends a message to the L1 contract, indicating that the User's L1 balance should be increased by the withdrawn amount.
-The L1 counterpart should allow the User to consume the message and increase their balance on L1 when doing so.
+Sending a message to L1 can be useful for withdrawals. The User requesting the withdrawal invokes a
+``withdraw`` (L2) transaction.
+The transaction decreases their L2 balance and sends a message to the L1 contract, indicating that
+the User's L1 balance should be increased by the withdrawn amount.
+The L1 counterpart should allow the User to consume the message and increase their balance on L1
+when doing so.
 
 .. tested-code:: cairo l1l2_withdraw
 
@@ -164,22 +182,29 @@ The L1 counterpart should allow the User to consume the message and increase the
     end
 
 Note that a new implicit argument was added -- the system call pointer (``syscall_ptr``).
-This argument allows us to invoke some functions of the StarkNet OS, including the "send message" function.
+This argument allows us to invoke some functions of the StarkNet OS, including the "send message"
+function.
 
 Sending a message is done at the end of ``withdraw()`` by calling
 ``send_message_to_l1()``. This gets the L1 contract address,
 the size of the message, and the message itself (as a ``felt*``).
-Note that the message itself is given as a pointer and, therefore, the message length must be passed explicitly.
-In our example, the message data is: ``MESSAGE_WITHDRAW, User, amount``. We choose to use the first element as an indicator of the message type (note that we don't really need it here since we only have one message type).
+Note that the message itself is given as a pointer and, therefore, the message length must be passed
+explicitly.
+In our example, the message data is: ``MESSAGE_WITHDRAW, User, amount``. We choose to use the
+first element as an indicator of the message type (note that we don't really need it here since we
+only have one message type).
 
 Now let's take a look at how the `L1 contract counterpart <../_static/L1L2Example.sol>`_
 may be written.
-Consider the ``withdraw()`` function: it gets the User and the amount, consumes the message (this part will fail if the message wasn't received on-chain), and updates the User's balance accordingly.
+Consider the ``withdraw()`` function: it gets the User and the amount, consumes the message (this
+part will fail if the message wasn't received on-chain), and updates the User's balance accordingly.
 
 .. topic:: Note
 
-    As you'll see below, we passed the address of the L2 contract as an argument in the function -- so that the contract can be deployed once and used by anyone doing this tutorial.
-    However, normally it doesn't make sense to get the address of the L2 contract as an argument -- the address should be fixed for each instance of the contract.
+    As you'll see below, we passed the address of the L2 contract as an argument in the function --
+    so that the contract can be deployed once and used by anyone doing this tutorial.
+    However, normally it doesn't make sense to get the address of the L2 contract as an argument --
+    the address should be fixed for each instance of the contract.
 
 Receive a message from L1
 *************************
@@ -207,7 +232,9 @@ In order to handle a message that was sent from an L1 contract, you should decla
     end
 
 
-An L1 handler is called by the StarkNet OS in order to process a message sent from an L1 contract. A StarkNet contract may define a few L1 handlers, and they are identified by an integer value called the *selector*.
+An L1 handler is called by the StarkNet OS in order to process a message sent from an L1 contract.
+A StarkNet contract may define a few L1 handlers, and they are identified by an integer value called
+the *selector*.
 You can compute the selector based on the L1 handler name using the following python code:
 
 .. tested-code:: python l1l2_selector
@@ -224,7 +251,8 @@ You should get:
     352040181584456735608515580760888541466059565068553383579463728554843487745
 
 When an L1 contract wants to send a message, it calls the
-``sendMessageToL2()`` function of the StarkNet Core Contract, and it specifies the L2 contract address and the selector for the handler to be invoked.
+``sendMessageToL2()`` function of the StarkNet Core Contract, and it specifies the L2 contract
+address and the selector for the handler to be invoked.
 Take a look at the deposit function in the `example L1 contract <../_static/L1L2Example.sol>`_.
 
 Use the contract
@@ -294,10 +322,15 @@ of the example contract, deployed at address
 with the following arguments:
 ``CONTRACT_ADDRESS, 12345678, 1000``
 (where, as before, ``CONTRACT_ADDRESS`` is the address of the **L2** contract you deployed).
-After the ``withdraw()`` transaction, the User's L1 balance should be 1000, and their L2 balance should be 2333.
+After the ``withdraw()`` transaction, the User's L1 balance should be 1000, and their L2 balance
+should be 2333.
 
-After your ``withdraw()`` transaction is accepted on-chain, call the ``deposit()`` function of the example contract. Use the following arguments: ``CONTRACT_ADDRESS, 12345678, 600`` to simulate a partial deposit of the 1000 tokens.
-It may take some time until StarkNet processes the incoming message and calls the L1 handler (for example, the system waits for a few blockchain confirmations). But, after that time, you will be able to see the updated balance of the User
+After your ``withdraw()`` transaction is accepted on-chain, call the ``deposit()`` function of the
+example contract. Use the following arguments: ``CONTRACT_ADDRESS, 12345678, 600`` to simulate a
+partial deposit of the 1000 tokens.
+It may take some time until StarkNet processes the incoming message and calls the L1 handler (for
+example, the system waits for a few blockchain confirmations). But, after that time, you will be
+able to see the updated balance of the User
 by invoking ``starknet call`` for ``get_balance`` again.
 The new balances should be L1 balance: 400 and L2 balance: 2933.
 

@@ -75,7 +75,9 @@ It may also include each of the following optional fields (according to the tran
 get_code
 --------
 
-Once the ``deploy`` transaction is accepted on-chain, you will be able to see the code of the contract you have just deployed. The output consists of a list of bytecodes rather than the source code. This is because the StarkNet network gets the contract after compilation.
+Once the ``deploy`` transaction is accepted on-chain, you will be able to see the code of the
+contract you have just deployed. The output consists of a list of bytecodes rather than the source
+code. This is because the StarkNet network gets the contract after compilation.
 
 To get the contract at a specific address, run the following command:
 
@@ -115,7 +117,8 @@ The output should resemble this:
 get_block
 ---------
 
-Instead of querying a specific contract or transaction, you may want to query an entire block and examine the transactions contained within it.
+Instead of querying a specific contract or transaction, you may want to query an entire block and
+examine the transactions contained within it.
 To do this, run the following:
 
 .. tested-code:: bash starknet_get_block
@@ -150,11 +153,15 @@ The result contains:
 *   ``block_id``: The block Id, a unique identifier of the block.
 *   ``previous_block_id``: The block Id of the previous block.
 *   ``sequence_number``: The block's sequence number, i.e., the number of blocks prior to this block.
-*   ``state_root``: The root of a commitment tree representing the StarkNet's state after the given block.
-*   ``status``: The status of the block (for example, ``PENDING`` -- i.e., the block was created but has not been accepted on-chain yet).
+*   ``state_root``: The root of a commitment tree representing the StarkNet's state after the given
+block.
+*   ``status``: The status of the block (for example, ``PENDING`` -- i.e., the block was created but
+has not been accepted on-chain yet).
 *   ``timestamp``: A timestamp representing the time this block was created.
-*   ``transaction_receipts``: Information about the transaction status and the corresponding L1<->L2 interaction for every transaction included in the block.
-*   ``transactions``: A mapping of the transactions included in the block, according to their transaction Ids. Note that these are the same Ids used in the ``transaction_receipts`` mapping.
+*   ``transaction_receipts``: Information about the transaction status and the corresponding L1<->L2
+interaction for every transaction included in the block.
+*   ``transactions``: A mapping of the transactions included in the block, according to their
+transaction Ids. Note that these are the same Ids used in the ``transaction_receipts`` mapping.
 
 To query the last block, remove the ``--id`` argument.
 
@@ -163,9 +170,11 @@ To query the last block, remove the ``--id`` argument.
 get_storage_at
 --------------
 
-Besides querying the contract's code, you may also want to query the contract's storage at a specific key. To do so, you first need to understand which key is of interest to you.
+Besides querying the contract's code, you may also want to query the contract's storage at a
+specific key. To do so, you first need to understand which key is of interest to you.
 As you saw before, StarkNet introduces a new primitive:
-:ref:`storage variables <storage_var>`. Each storage variable is mapped to a storage key (a field element).
+:ref:`storage variables <storage_var>`. Each storage variable is mapped to a storage key
+(a field element).
 To compute this key, run the following python code:
 
 .. tested-code:: python get_variable_key
@@ -199,7 +208,9 @@ Note that this is the same result obtained by the call to ``get_balance``.
 
 
 Later on, at the :ref:`User authentication <user_authentication>` section, you will see :ref:`a
-generalization of storage variables <storage_maps>`, which allow, for example, a balance variable for each User. This will require minor adjustments to the code above, which we will review in the relevant section.
+generalization of storage variables <storage_maps>`, which allow, for example, a balance variable
+for each User. This will require minor adjustments to the code above, which we will review in the
+relevant section.
 
 
 .. _change_query_context:
@@ -207,8 +218,10 @@ generalization of storage variables <storage_maps>`, which allow, for example, a
 Block-specific queries
 ----------------------
 
-Some of these CLI functions accept an additional argument, ``--block_id``, which applies the given query to a specific block.
+Some of these CLI functions accept an additional argument, ``--block_id``, which applies the given
+query to a specific block.
 This assists, for example, when you want to query the balance variable at a specific point in time.
 
-To determine whether a CLI function can be executed as a block-specific query, use the ``--help`` argument to see if ``--block_id`` is an optional argument for that function.
+To determine whether a CLI function can be executed as a block-specific query, use the ``--help``
+argument to see if ``--block_id`` is an optional argument for that function.
 Without the ``--block_id`` argument, the query is applied to the last accepted block.

@@ -7,7 +7,8 @@
 Hello, StarkNet
 ===============
 
-StarkNet is a permissionless, decentralized ZK-Rollup operating as an L2 network over Ethereum. StarkNet allows any dApp to achieve unlimited scale for its computation --
+StarkNet is a permissionless, decentralized ZK-Rollup operating as an L2 network over Ethereum.
+StarkNet allows any dApp to achieve unlimited scale for its computation --
 without compromising Ethereum's composability and security.
 
 StarkNet Alpha, the Mainnet release candidate, is currently deployed.

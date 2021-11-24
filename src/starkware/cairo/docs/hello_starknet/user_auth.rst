@@ -1,6 +1,5 @@
 .. proofedDate 2021/11/23
 
-.. comment null
 
 .. _user_authentication:
 
@@ -40,7 +39,8 @@ to a map from public key (User) to balance
     func balance(user : felt) -> (res : felt):
     end
 
-In fact, the ``@storage_var`` decorator allows you to add multiple arguments to create even more complicated maps.
+In fact, the ``@storage_var`` decorator allows you to add multiple arguments to create even more
+complicated maps.
 The functions ``balance.read()`` and ``balance.write()`` will now have the following signatures:
 
 .. code-block:: cairo
@@ -67,11 +67,13 @@ We now have to modify ``increase_balance`` to do the following:
 1.  Write to the appropriate ``balance`` entry.
 2.  Verify that the User has signed on this change.
 
-For the signature, we will use the STARK-friendly ECDSA signature, which is natively supported in Cairo.
+For the signature, we will use the STARK-friendly ECDSA signature, which is natively supported in
+Cairo.
 For technical details about this cryptographic primitive, see
 `STARK Curve <https://docs.starkware.co/starkex-docs/crypto/stark-curve>`_.
 
-We will need the ``ecdsa`` builtin to verify the signature, so we will change the ``%builtins`` line to:
+We will need the ``ecdsa`` builtin to verify the signature, so we will change the ``%builtins`` line
+to:
 
 .. tested-code:: cairo user_auth_builtins
 
@@ -114,18 +116,24 @@ Next, we will change the code of ``increase_balance()`` to:
         return ()
     end
 
-``verify_ecdsa_signature`` behaves like an assert -- in the case that the signature is invalid, the function will revert the entire transaction.
+``verify_ecdsa_signature`` behaves like an assert -- in the case that the signature is invalid,
+the function will revert the entire transaction.
 
 .. topic:: Note
 
-    Note that we don't handle replay attacks here. In a replay, once the User signs a transaction, someone may call it multiple times.
-    One way to prevent replay attacks is to add a ``nonce`` argument to ``increase_balance``, change the signed message to
+    Note that we don't handle replay attacks here. In a replay, once the User signs a transaction,
+    someone may call it multiple times.
+    One way to prevent replay attacks is to add a ``nonce`` argument to ``increase_balance``,
+    change the signed message to
     the Pedersen hash of the nonce and the amount, and define
-    another storage map from the signed message to a flag (either 0 or 1) -- indicating whether or not that transaction was executed by the system.
+    another storage map from the signed message to a flag (either 0 or 1) -- indicating whether or
+    not that transaction was executed by the system.
     Future versions of StarkNet will handle User authentication and prevent replay attacks.
 
 
-Similar to the code change for ``increase_balance()`` , we adjust ``get_balance()`` to handle the balance mapping. Here we don't need to verify the signature (since StarkNet's storage is not private anyway), so the change is simpler:
+Similar to the code change for ``increase_balance()`` , we adjust ``get_balance()`` to handle the
+balance mapping. Here we don't need to verify the signature (since StarkNet's storage is not private
+anyway), so the change is simpler:
 
 .. tested-code:: cairo user_auth_get_balance
 
@@ -212,7 +220,8 @@ You can query the transaction status:
 
     starknet tx_status --id TX_ID
 
-Finally, after the transaction is executed (status ``PENDING`` or ``ACCEPTED_ONCHAIN``), we may query the User's balance.
+Finally, after the transaction is executed (status ``PENDING`` or ``ACCEPTED_ONCHAIN``), we may
+query the User's balance.
 
 .. tested-code:: bash user_auth_call
 
@@ -228,8 +237,11 @@ You should get:
 
     4321
 
-Note that if you want to use the :ref:`get_storage_at` CLI command to query the balance of a specific User, you can no longer compute the relevant key by only supplying the name of the storage variable. That is because the balance storage variable now requires an additional argument, namely,
-the User key. Hence, you will need to supply the additional arguments when acquiring the key used in ``get_storage_at``. In our case, this translates to the following python code:
+Note that if you want to use the :ref:`get_storage_at` CLI command to query the balance of a
+specific User, you can no longer compute the relevant key by only supplying the name of the storage
+variable. That is because the balance storage variable now requires an additional argument, namely,
+the User key. Hence, you will need to supply the additional arguments when acquiring the key used
+in ``get_storage_at``. In our case, this translates to the following python code:
 
 .. tested-code:: python user_auth_balance_key
 
@@ -273,15 +285,20 @@ After this, when querying the transaction status, you should get:
     {
         "tx_failure_reason": {
             "code": "TRANSACTION_FAILED",
-            "error_message": "Error at pc=0:71:\nSignature (1225578735933442828068102633747590437426782890965066746429241472187377583468, 1), is invalid, with respect to the public key 1628448741648245036800002906075225705100596136133912895015035902954123957052, and the message hash 2145928028330445730928899764978337236302436665109337681432022680924515407233.\nCairo traceback (most recent call last):\nUnknown location (pc=0:155)\nUnknown location (pc=0:127)",
+            "error_message": "Error at pc=0:71:\nSignature (1225578735933442828068102633747590437426782890965066746429241472187377583468, 1), is
+            invalid, with respect to the public key 1628448741648245036800002906075225705100596136133912895015035902954123957052, and the message hash 2145928028330445730928899764978337236302436665109337681432022680924515407233.\nCairo traceback (most recent call last):\nUnknown location (pc=0:155)\nUnknown location (pc=0:127)",
             "tx_id": 2
         },
         "tx_status": "REJECTED"
     }
 
 
-This indicates that the transaction was reverted due to an invalid signature. Notice that the error message entry states that the error location is unknown. This is because the StarkNet network is not aware of the contract's source code and debug information.
-To retrieve the error location and reconstruct the traceback, add the path to the relevant compiled contract in the transaction status query, using the ``--contract`` argument. To better display the error (and only it), add the ``--error_message`` flag as well:
+This indicates that the transaction was reverted due to an invalid signature. Notice that the error
+message entry states that the error location is unknown. This is because the StarkNet network is not
+aware of the contract's source code and debug information.
+To retrieve the error location and reconstruct the traceback, add the path to the relevant compiled
+contract in the transaction status query, using the ``--contract`` argument. To better display the
+error (and only it), add the ``--error_message`` flag as well:
 
 .. tested-code:: bash user_auth_get_error_message
 

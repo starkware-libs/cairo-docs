@@ -1,7 +1,5 @@
 .. proofedDate 2021/11/23
 
-.. comment null
-
 
 Write unit tests
 ================

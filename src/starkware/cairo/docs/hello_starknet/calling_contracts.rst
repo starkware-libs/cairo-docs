@@ -1,6 +1,5 @@
 .. proofedDate 2021/11/23
 
-.. comment null
 
 Call another contract
 =====================
@@ -13,13 +12,15 @@ Call another contract
 
     **Prerequisites**
 
-        - Start by deploying the example contract in :ref:`starknet_intro` (as per the :ref:`compilation and deployment instructions <compile_contract>`).
+        - Start by deploying the example contract in :ref:`starknet_intro` (as per
+        the :ref:`compilation and deployment instructions <compile_contract>`).
 
         - Denote the address of this contract by ``BALANCE_CONTRACT``.
 
 .. _contract function:
 
-A contract function may invoke an external function of another contract. To call this contract from another contract, define an interface by copying the declarations of the external functions:
+A contract function may invoke an external function of another contract. To call this contract
+from another contract, define an interface by copying the declarations of the external functions:
 
 .. tested-code:: cairo call_contract_interface
 
@@ -63,7 +64,8 @@ Note that calling a function of another contract requires passing one additional
 before the function's original arguments -- the address of the called contract.
 For example, ``IBalanceContract.increase_balance`` gets two arguments:
 ``contract_address`` and ``amount`` (rather than just ``amount``).
-In addition, the ``syscall_ptr``, the ``storage_ptr``, and the ``range_check_ptr`` implicit arguments are required.
+In addition, the ``syscall_ptr``, the ``storage_ptr``, and the ``range_check_ptr`` implicit
+arguments are required.
 
 Create a file named ``proxy_contract.cairo`` containing the interface declaration and the two
 functions ``call_increase_balance()`` and ``call_get_balance()``,
@@ -115,7 +117,8 @@ Both commands should return ``10000``.
 Get the caller address
 ----------------------
 
-If your function was called by another contract, you can retrieve the address of that contract using the ``get_caller_address()`` library function:
+If your function was called by another contract, you can retrieve the address of that contract
+using the ``get_caller_address()`` library function:
 
 .. tested-code:: cairo get_caller_address
 
@@ -132,4 +135,6 @@ to the ``increase_balance()`` function of ``BALANCE_CONTRACT``:
 It would return ``PROXY_CONTRACT`` if called from
 ``PROXY_CONTRACT`` and 0 if called directly.
 
-Note that if you use ``get_caller_address()`` in a function ``foo()`` , that was called by another function ``bar()`` within your contract, it will still return the address of the contract that invoked ``bar()`` (or 0 if it was invoked by a User).
+Note that if you use ``get_caller_address()`` in a function ``foo()`` , that was called by another
+function ``bar()`` within your contract, it will still return the address of the contract that
+invoked ``bar()`` (or 0 if it was invoked by a User).

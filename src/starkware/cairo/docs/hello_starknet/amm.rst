@@ -1,8 +1,10 @@
 .. proofedDate 2021/11/23
 
-.. comment
+.. _Uniswap: https://docs.uniswap.org/protocol/V2/concepts/protocol-overview/how-uniswap-works
 
-.. _Uniswap: https://uniswap.org/docs/v2/protocol-overview/how-uniswap-works/
+.. _library: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/math.cairo
+
+.. _code: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/starknet/apps/amm_sample/amm_sample.cairo
 
 .. _amm_starknet:
 
@@ -35,12 +37,16 @@ A simple Automated Market Maker (AMM)
         - refer to the Uniswap_ docs, or
         - check the short description in our previous :ref:`AMM tutorial <amm_cairo>`.
 
-This tutorial reviews the code of a simple AMM written as a StarkNet contract; it highlights specific implementation details. The contract is deployable (and is actually deployed
+This tutorial reviews the code of a simple AMM written as a StarkNet contract; it highlights
+specific implementation details. The contract is deployable (and is actually deployed
 -- `go check it out <https://amm-demo.starknet.starkware.co>`_)
-to the StarkNet Planets Alpha release. It will be seamlessly deployable and compatible with future StarkNet releases.
+to the StarkNet Planets Alpha release. It will be seamlessly deployable and compatible with
+future StarkNet releases.
 
-We start by describing the scope of the contract functionality and follow with a dive into the implementation.
-Finally, we demonstrate how to invoke the demo contract's functionality on the StarkNet Planets Alpha environment with concrete examples.
+We start by describing the scope of the contract functionality and follow with a dive into the
+implementation.
+Finally, we demonstrate how to invoke the demo contract's functionality on the StarkNet Planets
+Alpha environment with concrete examples.
 
 Before we begin, you can review the full contract code `here
 <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/starknet/
@@ -51,18 +57,27 @@ apps/amm_sample/amm_sample.cairo>`_.
 AMM implementation in StarkNet Planets Alpha
 --------------------------------------------
 
-For those who read the :ref:`previous tutorial <amm_cairo>` -- comparing the code written there to the contract code in this tutorial can be an illuminating exercise that highlights the power of StarkNet.
+For those who read the :ref:`previous tutorial <amm_cairo>` -- comparing the code written there to
+the contract code in this tutorial can be an illuminating exercise that highlights the power of
+StarkNet.
 
 In this sample contract, we will:
 
     * limit our functionality to exactly one Pool to be managed by the contract
-    * implement a straightforward swap functionality (in both directions) using a simple curve, i.e., the constant product formula (:math:`x \cdot y = k`)
-    * refer to the tokens managed by the AMM as token A and token B, which represent any type of fungible token
+    * implement a straightforward swap functionality (in both directions) using a simple curve,
+    i.e., the constant product formula (:math:`x \cdot y = k`)
+    * refer to the tokens managed by the AMM as token A and token B, which represent any type of
+    fungible token
 
-For simplicity, some functionality related to interaction with ERC20 contracts will be mocked inside the AMM, i.e., minting tokens in an ERC20 contract are mocked in this sample contract. In practice, this logic would be implemented inside an ERC20 contract.
+For simplicity, some functionality related to interaction with ERC20 contracts will be mocked
+inside the AMM, i.e., minting tokens in an ERC20 contract are mocked in this sample contract.
+In practice, this logic would be implemented inside an ERC20 contract.
 
-The important point from this example is how StarkNet enables the developer of the Application to focus on specifying the verifiable business logic and constraints;
-while enjoying massive scalability -- without compromising security. In other words, only the invocable functions and the relevant storage variables used to maintain the state of the Application need to be specified by the developer.
+The important point from this example is how StarkNet enables the developer of the Application to
+focus on specifying the verifiable business logic and constraints;
+while enjoying massive scalability -- without compromising security. In other words, only the
+invocable functions and the relevant storage variables used to maintain the state of the
+Application need to be specified by the developer.
 
 
 .. _The AMM state:
@@ -70,7 +85,8 @@ while enjoying massive scalability -- without compromising security. In other wo
 The AMM state
 --------------
 
-Next, we dive into the implementation. We will start by reviewing how we maintain the state of the AMM.
+Next, we dive into the implementation. We will start by reviewing how we maintain the state of the
+AMM.
 
 We require the following fields in order to maintain the state:
 
@@ -80,13 +96,15 @@ We require the following fields in order to maintain the state:
 
 .. topic:: Note
 
-    As explained above, item 2 is only needed for this release and will be replaced with regular ERC-20 interactions in the future.
+    As explained above, item 2 is only needed for this release and will be replaced with regular
+    ERC-20 interactions in the future.
 
 In StarkNet, the programmatic model for storage is a simple key/value store.
 We can define a :ref:`storage variable <storage_var>`, so reading and writing from/to
 storage is just a matter of calling ``read`` and ``write`` on that variable.
 
-The Pool balance is defined as a mapping between the token type (predefined constants) and the balance available in the Pool for that token type.:
+The Pool balance is defined as a mapping between the token type (predefined constants) and the
+balance available in the Pool for that token type.:
 
 .. tested-code:: cairo sn_amm_pool_balance
 
@@ -94,7 +112,8 @@ The Pool balance is defined as a mapping between the token type (predefined cons
     func pool_balance(token_type : felt) -> (balance : felt):
     end
 
-The account balance is defined as a mapping between the account Id and token type, to the balance available in that account, for the given token type.
+The account balance is defined as a mapping between the account Id and token type, to the balance
+available in that account, for the given token type.
 
 .. tested-code:: cairo sn_amm_account_balance
 
@@ -130,16 +149,22 @@ The logic is fairly straightforward:
     3. assert it is not negative and doesn't exceed the upper bound
     4. write it to the account balance storage variable
 
-Observe that this flow covers cases where we subtract an amount from, or add an amount to, the balance.
+Observe that this flow covers cases where we subtract an amount from, or add an amount to, the
+balance.
 
 .. topic:: Note
 
     As mentioned, we assume that the reader is familiar with Cairo syntax.
     For those who are not, briefly, the relevant concepts are:
 
-    The usage of :ref:`implicit arguments <implicit_arguments>` passed to the `modify_account_balance` function inside the curly brackets. Specifically, the arguments necessary for the assertion and storage operations. Wherever such functionality is used, we will pass these implicit arguments.
+    The usage of :ref:`implicit arguments <implicit_arguments>` passed to the
+    `modify_account_balance` function inside the curly brackets. Specifically, the arguments
+    necessary for the assertion and storage operations. Wherever such functionality is used,
+    we will pass these implicit arguments.
 
-    The assert functions used here are imported from Cairo's `common math library <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/math.cairo>`_. In this case, ``assert_nn_le`` asserts that the first argument is non-negative and is less than or equal to the second argument (as *per* **3** above).
+    The assert functions used here are imported from Cairo's common math library_. In this case,
+    ``assert_nn_le`` asserts that the first argument is non-negative and is less than or equal to
+    the second argument (as *per* **3** above).
 
 To allow a User to read the balance of an account, we define the following:
 
@@ -211,10 +236,12 @@ Next, the primary function of the contract -- swapping tokens.
         return (amount_to=amount_to)
     end
 
-``swap`` receives as inputs the account id, the token type, and the amount of the token to be swapped. The function starts by verifying the validity of the inputs:
+``swap`` receives as inputs the account id, the token type, and the amount of the token to be
+swapped. The function starts by verifying the validity of the inputs:
 
     *   the token type is a valid token by asserting that it is equal to one of the Pool's token types
-    *   the swap amount requested is valid, i.e., it does not exceed the upper bound, and the account has enough funds to swap
+    *   the swap amount requested is valid, i.e., it does not exceed the upper bound, and the
+    account has enough funds to swap
 
 If all checks pass, we proceed to execute the swap:
 
@@ -263,23 +290,27 @@ The logic of the swapping itself is fairly straightforward:
     2. calculate the amount of tokens of the opposite type to be received by the Pool
     3. update the account balances for both tokens, as well as the Pool's balances
 
-Most of this implementation invokes functions we described earlier (``get_pool_token_balance``, ``modify_account_balance``, and``set_pool_token_balance``).
+Most of this implementation invokes functions we described earlier (``get_pool_token_balance``,
+``modify_account_balance``, and``set_pool_token_balance``).
 
 
-Note that the calculation of the amount to be swapped essentially implements the AMM constant product formula:
+Note that the calculation of the amount to be swapped essentially implements the AMM constant
+product formula:
 
 :math:`\text{amount_to} =
 \frac{\text{amm_to_balance} \cdot \text{amount_from}}
 {\text{amm_from_balance} + \text{amount_from}}`
 
-We use Cairo's common math library, specifically ``unsigned_div_rem`` (unsigned division with remainder), to calculate the amount of tokens to be received.
+We use Cairo's common math library, specifically ``unsigned_div_rem`` (unsigned division with
+remainder), to calculate the amount of tokens to be received.
 
 .. _Initialize the AMM:
 
 Initialize the AMM
 -------------------
 
-As we don't have contract interaction and liquidity providers in this version, we will now define how to initialize the AMM: both the liquidity Pool itself and some account balances.
+As we don't have contract interaction and liquidity providers in this version, we will now define
+how to initialize the AMM: both the liquidity Pool itself and some account balances.
 
 .. tested-code:: cairo sn_amm_init_amm
 
@@ -296,7 +327,8 @@ As we don't have contract interaction and liquidity providers in this version, w
         return ()
     end
 
-Initializing the Pool is a simple function that accepts two balances for the tokens (A and B), and sets them using the ``set_pool_token_balance`` function we defined above:
+Initializing the Pool is a simple function that accepts two balances for the tokens (A and B), and
+sets them using the ``set_pool_token_balance`` function we defined above:
 The ``POOL_UPPER_BOUND`` is a constant defined to prevent overflows.
 
 Having this function defined, we proceed to add demo tokens to an account:
@@ -325,7 +357,10 @@ Having this function defined, we proceed to add demo tokens to an account:
         return ()
     end
 
-Note that here we add another business constraint (for demo purposes) that the account is capped at some number calculated as a ratio from the Pool cap. Specifically, ``ACCOUNT_BALANCE_BOUND`` is defined as ``POOL_UPPER_BOUND`` divided by 1000, so the cap for an account is 1/1000 that of a Pool. All constants are defined at the top of the contract file.
+Note that here we add another business constraint (for demo purposes) that the account is capped at
+some number calculated as a ratio from the Pool cap. Specifically, ``ACCOUNT_BALANCE_BOUND`` is
+defined as ``POOL_UPPER_BOUND`` divided by 1000, so the cap for an account is 1/1000 that of a Pool.
+All constants are defined at the top of the contract file.
 
 .. _Explore examples:
 
@@ -334,7 +369,8 @@ Interaction examples
 
 .. topic:: Prerequisites
 
-    * the reader is familiar with the StarkNet CLI. If this is not the case, we recommend you review this :ref:`section <starknet_intro>`
+    * the reader is familiar with the StarkNet CLI. If this is not the case, we recommend you review
+    this :ref:`section <starknet_intro>`
 
     * the ``STARKNET_NETWORK`` environment variable is set as alpha:
 
@@ -342,13 +378,14 @@ Interaction examples
 
         export STARKNET_NETWORK=alpha
 
-    * for this section, you need to have the `contract code <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/starknet/apps/amm_sample/amm_sample.cairo>`_.
+    * for this section, you need to have the contract code_.
 
 .. test::
 
     assert codes['starknet_env'] == codes['amm_starknet_env']
 
-We can now explore a few examples which demonstrate how to interact with the contract using the StarkNet CLI tool. An instance of this contract is deployed and initialized at address ``0x05``.
+We can now explore a few examples which demonstrate how to interact with the contract using the
+StarkNet CLI tool. An instance of this contract is deployed and initialized at address ``0x05``.
 
 
 To use the StarkNet CLI, start by generating the ABI of the contract:
@@ -382,7 +419,8 @@ be a 251-bit integer value:
         --function add_demo_token \
         --inputs ACCOUNT_ID 1000 1000
 
-Now that we have some tokens, we can use the AMM and swap 500 units of token A in exchange for some units of token B (the exact number depends on the current balance of the Pool).
+Now that we have some tokens, we can use the AMM and swap 500 units of token A in exchange for some
+units of token B (the exact number depends on the current balance of the Pool).
 
 .. tested-code:: bash sn_amm_invoke_swap
 
