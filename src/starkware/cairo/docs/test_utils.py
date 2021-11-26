@@ -1,4 +1,5 @@
 import dataclasses
+import os
 from collections import defaultdict
 from enum import Enum, auto
 from typing import Dict
@@ -6,7 +7,11 @@ from typing import Dict
 import isort
 
 from starkware.cairo.lang.compiler.ast.code_elements import (
-    CodeElementDirective, CodeElementEmptyLine, CodeElementImport, CommentedCodeElement)
+    CodeElementDirective,
+    CodeElementEmptyLine,
+    CodeElementImport,
+    CommentedCodeElement,
+)
 from starkware.cairo.lang.compiler.parser import parse_file
 
 
@@ -16,7 +21,7 @@ def reorganize_code(code: str) -> str:
     imports.
     """
 
-    cairo_file = parse_file(code=code, filename='')
+    cairo_file = parse_file(code=code, filename="")
 
     class CodeElementType(Enum):
         DIRECTIVE = 0
@@ -40,7 +45,7 @@ def reorganize_code(code: str) -> str:
         empty_line,
         *code_element_by_group[CodeElementType.IMPORT],
         empty_line,
-        *code_element_by_group[CodeElementType.OTHER]
+        *code_element_by_group[CodeElementType.OTHER],
     ]
     cairo_file = dataclasses.replace(
         cairo_file,
@@ -51,5 +56,10 @@ def reorganize_code(code: str) -> str:
     )
 
     code = cairo_file.format()
-    code = isort.SortImports(file_contents=code, lines_after_imports=1).output
+    code = isort.api.sort_code_string(
+        code=code,
+        lines_after_imports=1,
+        multi_line_output=4,
+        settings_path=os.path.join(os.path.dirname(__file__), "../../../.."),
+    )
     return code

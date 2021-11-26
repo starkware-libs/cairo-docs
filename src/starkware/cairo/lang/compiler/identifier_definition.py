@@ -12,8 +12,7 @@ from starkware.cairo.lang.compiler.ast.expr import Expression
 from starkware.cairo.lang.compiler.ast.formatting_utils import LocationField
 from starkware.cairo.lang.compiler.error_handling import Location
 from starkware.cairo.lang.compiler.fields import CairoTypeAsStr
-from starkware.cairo.lang.compiler.preprocessor.flow import (
-    FlowTrackingData, FlowTrackingDataActual, ReferenceManager)
+from starkware.cairo.lang.compiler.preprocessor.flow import FlowTrackingData, ReferenceManager
 from starkware.cairo.lang.compiler.references import Reference
 from starkware.cairo.lang.compiler.scoped_name import ScopedName, ScopedNameAsStr
 
@@ -35,13 +34,13 @@ class FutureIdentifierDefinition(IdentifierDefinition):
     Represents an identifier that will be defined later in the code.
     """
 
-    TYPE: ClassVar[str] = 'future'
-    identifier_type: type
+    TYPE: ClassVar[str] = "future"
+    identifier_type: Type[IdentifierDefinition]
 
 
 @marshmallow_dataclass.dataclass
 class AliasDefinition(IdentifierDefinition):
-    TYPE: ClassVar[str] = 'alias'
+    TYPE: ClassVar[str] = "alias"
     Schema: ClassVar[Type[marshmallow.Schema]] = marshmallow.Schema
 
     destination: ScopedName = field(metadata=dict(marshmallow_field=ScopedNameAsStr()))
@@ -49,7 +48,7 @@ class AliasDefinition(IdentifierDefinition):
 
 @marshmallow_dataclass.dataclass
 class ConstDefinition(IdentifierDefinition):
-    TYPE: ClassVar[str] = 'const'
+    TYPE: ClassVar[str] = "const"
     Schema: ClassVar[Type[marshmallow.Schema]] = marshmallow.Schema
 
     value: int
@@ -57,12 +56,11 @@ class ConstDefinition(IdentifierDefinition):
 
 @marshmallow_dataclass.dataclass
 class MemberDefinition(IdentifierDefinition):
-    TYPE: ClassVar[str] = 'member'
+    TYPE: ClassVar[str] = "member"
     Schema: ClassVar[Type[marshmallow.Schema]] = marshmallow.Schema
 
     offset: int
-    cairo_type: CairoType = field(
-        metadata=dict(marshmallow_field=CairoTypeAsStr(required=True)))
+    cairo_type: CairoType = field(metadata=dict(marshmallow_field=CairoTypeAsStr(required=True)))
 
     location: Optional[Location] = LocationField
 
@@ -76,7 +74,8 @@ class StructDefinition(IdentifierDefinition):
         ...
     end
     """
-    TYPE: ClassVar[str] = 'struct'
+
+    TYPE: ClassVar[str] = "struct"
     Schema: ClassVar[Type[marshmallow.Schema]] = marshmallow.Schema
 
     full_name: ScopedName = field(metadata=dict(marshmallow_field=ScopedNameAsStr()))
@@ -91,14 +90,15 @@ class StructDefinition(IdentifierDefinition):
         """
         Sorts the members according to their offset.
         """
-        item['members'] = dict(
-            sorted(item['members'].items(), key=lambda key_value: key_value[1].offset))
+        item["members"] = dict(
+            sorted(item["members"].items(), key=lambda key_value: key_value[1].offset)
+        )
         return item
 
 
 @marshmallow_dataclass.dataclass
 class LabelDefinition(IdentifierDefinition):
-    TYPE: ClassVar[str] = 'label'
+    TYPE: ClassVar[str] = "label"
     Schema: ClassVar[Type[marshmallow.Schema]] = marshmallow.Schema
 
     pc: int
@@ -106,38 +106,38 @@ class LabelDefinition(IdentifierDefinition):
 
 @marshmallow_dataclass.dataclass
 class FunctionDefinition(LabelDefinition):
-    TYPE: ClassVar[str] = 'function'
+    TYPE: ClassVar[str] = "function"
     Schema: ClassVar[Type[marshmallow.Schema]] = marshmallow.Schema
 
     decorators: List[str]
 
 
 @marshmallow_dataclass.dataclass
+class NamespaceDefinition(IdentifierDefinition):
+    TYPE: ClassVar[str] = "namespace"
+    Schema: ClassVar[Type[marshmallow.Schema]] = marshmallow.Schema
+
+
+@marshmallow_dataclass.dataclass
 class ReferenceDefinition(IdentifierDefinition):
-    TYPE: ClassVar[str] = 'reference'
+    TYPE: ClassVar[str] = "reference"
     Schema: ClassVar[Type[marshmallow.Schema]] = marshmallow.Schema
 
     full_name: ScopedName = field(metadata=dict(marshmallow_field=ScopedNameAsStr()))
-    cairo_type: CairoType = field(
-        metadata=dict(marshmallow_field=CairoTypeAsStr(required=True)))
+    cairo_type: CairoType = field(metadata=dict(marshmallow_field=CairoTypeAsStr(required=True)))
     references: List[Reference]
 
     def eval(
-            self, reference_manager: ReferenceManager, flow_tracking_data: FlowTrackingData) -> \
-            Expression:
-        reference = flow_tracking_data.resolve_reference(
-            reference_manager=reference_manager,
-            name=self.full_name)
-        assert isinstance(flow_tracking_data, FlowTrackingDataActual), \
-            'Resolved references can only come from FlowTrackingDataActual.'
-        expr = reference.eval(flow_tracking_data.ap_tracking)
-
-        return expr
+        self, reference_manager: ReferenceManager, flow_tracking_data: FlowTrackingData
+    ) -> Expression:
+        return flow_tracking_data.evaluate_reference(
+            reference_manager=reference_manager, name=self.full_name
+        )
 
 
 @marshmallow_dataclass.dataclass
 class ScopeDefinition(IdentifierDefinition):
-    TYPE: ClassVar[str] = 'scope'
+    TYPE: ClassVar[str] = "scope"
     Schema: ClassVar[Type[marshmallow.Schema]] = marshmallow.Schema
 
 
@@ -153,6 +153,7 @@ class IdentifierDefinitionSchema(OneOfSchema):
         MemberDefinition.TYPE: MemberDefinition.Schema,
         LabelDefinition.TYPE: LabelDefinition.Schema,
         FunctionDefinition.TYPE: FunctionDefinition.Schema,
+        NamespaceDefinition.TYPE: NamespaceDefinition.Schema,
         ReferenceDefinition.TYPE: ReferenceDefinition.Schema,
         ScopeDefinition.TYPE: ScopeDefinition.Schema,
         StructDefinition.TYPE: StructDefinition.Schema,

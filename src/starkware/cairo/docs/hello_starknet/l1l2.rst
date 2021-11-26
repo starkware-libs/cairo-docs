@@ -66,15 +66,7 @@ This means that you shouldn't move valuable assets
 to the StarkNet system, unless
 you have a way to withdraw them given the removal of the L2 contract.
 That being said,
-recall that StarkNet Alpha only runs on the Ropsten *testnet*.
-
-**Note**: In the current version of StarkNet, contracts cannot interact with one another.
-This means that any contract that needs some kind of interaction with L1, such as deposit/withdraw
-of tokens, needs to use this message mechanism. In the future,
-token transfers between L1 and L2 will be handled by bridge token contracts
-(much like an L2 ERC20 contract),
-and the contract developer will be able to simply interact with those L2 contract.
-Then, the message mechanism will be required only if a developer needs a custom messaging protocol.
+recall that StarkNet Alpha only runs on the Goerli *testnet*.
 
 An example of a simple token bridge
 -----------------------------------
@@ -98,10 +90,9 @@ Start with the ``%lang`` and ``%builtins`` directives, a few imports and a few c
     from starkware.cairo.common.cairo_builtins import HashBuiltin
     from starkware.cairo.common.math import assert_nn
     from starkware.starknet.common.messages import send_message_to_l1
-    from starkware.starknet.common.storage import Storage
 
     const L1_CONTRACT_ADDRESS = (
-        0xce08635cc6477f3634551db7613cc4f36b4e49dc)
+        0x2Db8c2615db39a5eD8750B87aC8F217485BE11EC)
     const MESSAGE_WITHDRAW = 0
 
 Note that in real applications you may want to maintain the address of the L1 contract as a
@@ -119,7 +110,7 @@ Then, define the storage variable that holds the balances, together with a gette
 
     @view
     func get_balance{
-            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
+            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
             range_check_ptr}(user : felt) -> (balance : felt):
         let (res) = balance.read(user=user)
         return (res)
@@ -133,7 +124,7 @@ effectively "print" money. In addition, you'll want to check that ``amount`` is 
 
     @external
     func increase_balance{
-            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
+            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
             range_check_ptr}(user : felt, amount : felt):
         let (res) = balance.read(user=user)
         balance.write(user, res + amount)
@@ -154,9 +145,8 @@ when doing so.
 
     @external
     func withdraw{
-            syscall_ptr : felt*, storage_ptr : Storage*,
-            pedersen_ptr : HashBuiltin*, range_check_ptr}(
-            user : felt, amount : felt):
+            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
+            range_check_ptr}(user : felt, amount : felt):
         # Make sure 'amount' is positive.
         assert_nn(amount)
 
@@ -215,7 +205,7 @@ L1 handler:
 
     @l1_handler
     func deposit{
-            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
+            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
             range_check_ptr}(
             from_address : felt, user : felt, amount : felt):
         # Make sure the message was sent by the intended L1 contract.
@@ -274,24 +264,38 @@ Compile and deploy the contract:
 Don't forget to set the ``STARKNET_NETWORK`` environment variable to ``alpha``
 before running ``starknet deploy``.
 
+Set the following environment variable:
+
+.. tested-code:: bash l1l2_contract_address
+
+    # The deployment address of the previous contract.
+    export CONTRACT_ADDRESS="<address of the previous contract>"
+
+Choose your favorite ``USERID``, it should
+be a 251-bit integer value:
+
+.. tested-code:: bash l1l2_user_id
+
+    export USERID="<favorite 251-bit integer>"
+
 Invoke the ``increase_balance`` function and then the ``withdraw`` function:
 
 .. tested-code:: bash l1l2_invoke
 
     starknet invoke \
-        --address CONTRACT_ADDRESS \
+        --address ${CONTRACT_ADDRESS} \
         --abi l1l2_abi.json \
         --function increase_balance \
         --inputs \
-            12345678 \
+            ${USERID} \
             3333
 
     starknet invoke \
-        --address CONTRACT_ADDRESS \
+        --address ${CONTRACT_ADDRESS} \
         --abi l1l2_abi.json \
         --function withdraw \
         --inputs \
-            12345678 \
+            ${USERID} \
             1000
 
 Call ``get_balance`` to check that the balance was computed correctly
@@ -300,11 +304,11 @@ Call ``get_balance`` to check that the balance was computed correctly
 .. tested-code:: bash l1l2_get_balance
 
     starknet call \
-        --address CONTRACT_ADDRESS \
+        --address ${CONTRACT_ADDRESS} \
         --abi l1l2_abi.json \
         --function get_balance \
         --inputs \
-            12345678
+            ${USERID}
 
 You should get:
 
@@ -318,16 +322,16 @@ Wait for the transaction to be accepted on-chain (this may take some time) -- yo
 use ``starknet tx_status`` to track the transaction's progress.
 Then, invoke the ``withdraw()`` function
 of the example contract, deployed at address
-`0xce08635cc6477f3634551db7613cc4f36b4e49dc <https://ropsten.etherscan.io/address/0xce08635cc6477f3634551db7613cc4f36b4e49dc#writeContract>`_,
+`0x2Db8c2615db39a5eD8750B87aC8F217485BE11EC <https://goerli.etherscan.io/address/0x2Db8c2615db39a5eD8750B87aC8F217485BE11EC#writeContract>`_,
 with the following arguments:
-``CONTRACT_ADDRESS, 12345678, 1000``
+``CONTRACT_ADDRESS, USERID, 1000``
 (where, as before, ``CONTRACT_ADDRESS`` is the address of the **L2** contract you deployed).
 After the ``withdraw()`` transaction, the user's L1 balance should be 1000 and
 their L2 balance should be 2333.
 
 After your ``withdraw()`` transaction is accepted on-chain, call the ``deposit()``
 function of the example contract. Use the following arguments:
-``CONTRACT_ADDRESS, 12345678, 600``
+``CONTRACT_ADDRESS, USERID, 600``
 to simulate a partial deposit out of the 1000 tokens.
 It may take some time until StarkNet processes the incoming message and calls the L1 handler
 (for example, the system waits for a few blockchain confirmations).

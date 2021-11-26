@@ -2,13 +2,21 @@ import re
 
 import pytest
 
-from starkware.python.utils import WriteOnceDict, blockify, composite, indent, safe_zip, unique
+from starkware.python.utils import (
+    WriteOnceDict,
+    all_subclasses,
+    blockify,
+    composite,
+    indent,
+    safe_zip,
+    unique,
+)
 
 
 def test_indent():
-    assert indent('aa\n  bb', 2) == '  aa\n    bb'
-    assert indent('aa\n  bb\n', 2) == '  aa\n    bb\n'
-    assert indent('  aa\n  bb\n\ncc\n', 2) == '    aa\n    bb\n\n  cc\n'
+    assert indent("aa\n  bb", 2) == "  aa\n    bb"
+    assert indent("aa\n  bb\n", 2) == "  aa\n    bb\n"
+    assert indent("  aa\n  bb\n\ncc\n", 2) == "    aa\n    bb\n\n  cc\n"
 
 
 def test_unique():
@@ -21,9 +29,11 @@ def test_write_once_dict():
     key = 5
     value = None
     d[key] = value
-    with pytest.raises(AssertionError, match=re.escape(
-            f"Trying to set key=5 to 'b' but key=5 is already set to 'None'.")):
-        d[key] = 'b'
+    with pytest.raises(
+        AssertionError,
+        match=re.escape(f"Trying to set key=5 to 'b' but key=5 is already set to 'None'."),
+    ):
+        d[key] = "b"
 
 
 def test_safe_zip():
@@ -31,14 +41,14 @@ def test_safe_zip():
     assert list(safe_zip()) == list(zip())
 
     # Test equal-length iterables (including a generator).
-    assert (
-        list(safe_zip((i for i in range(3)), range(3, 6), [1, 2, 3])) ==
-        list(zip((i for i in range(3)), range(3, 6), [1, 2, 3])))
+    assert list(safe_zip((i for i in range(3)), range(3, 6), [1, 2, 3])) == list(
+        zip((i for i in range(3)), range(3, 6), [1, 2, 3])
+    )
 
     # Test unequal-length iterables.
     test_cases = [[range(4), range(3)], [[], range(3)]]
     for iterables in test_cases:
-        with pytest.raises(AssertionError, match='Iterables to safe_zip are not equal in length.'):
+        with pytest.raises(AssertionError, match="Iterables to safe_zip are not equal in length."):
             list(safe_zip(*iterables))  # Consume generator to get to the error.
 
 
@@ -54,8 +64,39 @@ def test_blockify():
     # Edge cases.
     assert list(blockify(data=[], chunk_size=2)) == []
     assert list(blockify(data=data, chunk_size=len(data))) == [data]
-    with pytest.raises(expected_exception=AssertionError, match='chunk_size'):
+    with pytest.raises(expected_exception=AssertionError, match="chunk_size"):
         blockify(data=data, chunk_size=0)
 
     assert list(blockify(data=data, chunk_size=4)) == [[1, 2, 3, 4], [5, 6, 7]]
     assert list(blockify(data=data, chunk_size=2)) == [[1, 2], [3, 4], [5, 6], [7]]
+
+
+def test_all_subclasses():
+    # Inheritance graph, the lower rows inherit from the upper rows.
+    #   A   B
+    #  / \ /
+    # C   D
+    #  \ /|
+    #   E F
+    class A:
+        pass
+
+    class B:
+        pass
+
+    class C(A):
+        pass
+
+    class D(B, A):
+        pass
+
+    class E(C, D):
+        pass
+
+    class F(D):
+        pass
+
+    all_subclass_objects = all_subclasses(A)
+    all_subclasses_set = set(all_subclass_objects)
+    assert len(all_subclass_objects) == len(all_subclasses_set)
+    assert all_subclasses_set == {A, C, D, E, F}

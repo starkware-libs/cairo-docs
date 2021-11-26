@@ -2,20 +2,40 @@ import dataclasses
 from typing import Optional, Tuple, cast
 
 from starkware.cairo.lang.compiler.ast.expr import (
-    ExprConst, ExprDeref, Expression, ExprOperator, ExprReg)
+    ExprConst,
+    ExprDeref,
+    Expression,
+    ExprOperator,
+    ExprReg,
+)
 from starkware.cairo.lang.compiler.ast.instructions import (
-    AddApInstruction, AssertEqInstruction, CallInstruction, CallLabelInstruction, InstructionAst,
-    JnzInstruction, JumpInstruction, JumpToLabelInstruction, RetInstruction)
+    AddApInstruction,
+    AssertEqInstruction,
+    CallInstruction,
+    CallLabelInstruction,
+    DefineWordInstruction,
+    InstructionAst,
+    JnzInstruction,
+    JumpInstruction,
+    JumpToLabelInstruction,
+    RetInstruction,
+)
 from starkware.cairo.lang.compiler.const_expr_checker import is_const_expr
 from starkware.cairo.lang.compiler.error_handling import LocationError
-from starkware.cairo.lang.compiler.instruction import OFFSET_BITS, Instruction, Register
+from starkware.cairo.lang.compiler.instruction import (
+    OFFSET_BITS,
+    BytecodeData,
+    BytecodeElement,
+    Instruction,
+    Register,
+)
 
 
 class InstructionBuilderError(LocationError):
     pass
 
 
-def build_instruction(instruction: InstructionAst) -> Instruction:
+def build_instruction(instruction: InstructionAst) -> BytecodeElement:
     if isinstance(instruction.body, AssertEqInstruction):
         return _build_assert_eq_instruction(instruction)
     elif isinstance(instruction.body, JumpInstruction):
@@ -28,10 +48,13 @@ def build_instruction(instruction: InstructionAst) -> Instruction:
         return _build_ret_instruction(instruction)
     elif isinstance(instruction.body, AddApInstruction):
         return _build_addap_instruction(instruction)
+    elif isinstance(instruction.body, DefineWordInstruction):
+        return _build_data_word(instruction)
     else:
         raise InstructionBuilderError(
-            f'Instructions of type {type(instruction.body).__name__} are not implemented.',
-            location=instruction.body.location)
+            f"Instructions of type {type(instruction.body).__name__} are not implemented.",
+            location=instruction.body.location,
+        )
 
 
 def get_instruction_size(instruction: InstructionAst, allow_auto_deduction: bool = False):
@@ -63,12 +86,12 @@ def _apply_inverse_syntactic_sugar(instruction_ast: AssertEqInstruction) -> Asse
         return instruction_ast
 
     expr: ExprOperator = instruction_ast.b
-    for op, inv_op in [('+', '-'), ('*', '/')]:
+    for op, inv_op in [("+", "-"), ("*", "/")]:
         if expr.op == inv_op:
             if isinstance(expr.b, ExprConst):
                 # The preprocessor should have taken care of this.
                 raise InstructionBuilderError(
-                    'Subtraction and division are not supported for immediates.',
+                    "Subtraction and division are not supported for immediates.",
                     location=expr.b.location,
                 )
             return AssertEqInstruction(
@@ -79,7 +102,7 @@ def _apply_inverse_syntactic_sugar(instruction_ast: AssertEqInstruction) -> Asse
                     b=expr.b,
                     location=instruction_ast.location,
                 ),
-                location=instruction_ast.location
+                location=instruction_ast.location,
             )
 
     return instruction_ast
@@ -101,12 +124,14 @@ def _build_assert_eq_instruction(instruction_ast: InstructionAst) -> Instruction
     try:
         # If it fails, try to parse it as b = a instead of a = b.
         instruction_body: AssertEqInstruction = cast(AssertEqInstruction, instruction_ast.body)
-        return _build_assert_eq_instruction_inner(dataclasses.replace(
-            instruction_ast,
-            body=dataclasses.replace(
-                instruction_body,
-                a=instruction_body.b,
-                b=instruction_body.a)))
+        return _build_assert_eq_instruction_inner(
+            dataclasses.replace(
+                instruction_ast,
+                body=dataclasses.replace(
+                    instruction_body, a=instruction_body.b, b=instruction_body.a
+                ),
+            )
+        )
     except Exception:
         # If both fail, raise the exception thrown by parsing the original form.
         raise exc from None
@@ -125,8 +150,9 @@ def _build_assert_eq_instruction_inner(instruction_ast: InstructionAst) -> Instr
 
     res_desc = _parse_res(instruction_body.b)
 
-    ap_update = Instruction.ApUpdate.ADD1 if instruction_ast.inc_ap else \
-        Instruction.ApUpdate.REGULAR
+    ap_update = (
+        Instruction.ApUpdate.ADD1 if instruction_ast.inc_ap else Instruction.ApUpdate.REGULAR
+    )
 
     return Instruction(
         off0=off0,
@@ -152,10 +178,12 @@ def _build_jump_instruction(instruction_ast: InstructionAst) -> Instruction:
 
     res_desc = _parse_res(instruction_body.val)
 
-    ap_update = Instruction.ApUpdate.ADD1 if instruction_ast.inc_ap else \
-        Instruction.ApUpdate.REGULAR
-    pc_update = Instruction.PcUpdate.JUMP_REL if instruction_body.relative else \
-        Instruction.PcUpdate.JUMP
+    ap_update = (
+        Instruction.ApUpdate.ADD1 if instruction_ast.inc_ap else Instruction.ApUpdate.REGULAR
+    )
+    pc_update = (
+        Instruction.PcUpdate.JUMP_REL if instruction_body.relative else Instruction.PcUpdate.JUMP
+    )
 
     return Instruction(
         # In this case dst is not involved. Choose [fp - 1] as the default.
@@ -194,10 +222,12 @@ def _build_jnz_instruction(instruction_ast: InstructionAst) -> Instruction:
         op1_addr = Instruction.Op1Addr.IMM
     else:
         raise InstructionBuilderError(
-            'Invalid expression for jmp offset.', location=jump_offset.location)
+            "Invalid expression for jmp offset.", location=jump_offset.location
+        )
 
-    ap_update = Instruction.ApUpdate.ADD1 if instruction_ast.inc_ap else \
-        Instruction.ApUpdate.REGULAR
+    ap_update = (
+        Instruction.ApUpdate.ADD1 if instruction_ast.inc_ap else Instruction.ApUpdate.REGULAR
+    )
 
     return Instruction(
         off0=off0,
@@ -232,15 +262,16 @@ def _build_call_instruction(instruction_ast: InstructionAst) -> Instruction:
         imm = val.val
         op1_addr = Instruction.Op1Addr.IMM
     else:
-        raise InstructionBuilderError(
-            'Invalid offset for call.', location=val.location)
+        raise InstructionBuilderError("Invalid offset for call.", location=val.location)
 
     if instruction_ast.inc_ap:
         raise InstructionBuilderError(
-            'ap++ may not be used with the call opcode.', location=instruction_ast.location)
+            "ap++ may not be used with the call opcode.", location=instruction_ast.location
+        )
 
-    pc_update = Instruction.PcUpdate.JUMP_REL if instruction_body.relative else \
-        Instruction.PcUpdate.JUMP
+    pc_update = (
+        Instruction.PcUpdate.JUMP_REL if instruction_body.relative else Instruction.PcUpdate.JUMP
+    )
 
     return Instruction(
         # Use dst for [ap] <- fp.
@@ -268,7 +299,8 @@ def _build_ret_instruction(instruction_ast: InstructionAst) -> Instruction:
 
     if instruction_ast.inc_ap:
         raise InstructionBuilderError(
-            'ap++ may not be used with the ret opcode.', location=instruction_ast.location)
+            "ap++ may not be used with the ret opcode.", location=instruction_ast.location
+        )
 
     return Instruction(
         # Use dst for fp <- [fp - 2].
@@ -300,7 +332,8 @@ def _build_addap_instruction(instruction_ast: InstructionAst) -> Instruction:
 
     if instruction_ast.inc_ap:
         raise InstructionBuilderError(
-            'ap++ may not be used with the addap opcode.', location=instruction_ast.location)
+            "ap++ may not be used with the addap opcode.", location=instruction_ast.location
+        )
 
     return Instruction(
         # In this case dst is not involved. Choose [fp - 1] as the default.
@@ -317,6 +350,26 @@ def _build_addap_instruction(instruction_ast: InstructionAst) -> Instruction:
         fp_update=Instruction.FpUpdate.REGULAR,
         opcode=Instruction.Opcode.NOP,
     )
+
+
+def _build_data_word(instruction_ast: InstructionAst) -> BytecodeData:
+    """
+    Builds a BytecodeData object from the AST object, assuming the instruction is a
+    DefineWordInstruction.
+    """
+    instruction_body: DefineWordInstruction = cast(DefineWordInstruction, instruction_ast.body)
+
+    if instruction_ast.inc_ap:
+        raise InstructionBuilderError(
+            "ap++ may not be used with the dw opcode.", location=instruction_ast.location
+        )
+
+    if not isinstance(instruction_body.expr, ExprConst):
+        raise InstructionBuilderError(
+            "dw must be followed by a constant expression.", location=instruction_body.expr.location
+        )
+
+    return BytecodeData(data=instruction_body.expr.val)
 
 
 @dataclasses.dataclass
@@ -352,9 +405,7 @@ def _parse_res(expr: Expression) -> ResDescription:
     elif isinstance(expr, ExprOperator):
         return _parse_res_operator(expr)
     else:
-        raise InstructionBuilderError(
-            'Invalid RHS expression.',
-            location=expr.location)
+        raise InstructionBuilderError("Invalid RHS expression.", location=expr.location)
 
 
 def _parse_res_deref(expr: Expression) -> ResDescription:
@@ -363,7 +414,8 @@ def _parse_res_deref(expr: Expression) -> ResDescription:
     corresponding to [[reg + off] + off] or [fp + off] respectively.
     """
     if isinstance(expr, ExprDeref) or (
-            isinstance(expr, ExprOperator) and isinstance(expr.a, ExprDeref)):
+        isinstance(expr, ExprOperator) and isinstance(expr.a, ExprDeref)
+    ):
         # Double dereference.
         inner, off2 = _parse_offset(expr)
         inner_addr = _parse_dereference(inner)
@@ -394,14 +446,14 @@ def _parse_res_operator(expr: ExprOperator) -> ResDescription:
     Given an expression of the form "[reg + off] * [reg + off]" or "[reg + off] * imm" (* can be
     replaced by +), returns the corresponding ResDescription.
     """
-    if expr.op == '+':
+    if expr.op == "+":
         res = Instruction.Res.ADD
-    elif expr.op == '*':
+    elif expr.op == "*":
         res = Instruction.Res.MUL
     else:
         raise InstructionBuilderError(
-            f"Expected '+' or '*', found: '{expr.op}'.",
-            location=expr.location)
+            f"Expected '+' or '*', found: '{expr.op}'.", location=expr.location
+        )
 
     # Parse op0.
     op0_expr = _parse_dereference(expr.a)
@@ -419,8 +471,9 @@ def _parse_res_operator(expr: ExprOperator) -> ResDescription:
         op1_addr = Instruction.Op1Addr.FP if op1_reg is Register.FP else Instruction.Op1Addr.AP
     else:
         raise InstructionBuilderError(
-            'Expected a constant expression or a dereference expression.',
-            location=op1_expr.location)
+            "Expected a constant expression or a dereference expression.",
+            location=op1_expr.location,
+        )
 
     return ResDescription(
         off1=off1,
@@ -439,8 +492,7 @@ def _parse_dereference(expr: Expression):
     """
 
     if not isinstance(expr, ExprDeref):
-        raise InstructionBuilderError(
-            'Expected a dereference expression.', location=expr.location)
+        raise InstructionBuilderError("Expected a dereference expression.", location=expr.location)
     return expr.addr
 
 
@@ -466,18 +518,20 @@ def _parse_offset(expr: Expression) -> Tuple[Expression, int]:
     if not isinstance(expr, ExprOperator):
         return expr, 0
 
-    if expr.op == '+':
+    if expr.op == "+":
         sign = 1
-    elif expr.op == '-':
+    elif expr.op == "-":
         sign = -1
     else:
         raise InstructionBuilderError(
-            f"Expected '+' or '-', found: '{expr.op}'.", location=expr.location)
+            f"Expected '+' or '-', found: '{expr.op}'.", location=expr.location
+        )
     offset_limit = 2 ** (OFFSET_BITS - 1)
     if not isinstance(expr.b, ExprConst) or not -offset_limit <= sign * expr.b.val < offset_limit:
         raise InstructionBuilderError(
-            f'Expected a constant offset in the range [-2^{OFFSET_BITS - 1}, 2^{OFFSET_BITS - 1}).',
-            location=expr.b.location)
+            f"Expected a constant offset in the range [-2^{OFFSET_BITS - 1}, 2^{OFFSET_BITS - 1}).",
+            location=expr.b.location,
+        )
     return expr.a, sign * expr.b.val
 
 
@@ -487,6 +541,7 @@ def _parse_register(expr: Expression) -> Register:
     """
     if not isinstance(expr, ExprReg):
         raise InstructionBuilderError(
-            f'Expected a register. Found: {expr.format()}.', location=expr.location)
+            f"Expected a register. Found: {expr.format()}.", location=expr.location
+        )
 
     return expr.reg
