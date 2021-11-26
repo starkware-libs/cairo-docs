@@ -6,16 +6,19 @@ python_lib(starknet_cli_lib
 
     LIBS
     cairo_compile_lib
+    cairo_tracer_lib
     cairo_version_lib
     cairo_vm_utils_lib
+    everest_definitions_lib
     services_external_api_lib
+    starknet_abi_lib
     starknet_compile_lib
     starknet_contract_definition_lib
     starknet_definitions_lib
     starknet_feeder_gateway_client_lib
     starknet_gateway_client_lib
     starknet_transaction_lib
-    starkware_utils_lib
+    starkware_error_handling_lib
 )
 
 python_venv(starknet_cli_venv

@@ -1,5 +1,4 @@
 import base64
-import dataclasses
 import gzip
 import json
 from abc import abstractmethod
@@ -11,13 +10,17 @@ import marshmallow.decorators
 import marshmallow_dataclass
 from marshmallow_oneofschema import OneOfSchema
 
-from services.everest.api.gateway.transaction import (
-    EverestAddTransactionRequest, EverestTransaction)
-from services.everest.definitions import fields as everest_fields
+from services.everest.api.gateway.transaction import EverestTransaction
 from starkware.starknet.definitions import fields
 from starkware.starknet.definitions.error_codes import StarknetErrorCode
+from starkware.starknet.definitions.general_config import StarknetGeneralConfig
 from starkware.starknet.definitions.transaction_type import TransactionType
-from starkware.starknet.services.api.contract_definition import ContractDefinition
+from starkware.starknet.services.api.contract_definition import (
+    CONSTRUCTOR_SELECTOR,
+    ContractDefinition,
+)
+from starkware.starknet.services.api.gateway.contract_address import calculate_contract_address
+from starkware.starknet.services.api.gateway.transaction_hash import calculate_transaction_hash
 from starkware.starkware_utils.error_handling import wrap_with_stark_exception
 
 
@@ -35,6 +38,13 @@ class Transaction(EverestTransaction):
         Subclasses should define it as a class variable.
         """
 
+    @abstractmethod
+    def calculate_hash(self, general_config: StarknetGeneralConfig) -> int:
+        """
+        Calculates the transaction hash in the StarkNet network - a unique identifier of the
+        transaction. See calculate_transaction_hash() docstring for more details.
+        """
+
 
 @marshmallow_dataclass.dataclass(frozen=True)
 class Deploy(Transaction):
@@ -42,8 +52,9 @@ class Deploy(Transaction):
     Represents a transaction in the StarkNet network that is a deployment of a StarkNet contract.
     """
 
-    contract_address: int = field(metadata=fields.contract_address_metadata)
+    contract_address_salt: int = field(metadata=fields.contract_address_salt_metadata)
     contract_definition: ContractDefinition
+    constructor_calldata: List[int] = field(metadata=fields.call_data_metadata)
 
     # Class variables.
     tx_type: ClassVar[TransactionType] = TransactionType.DEPLOY
@@ -51,40 +62,53 @@ class Deploy(Transaction):
     @staticmethod
     def compress_program(program_json: dict):
         full_program = json.dumps(program_json)
-        compressed_program = gzip.compress(data=full_program.encode('ascii'))
+        compressed_program = gzip.compress(data=full_program.encode("ascii"))
         compressed_program = base64.b64encode(compressed_program)
-        return compressed_program.decode('ascii')
+        return compressed_program.decode("ascii")
 
     @marshmallow.decorators.post_dump
     def compress_program_post_dump(
-            self, data: Dict[str, Any], many: bool, **kwargs) -> Dict[str, Any]:
-        data['contract_definition']['program'] = Deploy.compress_program(
-            program_json=data['contract_definition']['program'])
+        self, data: Dict[str, Any], many: bool, **kwargs
+    ) -> Dict[str, Any]:
+        data["contract_definition"]["program"] = Deploy.compress_program(
+            program_json=data["contract_definition"]["program"]
+        )
         return data
 
     @marshmallow.decorators.pre_load
     def decompress_program(self, data: Dict[str, Any], many: bool, **kwargs) -> Dict[str, Any]:
-        compressed_program: str = data['contract_definition']['program']
+        compressed_program: str = data["contract_definition"]["program"]
 
         with wrap_with_stark_exception(
-                code=StarknetErrorCode.INVALID_PROGRAM, message='Invalid compressed program.',
-                exception_types=[Exception]):
-            compressed_program_bytes = base64.b64decode(compressed_program.encode('ascii'))
+            code=StarknetErrorCode.INVALID_PROGRAM,
+            message="Invalid compressed program.",
+            exception_types=[Exception],
+        ):
+            compressed_program_bytes = base64.b64decode(compressed_program.encode("ascii"))
             decompressed_program = gzip.decompress(data=compressed_program_bytes)
-            data['contract_definition']['program'] = json.loads(
-                decompressed_program.decode('ascii'))
+            data["contract_definition"]["program"] = json.loads(
+                decompressed_program.decode("ascii")
+            )
 
         return data
 
-    def _remove_debug_info(self) -> 'Deploy':
+    def calculate_hash(self, general_config: StarknetGeneralConfig) -> int:
         """
-        Sets debug_info in the Cairo contract program to None.
-        Returns an altered Deploy instance.
+        Calculates the transaction hash in the StarkNet network.
         """
-        altered_program = dataclasses.replace(self.contract_definition.program, debug_info=None)
-        altered_contract_definition = dataclasses.replace(
-            self.contract_definition, program=altered_program)
-        return dataclasses.replace(self, contract_definition=altered_contract_definition)
+        contract_address = calculate_contract_address(
+            salt=self.contract_address_salt,
+            contract_definition=self.contract_definition,
+            constructor_calldata=self.constructor_calldata,
+            caller_address=0,
+        )
+        return calculate_transaction_hash(
+            tx_type=TransactionType.DEPLOY,
+            contract_address=contract_address,
+            entry_point_selector=CONSTRUCTOR_SELECTOR,
+            calldata=self.constructor_calldata,
+            chain_id=general_config.chain_id.value,
+        )
 
 
 @marshmallow_dataclass.dataclass(frozen=True)
@@ -98,9 +122,25 @@ class InvokeFunction(Transaction):
     # A field element that encodes the signature of the called function.
     entry_point_selector: int = field(metadata=fields.entry_point_selector_metadata)
     calldata: List[int] = field(metadata=fields.call_data_metadata)
+    # Additional information given by the caller that represents the signature of the transaction.
+    # The exact way this field is handled is defined by the called contract's function, like
+    # calldata.
+    signature: List[int] = field(metadata=fields.signature_metadata)
 
     # Class variables.
     tx_type: ClassVar[TransactionType] = TransactionType.INVOKE_FUNCTION
+
+    def calculate_hash(self, general_config: StarknetGeneralConfig) -> int:
+        """
+        Calculates the transaction hash in the StarkNet network.
+        """
+        return calculate_transaction_hash(
+            tx_type=TransactionType.INVOKE_FUNCTION,
+            contract_address=self.contract_address,
+            entry_point_selector=self.entry_point_selector,
+            calldata=self.calldata,
+            chain_id=general_config.chain_id.value,
+        )
 
 
 class TransactionSchema(OneOfSchema):
@@ -112,6 +152,7 @@ class TransactionSchema(OneOfSchema):
     Transaction class (e.g., Transaction.load(invoke_function_dict), where
     {"type": "INVOKE_FUNCTION"} is in invoke_function_dict, will produce an InvokeFunction object).
     """
+
     type_schemas: Dict[str, Type[marshmallow.Schema]] = {
         TransactionType.DEPLOY.name: Deploy.Schema,
         TransactionType.INVOKE_FUNCTION.name: InvokeFunction.Schema,
@@ -122,9 +163,3 @@ class TransactionSchema(OneOfSchema):
 
 
 Transaction.Schema = TransactionSchema
-
-
-@marshmallow_dataclass.dataclass(frozen=True)
-class AddTransactionRequest(EverestAddTransactionRequest):
-    tx: Transaction
-    tx_id: int = field(metadata=everest_fields.tx_id_field_metadata)

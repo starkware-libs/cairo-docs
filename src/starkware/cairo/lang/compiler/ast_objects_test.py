@@ -13,44 +13,50 @@ def test_format_parentheses():
 
     # Call remove_parentheses(parse_expr()) to create an expression tree in the given structure
     # without ExprParentheses.
-    assert remove_parentheses(parse_expr('(a + b) * (c - d) * (e * f)')).format() == \
-        '(a + b) * (c - d) * e * f'
-    assert remove_parentheses(parse_expr('x - (a + b) - (c - d) - (e * f)')).format() == \
-        'x - (a + b) - (c - d) - e * f'
-    assert remove_parentheses(parse_expr('(a + b) + (c - d) + (e * f)')).format() == \
-        'a + b + c - d + e * f'
-    assert remove_parentheses(parse_expr('-(a + b + c)')).format() == '-(a + b + c)'
-    assert remove_parentheses(parse_expr('a + -b + c')).format() == 'a + (-b) + c'
-    assert remove_parentheses(parse_expr('&(a + b)')).format() == '&(a + b)'
-    assert remove_parentheses(parse_expr('a ** b ** c ** d')).format() == 'a ** (b ** (c ** d))'
+    assert (
+        remove_parentheses(parse_expr("(a + b) * (c - d) * (e * f)")).format()
+        == "(a + b) * (c - d) * e * f"
+    )
+    assert (
+        remove_parentheses(parse_expr("x - (a + b) - (c - d) - (e * f)")).format()
+        == "x - (a + b) - (c - d) - e * f"
+    )
+    assert (
+        remove_parentheses(parse_expr("(a + b) + (c - d) + (e * f)")).format()
+        == "a + b + c - d + e * f"
+    )
+    assert remove_parentheses(parse_expr("-(a + b + c)")).format() == "-(a + b + c)"
+    assert remove_parentheses(parse_expr("a + -b + c")).format() == "a + (-b) + c"
+    assert remove_parentheses(parse_expr("&(a + b)")).format() == "&(a + b)"
+    assert remove_parentheses(parse_expr("a ** b ** c ** d")).format() == "a ** (b ** (c ** d))"
 
     # Test that parentheses are added to non-atomized Dot and Subscript expressions.
-    assert remove_parentheses(parse_expr('(x * y).z')).format() == '(x * y).z'
-    assert remove_parentheses(parse_expr('(-x).y')).format() == '(-x).y'
-    assert remove_parentheses(parse_expr('(&x).y')).format() == '(&x).y'
-    assert remove_parentheses(parse_expr('(x * y)[z]')).format() == '(x * y)[z]'
-    assert remove_parentheses(parse_expr('(-x)[y]')).format() == '(-x)[y]'
-    assert remove_parentheses(parse_expr('(&x)[y]')).format() == '(&x)[y]'
+    assert remove_parentheses(parse_expr("(x * y).z")).format() == "(x * y).z"
+    assert remove_parentheses(parse_expr("(-x).y")).format() == "(-x).y"
+    assert remove_parentheses(parse_expr("(&x).y")).format() == "(&x).y"
+    assert remove_parentheses(parse_expr("(x * y)[z]")).format() == "(x * y)[z]"
+    assert remove_parentheses(parse_expr("(-x)[y]")).format() == "(-x)[y]"
+    assert remove_parentheses(parse_expr("(&x)[y]")).format() == "(&x)[y]"
 
-    assert remove_parentheses(parse_expr('&(x.y)')).format() == '&x.y'
-    assert remove_parentheses(parse_expr('-(x.y)')).format() == '-x.y'
-    assert remove_parentheses(parse_expr('(x.y)*z')).format() == 'x.y * z'
-    assert remove_parentheses(parse_expr('x-(y.z)')).format() == 'x - y.z'
+    assert remove_parentheses(parse_expr("&(x.y)")).format() == "&x.y"
+    assert remove_parentheses(parse_expr("-(x.y)")).format() == "-x.y"
+    assert remove_parentheses(parse_expr("(x.y)*z")).format() == "x.y * z"
+    assert remove_parentheses(parse_expr("x-(y.z)")).format() == "x - y.z"
 
-    assert remove_parentheses(parse_expr('([x].y).z')).format() == '[x].y.z'
-    assert remove_parentheses(parse_expr('&(x[y])')).format() == '&x[y]'
-    assert remove_parentheses(parse_expr('-(x[y])')).format() == '-x[y]'
-    assert remove_parentheses(parse_expr('(x[y])*z')).format() == 'x[y] * z'
-    assert remove_parentheses(parse_expr('x-(y[z])')).format() == 'x - y[z]'
-    assert remove_parentheses(parse_expr('(([x][y])[z])')).format() == '[x][y][z]'
-    assert remove_parentheses(parse_expr('x[(y+z)]')).format() == 'x[y + z]'
+    assert remove_parentheses(parse_expr("([x].y).z")).format() == "[x].y.z"
+    assert remove_parentheses(parse_expr("&(x[y])")).format() == "&x[y]"
+    assert remove_parentheses(parse_expr("-(x[y])")).format() == "-x[y]"
+    assert remove_parentheses(parse_expr("(x[y])*z")).format() == "x[y] * z"
+    assert remove_parentheses(parse_expr("x-(y[z])")).format() == "x - y[z]"
+    assert remove_parentheses(parse_expr("(([x][y])[z])")).format() == "[x][y][z]"
+    assert remove_parentheses(parse_expr("x[(y+z)]")).format() == "x[y + z]"
 
-    assert remove_parentheses(parse_expr('[((x+y) + z)]')).format() == '[x + y + z]'
+    assert remove_parentheses(parse_expr("[((x+y) + z)]")).format() == "[x + y + z]"
 
     # Test that parentheses are not added if they were already present.
-    assert parse_expr('(a * (b + c))').format() == '(a * (b + c))'
-    assert parse_expr('((a * ((b + c))))').format() == '((a * ((b + c))))'
-    assert parse_expr('(x + y)[z]').format() == '(x + y)[z]'
+    assert parse_expr("(a * (b + c))").format() == "(a * (b + c))"
+    assert parse_expr("((a * ((b + c))))").format() == "((a * ((b + c))))"
+    assert parse_expr("(x + y)[z]").format() == "(x + y)[z]"
 
 
 def test_format_parentheses_notes():
@@ -99,18 +105,20 @@ def test_format_func_call_notes():
     before = """\
 foo(x = 12 # Comment.
 )"""
-    with pytest.raises(FormattingError, match='Comments inside expressions are not supported'):
+    with pytest.raises(FormattingError, match="Comments inside expressions are not supported"):
         parse_code_element(before).format(allowed_line_length=100)
 
 
 def test_negative_numbers():
-    assert ExprConst(-1).format() == '-1'
-    assert ExprNeg(val=ExprConst(val=1)).format() == '-1'
-    assert ExprOperator(a=ExprConst(val=-1), op='+', b=ExprConst(val=-2)).format() == '(-1) + (-2)'
-    assert ExprOperator(
-        a=ExprNeg(val=ExprConst(val=1)),
-        op='+',
-        b=ExprNeg(val=ExprConst(val=2))).format() == '(-1) + (-2)'
+    assert ExprConst(-1).format() == "-1"
+    assert ExprNeg(val=ExprConst(val=1)).format() == "-1"
+    assert ExprOperator(a=ExprConst(val=-1), op="+", b=ExprConst(val=-2)).format() == "(-1) + (-2)"
+    assert (
+        ExprOperator(
+            a=ExprNeg(val=ExprConst(val=1)), op="+", b=ExprNeg(val=ExprConst(val=2))
+        ).format()
+        == "(-1) + (-2)"
+    )
 
 
 def test_file_format():
@@ -136,6 +144,7 @@ tempvar q      : felt
 local     z                     :T*=x
 assert x*z+x=    y+y
 static_assert   ap + (3 +   7 )+ ap   ==fp
+let()=foo()
 return  (1,[fp],
   [ap +3],)
    fibonacci  (a = 3 , b=[fp +1])
@@ -144,7 +153,28 @@ return  (1,[fp],
 label2:
 
   jmp rel 17 if [ap+3]!=  0
-[fp] = [fp] * [fp]"""
+[fp] = [fp] * [fp]
+with_attr     no_value_attribute:
+[ap] = [fp]; ap++
+end
+with_attr single_line_attribute  (
+
+    "A single line value"
+
+    ) :
+    [ap] = [fp]; ap++
+end
+with_attr long_value_attribute(
+    "A single line with_attr expression that is too long and does not fit into a single line"):
+    [ap] = [fp]; ap++
+end
+with_attr error_message  (  "Attribute value " "with"
+
+" multiple"
+"\\n"
+"lines"  ) :
+    [ap] = [fp]; ap++
+end"""
     after = """\
 ap += [fp]
 %lang starknet
@@ -164,6 +194,7 @@ alloc_locals
 local z : T* = x
 assert x * z + x = y + y
 static_assert ap + (3 + 7) + ap == fp
+let () = foo()
 return (1, [fp], [ap + 3])
 fibonacci(a=3, b=[fp + 1])
 [ap - 1] = [fp]  # This is a comment.
@@ -172,6 +203,24 @@ fibonacci(a=3, b=[fp + 1])
 label2:
 jmp rel 17 if [ap + 3] != 0
 [fp] = [fp] * [fp]
+with_attr no_value_attribute:
+    [ap] = [fp]; ap++
+end
+with_attr single_line_attribute("A single line value"):
+    [ap] = [fp]; ap++
+end
+with_attr long_value_attribute(
+        "A single line with_attr expression that is too long and does not fit into a single line"):
+    [ap] = [fp]; ap++
+end
+with_attr error_message(
+        "Attribute value "
+        "with"
+        " multiple"
+        "\\n"
+        "lines"):
+    [ap] = [fp]; ap++
+end
 """
     assert parse_file(before).format() == after
 
@@ -240,7 +289,9 @@ def test_file_format_comment_spaces():
 #   First line.
 #   Second line.
 [ap] = [ap] #{spaces}
-""".format(spaces='   ')
+""".format(
+        spaces="   "
+    )
     after = """\
 # First line.
 #
@@ -511,8 +562,22 @@ with   a , b  as   c,d  :
     [ap] = [ap]
 end
 """
-    assert parse_file(code).format() == """\
+    assert (
+        parse_file(code).format()
+        == """\
 with a, b as c, d:
     [ap] = [ap]
 end
 """
+    )
+
+
+def test_with_attr():
+    code = """\
+with_attr attribute_name  ("Comments"
+        # within attribute value
+        " are not supported") :
+    [ap] = [fp]; ap++
+end"""
+    with pytest.raises(FormattingError, match="Comments inside expressions are not supported"):
+        parse_code_element(code).format(allowed_line_length=100)

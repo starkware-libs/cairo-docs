@@ -1,0 +1,62 @@
+Writing unit tests
+==================
+
+This page demonstrates how to write unit tests for your StarkNet contracts.
+The ``cairo-lang`` package provides a set of python classes that simulates the
+behavior of the StarkNet system.
+We'll use `pytest <https://docs.pytest.org/en/6.2.x/>`_ as the unit test infrastructure.
+
+Start by installing pytest:
+
+.. code-block:: bash
+
+    pip install pytest pytest-asyncio
+
+Let's write a unit test for the contract from :ref:`first_contract`.
+Create a file named ``contract.cairo`` and copy the contract code into it.
+
+Now, copy the following code into a python file named ``contract_test.py``:
+
+.. tested-code:: python first_contract_unit_test
+
+    import os
+    import pytest
+
+    from starkware.starknet.testing.starknet import Starknet
+
+    # The path to the contract source code.
+    CONTRACT_FILE = os.path.join(
+        os.path.dirname(__file__), "contract.cairo")
+
+
+    # The testing library uses python's asyncio. So the following
+    # decorator and the ``async`` keyword are needed.
+    @pytest.mark.asyncio
+    async def test_increase_balance():
+        # Create a new Starknet class that simulates the StarkNet
+        # system.
+        starknet = await Starknet.empty()
+
+        # Deploy the contract.
+        contract = await starknet.deploy(
+            source=CONTRACT_FILE,
+        )
+
+        # Invoke increase_balance() twice.
+        await contract.increase_balance(amount=10).invoke()
+        await contract.increase_balance(amount=20).invoke()
+
+        # Check the result of get_balance().
+        execution_info = await contract.get_balance().call()
+        assert execution_info.result == (30,)
+
+This test creates an instance of the Starknet testing class.
+This class allows deploying StarkNet contracts and interacting with them.
+The test deploys our contract and invokes increase_balance twice.
+At the end it verifies that calling the ``get_balance()`` method returns the expected result.
+
+Run the test using pytest:
+
+.. tested-code:: bash first_contract_unit_test_run
+
+    pytest contract_test.py
