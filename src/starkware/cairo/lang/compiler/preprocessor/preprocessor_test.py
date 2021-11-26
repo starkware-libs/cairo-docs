@@ -4,14 +4,23 @@ from starkware.cairo.lang.compiler.ast.code_elements import CodeElementFunction
 from starkware.cairo.lang.compiler.ast.module import CairoModule
 from starkware.cairo.lang.compiler.error_handling import LocationError
 from starkware.cairo.lang.compiler.identifier_definition import (
-    ConstDefinition, LabelDefinition, ReferenceDefinition)
+    ConstDefinition,
+    FunctionDefinition,
+    LabelDefinition,
+    ReferenceDefinition,
+)
 from starkware.cairo.lang.compiler.identifier_manager import IdentifierError
 from starkware.cairo.lang.compiler.instruction_builder import InstructionBuilderError
 from starkware.cairo.lang.compiler.parser import parse_type
 from starkware.cairo.lang.compiler.preprocessor.default_pass_manager import default_pass_manager
 from starkware.cairo.lang.compiler.preprocessor.preprocess_codes import preprocess_codes
 from starkware.cairo.lang.compiler.preprocessor.preprocessor_test_utils import (
-    PRIME, TEST_SCOPE, preprocess_str, strip_comments_and_linebreaks, verify_exception)
+    PRIME,
+    TEST_SCOPE,
+    preprocess_str,
+    strip_comments_and_linebreaks,
+    verify_exception,
+)
 from starkware.cairo.lang.compiler.scoped_name import ScopedName
 from starkware.cairo.lang.compiler.test_utils import read_file_from_dict
 from starkware.cairo.lang.compiler.type_casts import CairoTypeError
@@ -20,12 +29,14 @@ from starkware.cairo.lang.compiler.type_system_visitor import simplify_type_syst
 
 
 def test_compiler():
-    program = preprocess_str(code="""
+    program = preprocess_str(
+        code="""
 
 const x = 5
 const y = 2 * x
 [ap] = [[fp + 2 * 0x3] + ((7 - 1 + y))]; ap++
-ap += 4 + %[ 2**10 %]
+ap += 3 + 'a'
+dw x + 5
 
 # An empty line with a comment.
 [ap] = [fp] # This is a comment.
@@ -35,16 +46,22 @@ jmp rel 2 - 3
 ret
 label:
 jmp label if [fp + 3 + 1] != 0
-""", prime=PRIME)
-    assert program.format() == """\
+""",
+        prime=PRIME,
+    )
+    assert (
+        program.format()
+        == """\
 [ap] = [[fp + 6] + 16]; ap++
-ap += 1028
+ap += 100
+dw 10
 [ap] = [fp]
 [ap] = [ap + (-5)]
 jmp rel -1
 ret
 jmp rel 0 if [fp + 4] != 0
 """
+    )
 
 
 def test_scope_const():
@@ -61,7 +78,9 @@ end
 [ap + 4] = f.x; ap++
 """
     program = preprocess_str(code=code, prime=PRIME)
-    assert program.format() == """\
+    assert (
+        program.format()
+        == """\
 [ap] = 5; ap++
 [ap + 1] = 1234; ap++
 [ap + 2] = 1234; ap++
@@ -69,51 +88,65 @@ ret
 [ap + 3] = 5; ap++
 [ap + 4] = 1234; ap++
 """
+    )
 
 
 def test_pow_failure():
-    verify_exception("""\
+    verify_exception(
+        """\
 func foo(x : felt):
     tempvar y = x ** 2
 end
-""", """
+""",
+        """
 file:?:?: Operator '**' is only supported for constant values.
     tempvar y = x ** 2
                 ^****^
-""")
-    verify_exception("""\
+""",
+    )
+    verify_exception(
+        """\
 const X = 2
 const Y = 2 ** (2 * 3)
 const Z = 2 ** (X * 3)
-""", """
+""",
+        """
 file:?:?: Identifier 'X' is not allowed in this context.
 const Z = 2 ** (X * 3)
                 ^
-""", exc_type=CairoTypeError)
+""",
+        exc_type=CairoTypeError,
+    )
 
 
 def test_referenced_before_definition_failure():
-    verify_exception("""
+    verify_exception(
+        """
 const x = 5
 func f():
     [ap + 1] = x; ap++
     const x = 1234
 end
-""", """
+""",
+        """
 file:?:?: Identifier 'x' referenced before definition.
     [ap + 1] = x; ap++
                ^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 foo.x = 6
 func foo():
     const x = 6
 end
-""", """
+""",
+        """
 file:?:?: Identifier 'foo.x' referenced before definition.
 foo.x = 6
 ^***^
-""")
+""",
+    )
 
 
 def test_assign_future_label():
@@ -126,12 +159,46 @@ future_label2:
 [ap] = 8; ap++
 """
     program = preprocess_str(code=code, prime=PRIME)
-    assert program.format() == """\
+    assert (
+        program.format()
+        == """\
 [ap] = 2; ap++
 [ap] = 4; ap++
 [ap] = 6; ap++
 [ap] = 8; ap++
 """
+    )
+
+
+def test_assign_future_function_label():
+    code = """\
+g(f)
+g((f + 1) * 2 + 3)
+
+func f() -> ():
+    ret
+end
+func g(x: felt) -> ():
+    ret
+end
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    f_definition = program.identifiers.get_by_full_name(ScopedName.from_string("test_scope.f"))
+    assert isinstance(f_definition, FunctionDefinition)
+    assert (
+        program.format()
+        == f"""\
+[ap] = {f_definition.pc}; ap++
+call rel 13
+[ap] = {f_definition.pc}; ap++
+[ap] = [ap + (-1)] + 1; ap++
+[ap] = [ap + (-1)] * 2; ap++
+[ap] = [ap + (-1)] + 3; ap++
+call rel 3
+ret
+ret
+"""
+    )
 
 
 def test_temporary_variable():
@@ -155,7 +222,9 @@ tempvar w
 tempvar h = nondet %{ 5**i %}
 """
     program = preprocess_str(code=code, prime=PRIME)
-    assert program.format() == """\
+    assert (
+        program.format()
+        == """\
 [ap] = [ap + (-1)] + [fp + (-3)]; ap++
 ap += 3
 [ap] = [ap + (-4)]; ap++
@@ -171,51 +240,66 @@ ap += 1
 %{ memory[ap] = int(5**i) %}
 ap += 1
 """
+    )
 
 
 def test_temporary_variable_failures():
-    verify_exception("""
+    verify_exception(
+        """
 tempvar x : felt = cast([ap], felt*)
-""", """
+""",
+        """
 file:?:?: Cannot assign an expression of type 'felt*' to a temporary variable of type 'felt'.
 tempvar x : felt = cast([ap], felt*)
             ^**^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 tempvar _ = 0
-""", """
+""",
+        """
 file:?:?: Reference name cannot be '_'.
 tempvar _ = 0
         ^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 struct T:
     member x : felt
     member y : felt
 end
 tempvar a : T = nondet %{ 1 %}
-""", """
+""",
+        """
 file:?:?: Hint tempvars must be of type felt.
 tempvar a : T = nondet %{ 1 %}
                 ^************^
-""")
+""",
+    )
 
 
 def test_tempvar_modifier_failures():
-    verify_exception("""
+    verify_exception(
+        """
 func main():
     tempvar local x = 5
 end
-""", """
+""",
+        """
 file:?:?: Unexpected modifier 'local'.
     tempvar local x = 5
             ^***^
-""")
+""",
+    )
 
-    verify_exception("""
+    verify_exception(
+        """
 tempvar x = [ap - 1] + [fp - 3]
 [x] = [[ap]]
-""", """
+""",
+        """
 file:?:?: While expanding the reference 'x' in:
 [x] = [[ap]]
  ^
@@ -224,7 +308,9 @@ tempvar x = [ap - 1] + [fp - 3]
         ^
 Preprocessed instruction:
 [[ap + (-1)]] = [[ap]]
-""", exc_type=InstructionBuilderError)
+""",
+        exc_type=InstructionBuilderError,
+    )
 
 
 def test_static_assert():
@@ -235,70 +321,91 @@ ap += 3
 static_assert x + 7 == ap + 4
 """
     program = preprocess_str(code=code, prime=PRIME)
-    assert program.format() == """\
+    assert (
+        program.format()
+        == """\
 ap += 3
 """
+    )
 
 
 def test_static_assert_failures():
-    verify_exception("""
+    verify_exception(
+        """
 static_assert 3 + fp + 10 == 0 + fp + 14
-""", """
+""",
+        """
 file:?:?: Static assert failed: fp + 13 != fp + 14.
 static_assert 3 + fp + 10 == 0 + fp + 14
 ^**************************************^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 let x = ap
 ap += 3
 static_assert x + 7 == 0
-""", """
+""",
+        """
 file:?:?: Static assert failed: ap + 4 != 0.
 static_assert x + 7 == 0
 ^**********************^
-""")
+""",
+    )
 
 
-@pytest.mark.parametrize('last_statement', [
-    'jmp body if [ap] != 0',
-    'ap += 0',
-    '[ap] = [ap]',
-    '[ap] = [ap]; ap++',
-])
+@pytest.mark.parametrize(
+    "last_statement",
+    [
+        "jmp body if [ap] != 0",
+        "ap += 0",
+        "[ap] = [ap]",
+        "[ap] = [ap]; ap++",
+    ],
+)
 def test_func_failures(last_statement):
-    verify_exception(f"""
+    verify_exception(
+        f"""
 func f(x):
     body:
     ret
     {last_statement}
 end
-""", """
+""",
+        """
 file:?:?: Function must end with a return instruction or a jump.
 func f(x):
      ^
-""")
+""",
+    )
 
 
 def test_func_modifier_failures():
-    verify_exception(f"""
+    verify_exception(
+        f"""
 func f(local x):
     ret
 end
-""", """
+""",
+        """
 file:?:?: Unexpected modifier 'local'.
 func f(local x):
        ^***^
-""")
+""",
+    )
 
-    verify_exception(f"""
+    verify_exception(
+        f"""
 func f(x) -> (local y):
     ret
 end
-""", """
+""",
+        """
 file:?:?: Unexpected modifier 'local'.
 func f(x) -> (local y):
               ^***^
-""")
+""",
+    )
 
 
 def test_return():
@@ -320,7 +427,9 @@ func g():
 end
 """
     program = preprocess_str(code=code, prime=PRIME)
-    assert program.format() == """\
+    assert (
+        program.format()
+        == """\
 [ap] = 1; ap++
 [ap] = [fp]; ap++
 [ap] = [fp + 1] + 2; ap++
@@ -339,57 +448,73 @@ ret
 ret
 ret
 """
+    )
 
 
 def test_return_failures():
     # Named after positional.
-    verify_exception("""
+    verify_exception(
+        """
 func f() -> (a, b, c):
     return (a=1, b=1, [fp] + 1)
 end
-""", """
+""",
+        """
 file:?:?: Positional arguments must not appear after named arguments.
     return (a=1, b=1, [fp] + 1)
                       ^******^
-""")
+""",
+    )
     # Wrong num.
-    verify_exception("""
+    verify_exception(
+        """
 func f() -> (a, b, c, d):
     return (1, [fp] + 1)
 end
-""", """
+""",
+        """
 file:?:?: Expected exactly 4 expressions, got 2.
     return (1, [fp] + 1)
     ^******************^
-""")
+""",
+    )
     # Wrong num.
-    verify_exception("""
+    verify_exception(
+        """
 func f() -> (a, b):
     return ()
 end
-""", """
+""",
+        """
 file:?:?: Expected exactly 2 expressions, got 0.
     return ()
     ^*******^
-""")
+""",
+    )
     # Unknown name.
-    verify_exception("""
+    verify_exception(
+        """
 func f() -> (a, b, c):
     return (a=1, d=1, [fp] + 1)
 end
-""", """
+""",
+        """
 file:?:?: Expected named arg 'b' found 'd'.
     return (a=1, d=1, [fp] + 1)
                  ^
-""")
+""",
+    )
     # Not in func.
-    verify_exception("""
+    verify_exception(
+        """
 return (a=1, [fp] + 1)
-""", """
+""",
+        """
 file:?:?: return cannot be used outside of a function.
 return (a=1, [fp] + 1)
 ^********************^
-""")
+""",
+    )
 
 
 def test_tail_call():
@@ -402,8 +527,11 @@ func g(a, b) -> (a):
 end
 """
     program = preprocess_str(
-        code=code, prime=PRIME, main_scope=ScopedName.from_string('test_scope'))
-    assert program.format() == """\
+        code=code, prime=PRIME, main_scope=ScopedName.from_string("test_scope")
+    )
+    assert (
+        program.format()
+        == """\
 [ap] = [fp + (-3)]; ap++
 call rel -1
 ret
@@ -411,70 +539,92 @@ ret
 call rel -5
 ret
 """
+    )
 
 
 def test_tail_call_failure():
-    verify_exception("""
+    verify_exception(
+        """
 func g() -> (a):
     return (a=0)
 end
 return g()
-""", """
+""",
+        """
 file:?:?: return cannot be used outside of a function.
 return g()
 ^********^
-""")
+""",
+    )
 
-    verify_exception("""
+    verify_exception(
+        """
 func g() -> (a):
     return (a=0)
 end
 func f(x, y) -> (a, b, c, d, e):
     return g()
 end
-""", """
+""",
+        """
 file:?:?: Cannot convert the return type of g to the return type of f.
     return g()
-           ^*^
-""")
+    ^********^
+""",
+    )
 
-    verify_exception("""
-func g{x}() -> (a):
+    verify_exception(
+        """
+func g{x, y}() -> (a):
     return (a=0)
 end
-func f(x, y) -> (a):
-    with x:
-        return g()
-    end
+func f{y, x}() -> (a):
+    return g()
 end
-""", """
+""",
+        """
 file:?:?: Cannot convert the implicit arguments of g to the implicit arguments of f.
-        return g()
-               ^*^
-""")
+    return g()
+    ^********^
+The implicit arguments of 'g' were defined here:
+file:?:?
+func g{x, y}() -> (a):
+       ^**^
+The implicit arguments of 'f' were defined here:
+file:?:?
+func f{y, x}() -> (a):
+       ^**^
+""",
+    )
 
-    verify_exception("""
+    verify_exception(
+        """
 func f(x, y) -> (a, b, c, d, e):
     return g()
 end
-""", """
+""",
+        """
 file:?:?: Unknown identifier 'g'.
     return g()
            ^
-""")
+""",
+    )
 
-    verify_exception("""
+    verify_exception(
+        """
 func g(x, y) -> (a : felt):
     return (a=5)
 end
 func f(x, y) -> (a : felt*):
     return g(x, y)
 end
-""", """
+""",
+        """
 file:?:?: Cannot convert the return type of g to the return type of f.
     return g(x, y)
-           ^*****^
-""")
+    ^************^
+""",
+    )
 
 
 def test_function_call():
@@ -492,7 +642,9 @@ let res = foo(a=2, b=3)
 res.c = 1
 """
     program = preprocess_str(code=code, prime=PRIME)
-    assert program.format() == """\
+    assert (
+        program.format()
+        == """\
 [ap] = [fp + (-4)]; ap++
 call rel 5
 [ap] = 1; ap++
@@ -509,6 +661,7 @@ call rel -17
 call rel -23
 [ap + (-1)] = 1
 """
+    )
 
 
 def test_func_args():
@@ -527,28 +680,36 @@ end
 """
     program = preprocess_str(code=code, prime=PRIME, main_scope=scope)
     reference_x = program.instructions[-1].flow_tracking_data.resolve_reference(
-        reference_manager=program.reference_manager, name=scope + 'f.x')
-    assert reference_x.value.format() == '[cast(fp + (-6), felt*)]'
+        reference_manager=program.reference_manager, name=scope + "f.x"
+    )
+    assert reference_x.value.format() == "[cast(fp + (-6), felt*)]"
     reference_y = program.instructions[-1].flow_tracking_data.resolve_reference(
-        reference_manager=program.reference_manager, name=scope + 'f.y')
-    assert reference_y.value.format() == f'[cast(fp + (-5), {scope}.T*)]'
+        reference_manager=program.reference_manager, name=scope + "f.y"
+    )
+    assert reference_y.value.format() == f"[cast(fp + (-5), {scope}.T*)]"
     reference_z = program.instructions[-1].flow_tracking_data.resolve_reference(
-        reference_manager=program.reference_manager, name=scope + 'f.z')
-    assert reference_z.value.format() == f'[cast(fp + (-3), {scope}.T**)]'
-    assert program.format() == """\
+        reference_manager=program.reference_manager, name=scope + "f.z"
+    )
+    assert reference_z.value.format() == f"[cast(fp + (-3), {scope}.T**)]"
+    assert (
+        program.format()
+        == """\
 [fp + (-6)] = 1; ap++
 [fp + (-5)] = 2; ap++
 [[fp + (-3)] + 1] = [fp + (-4)]; ap++
 ret
 """
+    )
 
 
 def test_func_args_failures():
-    verify_exception("""
+    verify_exception(
+        """
 func f(x):
     [ap] = [x] + 1
 end
-""", """
+""",
+        """
 file:?:?: While expanding the reference 'x' in:
     [ap] = [x] + 1
             ^
@@ -557,7 +718,9 @@ func f(x):
        ^
 Preprocessed instruction:
 [ap] = [[fp + (-3)]] + 1
-""", exc_type=InstructionBuilderError)
+""",
+        exc_type=InstructionBuilderError,
+    )
 
 
 def test_with_statement():
@@ -573,13 +736,16 @@ end
 [ap] = x
 """
     program = preprocess_str(code=code, prime=PRIME)
-    assert program.format() == """\
+    assert (
+        program.format()
+        == """\
 [ap] = 0
 [ap] = 1
 [ap] = 2
 [ap] = 1000
 [ap] = 1001
 """
+    )
 
 
 def test_with_statement_locals():
@@ -598,7 +764,9 @@ func bar():
 end
 """
     program = preprocess_str(code=code, prime=PRIME)
-    assert program.format() == """\
+    assert (
+        program.format()
+        == """\
 ret
 ap += 2
 [fp] = 0
@@ -606,38 +774,62 @@ call rel -5
 [fp + 1] = [ap + (-1)]
 ret
 """
+    )
 
 
 def test_with_statement_failure():
-    verify_exception("""
+    verify_exception(
+        """
 with x:
     [ap] = [ap]
 end
-""", """
+""",
+        """
 file:?:?: Unknown reference 'x'.
 with x:
      ^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 const x = 0
 with x:
     [ap] = [ap]
 end
-""", """
+""",
+        """
 file:?:?: Expected 'x' to be a reference, found: const.
 with x:
      ^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 let x = 0
 with x as y:
     [ap] = [ap]
 end
-""", """
+""",
+        """
 file:?:?: The 'as' keyword is not supported in 'with' statements.
 with x as y:
           ^
-""")
+""",
+    )
+
+
+def test_with_attr_statement():
+    verify_exception(
+        """
+with_attr x:
+end
+""",
+        """
+file:?:?: with_attr is not supported yet.
+with_attr x:
+          ^
+""",
+    )
 
 
 def test_implicit_args():
@@ -679,7 +871,9 @@ func h():
 end
 """
     program = preprocess_str(code=code, prime=PRIME)
-    assert program.format() == """\
+    assert (
+        program.format()
+        == """\
 [ap] = [fp + (-1234)]; ap++
 [ap] = [fp + (-1233)]; ap++
 ret
@@ -704,28 +898,36 @@ call rel -25
 [ap] = [ap + (-2)]; ap++
 ret
 """
+    )
 
 
 def test_implicit_args_failures():
-    verify_exception("""
+    verify_exception(
+        """
 func f{x}(x):
     ret
 end
-""", """
+""",
+        """
 file:?:?: Arguments and return values cannot have the same name of an implicit argument.
 func f{x}(x):
           ^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 func f{x}() -> (x):
     ret
 end
-""", """
+""",
+        """
 file:?:?: Arguments and return values cannot have the same name of an implicit argument.
 func f{x}() -> (x):
                 ^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 func f{x}():
     ret
 end
@@ -734,15 +936,18 @@ func g():
     f()
     ret
 end
-""", """
+""",
+        """
 file:?:?: While trying to retrieve the implicit argument 'x' in:
     f()
     ^*^
 file:?:?: Unknown identifier 'x'.
 func f{x}():
        ^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 func f{x}(y):
     ret
 end
@@ -754,26 +959,32 @@ func g(x):
     f(1)
     ret
 end
-""", """
+""",
+        """
 file:?:?: While trying to update the implicit return value 'x' in:
     f(1)
     ^**^
 file:?:?: 'x' cannot be used as an implicit return value. Consider using a 'with' statement.
 func f{x}(y):
        ^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 func f{x}():
     let x = cast(0, felt*)
     return ()
 end
-""", """
+""",
+        """
 file:?:?: Reference rebinding must preserve the reference type. Previous type: 'felt', new type: \
 'felt*'.
     let x = cast(0, felt*)
         ^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 func f{x}():
     ret
 end
@@ -782,14 +993,16 @@ func g():
     f()
     ret
 end
-""", """
+""",
+        """
 file:?:?: While trying to update the implicit return value 'x' in:
     f()
     ^*^
 file:?:?: Redefinition of 'test_scope.g.x'.
 func f{x}():
        ^
-""")
+""",
+    )
 
 
 def test_implcit_argument_bindings():
@@ -804,7 +1017,9 @@ func g{x, y, z}():
 end
 """
     program = preprocess_str(code=code, prime=PRIME)
-    assert program.format() == """\
+    assert (
+        program.format()
+        == """\
 ret
 [ap] = [fp + (-5)]; ap++
 [ap] = [fp + (-3)]; ap++
@@ -814,10 +1029,12 @@ call rel -3
 [ap] = [ap + (-3)]; ap++
 ret
 """
+    )
 
 
 def test_implcit_argument_bindings_failures():
-    verify_exception("""
+    verify_exception(
+        """
 func foo{x}(y) -> (z):
     ret
 end
@@ -826,12 +1043,15 @@ func bar():
     let x = foo{5}(0)
     ret
 end
-""", """
+""",
+        """
 file:?:?: Implicit argument binding must be of the form: arg_name=var.
     let x = foo{5}(0)
                 ^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 func foo{x}(y) -> (z):
     ret
 end
@@ -841,12 +1061,15 @@ func bar():
     let (res) = foo{y=x}(0)
     ret
 end
-""", """
+""",
+        """
 file:?:?: Unexpected implicit argument binding: y.
     let (res) = foo{y=x}(0)
                     ^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 func foo{x}(y) -> (z):
     ret
 end
@@ -855,11 +1078,13 @@ func bar():
     foo{x=2}(0)
     ret
 end
-""", """
+""",
+        """
 file:?:?: Implicit argument binding must be an identifier.
     foo{x=2}(0)
           ^
-""")
+""",
+    )
 
 
 def test_func_args_scope():
@@ -876,7 +1101,9 @@ end
 [ap + 5] = f.Args.z; ap++
 """
     program = preprocess_str(code=code, prime=PRIME)
-    assert program.format() == """\
+    assert (
+        program.format()
+        == """\
 [ap] = 1234; ap++
 [fp + (-5)] = 1; ap++
 [fp + (-4)] = 2; ap++
@@ -885,6 +1112,7 @@ ret
 [ap + 4] = 1234; ap++
 [ap + 5] = 2; ap++
 """
+    )
 
 
 def test_func_args_and_rets_scope():
@@ -902,7 +1130,9 @@ end
 [ap + 6] = f.Return.x; ap++
 """
     program = preprocess_str(code=code, prime=PRIME)
-    assert program.format() == """\
+    assert (
+        program.format()
+        == """\
 [ap] = 1234; ap++
 [fp + (-5)] = 1; ap++
 [fp + (-4)] = 2; ap++
@@ -912,6 +1142,7 @@ ret
 [ap + 5] = 0; ap++
 [ap + 6] = 2; ap++
 """
+    )
 
 
 def test_func_named_args():
@@ -928,17 +1159,21 @@ static_assert f_args + f.Args.SIZE == ap
 call f
 """
     program = preprocess_str(code=code, prime=PRIME)
-    assert program.format() == """\
+    assert (
+        program.format()
+        == """\
 ret
 [ap + 2] = 2; ap++
 [ap + (-1)] = 0; ap++
 [ap + (-1)] = 1; ap++
 call rel -7
 """
+    )
 
 
 def test_func_named_args_failures():
-    verify_exception("""
+    verify_exception(
+        """
 func f(x, y, z):
     ret
 end
@@ -948,11 +1183,13 @@ f_args.z = 2; ap++
 f_args.x = 0; ap++
 static_assert f_args + f.Args.SIZE == ap
 call f
-""", """
+""",
+        """
 file:?:?: Static assert failed: ap + 1 != ap.
 static_assert f_args + f.Args.SIZE == ap
 ^**************************************^
-""")
+""",
+    )
 
 
 def test_function_call_by_value_args():
@@ -973,7 +1210,9 @@ func f(x, y : T, z : T):
 end
 """
     program = preprocess_str(code=code, prime=PRIME)
-    assert program.format() == """\
+    assert (
+        program.format()
+        == """\
 [ap] = 2; ap++
 [ap] = [fp + (-5)]; ap++
 [ap] = [fp + (-4)]; ap++
@@ -984,15 +1223,20 @@ end
 call rel -8
 ret
 """
+    )
 
 
-@pytest.mark.parametrize('test_line, expected_type, actual_type, arrow', [
-    ('f(1, y=13)', 'T', 'felt', '^^'),
-    ('f(1, y=&y)', 'T', 'T*', '^^'),
-    ('f(1, y=t)', 'T', 'S', '^'),
-])
+@pytest.mark.parametrize(
+    "test_line, expected_type, actual_type, arrow",
+    [
+        ("f(1, y=13)", "T", "felt", "^^"),
+        ("f(1, y=&y)", "T", "T*", "^^"),
+        ("f(1, y=t)", "T", "S", "^"),
+    ],
+)
 def test_func_by_value_args_failures(test_line, expected_type, actual_type, arrow):
-    verify_exception(f"""
+    verify_exception(
+        f"""
 struct T:
     member s : felt
     member t : felt
@@ -1007,11 +1251,14 @@ func f(x, y : {expected_type}):
     {test_line}
     ret
 end
-""", f"""
+""",
+        f"""
 file:?:?: Expected expression of type '{expected_type}', got '{actual_type}'.
     {test_line}
            {arrow}
-""", main_scope=ScopedName())
+""",
+        main_scope=ScopedName(),
+    )
 
 
 def test_func_by_value_return():
@@ -1026,23 +1273,30 @@ func f(s : T) -> (x : T, y : T):
 end
 """
     program = preprocess_str(code=code, prime=PRIME)
-    assert program.format() == """\
+    assert (
+        program.format()
+        == """\
 [ap] = [fp + (-4)]; ap++
 [ap] = [fp + (-3)]; ap++
 [ap] = [ap + (-102)]; ap++
 [ap] = [ap + (-102)]; ap++
 ret
 """
+    )
 
 
-@pytest.mark.parametrize('jmp_code', [
-    'jmp loop if [ap] != 0',
-    'jmp rel 3',
-    'jmp abs 3',
-    'jmp rel [ap + 3] if [ap] != 0',
-])
+@pytest.mark.parametrize(
+    "jmp_code",
+    [
+        "jmp loop if [ap] != 0",
+        "jmp rel 3",
+        "jmp abs 3",
+        "jmp rel [ap + 3] if [ap] != 0",
+    ],
+)
 def test_function_flow_revoke(jmp_code):
-    verify_exception(f"""
+    verify_exception(
+        f"""
 func foo():
     loop:
     {jmp_code}
@@ -1055,7 +1309,8 @@ func bar():
     assert x = 0
     ret
 end
-""", """
+""",
+        """
 file:?:?: Reference 'x' was revoked.
     assert x = 0
            ^
@@ -1063,7 +1318,8 @@ Reference was defined here:
 file:?:?
     tempvar x = 0
             ^
-""")
+""",
+    )
 
 
 def test_scope_label():
@@ -1084,7 +1340,9 @@ jmp f
 call f
 """
     program = preprocess_str(code=code, prime=PRIME)
-    assert program.format() == """\
+    assert (
+        program.format()
+        == """\
 jmp rel 0
 jmp rel 4
 call rel 2
@@ -1096,16 +1354,17 @@ jmp rel -6
 jmp rel -10
 call rel -12
 """
+    )
 
 
 def test_import():
     files = {
-        '.': """
+        ".": """
 from a import f as g, h as h2
 call g
 call h2
 """,
-        'a': """
+        "a": """
 func f():
   jmp f
 end
@@ -1113,132 +1372,164 @@ end
 func h():
   jmp h
 end
-"""
+""",
     }
     program = preprocess_codes(
-        codes=[(files['.'], '.')],
-        pass_manager=default_pass_manager(prime=PRIME, read_module=read_file_from_dict(files)))
+        codes=[(files["."], ".")],
+        pass_manager=default_pass_manager(prime=PRIME, read_module=read_file_from_dict(files)),
+    )
 
-    assert program.format() == """\
+    assert (
+        program.format()
+        == """\
 jmp rel 0
 jmp rel 0
 call rel -4
 call rel -4
 """
+    )
 
 
 def test_import_identifiers():
     # Define files used in this test.
     files = {
-        '.': """
+        ".": """
 from a.b.c import alpha as x
 from a.b.c import beta
 from a.b.c import xi
 """,
-        'a.b.c': """
+        "a.b.c": """
 from tau import xi
 const alpha = 0
 const beta = 1
 const gamma = 2
 """,
-        'tau': """
+        "tau": """
 const xi = 42
-"""
+""",
     }
 
     # Prepare auxiliary functions for tests.
     scope = ScopedName.from_string
 
-    def get_full_name(name, curr_scope=''):
+    def get_full_name(name, curr_scope=""):
         try:
             return program.identifiers.search(
-                accessible_scopes=[scope(curr_scope)], name=scope(name)).get_canonical_name()
+                accessible_scopes=[scope(curr_scope)], name=scope(name)
+            ).get_canonical_name()
         except IdentifierError:
             return None
 
     # Preprocess program.
     program = preprocess_codes(
-        codes=[(files['.'], '.')],
+        codes=[(files["."], ".")],
         pass_manager=default_pass_manager(prime=PRIME, read_module=read_file_from_dict(files)),
-        main_scope=scope('__main__'))
+        main_scope=scope("__main__"),
+    )
 
     # Verify identifiers are resolved correctly.
-    assert get_full_name('x', '__main__') == scope('a.b.c.alpha')
-    assert get_full_name('beta', '__main__') == scope('a.b.c.beta')
-    assert get_full_name('xi', '__main__') == scope('tau.xi')
+    assert get_full_name("x", "__main__") == scope("a.b.c.alpha")
+    assert get_full_name("beta", "__main__") == scope("a.b.c.beta")
+    assert get_full_name("xi", "__main__") == scope("tau.xi")
 
-    assert get_full_name('alpha', 'a.b.c') == scope('a.b.c.alpha')
-    assert get_full_name('beta', 'a.b.c') == scope('a.b.c.beta')
-    assert get_full_name('gamma', 'a.b.c') == scope('a.b.c.gamma')
-    assert get_full_name('xi', 'a.b.c') == scope('tau.xi')
+    assert get_full_name("alpha", "a.b.c") == scope("a.b.c.alpha")
+    assert get_full_name("beta", "a.b.c") == scope("a.b.c.beta")
+    assert get_full_name("gamma", "a.b.c") == scope("a.b.c.gamma")
+    assert get_full_name("xi", "a.b.c") == scope("tau.xi")
 
-    assert get_full_name('xi', 'tau') == scope('tau.xi')
+    assert get_full_name("xi", "tau") == scope("tau.xi")
 
     # Verify inaccessible identifiers.
-    assert get_full_name('alpha', '__main__') is None
-    assert get_full_name('gamma', '__main__') is None
-    assert get_full_name('a.b.c.alpha', '__main__') is None
-    assert get_full_name('tau.xi', '__main__') is None
+    assert get_full_name("alpha", "__main__") is None
+    assert get_full_name("gamma", "__main__") is None
+    assert get_full_name("a.b.c.alpha", "__main__") is None
+    assert get_full_name("tau.xi", "__main__") is None
 
 
 def test_import_errors():
     # Inaccessible import.
-    verify_exception("""
+    verify_exception(
+        """
 from foo import bar
-""", """
+""",
+        """
 file:?:?: Could not load module 'foo'.
 Error: 'foo'
 from foo import bar
      ^*^
-""", files={}, exc_type=LocationError)
+""",
+        files={},
+        exc_type=LocationError,
+    )
 
     # Ignoring aliasing.
-    verify_exception("""
+    verify_exception(
+        """
 from foo import bar as notbar
 [ap] = bar
-""", """
+""",
+        """
 file:?:?: Unknown identifier 'bar'.
 [ap] = bar
        ^*^
-""", files={'foo': 'const bar = 3'})
+""",
+        files={"foo": "const bar = 3"},
+    )
 
     # Identifier redefinition.
-    verify_exception("""
+    verify_exception(
+        """
 const bar = 0
 from foo import bar
-""", """
+""",
+        """
 file:?:?: Redefinition of 'test_scope.bar'.
 from foo import bar
                 ^*^
-""", files={'foo': 'const bar=0'})
+""",
+        files={"foo": "const bar=0"},
+    )
 
-    verify_exception(f"""
+    verify_exception(
+        f"""
 const lambda = 0
 from foo import bar as lambda
-""", """
+""",
+        """
 file:?:?: Redefinition of 'test_scope.lambda'.
 from foo import bar as lambda
                        ^****^
-""", files={'foo': 'const bar=0'})
+""",
+        files={"foo": "const bar=0"},
+    )
 
-    verify_exception('from foo import bar', """ \
+    verify_exception(
+        "from foo import bar",
+        """ \
 file:?:?: Cannot import 'bar' from 'foo'.
 from foo import bar
                 ^*^
-""", files={'foo': ''})
+""",
+        files={"foo": ""},
+    )
 
 
 def test_error_scope_redefinition():
-    verify_exception("""
+    verify_exception(
+        """
 from a import b
 from a.b import c
-""", """
+""",
+        """
 Scope 'a.b' collides with a different identifier of type 'const'.
-""", files={'a': 'const b = 0', 'a.b': 'const c = 1'})
+""",
+        files={"a": "const b = 0", "a.b": "const c = 1"},
+    )
 
 
 def test_scope_failures():
-    verify_exception("""
+    verify_exception(
+        """
 func f():
 const x = 5
 ret
@@ -1247,12 +1538,15 @@ func g():
 [ap] = x; ap++
 ret
 end
-""", """
+""",
+        """
 file:?:?: Unknown identifier 'x'.
 [ap] = x; ap++
        ^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 func f():
 label:
 ret
@@ -1261,42 +1555,54 @@ func g():
 call label
 ret
 end
-""", """
+""",
+        """
 file:?:?: Unknown identifier 'label'.
 call label
      ^***^
-""")
+""",
+    )
 
 
 def test_const_failures():
-    verify_exception("""
+    verify_exception(
+        """
 const x = y
-""", """
+""",
+        """
 file:?:?: Unknown identifier 'y'.
 const x = y
           ^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 const x = 0
 [ap] = x.y.z
-""", """
+""",
+        """
 file:?:?: Unexpected '.' after 'test_scope.x' which is const.
 [ap] = x.y.z
        ^***^
-""")
+""",
+    )
 
-    verify_exception("""
+    verify_exception(
+        """
 const x = [ap] + 5
-""", """
+""",
+        """
 file:?:?: Expected a constant expression.
 const x = [ap] + 5
           ^******^
-""")
+""",
+    )
 
 
 def test_labels():
-    scope = ScopedName.from_string('my.cool.scope')
-    program = preprocess_str("""
+    scope = ScopedName.from_string("my.cool.scope")
+    program = preprocess_str(
+        """
 const x = 7
 a0:
 [ap] = x; ap++  # Size: 2.
@@ -1311,27 +1617,30 @@ jmp a3  # Size: 2.
 jmp a3 if [ap] != 0  # Size: 2.
 call a3  # Size: 2.
 a3:
-""", prime=PRIME, main_scope=scope)
+""",
+        prime=PRIME,
+        main_scope=scope,
+    )
     program_labels = {
         name: identifier_definition.pc
         for name, identifier_definition in program.identifiers.get_scope(scope).identifiers.items()
-        if isinstance(identifier_definition, LabelDefinition)}
-    assert program_labels == {'a0': 0, 'a1': 4, 'a2': 6, 'a3': 14}
+        if isinstance(identifier_definition, LabelDefinition)
+    }
+    assert program_labels == {"a0": 0, "a1": 4, "a2": 6, "a3": 14}
 
 
 def test_process_file_scope():
     # Verify the good scenario.
-    valid_scope = ScopedName.from_string('some.valid.scope')
-    program = preprocess_str('const x = 4', prime=PRIME, main_scope=valid_scope)
+    valid_scope = ScopedName.from_string("some.valid.scope")
+    program = preprocess_str("const x = 4", prime=PRIME, main_scope=valid_scope)
 
     module = CairoModule(cairo_file=program, module_name=valid_scope)
-    assert program.identifiers.as_dict() == {
-        valid_scope + 'x': ConstDefinition(4)
-    }
+    assert program.identifiers.as_dict() == {valid_scope + "x": ConstDefinition(4)}
 
 
 def test_label_resolution():
-    program = preprocess_str(code="""
+    program = preprocess_str(
+        code="""
 [ap] = 7; ap++  # Size: 2.
 
 loop:
@@ -1344,8 +1653,12 @@ future_label:
 jmp loop   # Size: 2.
 jmp loop if [ap] != 0  # Size: 2.
 call loop  # Size 2.
-""", prime=PRIME)
-    assert program.format() == """\
+""",
+        prime=PRIME,
+    )
+    assert (
+        program.format()
+        == """\
 [ap] = 7; ap++
 [ap] = [ap + (-1)] + 1
 jmp rel 7
@@ -1356,110 +1669,145 @@ jmp rel -9
 jmp rel -11 if [ap] != 0
 call rel -13
 """
+    )
 
 
 def test_labels_failures():
-    verify_exception("""
+    verify_exception(
+        """
 jmp x.y.z
-""", """
+""",
+        """
 file:?:?: Unknown identifier 'x'.
 jmp x.y.z
     ^***^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 const x = 0
 jmp x
-""", """
+""",
+        """
 file:?:?: Expected a label name. Identifier 'x' is of type const.
 jmp x
     ^
-""")
+""",
+    )
 
 
 def test_redefinition_failures():
-    verify_exception("""
+    verify_exception(
+        """
 name:
 const name = 0
-""", """
+""",
+        """
 file:?:?: Redefinition of 'test_scope.name'.
 const name = 0
       ^**^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 const name = 0
 let name = ap
-""", """
+""",
+        """
 file:?:?: Redefinition of 'test_scope.name'.
 let name = ap
     ^**^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 let name = ap
 name:
-""", """
+""",
+        """
 file:?:?: Redefinition of 'test_scope.name'.
 name:
 ^**^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 func f(name, x, name):
     [ap + name] = 1
     [ap + x] = 2
 end
-""", """
+""",
+        """
 file:?:?: Redefinition of 'test_scope.f.Args.name'.
 func f(name, x, name):
                 ^**^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 func f() -> (name, x, name):
     [ap] = 1
     [ap] = 2
 end
-""", """
+""",
+        """
 file:?:?: Redefinition of 'test_scope.f.Return.name'.
 func f() -> (name, x, name):
                       ^**^
-""")
+""",
+    )
 
 
 def test_directives():
-    program = preprocess_str(code="""\
+    program = preprocess_str(
+        code="""\
 # This is a comment.
 
 
 %builtins ab cd ef
 
 [fp] = [fp]
-""", prime=PRIME)
-    assert program.builtins == ['ab', 'cd', 'ef']
-    assert program.format() == """\
+""",
+        prime=PRIME,
+    )
+    assert program.builtins == ["ab", "cd", "ef"]
+    assert (
+        program.format()
+        == """\
 %builtins ab cd ef
 
 [fp] = [fp]
 """
+    )
 
 
 def test_directives_failures():
-    verify_exception("""
+    verify_exception(
+        """
 [fp] = [fp]
 %builtins ab cd ef
-""", """
+""",
+        """
 file:?:?: Directives must appear at the top of the file.
 %builtins ab cd ef
 ^****************^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 %lang abc
-""", """
+""",
+        """
 file:?:?: Unsupported %lang directive. Are you using the correct compiler?
 %lang abc
 ^*******^
-""")
+""",
+    )
 
 
 def test_conditionals():
-    program = preprocess_str(code="""
+    program = preprocess_str(
+        code="""
 let x = 2
 if [ap] * 2 == [fp] + 3:
     let x = 3
@@ -1468,8 +1816,12 @@ else:
     let x = 4
     [ap] = x; ap++
 end
-""", prime=PRIME)
-    assert program.format() == """\
+""",
+        prime=PRIME,
+    )
+    assert (
+        program.format()
+        == """\
 [ap] = [ap] * 2; ap++
 [ap] = [fp] + 3; ap++
 [ap] = [ap + (-2)] - [ap + (-1)]; ap++
@@ -1478,58 +1830,84 @@ jmp rel 6 if [ap + (-1)] != 0
 jmp rel 4
 [ap] = 4; ap++
 """
-    program = preprocess_str(code="""
+    )
+    program = preprocess_str(
+        code="""
 if [ap] == [fp]:
     ret
 else:
     [ap] = [ap]
 end
 [fp] = [fp]
-""", prime=PRIME)
-    assert program.format() == """\
+""",
+        prime=PRIME,
+    )
+    assert (
+        program.format()
+        == """\
 [ap] = [ap] - [fp]; ap++
 jmp rel 3 if [ap + (-1)] != 0
 ret
 [ap] = [ap]
 [fp] = [fp]
 """
-    program = preprocess_str(code="""
+    )
+    program = preprocess_str(
+        code="""
 if [ap] == 0:
     ret
 end
 [fp] = [fp]
-""", prime=PRIME)
-    assert program.format() == """\
+""",
+        prime=PRIME,
+    )
+    assert (
+        program.format()
+        == """\
 jmp rel 3 if [ap] != 0
 ret
 [fp] = [fp]
 """
+    )
     # No jump if there is no "Non-equal" block.
-    program = preprocess_str(code="""
+    program = preprocess_str(
+        code="""
 if [ap] == 0:
     [fp + 1] = [fp + 1]
 end
 [fp] = [fp]
-""", prime=PRIME)
-    assert program.format() == """\
+""",
+        prime=PRIME,
+    )
+    assert (
+        program.format()
+        == """\
 jmp rel 3 if [ap] != 0
 [fp + 1] = [fp + 1]
 [fp] = [fp]
 """
-    program = preprocess_str(code="""
+    )
+    program = preprocess_str(
+        code="""
 if [ap] != 0:
     ret
 end
 [fp] = [fp]
-""", prime=PRIME)
-    assert program.format() == """\
+""",
+        prime=PRIME,
+    )
+    assert (
+        program.format()
+        == """\
 jmp rel 4 if [ap] != 0
 jmp rel 3
 ret
 [fp] = [fp]
 """
+    )
     # With locals.
-    program = preprocess_str(code="""
+    program = preprocess_str(
+        code="""
 func a():
     alloc_locals
     local a
@@ -1545,8 +1923,12 @@ func a():
     [fp] = [fp]
     ret
 end
-""", prime=PRIME)
-    assert program.format() == """\
+""",
+        prime=PRIME,
+    )
+    assert (
+        program.format()
+        == """\
 ap += 3
 jmp rel 8 if [ap] != 0
 [fp + 2] = 6
@@ -1557,6 +1939,7 @@ jmp rel 6
 [fp] = [fp]
 ret
 """
+    )
 
 
 def test_hints_good():
@@ -1607,64 +1990,80 @@ ret
 
 
 def test_hints_failures():
-    verify_exception("""
+    verify_exception(
+        """
 %{
 hint
 %}
-""", """
+""",
+        """
 file:?:?: Found a hint at the end of a code block. Hints must be followed by an instruction.
 %{
 ^^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 func f():
 %{
 hint
 %}
 end
 [ap] = 1
-""", """
+""",
+        """
 file:?:?: Found a hint at the end of a code block. Hints must be followed by an instruction.
 %{
 ^^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 [fp] = [fp]
 %{
 hint
 %}
 label:
 [fp] = [fp]
-""", """
+""",
+        """
 file:?:?: Hints before labels are not allowed.
 %{
 ^^
-""")
+""",
+    )
 
 
 def test_builtins_failures():
-    verify_exception("""
+    verify_exception(
+        """
 %builtins a
 %builtins b
-""", """
+""",
+        """
 file:?:?: Redefinition of builtins directive.
 %builtins b
 ^*********^
-""")
+""",
+    )
 
 
 def test_builtin_directive_duplicate_entry():
-    verify_exception("""
+    verify_exception(
+        """
 %builtins pedersen ecdsa pedersen
-""", """
+""",
+        """
 file:?:?: The builtin 'pedersen' appears twice in builtins directive.
 %builtins pedersen ecdsa pedersen
 ^*******************************^
-""")
+""",
+    )
 
 
 def test_references():
-    program = preprocess_str(code="""
+    program = preprocess_str(
+        code="""
 call label1
 label1:
 ret
@@ -1691,8 +2090,12 @@ ret
 let y = ap
 [y] = 0; ap++
 [y] = 0; ap++
-""", prime=PRIME)
-    assert program.format() == """\
+""",
+        prime=PRIME,
+    )
+    assert (
+        program.format()
+        == """\
 call rel 2
 ret
 [ap + 1] = 1; ap++
@@ -1712,11 +2115,13 @@ ret
 [ap] = 0; ap++
 [ap + (-1)] = 0; ap++
 """
+    )
 
 
 def test_reference_type_deduction():
     scope = TEST_SCOPE
-    program = preprocess_str(code="""
+    program = preprocess_str(
+        code="""
 struct T:
     member t : felt
 end
@@ -1729,7 +2134,10 @@ func foo():
     let e : felt* = [b]
     return ()
 end
-""", prime=PRIME, main_scope=scope)
+""",
+        prime=PRIME,
+        main_scope=scope,
+    )
 
     def get_reference_type(name):
         identifier_definition = program.identifiers.get_by_full_name(scope + name)
@@ -1738,15 +2146,16 @@ end
         _, expr_type = simplify_type_system(identifier_definition.references[0].value)
         return expr_type
 
-    assert get_reference_type('foo.a').format() == f'{scope}.T***'
-    assert get_reference_type('foo.b').format() == f'{scope}.T**'
-    assert get_reference_type('foo.c').format() == 'felt*'
-    assert get_reference_type('foo.d').format() == f'{scope}.T*'
-    assert get_reference_type('foo.e').format() == 'felt*'
+    assert get_reference_type("foo.a").format() == f"{scope}.T***"
+    assert get_reference_type("foo.b").format() == f"{scope}.T**"
+    assert get_reference_type("foo.c").format() == "felt*"
+    assert get_reference_type("foo.d").format() == f"{scope}.T*"
+    assert get_reference_type("foo.e").format() == "felt*"
 
 
 def test_rebind_reference():
-    program = preprocess_str(code="""
+    program = preprocess_str(
+        code="""
 struct T:
     member pad0 : felt
     member pad1 : felt
@@ -1759,28 +2168,37 @@ let y = &x.t
 let x : T* = cast(fp - 3, T*)
 [cast(x, felt)] = x.t
 [y] = [y]
-""", prime=PRIME)
-    assert program.format() == """\
+""",
+        prime=PRIME,
+    )
+    assert (
+        program.format()
+        == """\
 [ap + 1] = [ap + 3]
 [fp + (-3)] = [fp + (-1)]
 [ap + 3] = [ap + 3]
 """
+    )
 
 
 def test_rebind_reference_failures():
-    verify_exception("""
+    verify_exception(
+        """
 let x = cast(ap, felt*)
 let x = cast(ap, felt**)
-""", """
+""",
+        """
 file:?:?: Reference rebinding must preserve the reference type. Previous type: 'felt*', \
 new type: 'felt**'.
 let x = cast(ap, felt**)
     ^
-""")
+""",
+    )
 
 
 def test_reference_over_calls():
-    program = preprocess_str(code="""
+    program = preprocess_str(
+        code="""
 func f():
     ap += 3
     jmp label1 if [ap] != 0; ap++
@@ -1795,8 +2213,12 @@ let x = ap + 1
 [x] = 0
 call f
 [x] = 0
-""", prime=PRIME)
-    assert program.format() == """\
+""",
+        prime=PRIME,
+    )
+    assert (
+        program.format()
+        == """\
 ap += 3
 jmp rel 4 if [ap] != 0; ap++
 [ap] = [ap]; ap++
@@ -1807,10 +2229,44 @@ ret
 call rel -11
 [ap + (-6)] = 0
 """
+    )
 
 
-def test_reference_over_calls_failures():
-    verify_exception(f"""
+def test_struct_no_revocation():
+    program = preprocess_str(
+        code=f"""
+struct A:
+    member x : felt
+    member y : felt
+end
+func main() -> (res : A):
+    alloc_locals
+    tempvar a : A = A(1, 2)
+    ap += [ap]
+    return (res=a)
+end
+""",
+        prime=PRIME,
+    )
+    assert (
+        program.format()
+        == """\
+ap += 2
+[ap] = 1; ap++
+[ap] = 2; ap++
+[fp] = [ap + (-2)]
+[fp + 1] = [ap + (-1)]
+ap += [ap]
+[ap] = [fp]; ap++
+[ap] = [fp + 1]; ap++
+ret
+"""
+    )
+
+
+def test_reference_over_calls_no_revocation():
+    program = preprocess_str(
+        code=f"""
 func f():
     ap += 3
     jmp label1 if [ap] != 0
@@ -1819,104 +2275,146 @@ func f():
     ret
 end
 
-let x = ap + 1
-call f
-[x] = 0
-""", """
-file:?:?: Reference 'x' was revoked.
-[x] = 0
- ^
-Reference was defined here:
-file:?:?
-let x = ap + 1
-    ^
-""")
-
-    verify_exception(f"""
-func f():
-    ap += 3
-    jmp label1 if [ap] != 0
-    [ap] = [ap]; ap++
-    ret
-    label1:
+func main():
+    alloc_locals
+    let x = [ap + 1]
+    call f
+    x = 0
     ret
 end
+""",
+        prime=PRIME,
+    )
+    assert (
+        program.format()
+        == """\
+ap += 3
+jmp rel 3 if [ap] != 0
+[ap] = [ap]; ap++
+ret
+ap += 1
+[fp] = [ap + 1]
+call rel -9
+[fp] = 0
+ret
+"""
+    )
 
-let x = ap + 1
-call f
-[x] = 0
-""", """
-file:?:?: Reference 'x' was revoked.
-[x] = 0
- ^
-Reference was defined here:
-file:?:?
-let x = ap + 1
-    ^
-""")
 
-
-@pytest.mark.parametrize('revoking_instruction, has_def_location', [
-    ('ap += [fp]', True),
-    ('call label', True),
-    ('call rel 0', True),
-    ('ret', False),
-    ('jmp label', False),
-    ('jmp rel 0', False),
-    ('jmp abs 0', False),
-])
-def test_references_revoked(revoking_instruction, has_def_location):
-    def_loction_str = """\
-Reference was defined here:
-file:?:?
-let x = ap
-    ^
-""" if has_def_location else ''
-
-    verify_exception(f"""
-label:
-let x = ap
-{revoking_instruction}
-[x] = 0
-""", f"""
-file:?:?: Reference 'x' was revoked.
-[x] = 0
- ^
-{def_loction_str}
-""")
+def test_revoke_correction_invalid_reference():
+    verify_exception(
+        f"""
+func main():
+    alloc_locals
+    let x = ap
+    ap += [ap]
+    x = x
+end
+""",
+        """\
+file:?:?: While auto generating local variable for 'x'.
+    let x = ap
+        ^
+file:?:?: While expanding the reference 'x' in:
+    let x = ap
+        ^
+file:?:?: ap may only be used in an expression of the form [ap + <const>].
+    let x = ap
+            ^^
+""",
+    )
 
 
 def test_references_revoked_multiple_location():
-    verify_exception(f"""
-if [ap] == 0:
-    let x = ap
-else:
-    let y = ap
-    let x = y
+    verify_exception(
+        f"""
+func main():
+    alloc_locals
+    if [ap] == 0:
+        let x = [ap]
+    else:
+        let y = [ap]
+        let x = y
+    end
+    ap += [fp]
+    x = 0
 end
-ap += [fp]
-[x] = 0
-""", """
-
+""",
+        """\
 file:?:?: Reference 'x' was revoked.
-[x] = 0
- ^
+    x = 0
+    ^
 Reference was defined here:
 file:?:?
-    let x = y
-        ^
+        let x = y
+            ^
 file:?:?
-    let x = ap
+        let x = [ap]
+            ^
+""",
+    )
+
+
+@pytest.mark.parametrize(
+    "revoking_instruction, alloc_locals, valid, has_def_location",
+    [
+        ("ap += [fp]", "alloc_locals", True, None),
+        ("ap += [fp]", "", False, True),
+        ("ap += [fp]", "ap += SIZEOF_LOCALS", False, True),
+        ("call label", "alloc_locals", True, None),
+        ("call label", "", False, True),
+        ("call rel 0", "alloc_locals", True, None),
+        ("call rel 0", "", False, True),
+        ("ret", "alloc_locals", False, False),
+        ("jmp label", "alloc_locals", False, False),
+        ("jmp rel 0", "alloc_locals", False, False),
+        ("jmp abs 0", "alloc_locals", False, False),
+    ],
+)
+def test_references_revoked(revoking_instruction, valid, alloc_locals, has_def_location):
+    code = f"""
+func main():
+    {alloc_locals}
+    label:
+    let x = [ap]
+    {revoking_instruction}
+    x = 0
+    ret
+end
+"""
+    if not valid:
+        assert has_def_location is not None
+        def_loction_str = (
+            """\
+Reference was defined here:
+file:?:?
+    let x = [ap]
         ^
-""")
+"""
+            if has_def_location
+            else ""
+        )
+        verify_exception(
+            code,
+            f"""
+file:?:?: Reference 'x' was revoked.
+    x = 0
+    ^
+{def_loction_str}
+""",
+        )
+    else:
+        preprocess_str(code, prime=PRIME)
 
 
 def test_references_failures():
-    verify_exception("""
+    verify_exception(
+        """
 let ref = [fp]
 let ref2 = ref
 [ref2] = [[fp]]
-""", """
+""",
+        """
 file:?:?: While expanding the reference 'ref2' in:
 [ref2] = [[fp]]
  ^**^
@@ -1928,22 +2426,27 @@ let ref = [fp]
           ^**^
 Preprocessed instruction:
 [[fp]] = [[fp]]
-""", exc_type=InstructionBuilderError)
+""",
+        exc_type=InstructionBuilderError,
+    )
 
 
-@pytest.mark.parametrize('valid, has0, has1, has2', [
-    (False, True, True, True),
-    (False, False, True, True),
-    (False, True, False, True),
-    (False, True, True, False),
-    (False, False, True, False),
-    (False, False, False, True),
-    (True, True, False, False),
-])
+@pytest.mark.parametrize(
+    "valid, has0, has1, has2",
+    [
+        (False, True, True, True),
+        (False, False, True, True),
+        (False, True, False, True),
+        (False, True, True, False),
+        (False, False, True, False),
+        (False, False, False, True),
+        (True, True, False, False),
+    ],
+)
 def test_reference_flow_revokes(valid, has0, has1, has2):
-    def0 = 'let ref = [fp]' if has0 else ''
-    def1 = 'let ref = [fp + 1]' if has1 else ''
-    def2 = 'let ref = [fp + 2]' if has2 else ''
+    def0 = "let ref = [fp]" if has0 else ""
+    def1 = "let ref = [fp + 1]" if has1 else ""
+    def2 = "let ref = [fp + 2]" if has2 else ""
     code = f"""
 {def0}
 jmp b if [ap] != 0
@@ -1958,21 +2461,27 @@ c:
     if valid:
         preprocess_str(code, prime=PRIME)
     else:
-        verify_exception(code, """
+        verify_exception(
+            code,
+            """
 file:?:?: Reference 'ref' was revoked.
 [ref] = [fp + 3]
  ^*^
-""")
+""",
+        )
 
 
 def test_implicit_arg_revocation():
-    verify_exception("""
+    verify_exception(
+        """
 func foo{x}(y):
     foo(y=1)
+    # The following instruction revokes the implicit argument x
     ap += [fp]
     return foo(y=2)
 end
-""", """
+""",
+        """
 file:?:?: While trying to retrieve the implicit argument 'x' in:
     return foo(y=2)
            ^******^
@@ -1983,11 +2492,53 @@ Reference was defined here:
 file:?:?
     foo(y=1)
     ^******^
-""")
+""",
+    )
+
+
+def test_implicit_arg_no_revocation():
+    program = preprocess_str(
+        code="""
+struct T:
+    member a : felt
+    member b : felt
+end
+func foo{x}(y):
+    alloc_locals
+    tempvar z: T = T(1,2)
+    foo(y=1)
+    # The following instruction revokes the implicit argument x, which is therefore copied to a
+    # local variable.
+    ap += [fp]
+    return foo(y=z.a)
+end
+""",
+        prime=PRIME,
+    )
+    assert (
+        program.format()
+        == """\
+ap += 3
+[ap] = 1; ap++
+[ap] = 2; ap++
+[fp] = [ap + (-2)]
+[fp + 1] = [ap + (-1)]
+[ap] = [fp + (-4)]; ap++
+[ap] = 1; ap++
+call rel -11
+[fp + 2] = [ap + (-1)]
+ap += [fp]
+[ap] = [fp + 2]; ap++
+[ap] = [fp]; ap++
+call rel -17
+ret
+"""
+    )
 
 
 def test_reference_flow_converge():
-    program = preprocess_str("""
+    program = preprocess_str(
+        """
 if [ap] != 0:
     tempvar a = 1
 else:
@@ -1995,19 +2546,25 @@ else:
 end
 
 assert a = a
-""", prime=PRIME)
-    assert program.format() == """\
+""",
+        prime=PRIME,
+    )
+    assert (
+        program.format()
+        == """\
 jmp rel 6 if [ap] != 0
 [ap] = 2; ap++
 jmp rel 4
 [ap] = 1; ap++
 [ap + (-1)] = [ap + (-1)]
 """
+    )
 
 
 def test_typed_references():
     scope = TEST_SCOPE
-    program = preprocess_str(code="""
+    program = preprocess_str(
+        code="""
 func main():
     struct T:
         member pad0 : felt
@@ -2032,24 +2589,30 @@ func main():
     [fp] = y.a + 1
     ret
 end
-""", prime=PRIME, main_scope=scope)
+""",
+        prime=PRIME,
+        main_scope=scope,
+    )
 
     def get_reference(name):
         scoped_name = scope + name
         assert isinstance(program.identifiers.get_by_full_name(scoped_name), ReferenceDefinition)
 
         return program.instructions[-1].flow_tracking_data.resolve_reference(
-            reference_manager=program.reference_manager, name=scoped_name)
+            reference_manager=program.reference_manager, name=scoped_name
+        )
 
-    expected_type_x = mark_type_resolved(parse_type(f'{scope}.main.Struct*'))
-    assert simplify_type_system(get_reference('main.x').value)[1] == expected_type_x
+    expected_type_x = mark_type_resolved(parse_type(f"{scope}.main.Struct*"))
+    assert simplify_type_system(get_reference("main.x").value)[1] == expected_type_x
 
-    expected_type_y = mark_type_resolved(parse_type(f'{scope}.main.Struct'))
-    reference = get_reference('main.y')
+    expected_type_y = mark_type_resolved(parse_type(f"{scope}.main.Struct"))
+    reference = get_reference("main.y")
     assert simplify_type_system(reference.value)[1] == expected_type_y
 
-    assert reference.value.format() == f'[cast(ap + 10, {scope}.main.Struct*)]'
-    assert program.format() == """\
+    assert reference.value.format() == f"[cast(ap + 10, {scope}.main.Struct*)]"
+    assert (
+        program.format()
+        == """\
 [fp] = [ap + 12]
 [fp] = [[ap + 12] + 3]
 [ap] = [[ap + 12] + 3]; ap++
@@ -2057,45 +2620,57 @@ end
 [fp] = [ap + 11] + 1
 ret
 """
+    )
 
 
 def test_typed_references_failures():
-    verify_exception(f"""
+    verify_exception(
+        f"""
 let x = fp
 x.a = x.a
-""", """
+""",
+        """
 file:?:?: Cannot apply dot-operator to non-struct type 'felt'.
 x.a = x.a
 ^*^
-""", exc_type=CairoTypeError)
-    verify_exception(f"""
+""",
+        exc_type=CairoTypeError,
+    )
+    verify_exception(
+        f"""
 struct T:
     member z : felt
 end
 
 let x : T = ap
 x.z = x.z
-""", """
+""",
+        """
 file:?:?: Cannot assign an expression of type 'felt' to a reference of type 'test_scope.T'.
 let x : T = ap
         ^
-""")
-    verify_exception(f"""
+""",
+    )
+    verify_exception(
+        f"""
 struct T:
     member z : felt
 end
 
 let x : T* = [cast(ap, T*)]
-""", """
+""",
+        """
 file:?:?: Cannot assign an expression of type 'test_scope.T' to a reference of type 'test_scope.T*'.
 let x : T* = [cast(ap, T*)]
         ^^
-""")
+""",
+    )
 
 
 def test_return_value_reference():
     scope = TEST_SCOPE
-    program = preprocess_str(code="""
+    program = preprocess_str(
+        code="""
 func foo() -> (val, x, y):
     ret
 end
@@ -2110,27 +2685,35 @@ func main():
     let z = call abs 0
     ret
 end
-""", prime=PRIME, main_scope=scope)
+""",
+        prime=PRIME,
+        main_scope=scope,
+    )
 
     def get_reference(name):
         scoped_name = scope + name
         assert isinstance(program.identifiers.get_by_full_name(scoped_name), ReferenceDefinition)
 
         return program.instructions[-1].flow_tracking_data.resolve_reference(
-            reference_manager=program.reference_manager, name=scoped_name)
+            reference_manager=program.reference_manager, name=scoped_name
+        )
 
-    expected_type = mark_type_resolved(parse_type(
-        f'{scope}.foo.{CodeElementFunction.RETURN_SCOPE}'))
-    assert simplify_type_system(get_reference('main.x').value)[1] == expected_type
+    expected_type = mark_type_resolved(
+        parse_type(f"{scope}.foo.{CodeElementFunction.RETURN_SCOPE}")
+    )
+    assert simplify_type_system(get_reference("main.x").value)[1] == expected_type
 
-    expected_type = mark_type_resolved(parse_type(
-        f'{scope}.main.{CodeElementFunction.RETURN_SCOPE}'))
-    assert simplify_type_system(get_reference('main.y').value)[1] == expected_type
+    expected_type = mark_type_resolved(
+        parse_type(f"{scope}.main.{CodeElementFunction.RETURN_SCOPE}")
+    )
+    assert simplify_type_system(get_reference("main.y").value)[1] == expected_type
 
-    expected_type = parse_type('felt')
-    assert simplify_type_system(get_reference('main.z').value)[1] == expected_type
+    expected_type = parse_type("felt")
+    assert simplify_type_system(get_reference("main.z").value)[1] == expected_type
 
-    assert program.format() == """\
+    assert (
+        program.format()
+        == """\
 ret
 call rel -1
 [ap] = 0; ap++
@@ -2139,48 +2722,63 @@ call rel -7
 call abs 0
 ret
 """
+    )
 
 
 def test_return_value_reference_failures():
-    verify_exception(f"""
+    verify_exception(
+        f"""
 let x = call foo
-""", """
+""",
+        """
 file:?:?: Unknown identifier 'foo'.
 let x = call foo
              ^*^
-""")
-    verify_exception(f"""
+""",
+    )
+    verify_exception(
+        f"""
 func foo():
   ret
 end
 let x = call foo
 [x.a] = 0
-""", """
+""",
+        """
 file:?:?: Member 'a' does not appear in definition of struct 'test_scope.foo.Return'.
 [x.a] = 0
  ^*^
-""", exc_type=CairoTypeError)
-    verify_exception(f"""
+""",
+        exc_type=CairoTypeError,
+    )
+    verify_exception(
+        f"""
 func foo():
     ret
 end
 let x : unknown_type* = call foo
-""", """
+""",
+        """
 file:?:?: Unknown identifier 'unknown_type'.
 let x : unknown_type* = call foo
         ^**********^
-""")
-    verify_exception(f"""
+""",
+    )
+    verify_exception(
+        f"""
 struct T:
   member s : felt
 end
 let x : T* = cast(ap, T*)
 [ap] = x.a
-""", """
+""",
+        """
 file:?:?: Member 'a' does not appear in definition of struct 'test_scope.T'.
 [ap] = x.a
        ^*^
-""", exc_type=CairoTypeError)
+""",
+        exc_type=CairoTypeError,
+    )
 
 
 def test_unpacking():
@@ -2200,12 +2798,17 @@ func g():
     a = b + c
     # The type of e is deduced from the return type of f().
     a = e.b
-    let (_, _, local c, _, _) = f()
+    let (a, _, local c, x, _) = f()
+    ap += [ap]
+    a = a
+    x = x
     ret
 end
 """
     program = preprocess_str(code=code, prime=PRIME)
-    assert program.format() == """\
+    assert (
+        program.format()
+        == """\
 [ap] = 5; ap++
 [ap] = 6; ap++
 [ap] = 1; ap++
@@ -2215,7 +2818,7 @@ end
 [ap] = [[ap + (-6)]]; ap++
 [ap] = [[ap + (-6)]]; ap++
 ret
-ap += 3
+ap += 5
 call rel -17
 [fp] = [ap + (-5)]
 [fp + 1] = [ap + (-4)]
@@ -2225,31 +2828,44 @@ call rel -17
 [ap + (-7)] = [ap + (-2)]
 call rel -25
 [fp + 2] = [ap + (-4)]
+[fp + 3] = [ap + (-6)]
+[fp + 4] = [ap + (-3)]
+ap += [ap]
+[fp + 3] = [fp + 3]
+[fp + 4] = [fp + 4]
 ret
 """
+    )
 
 
 def test_unpacking_failures():
-    verify_exception(f"""
+    verify_exception(
+        f"""
 func foo() -> (a):
     ret
 end
 let (a, b) = foo()
-""", """
+""",
+        """
 file:?:?: Expected 1 unpacking identifier, found 2.
 let (a, b) = foo()
      ^**^
-""")
+""",
+    )
 
-    verify_exception(f"""
+    verify_exception(
+        f"""
 let (a, b) = 1 + 3
-""", """
+""",
+        """
 file:?:?: Cannot unpack 1 + 3.
 let (a, b) = 1 + 3
              ^***^
-""")
+""",
+    )
 
-    verify_exception(f"""
+    verify_exception(
+        f"""
 struct T:
     member a : felt
     member b : felt
@@ -2258,13 +2874,16 @@ func foo() -> (a, b : T):
     ret
 end
 let (a, b, c) = foo()
-""", """
+""",
+        """
 file:?:?: Expected 2 unpacking identifiers, found 3.
 let (a, b, c) = foo()
      ^*****^
-""")
+""",
+    )
 
-    verify_exception(f"""
+    verify_exception(
+        f"""
 struct T:
     member a : felt
     member b : felt
@@ -2273,13 +2892,16 @@ func foo() -> (a, b):
     ret
 end
 let (a, b : T) = foo()
-""", """
+""",
+        """
 file:?:?: Expected expression of type 'felt', got 'test_scope.T'.
 let (a, b : T) = foo()
         ^***^
-""")
+""",
+    )
 
-    verify_exception(f"""
+    verify_exception(
+        f"""
 struct T:
     member a : felt
     member b : felt
@@ -2296,14 +2918,17 @@ func test():
     let (a, local b : S) = foo()
     ret
 end
-""", """
+""",
+        """
 file:?:?: Expected expression of type 'test_scope.T', got 'test_scope.S'.
     let (a, local b : S) = foo()
             ^*********^
 
-""")
+""",
+    )
 
-    verify_exception(f"""
+    verify_exception(
+        f"""
 struct T:
 end
 
@@ -2316,19 +2941,23 @@ func test():
     let (local _ : T*) = foo()
     ret
 end
-""", """
+""",
+        """
 file:?:?: Reference name cannot be '_'.
     let (local _ : T*) = foo()
          ^**********^
-""")
+""",
+    )
 
-    verify_exception(f"""
+    verify_exception(
+        f"""
 func foo() -> (a):
   ret
 end
 let (a) = foo()
 [a] = [a]
-""", """
+""",
+        """
 file:?:?: While expanding the reference 'a' in:
 [a] = [a]
  ^
@@ -2337,77 +2966,98 @@ let (a) = foo()
      ^
 Preprocessed instruction:
 [[ap + (-1)]] = [[ap + (-1)]]
-""", exc_type=InstructionBuilderError)
+""",
+        exc_type=InstructionBuilderError,
+    )
 
 
 def test_unpacking_modifier_failure():
-    verify_exception("""
+    verify_exception(
+        """
 func foo() -> (a, b):
   ret
 end
 let (a, local b) = foo()
-""", """
+""",
+        """
 file:?:?: Unexpected modifier 'local'.
 let (a, local b) = foo()
         ^***^
-""")
+""",
+    )
 
 
 def test_member_def_failures():
-    verify_exception("""
+    verify_exception(
+        """
 struct T:
     member t
 end
-""", """
+""",
+        """
 file:?:?: Struct members must be explicitly typed (e.g., member x : felt).
     member t
            ^
-""")
+""",
+    )
 
-    verify_exception("""
+    verify_exception(
+        """
 member t : felt
-""", """
+""",
+        """
 file:?:?: The member keyword may only be used inside a struct.
 member t : felt
        ^******^
-""")
+""",
+    )
 
-    verify_exception("""
+    verify_exception(
+        """
 struct T:
     member local t
 end
-""", """
+""",
+        """
 file:?:?: Unexpected modifier 'local'.
     member local t
            ^***^
-""")
+""",
+    )
 
 
 def test_bad_struct():
-    verify_exception("""
+    verify_exception(
+        """
 struct T:
     return()
 end
-""", """
+""",
+        """
 file:?:?: Unexpected statement inside a struct definition.
     return()
     ^******^
-""")
+""",
+    )
 
 
 def test_bad_type_annotation():
-    verify_exception("""
+    verify_exception(
+        """
 func foo():
     local a : foo
     ret
 end
-""", """
+""",
+        """
 file:?:?: Expected 'test_scope.foo' to be a struct. Found: 'function'.
     local a : foo
               ^*^
-""")
+""",
+    )
 
-    verify_exception("""
+    verify_exception(
+        """
 func foo():
     struct test:
         member a : foo*
@@ -2415,13 +3065,16 @@ func foo():
 
     ret
 end
-""", """
+""",
+        """
 file:?:?: Expected 'foo' to be a struct. Found: 'function'.
         member a : foo*
                    ^*^
-""")
+""",
+    )
 
-    verify_exception("""
+    verify_exception(
+        """
 func foo():
     struct test:
         member a : foo.abc*
@@ -2429,15 +3082,18 @@ func foo():
 
     ret
 end
-""", """
+""",
+        """
 file:?:?: Unknown identifier 'test_scope.foo.abc'.
         member a : foo.abc*
                    ^*****^
-""")
+""",
+    )
 
 
 def test_cast_failure():
-    verify_exception("""
+    verify_exception(
+        """
 struct A:
 end
 
@@ -2445,33 +3101,40 @@ func foo(a : A*):
     let a = cast(5, A)
     return ()
 end
-""", """
+""",
+        """
 file:?:?: Cannot cast 'felt' to 'test_scope.A'.
     let a = cast(5, A)
             ^********^
-""", exc_type=CairoTypeError)
+""",
+        exc_type=CairoTypeError,
+    )
 
 
 def test_nested_function_failure():
-    verify_exception("""
+    verify_exception(
+        """
 func foo():
     func bar():
         return()
     end
     return ()
 end
-""", """
+""",
+        """
 file:?:?: Nested functions are not supported.
     func bar():
          ^*^
 Outer function was defined here: file:?:?
 func foo():
      ^*^
-""")
+""",
+    )
 
 
 def test_namespace_inside_function_failure():
-    verify_exception("""
+    verify_exception(
+        """
 func foo():
     namespace MyNamespace:
     end
@@ -2479,14 +3142,31 @@ func foo():
 end
 
 
-""", """
+""",
+        """
 file:?:?: Cannot define a namespace inside a function.
     namespace MyNamespace:
               ^*********^
 Outer function was defined here: file:?:?
 func foo():
      ^*^
-""")
+""",
+    )
+
+
+def test_namespace_is_not_a_label():
+    verify_exception(
+        """
+namespace MyNamespace:
+end
+jmp MyNamespace
+""",
+        """
+file:?:?: Expected a label name. Identifier 'MyNamespace' is of type namespace.
+jmp MyNamespace
+    ^*********^
+""",
+    )
 
 
 def test_struct_assignments():
@@ -2511,13 +3191,16 @@ func f(t : T*):
 end
 """
     program = preprocess_str(code=code, prime=PRIME)
-    assert program.format() == """\
+    assert (
+        program.format()
+        == """\
 ap += 3
 [fp] = [[fp + (-3)]]
 [fp + 1] = [[fp + (-3)] + 1]
 [fp + 2] = [[fp + (-3)] + 2]
 ret
 """
+    )
 
     code = f"""\
 {struct_def}
@@ -2527,7 +3210,9 @@ func copy(src : T**, dest: T**):
 end
 """
     program = preprocess_str(code=code, prime=PRIME)
-    assert program.format() == """\
+    assert (
+        program.format()
+        == """\
 [ap] = [[fp + (-3)]]; ap++
 [ap] = [[fp + (-4)]]; ap++
 [ap] = [[ap + (-1)]]; ap++
@@ -2542,6 +3227,48 @@ end
 [[ap + (-3)] + 2] = [ap + (-1)]
 ret
 """
+    )
+
+
+def test_continuous_structs():
+    code = f"""\
+struct A:
+    member a: felt
+    member b: felt
+end
+struct B:
+    member a: A
+    member b: felt
+end
+struct C:
+    member a: A
+    member b: B
+    member c: felt
+end
+
+func foo(x: C):
+    x.a.a = 1
+    x.a.b = 2
+    x.b.a.a = 3
+    x.b.a.b = 4
+    x.b.b = 5
+    x.c = 6
+    return ()
+end
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+        program.format()
+        == """\
+[fp + (-8)] = 1
+[fp + (-7)] = 2
+[fp + (-6)] = 3
+[fp + (-5)] = 4
+[fp + (-4)] = 5
+[fp + (-3)] = 6
+ret
+"""
+    )
 
 
 def test_subscript_operator():
@@ -2731,12 +3458,15 @@ func f():
 end
 """
     program = preprocess_str(code=code, prime=PRIME)
-    assert program.format() == """\
+    assert (
+        program.format()
+        == """\
 ap += 2
 [fp] = [ap]
 [fp + 1] = [ap + 1]
 ret
 """
+    )
 
 
 def test_tuple_expression():
@@ -2760,7 +3490,9 @@ func foo(a : A*):
 end
 """
     program = preprocess_str(code=code, prime=PRIME)
-    assert program.format() == """\
+    assert (
+        program.format()
+        == """\
 ap += 4
 [fp] = 1
 [fp + 1] = [[fp]]
@@ -2771,10 +3503,12 @@ ap += 4
 [fp] = [fp]
 ret
 """
+    )
 
 
 def test_tuple_expression_failures():
-    verify_exception("""
+    verify_exception(
+        """
 struct A:
     member x : felt
 end
@@ -2782,14 +3516,18 @@ struct B:
 end
 let a = cast(fp, A*)
 let b = cast((1, a), B)
-""", """
+""",
+        """
 file:?:?: Cannot cast an expression of type '(felt, test_scope.A*)' to 'test_scope.B'.
 The former has 2 members while the latter has 0 members.
 let b = cast((1, a), B)
              ^****^
-""", exc_type=CairoTypeError)
+""",
+        exc_type=CairoTypeError,
+    )
 
-    verify_exception("""
+    verify_exception(
+        """
 struct A:
     member x : felt
     member y : felt
@@ -2800,16 +3538,20 @@ struct B:
 end
 let a = [cast(fp, A*)]
 let b = cast((a, 1), B)
-""", """
+""",
+        """
 file:?:?: While expanding the reference 'a' in:
 let b = cast((a, 1), B)
               ^
 file:?:?: Cannot cast 'test_scope.A' to 'felt'.
 let a = [cast(fp, A*)]
         ^************^
-""", exc_type=CairoTypeError)
+""",
+        exc_type=CairoTypeError,
+    )
 
-    verify_exception("""
+    verify_exception(
+        """
 struct A:
     member x : felt
     member y : felt
@@ -2819,37 +3561,50 @@ struct B:
     member b : A
 end
 let b = cast([cast(ap, (felt, felt*)*)], B)
-""", """
+""",
+        """
 file:?:?: Cannot cast 'felt*' to 'test_scope.A'.
 let b = cast([cast(ap, (felt, felt*)*)], B)
              ^************************^
-""", exc_type=CairoTypeError)
+""",
+        exc_type=CairoTypeError,
+    )
 
-    verify_exception("""
+    verify_exception(
+        """
 struct B:
 end
 let b = cast([cast(ap, (felt, felt*)*)], B)
-""", """
+""",
+        """
 file:?:?: Cannot cast an expression of type '(felt, felt*)' to 'test_scope.B'.
 The former has 2 members while the latter has 0 members.
 let b = cast([cast(ap, (felt, felt*)*)], B)
              ^************************^
-""", exc_type=CairoTypeError)
-    verify_exception("""
+""",
+        exc_type=CairoTypeError,
+    )
+    verify_exception(
+        """
 (1, 1) = 1
-""", """
+""",
+        """
 file:?:?: Expected a 'felt' or a pointer type. Got: '(felt, felt)'.
 (1, 1) = 1
 ^****^
-""")
+""",
+    )
 
-    verify_exception("""
+    verify_exception(
+        """
 assert (1, 1) = 1
-""", """
+""",
+        """
 file:?:?: Cannot compare '(felt, felt)' and 'felt'.
 assert (1, 1) = 1
 ^***************^
-""")
+""",
+    )
 
 
 def test_struct_constructor():
@@ -2925,31 +3680,39 @@ ret
 
 
 def test_struct_constructor_failures():
-    verify_exception("""
+    verify_exception(
+        """
 func foo():
     ret
 end
 
 foo(3) = foo(4)
-""", """
+""",
+        """
 file:?:?: Expected 'foo' to be a struct. Found: 'function'.
 foo(3) = foo(4)
 ^****^
-""")
-    verify_exception("""
+""",
+    )
+    verify_exception(
+        """
 struct A:
     member next: A*
 end
 
 assert A(next=0) = A(next=0)
-""", """
+""",
+        """
 file:?:?: Cannot cast 'felt' to 'test_scope.A*'.
 assert A(next=0) = A(next=0)
               ^
-""", exc_type=CairoTypeError)
+""",
+        exc_type=CairoTypeError,
+    )
 
     def verify_exception_for_expr(expr_str: str, expected_error: str):
-        verify_exception(f"""
+        verify_exception(
+            f"""
 struct T:
     member x : felt
     member y : felt
@@ -2959,49 +3722,68 @@ func foo(a):
     alloc_locals
     local a : T = {expr_str}
 end
-""", expected_error, exc_type=CairoTypeError)
+""",
+            expected_error,
+            exc_type=CairoTypeError,
+        )
 
-    verify_exception_for_expr('T(5, 6, 7)', """
+    verify_exception_for_expr(
+        "T(5, 6, 7)",
+        """
 file:?:?: Cannot cast an expression of type '(felt, felt, felt)' to 'test_scope.T'.
 The former has 3 members while the latter has 2 members.
     local a : T = T(5, 6, 7)
                   ^********^
-""")
+""",
+    )
 
-    verify_exception_for_expr('&T(5, 6)', """
+    verify_exception_for_expr(
+        "&T(5, 6)",
+        """
 file:?:?: Expression has no address.
     local a : T = &T(5, 6)
                    ^*****^
-""")
+""",
+    )
 
-    verify_exception_for_expr('T(5, 6).x', """
+    verify_exception_for_expr(
+        "T(5, 6).x",
+        """
 file:?:?: Accessing struct members for r-value structs is not supported yet.
     local a : T = T(5, 6).x
                   ^*******^
-""")
+""",
+    )
 
-    verify_exception_for_expr('T{a}(5, 6)', """
+    verify_exception_for_expr(
+        "T{a}(5, 6)",
+        """
 file:?:?: Implicit arguments cannot be used with struct constructors.
     local a : T = T{a}(5, 6)
                     ^
-""")
+""",
+    )
 
 
 def test_unsupported_decorator():
-    verify_exception("""
+    verify_exception(
+        """
 @external
 func foo():
     return()
 end
-""", """
+""",
+        """
 file:?:?: Unsupported decorator: 'external'.
 @external
-^*******^
-""")
+ ^******^
+""",
+    )
 
 
 def test_skipped_functions():
-    files = {'module': """
+    files = {
+        "module": """
 func func0():
     tempvar x = 0
     return ()
@@ -3014,14 +3796,19 @@ func func2():
     tempvar x = 2
     return func1()
 end
-""", '.': """
+""",
+        ".": """
 from module import func2
 func2()
-"""}
+""",
+    }
     program = preprocess_codes(
-        codes=[(files['.'], '.')],
-        pass_manager=default_pass_manager(prime=PRIME, read_module=read_file_from_dict(files)))
-    assert program.format() == """\
+        codes=[(files["."], ".")],
+        pass_manager=default_pass_manager(prime=PRIME, read_module=read_file_from_dict(files)),
+    )
+    assert (
+        program.format()
+        == """\
 [ap] = 1; ap++
 ret
 [ap] = 2; ap++
@@ -3029,13 +3816,18 @@ call rel -5
 ret
 call rel -5
 """
+    )
     program = preprocess_codes(
-        codes=[(files['.'], '.')],
+        codes=[(files["."], ".")],
         pass_manager=default_pass_manager(
             prime=PRIME,
             read_module=read_file_from_dict(files),
-            opt_unused_functions=False))
-    assert program.format() == """\
+            opt_unused_functions=False,
+        ),
+    )
+    assert (
+        program.format()
+        == """\
 [ap] = 0; ap++
 ret
 [ap] = 1; ap++
@@ -3045,6 +3837,7 @@ call rel -5
 ret
 call rel -5
 """
+    )
 
 
 def test_known_ap_change_decorator():
@@ -3067,15 +3860,38 @@ end
     preprocess_str(code=code, prime=PRIME)
 
     # Negative case.
-    verify_exception("""
+    verify_exception(
+        """
 @known_ap_change
 func foo():
     foo()
     return ()
 end
-""", """
+""",
+        """
 file:?:?: The compiler was unable to deduce the change of the ap register, as required by this \
 decorator.
 @known_ap_change
-^**************^
-""")
+ ^*************^
+""",
+    )
+
+
+def test_define_word_failure():
+    verify_exception(
+        """
+tempvar x = 5
+dw x
+""",
+        """
+file:?:?: While expanding the reference 'x' in:
+dw x
+   ^
+file:?:?: dw must be followed by a constant expression.
+tempvar x = 5
+        ^
+Preprocessed instruction:
+dw [ap + (-1)]
+""",
+        exc_type=InstructionBuilderError,
+    )

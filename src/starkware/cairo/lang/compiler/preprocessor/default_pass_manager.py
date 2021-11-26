@@ -1,11 +1,19 @@
-from typing import Callable, Dict, Optional, Sequence, Tuple, Type
+from typing import Callable, Dict, Optional, Sequence, Set, Tuple, Type
 
 from starkware.cairo.lang.compiler.ast.module import CairoModule
 from starkware.cairo.lang.compiler.import_loader import collect_imports
+from starkware.cairo.lang.compiler.preprocessor.auxiliary_info_collector import (
+    AuxiliaryInfoCollector,
+)
 from starkware.cairo.lang.compiler.preprocessor.dependency_graph import DependencyGraphStage
+from starkware.cairo.lang.compiler.preprocessor.directives import DirectivesCollectorStage
 from starkware.cairo.lang.compiler.preprocessor.identifier_collector import IdentifierCollector
 from starkware.cairo.lang.compiler.preprocessor.pass_manager import (
-    PassManager, PassManagerContext, Stage, VisitorStage)
+    PassManager,
+    PassManagerContext,
+    Stage,
+    VisitorStage,
+)
 from starkware.cairo.lang.compiler.preprocessor.preprocessor import Preprocessor
 from starkware.cairo.lang.compiler.preprocessor.struct_collector import StructCollector
 from starkware.cairo.lang.compiler.preprocessor.unique_labels import UniqueLabelCreator
@@ -13,41 +21,68 @@ from starkware.cairo.lang.compiler.scoped_name import ScopedName
 
 
 def default_pass_manager(
-        prime: int,
-        read_module: Callable[[str], Tuple[str, str]],
-        preprocessor_cls: Optional[Type[Preprocessor]] = None,
-        opt_unused_functions: bool = True,
-        preprocessor_kwargs: Optional[Dict] = None) -> PassManager:
+    prime: int,
+    read_module: Callable[[str], Tuple[str, str]],
+    preprocessor_cls: Optional[Type[Preprocessor]] = None,
+    opt_unused_functions: bool = True,
+    auxiliary_info_cls: Optional[Type[AuxiliaryInfoCollector]] = None,
+    preprocessor_kwargs: Optional[Dict] = None,
+    additional_scopes_to_compile: Optional[Set[ScopedName]] = None,
+) -> PassManager:
     manager = PassManager()
-    manager.add_stage('module_collector', ModuleCollector(read_module=read_module))
-    manager.add_stage('unique_label_creator', VisitorStage(
-        lambda context: UniqueLabelCreator(), modify_ast=True))
-    manager.add_stage('identifier_collector', VisitorStage(
-        lambda context: IdentifierCollector(identifiers=context.identifiers)))
+    manager.add_stage("module_collector", ModuleCollector(read_module=read_module))
+    manager.add_stage(
+        "unique_label_creator", VisitorStage(lambda context: UniqueLabelCreator(), modify_ast=True)
+    )
+    manager.add_stage(
+        "identifier_collector",
+        VisitorStage(lambda context: IdentifierCollector(identifiers=context.identifiers)),
+    )
+    manager.add_stage("directives_collector", DirectivesCollectorStage())
+    manager.add_stage(
+        "struct_collector",
+        VisitorStage(lambda context: StructCollector(identifiers=context.identifiers)),
+    )
     if opt_unused_functions:
-        manager.add_stage('dependency_graph', DependencyGraphStage())
-    manager.add_stage('struct_collector', VisitorStage(
-        lambda context: StructCollector(identifiers=context.identifiers)))
-    manager.add_stage('preprocessor', PreprocessorStage(
-        prime, preprocessor_cls, preprocessor_kwargs))
+        if additional_scopes_to_compile is None:
+            additional_scopes_to_compile = set()
+        manager.add_stage(
+            "dependency_graph",
+            DependencyGraphStage(additional_scopes_to_compile=additional_scopes_to_compile),
+        )
+    manager.add_stage(
+        "preprocessor",
+        PreprocessorStage(prime, preprocessor_cls, auxiliary_info_cls, preprocessor_kwargs),
+    )
     return manager
 
 
 class PreprocessorStage(Stage):
     def __init__(
-            self, prime: int, preprocessor_cls: Optional[Type[Preprocessor]] = None,
-            preprocessor_kwargs: Optional[Dict] = None):
+        self,
+        prime: int,
+        preprocessor_cls: Optional[Type[Preprocessor]] = None,
+        auxiliary_info_cls: Optional[Type[AuxiliaryInfoCollector]] = None,
+        preprocessor_kwargs: Optional[Dict] = None,
+    ):
         self.prime = prime
         if preprocessor_cls is None:
             self.preprocessor_cls = Preprocessor
         else:
             self.preprocessor_cls = preprocessor_cls
+        self.auxiliary_info_cls = auxiliary_info_cls
         self.preprocessor_kwargs = {} if preprocessor_kwargs is None else preprocessor_kwargs
 
     def run(self, context: PassManagerContext):
+        assert context.builtins is not None
         preprocessor = self.preprocessor_cls(
-            prime=self.prime, identifiers=context.identifiers,
-            functions_to_compile=context.functions_to_compile, **self.preprocessor_kwargs)
+            prime=self.prime,
+            identifiers=context.identifiers,
+            builtins=context.builtins,
+            functions_to_compile=context.functions_to_compile,
+            auxiliary_info_cls=self.auxiliary_info_cls,
+            **self.preprocessor_kwargs,
+        )
         preprocessor.identifier_locations = context.identifier_locations
 
         for module in context.modules:
@@ -59,8 +94,10 @@ class PreprocessorStage(Stage):
 
 class ModuleCollector(Stage):
     def __init__(
-            self, read_module: Callable[[str], Tuple[str, str]],
-            additional_modules: Optional[Sequence[str]] = None):
+        self,
+        read_module: Callable[[str], Tuple[str, str]],
+        additional_modules: Optional[Sequence[str]] = None,
+    ):
         self.read_module = read_module
         self.additional_modules = [] if additional_modules is None else list(additional_modules)
 

@@ -13,7 +13,7 @@ from starkware.cairo.lang.compiler.ast.formatting_utils import set_max_line_leng
 from starkware.cairo.lang.compiler.parser import parse_file
 
 MAX_LINE_LENGTH = 65
-DOCS_TEST_FILTER_ENV_VAR = 'DOCS_TEST_FILTER'
+DOCS_TEST_FILTER_ENV_VAR = "DOCS_TEST_FILTER"
 
 
 class TestedCodeDirective(Directive):
@@ -30,16 +30,17 @@ class TestedCodeDirective(Directive):
     (the string "print('Hello world')" in the example above) for tests which appears later using
     the test directive.
     """
+
     has_content = True
     required_arguments = 2
 
     def run(self):
         language, code_name = self.arguments
-        code = '\n'.join(self.content)
+        code = "\n".join(self.content)
 
         node = nodes.literal_block(code, code)
-        node['language'] = language
-        node['testing_tested_code_name'] = code_name
+        node["language"] = language
+        node["testing_tested_code_name"] = code_name
 
         return [node]
 
@@ -62,13 +63,14 @@ class TestDirective(Directive):
       DOCS_TEST_FILTER=builtins scripts/burn.py --target cairo_docs_test
     to run all the tests in *.rst files that contain the word 'builtins'.
     """
+
     has_content = True
 
     def run(self):
-        test_code = '\n'.join(self.content)
+        test_code = "\n".join(self.content)
 
         node = nodes.comment(test_code, test_code)
-        node['testing_test'] = True
+        node["testing_test"] = True
 
         return [node]
 
@@ -78,11 +80,12 @@ class TestCodeBuilder(Builder):
     A builder that runs the test created by the test directive (see TestDirective).
     """
 
-    name = 'testcode'
+    name = "testcode"
 
     def write(
-            self, build_docnames: Iterable[str], updated_docnames: Sequence[str],
-            method: str = 'update'):
+        self, build_docnames: Iterable[str], updated_docnames: Sequence[str], method: str = "update"
+    ):
+        assert self.env is not None
         if build_docnames is None:
             build_docnames = self.env.all_docs
         build_docnames = sorted(build_docnames)
@@ -94,26 +97,26 @@ class TestCodeBuilder(Builder):
             doctree = self.env.get_doctree(docname)
 
             def is_code(node: nodes.Node):
-                return isinstance(node, nodes.literal_block) and 'testing_tested_code_name' in node
+                return isinstance(node, nodes.literal_block) and "testing_tested_code_name" in node
 
             for node in doctree.traverse(is_code):
                 self.handle_code_node(node, docname, codes)
 
-        codes_json_file = os.environ.get('DOCS_CODES_JSON_FILE')
+        codes_json_file = os.environ.get("DOCS_CODES_JSON_FILE")
         if codes_json_file is not None:
-            with open(codes_json_file, 'w') as f:
+            with open(codes_json_file, "w") as f:
                 json.dump(codes, f, indent=4)
-                f.write('\n')
+                f.write("\n")
 
-        if os.environ.get('DOCS_SKIP_TESTS') == '1':
-            print('Skipping tests.')
+        if os.environ.get("DOCS_SKIP_TESTS") == "1":
+            print("Skipping tests.")
         else:
             # Run the tests.
             for docname in build_docnames:
                 doctree = self.env.get_doctree(docname)
 
                 def is_test(node: nodes.Node):
-                    return isinstance(node, nodes.comment) and 'testing_test' in node
+                    return isinstance(node, nodes.comment) and "testing_test" in node
 
                 for node in doctree.traverse(is_test):
                     self.handle_test_node(node, docname, codes)
@@ -124,18 +127,19 @@ class TestCodeBuilder(Builder):
         code is well-formatted.
         """
         code = node.children[0].astext()
-        code_name = node['testing_tested_code_name']
-        assert code_name not in codes, \
-            f"Tested code segment '{code_name}' was defined more than once."
+        code_name = node["testing_tested_code_name"]
+        assert (
+            code_name not in codes
+        ), f"Tested code segment '{code_name}' was defined more than once."
         codes[code_name] = code
 
         # Check formatting.
-        if node['language'] == 'cairo':
+        if node["language"] == "cairo":
             # Replace patterns of the form '<expr*>' with 0 before auto-formatting.
-            code_for_formatting = re.sub('<expr.*?>', '0', code)
+            code_for_formatting = re.sub("<expr.*?>", "0", code)
             try:
                 with set_max_line_length(MAX_LINE_LENGTH):
-                    formatted_code = parse_file(code_for_formatting, filename=f'<input>').format()
+                    formatted_code = parse_file(code_for_formatting, filename=f"<input>").format()
             except Exception:
                 traceback_str = traceback.format_exc()
                 exc_str = f'Formatting failure at "{docname}:{node.line}":\n\n' + traceback_str
@@ -151,8 +155,9 @@ class TestCodeBuilder(Builder):
                 bad, good = [
                     (bad, good)
                     for bad, good in zip(code_for_formatting_lines, formatted_code_lines)
-                    if bad != good][0]
-                print(f'First different line:', file=sys.stderr)
+                    if bad != good
+                ][0]
+                print(f"First different line:", file=sys.stderr)
                 print(bad, file=sys.stderr)
                 print(good, file=sys.stderr)
 
@@ -164,8 +169,8 @@ class TestCodeBuilder(Builder):
             return
         try:
             if test_filter is not None:
-                print(f'Running test {docname}...')
-            exec(node.children[0].astext(), {'codes': codes})
+                print(f"Running test {docname}...")
+            exec(node.children[0].astext(), {"codes": codes})
         except Exception:
             traceback_str = traceback.format_exc()
             exc_str = f'Test failure at "{docname}:{node.line}":\n\n{traceback_str}'
@@ -173,13 +178,14 @@ class TestCodeBuilder(Builder):
             sys.exit(1)
 
     def get_outdated_docs(self) -> Union[str, Iterable[str]]:
+        assert self.env is not None
         # Build all docs every time.
         return self.env.found_docs
 
 
 def setup(app):
-    app.add_directive('tested-code', TestedCodeDirective)
-    app.add_directive('test', TestDirective)
+    app.add_directive("tested-code", TestedCodeDirective)
+    app.add_directive("test", TestDirective)
     app.add_builder(TestCodeBuilder)
 
-    return {'version': '0.1'}
+    return {"version": "0.1"}

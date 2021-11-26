@@ -55,8 +55,8 @@ memory. This memory is located in its own segment, which is variable in length.
 Example
 -------
 
-Compile the following code and run it with ``--layout=small --print_memory --print_info`` (and
-without ``--relocate_prints``):
+Compile the following code and run it with
+``--layout=small --print_memory --print_info --print_segments`` (and without ``--relocate_prints``):
 
 .. tested-code:: cairo segments_example
 
@@ -182,7 +182,7 @@ the same values after relocation.
         output = subprocess.check_output(
             'cairo-compile segments.cairo --output segments.json\n'
             'cairo-run --program=segments.json --print_output '
-            '--layout=small --print_memory --print_info',
+            '--layout=small --print_memory --print_info --print_segments',
             shell=True, cwd=tmpdir, env=env).decode('utf8')
 
         actual_output_lines = [line.strip() for line in output.splitlines() if line.strip()]

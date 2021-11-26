@@ -19,20 +19,20 @@ class ToggleDirective(Directive):
     required_arguments = 1
 
     def run(self):
-        text = '\n'.join(self.content)
+        text = "\n".join(self.content)
 
         node = Container(text)
         self.state.nested_parse(self.content, self.content_offset, node)
 
         return [
-            nodes.raw('', f'<details><summary><a>{self.arguments[0]}</a></summary>', format='html'),
+            nodes.raw("", f"<details><summary><a>{self.arguments[0]}</a></summary>", format="html"),
             node,
-            nodes.raw('', '</details>', format='html'),
+            nodes.raw("", "</details>", format="html"),
         ]
 
 
 def setup(app):
-    app.add_directive('toggle', ToggleDirective)
+    app.add_directive("toggle", ToggleDirective)
     app.add_node(Container, html=(visit_container, depart_container))
 
-    return {'version': '0.1'}
+    return {"version": "0.1"}

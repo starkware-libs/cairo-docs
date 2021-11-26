@@ -21,7 +21,7 @@ You can read and write this value as follows:
 
     @external
     func extend_range{
-            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
+            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
             range_check_ptr}(user : felt):
         let (min_max) = range.read(user)
         range.write(user, (min_max[0] - 1, min_max[1] + 1))
@@ -74,3 +74,37 @@ arguments will fail as the arrays are different.
 A StarkNet contract using array arguments in external functions
 must have the range_check builtin, which is used
 to validate that the array's length is nonnegative.
+
+
+Passing tuples and structs in calldata
+--------------------------------------
+
+Calldata arguments and return values may be of any type that does not contain pointers.
+E.g., structs with felt members, tuples of felts and tuples of tuples of felts.
+For example:
+
+.. tested-code:: cairo sum_points
+
+    struct Point:
+        member x : felt
+        member y : felt
+    end
+
+    @view
+    func sum_points(points : (Point, Point)) -> (res : Point):
+        return (
+            res=Point(
+            x=points[0].x + points[1].x,
+            y=points[0].y + points[1].y))
+    end
+
+In order to call ``sum_points`` with the points ``(1, 2), (10, 20)``,
+you should pass the following inputs to ``starknet call``:
+
+.. tested-code:: bash call_sum_points
+
+    starknet call \
+        --address CONTRACT_ADDRESS \
+        --abi contract_abi.json \
+        --function sum_points \
+        --inputs 1 2 10 20
