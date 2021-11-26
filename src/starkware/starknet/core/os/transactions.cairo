@@ -1,27 +1,52 @@
 from starkware.cairo.builtin_selection.select_builtins import select_builtins
 from starkware.cairo.builtin_selection.validate_builtins import validate_builtin, validate_builtins
-from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin
+from starkware.cairo.common.cairo_builtins import BitwiseBuiltin, HashBuiltin, SignatureBuiltin
 from starkware.cairo.common.dict import dict_new, dict_read, dict_update, dict_write
 from starkware.cairo.common.dict_access import DictAccess
 from starkware.cairo.common.find_element import find_element
-from starkware.cairo.common.math import assert_not_zero
+from starkware.cairo.common.math import assert_nn, assert_not_zero
 from starkware.cairo.common.memcpy import memcpy
 from starkware.cairo.common.registers import get_ap, get_fp_and_pc
 from starkware.cairo.common.segments import relocate_segment
-from starkware.starknet.common.storage import Storage
-from starkware.starknet.common.syscalls import SendMessageToL1SysCall
+from starkware.starknet.common.syscalls import (
+    CALL_CONTRACT_SELECTOR, DELEGATE_CALL_SELECTOR, GET_CALLER_ADDRESS_SELECTOR,
+    GET_CONTRACT_ADDRESS_SELECTOR, GET_SEQUENCER_ADDRESS_SELECTOR, GET_TX_SIGNATURE_SELECTOR,
+    SEND_MESSAGE_TO_L1_SELECTOR, STORAGE_READ_SELECTOR, STORAGE_WRITE_SELECTOR, CallContract,
+    CallContractResponse, GetCallerAddress, GetCallerAddressResponse, GetContractAddress,
+    GetContractAddressResponse, GetSequencerAddress, GetSequencerAddressResponse, GetTxSignature,
+    SendMessageToL1SysCall, StorageRead, StorageWrite)
 from starkware.starknet.core.os.contracts import (
     ContractDefinition, ContractDefinitionFact, ContractEntryPoint, load_contract_definition_facts)
-from starkware.starknet.core.os.output import MessageHeader, OsCarriedOutputs
+from starkware.starknet.core.os.output import DeploymentInfoHeader, MessageHeader, OsCarriedOutputs
 from starkware.starknet.core.os.state import StateEntry
 
 const UNINITIALIZED_CONTRACT_HASH = 0
 
-# The amount of range checks we need to reserve for the OS to validate an invoke transaction.
-const RANGE_CHECKS_PER_INVOKE_TRANSACTION = 4 + (1 + BuiltinEncodings.SIZE)
+# The dummy caller address of an externally originated transaction.
+const ORIGIN_ADDRESS = 0
 
+# An entry point offset that indicates that nothing needs to be done.
+# Used to implement an empty constructor.
+const NOP_ENTRY_POINT_OFFSET = -1
+
+const TX_TYPE_EXTERNAL = 0
+const TX_TYPE_L1_HANDLER = 1
+const TX_TYPE_CONSTRUCTOR = 2
+
+# get_selector_from_name('constructor').
+const CONSTRUCTOR_SELECTOR = (
+    0x28ffe4ff0f226a9107253e17a904099aa4f63a02a5621de0576e5aa71bc5194)
+
+# An internal representation of an Invoke transaction to execute.
 struct Transaction:
+    member tx_type : felt
+    member caller_address : felt
+    # The address of the contract executing this transaction.
+    # This address controls the storage being used, messages sent to L1, calling contracts, etc.
     member contract_address : felt
+    # The address that holds the code to execute.
+    # It may differ from contract_address in the case of delegate call.
+    member code_address : felt
     member selector : felt
     member calldata_size : felt
     member calldata : felt*
@@ -37,6 +62,7 @@ struct BuiltinPointers:
     member pedersen : HashBuiltin*
     member range_check : felt
     member ecdsa : felt
+    member bitwise : felt
 end
 
 # A struct containing the ASCII encoding of each builtin.
@@ -44,6 +70,7 @@ struct BuiltinEncodings:
     member pedersen : felt
     member range_check : felt
     member ecdsa : felt
+    member bitwise : felt
 end
 
 # A struct containing the instance size of each builtin.
@@ -51,6 +78,7 @@ struct BuiltinInstanceSizes:
     member pedersen : felt
     member range_check : felt
     member ecdsa : felt
+    member bitwise : felt
 end
 
 struct BuiltinParams:
@@ -62,25 +90,28 @@ struct ExecuteTransactionContext:
     member builtin_params : BuiltinParams*
     member n_contract_definition_facts : felt
     member contract_definition_facts : ContractDefinitionFact*
+    member sequencer_address : felt
 end
 
 func get_builtin_params() -> (builtin_params : BuiltinParams*):
     alloc_locals
     let (local __fp__, _) = get_fp_and_pc()
 
-    local builtin_encodings : BuiltinEncodings
-    builtin_encodings.pedersen = %[int.from_bytes('pedersen'.encode('ascii'), 'big')%]
-    builtin_encodings.range_check = %[int.from_bytes('range_check'.encode('ascii'), 'big')%]
-    builtin_encodings.ecdsa = %[int.from_bytes('ecdsa'.encode('ascii'), 'big')%]
+    local builtin_encodings : BuiltinEncodings = BuiltinEncodings(
+        pedersen='pedersen',
+        range_check='range_check',
+        ecdsa='ecdsa',
+        bitwise='bitwise')
 
-    local builtin_instance_sizes : BuiltinInstanceSizes
-    builtin_instance_sizes.pedersen = HashBuiltin.SIZE
-    builtin_instance_sizes.range_check = 1
-    builtin_instance_sizes.ecdsa = SignatureBuiltin.SIZE
+    local builtin_instance_sizes : BuiltinInstanceSizes = BuiltinInstanceSizes(
+        pedersen=HashBuiltin.SIZE,
+        range_check=1,
+        ecdsa=SignatureBuiltin.SIZE,
+        bitwise=BitwiseBuiltin.SIZE)
 
-    local builtin_params : BuiltinParams
-    assert builtin_params.builtin_encodings = &builtin_encodings
-    assert builtin_params.builtin_instance_sizes = &builtin_instance_sizes
+    local builtin_params : BuiltinParams = BuiltinParams(
+        builtin_encodings=&builtin_encodings,
+        builtin_instance_sizes=&builtin_instance_sizes)
     return (builtin_params=&builtin_params)
 end
 
@@ -97,43 +128,50 @@ end
 #   Note that if the assumption above does not hold it might be the case that
 #   the returned range_check_ptr is smaller then reserved_range_checks_end.
 func execute_transactions{
-        pedersen_ptr : HashBuiltin*, range_check_ptr, ecdsa_ptr, outputs : OsCarriedOutputs}() -> (
-        reserved_range_checks_end, state_changes : StateChanges):
+        pedersen_ptr : HashBuiltin*, range_check_ptr, ecdsa_ptr, bitwise_ptr,
+        outputs : OsCarriedOutputs}() -> (reserved_range_checks_end, state_changes : StateChanges):
     alloc_locals
     local n_txs
     %{
+        from starkware.python.utils import from_bytes
+
         ids.n_txs = len(os_input.transactions)
 
         initial_dict = {
             address: segments.gen_arg(
-                (int.from_bytes(contract.contract_hash, 'big'), segments.add()))
+                (from_bytes(contract.contract_hash), segments.add()))
             for address, contract in os_input.contracts.items()
         }
     %}
     # A dict from contract address to a dict of storage changes.
     let (local global_state_changes : DictAccess*) = dict_new()
 
-    local execute_tx_context : ExecuteTransactionContext
     let (n_contract_definition_facts, contract_definition_facts) = load_contract_definition_facts()
-    assert execute_tx_context.n_contract_definition_facts = n_contract_definition_facts
-    assert execute_tx_context.contract_definition_facts = contract_definition_facts
 
     let (local __fp__, _) = get_fp_and_pc()
-    local local_builtin_ptrs : BuiltinPointers
-    assert local_builtin_ptrs.pedersen = pedersen_ptr
-
-    %{ ids.local_builtin_ptrs.range_check = segments.add_temp_segment() %}
-    local_builtin_ptrs.ecdsa = ecdsa_ptr
+    tempvar temp_range_check
+    %{ ids.temp_range_check = segments.add_temp_segment() %}
+    local local_builtin_ptrs : BuiltinPointers = BuiltinPointers(
+        pedersen=pedersen_ptr,
+        range_check=temp_range_check,
+        ecdsa=ecdsa_ptr,
+        bitwise=bitwise_ptr)
 
     let (builtin_params) = get_builtin_params()
-    assert execute_tx_context.builtin_params = builtin_params
+
+    local execute_tx_context : ExecuteTransactionContext = ExecuteTransactionContext(
+        builtin_params=builtin_params,
+        n_contract_definition_facts=n_contract_definition_facts,
+        contract_definition_facts=contract_definition_facts,
+        sequencer_address=nondet %{ os_input.sequencer_address %})
 
     let builtin_ptrs = &local_builtin_ptrs
     %{
         vm_enter_scope({
             'storage_by_address' : storage_by_address,
             'transactions' : iter(os_input.transactions),
-            '__dict_manager' : __dict_manager,
+            'syscall_handler' : syscall_handler,
+             '__dict_manager' : __dict_manager,
         })
     %}
     # Keep a reference to the start of global_state_changes.
@@ -152,6 +190,7 @@ func execute_transactions{
     let pedersen_ptr = builtin_ptrs.pedersen
     let range_check_ptr = builtin_ptrs.range_check
     let ecdsa_ptr = builtin_ptrs.ecdsa
+    let bitwise_ptr = builtin_ptrs.bitwise
     return (
         reserved_range_checks_end=reserved_range_checks_end,
         state_changes=StateChanges(global_state_changes_start, global_state_changes))
@@ -185,52 +224,295 @@ func execute_transactions_inner{
 
     jmp deploy_transaction if [ap] != 0; ap++
 
+    tempvar tx : Transaction*
+    %{
+        from starkware.starknet.business_logic.internal_transaction import InternalInvokeFunction
+        from starkware.starknet.services.api.contract_definition import EntryPointType
+
+        if tx.entry_point_type is EntryPointType.L1_HANDLER:
+            tx_type = ids.TX_TYPE_L1_HANDLER
+        elif tx.entry_point_type is EntryPointType.EXTERNAL:
+            tx_type = ids.TX_TYPE_EXTERNAL
+        else:
+            raise NotImplementedError(f'Unexpected EntryPointType: {tx.entry_point_type}.')
+
+        assert isinstance(tx, InternalInvokeFunction), \
+            f'Expected a transaction of type InternalInvokeFunction, got {tx}.'
+        ids.tx = segments.gen_arg(
+            arg=[
+                tx_type,
+                ids.ORIGIN_ADDRESS,
+                tx.contract_address,
+                tx.code_address,
+                tx.entry_point_selector,
+                len(tx.calldata),
+                tx.calldata,
+            ]
+        )
+    %}
+
+    # External calls originate from ORIGIN_ADDRESS.
+    assert tx.caller_address = ORIGIN_ADDRESS
+
+    # Assert that tx.tx_type is either TX_TYPE_L1_HANDLER or TX_TYPE_EXTERNAL.
+    assert (tx.tx_type - TX_TYPE_L1_HANDLER) * (tx.tx_type - TX_TYPE_EXTERNAL) = 0
+
+    # In external calls and l1 handlers, the code_address must match the contract_address.
+    assert tx.code_address = tx.contract_address
+
     # Handle invoke_transaction.
-    execute_invoke_transaction(execute_tx_context=execute_tx_context)
+    execute_invoke_transaction(execute_tx_context=execute_tx_context, tx=tx)
 
     return execute_transactions_inner(execute_tx_context=execute_tx_context, n_txs=n_txs - 1)
 
     deploy_transaction:
     # Handle deploy_transaction.
-    execute_deploy_transaction()
+    execute_deploy_transaction(execute_tx_context=execute_tx_context)
 
     return execute_transactions_inner(execute_tx_context=execute_tx_context, n_txs=n_txs - 1)
 end
 
+# Executes a syscall that calls another contract, or invokes a delegate call.
+func execute_contract_call{
+        range_check_ptr, builtin_ptrs : BuiltinPointers*, global_state_changes : DictAccess*,
+        outputs : OsCarriedOutputs}(
+        execute_tx_context : ExecuteTransactionContext*, contract_address : felt,
+        caller_address : felt, syscall_ptr : CallContract*):
+    alloc_locals
+
+    let call_req = syscall_ptr.request
+
+    local tx : Transaction*
+    %{ ids.tx = segments.add() %}
+    assert [tx] = Transaction(
+        tx_type=TX_TYPE_EXTERNAL,
+        caller_address=caller_address,
+        contract_address=contract_address,
+        code_address=call_req.contract_address,
+        selector=call_req.function_selector,
+        calldata_size=call_req.calldata_size,
+        calldata=call_req.calldata)
+
+    let (retdata_size, retdata) = execute_invoke_transaction(
+        execute_tx_context=execute_tx_context, tx=tx)
+
+    let call_resp = syscall_ptr.response
+    %{
+        expected = memory.get_range(addr=ids.call_resp.retdata, size=ids.retdata_size)
+        actual = memory.get_range(addr=ids.retdata, size=ids.retdata_size)
+
+        assert expected == actual, f'Return value mismatch expected={expected}, actual={actual}.'
+    %}
+    relocate_segment(src_ptr=call_resp.retdata, dest_ptr=retdata)
+
+    assert call_resp = CallContractResponse(
+        retdata_size=retdata_size,
+        retdata=retdata)
+    return ()
+end
+
+# Reads a value from the current contract's storage.
+func execute_storage_read{global_state_changes : DictAccess*}(
+        contract_address, syscall_ptr : StorageRead*):
+    alloc_locals
+    local state_entry : StateEntry*
+    local new_state_entry : StateEntry*
+    %{
+        syscall_handler.execute_syscall_storage_read()
+
+        # Fetch a state_entry in this hint and validate it in the update that comes next.
+        ids.state_entry = __dict_manager.get_dict(ids.global_state_changes)[ids.contract_address]
+
+        ids.new_state_entry = segments.add()
+    %}
+
+    tempvar value = syscall_ptr.response.value
+
+    # Update the contract's storage.
+    tempvar storage_ptr = state_entry.storage_ptr
+    assert [storage_ptr] = DictAccess(
+        key=syscall_ptr.request.address, prev_value=value, new_value=value)
+    let storage_ptr = storage_ptr + DictAccess.SIZE
+
+    # Update global_state_changes.
+    assert [new_state_entry] = StateEntry(
+        contract_hash=state_entry.contract_hash,
+        storage_ptr=storage_ptr)
+    dict_update{dict_ptr=global_state_changes}(
+        key=contract_address,
+        prev_value=cast(state_entry, felt),
+        new_value=cast(new_state_entry, felt))
+
+    return ()
+end
+
+# Write a value to the current contract's storage.
+func execute_storage_write{global_state_changes : DictAccess*}(
+        contract_address, syscall_ptr : StorageWrite*):
+    alloc_locals
+    local prev_value : felt
+    local state_entry : StateEntry*
+    local new_state_entry : StateEntry*
+    %{
+        ids.prev_value = syscall_handler.execute_syscall_storage_write()
+
+        # Fetch a state_entry in this hint and validate it in the update that comes next.
+        ids.state_entry = __dict_manager.get_dict(ids.global_state_changes)[ids.contract_address]
+
+        ids.new_state_entry = segments.add()
+    %}
+
+    # Update the contract's storage.
+    tempvar storage_ptr = state_entry.storage_ptr
+    assert [storage_ptr] = DictAccess(
+        key=syscall_ptr.address, prev_value=prev_value, new_value=syscall_ptr.value)
+    let storage_ptr = storage_ptr + DictAccess.SIZE
+
+    # Update global_state_changes.
+    assert [new_state_entry] = StateEntry(
+        contract_hash=state_entry.contract_hash,
+        storage_ptr=storage_ptr)
+    dict_update{dict_ptr=global_state_changes}(
+        key=contract_address,
+        prev_value=cast(state_entry, felt),
+        new_value=cast(new_state_entry, felt))
+
+    return ()
+end
+
+# Executes a system call.
+#
+# Arguments:
+# execute_tx_context - a read-only context used for transaction execution.
+# calling_tx - The transaction for which we are executing the system calls.
+# syscall_ptr a pointer to the syscall segment associated with the 'calling_tx'.
 func execute_syscalls{
         range_check_ptr, builtin_ptrs : BuiltinPointers*, global_state_changes : DictAccess*,
         outputs : OsCarriedOutputs}(
-        execute_tx_context : ExecuteTransactionContext*, caller_address, syscall_size,
+        execute_tx_context : ExecuteTransactionContext*, calling_tx : Transaction*, syscall_size,
         syscall_ptr : felt*):
     if syscall_size == 0:
         return ()
     end
 
-    # Currently only the 'SendMessageToL1' system call is supported.
-    assert [syscall_ptr] = %[int.from_bytes(b'SendMessageToL1', 'big')%]
+    if [syscall_ptr] == CALL_CONTRACT_SELECTOR:
+        let call_contract_syscall = cast(syscall_ptr, CallContract*)
+        execute_contract_call(
+            execute_tx_context=execute_tx_context,
+            contract_address=call_contract_syscall.request.contract_address,
+            caller_address=calling_tx.contract_address,
+            syscall_ptr=call_contract_syscall)
+        return execute_syscalls(
+            execute_tx_context=execute_tx_context,
+            calling_tx=calling_tx,
+            syscall_size=syscall_size - CallContract.SIZE,
+            syscall_ptr=syscall_ptr + CallContract.SIZE)
+    end
+
+    if [syscall_ptr] == DELEGATE_CALL_SELECTOR:
+        execute_contract_call(
+            execute_tx_context=execute_tx_context,
+            contract_address=calling_tx.contract_address,
+            caller_address=calling_tx.caller_address,
+            syscall_ptr=cast(syscall_ptr, CallContract*))
+        return execute_syscalls(
+            execute_tx_context=execute_tx_context,
+            calling_tx=calling_tx,
+            syscall_size=syscall_size - CallContract.SIZE,
+            syscall_ptr=syscall_ptr + CallContract.SIZE)
+    end
+
+    if [syscall_ptr] == GET_CALLER_ADDRESS_SELECTOR:
+        assert [cast(syscall_ptr, GetCallerAddress*)].response = GetCallerAddressResponse(
+            caller_address=calling_tx.caller_address)
+        return execute_syscalls(
+            execute_tx_context=execute_tx_context,
+            calling_tx=calling_tx,
+            syscall_size=syscall_size - GetCallerAddress.SIZE,
+            syscall_ptr=syscall_ptr + GetCallerAddress.SIZE)
+    end
+
+    if [syscall_ptr] == GET_SEQUENCER_ADDRESS_SELECTOR:
+        assert [cast(syscall_ptr, GetSequencerAddress*)].response = GetSequencerAddressResponse(
+            sequencer_address=execute_tx_context.sequencer_address)
+        return execute_syscalls(
+            execute_tx_context=execute_tx_context,
+            calling_tx=calling_tx,
+            syscall_size=syscall_size - GetSequencerAddress.SIZE,
+            syscall_ptr=syscall_ptr + GetSequencerAddress.SIZE)
+    end
+
+    if [syscall_ptr] == GET_CONTRACT_ADDRESS_SELECTOR:
+        assert [cast(syscall_ptr, GetContractAddress*)].response = GetContractAddressResponse(
+            contract_address=calling_tx.contract_address)
+        return execute_syscalls(
+            execute_tx_context=execute_tx_context,
+            calling_tx=calling_tx,
+            syscall_size=syscall_size - GetContractAddress.SIZE,
+            syscall_ptr=syscall_ptr + GetContractAddress.SIZE)
+    end
+
+    if [syscall_ptr] == GET_TX_SIGNATURE_SELECTOR:
+        # Note that we don't enforce anything on the response.
+        return execute_syscalls(
+            execute_tx_context=execute_tx_context,
+            calling_tx=calling_tx,
+            syscall_size=syscall_size - GetTxSignature.SIZE,
+            syscall_ptr=syscall_ptr + GetTxSignature.SIZE)
+    end
+
+    if [syscall_ptr] == STORAGE_READ_SELECTOR:
+        execute_storage_read(
+            contract_address=calling_tx.contract_address,
+            syscall_ptr=cast(syscall_ptr, StorageRead*))
+        return execute_syscalls(
+            execute_tx_context=execute_tx_context,
+            calling_tx=calling_tx,
+            syscall_size=syscall_size - StorageRead.SIZE,
+            syscall_ptr=syscall_ptr + StorageRead.SIZE)
+    end
+
+    if [syscall_ptr] == STORAGE_WRITE_SELECTOR:
+        execute_storage_write(
+            contract_address=calling_tx.contract_address,
+            syscall_ptr=cast(syscall_ptr, StorageWrite*))
+        return execute_syscalls(
+            execute_tx_context=execute_tx_context,
+            calling_tx=calling_tx,
+            syscall_size=syscall_size - StorageWrite.SIZE,
+            syscall_ptr=syscall_ptr + StorageWrite.SIZE)
+    end
+
+    # Here the system call must be 'SendMessageToL1'.
+    assert [syscall_ptr] = SEND_MESSAGE_TO_L1_SELECTOR
 
     let syscall = [cast(syscall_ptr, SendMessageToL1SysCall*)]
 
     assert [outputs.messages_to_l1] = MessageHeader(
-        from_address=caller_address,
+        from_address=calling_tx.contract_address,
         to_address=syscall.to_address,
         payload_size=syscall.payload_size)
     memcpy(
         dst=outputs.messages_to_l1 + MessageHeader.SIZE,
         src=syscall.payload_ptr,
         len=syscall.payload_size)
-    tempvar outputs = OsCarriedOutputs(
+    let outputs = OsCarriedOutputs(
         messages_to_l1=outputs.messages_to_l1 + MessageHeader.SIZE +
-            outputs.messages_to_l1.payload_size,
-        messages_to_l2=outputs.messages_to_l2)
+        outputs.messages_to_l1.payload_size,
+        messages_to_l2=outputs.messages_to_l2,
+        deployment_info=outputs.deployment_info)
     return execute_syscalls(
         execute_tx_context=execute_tx_context,
-        caller_address=caller_address,
-        syscall_size=syscall_size - 4,
-        syscall_ptr=syscall_ptr + 4)
+        calling_tx=calling_tx,
+        syscall_size=syscall_size - SendMessageToL1SysCall.SIZE,
+        syscall_ptr=syscall_ptr + SendMessageToL1SysCall.SIZE)
 end
 
+# Adds 'tx' to 'outputs' if tx.tx_type is TX_TYPE_L1_HANDLER.
 func consume_l1_to_l2_message{outputs : OsCarriedOutputs}(tx : Transaction*):
+    if tx.tx_type != TX_TYPE_L1_HANDLER:
+        return ()
+    end
     assert_not_zero(tx.calldata_size)
     # The raw payload is the calldata without the from_address argument (which is the first).
     tempvar raw_payload : felt* = tx.calldata + 1
@@ -248,33 +530,67 @@ func consume_l1_to_l2_message{outputs : OsCarriedOutputs}(tx : Transaction*):
     assert [message_payload] = tx.selector
     memcpy(dst=message_payload + 1, src=raw_payload, len=raw_payload_size)
 
-    tempvar outputs = OsCarriedOutputs(
+    let outputs = OsCarriedOutputs(
         messages_to_l1=outputs.messages_to_l1,
         messages_to_l2=outputs.messages_to_l2 + MessageHeader.SIZE +
-            outputs.messages_to_l2.payload_size)
+        outputs.messages_to_l2.payload_size,
+        deployment_info=outputs.deployment_info)
     return ()
 end
 
+# Returns the entry point's offset in the program based on the contract_definition and the
+# transaction.
+func get_entry_point_offset{range_check_ptr}(
+        contract_definition : ContractDefinition*, tx : Transaction*) -> (
+        entry_point_offset : felt):
+    # Get the entry points corresponding to the transaction's type.
+    if tx.tx_type == TX_TYPE_L1_HANDLER:
+        tempvar entry_points = contract_definition.l1_handlers
+        tempvar n_entry_points = contract_definition.n_l1_handlers
+    else:
+        if tx.tx_type == TX_TYPE_EXTERNAL:
+            tempvar entry_points = contract_definition.external_functions
+            tempvar n_entry_points = contract_definition.n_external_functions
+        else:
+            assert tx.tx_type = TX_TYPE_CONSTRUCTOR
+            tempvar entry_points = contract_definition.constructors
+            tempvar n_entry_points = contract_definition.n_constructors
+
+            if n_entry_points == 0:
+                return (entry_point_offset=NOP_ENTRY_POINT_OFFSET)
+            end
+        end
+    end
+
+    # The key must be at offset 0.
+    static_assert ContractEntryPoint.selector == 0
+    let (entry_point_desc : ContractEntryPoint*) = find_element(
+        array_ptr=cast(entry_points, felt*),
+        elm_size=ContractEntryPoint.SIZE,
+        n_elms=n_entry_points,
+        key=tx.selector)
+    return (entry_point_offset=entry_point_desc.offset)
+end
+
+# Executes an invoke transaction and returns its return value.
+#
+# Arguments:
+# execute_tx_context - a read-only context used for transaction execution.
+# tx - The transaction to execute.
 func execute_invoke_transaction{
         range_check_ptr, builtin_ptrs : BuiltinPointers*, global_state_changes : DictAccess*,
-        outputs : OsCarriedOutputs}(execute_tx_context : ExecuteTransactionContext*):
+        outputs : OsCarriedOutputs}(
+        execute_tx_context : ExecuteTransactionContext*, tx : Transaction*) -> (
+        retdata_size, retdata : felt*):
     alloc_locals
-    local tx : Transaction*
-    local state_entry : StateEntry*
 
-    %{
-        from starkware.starknet.business_logic.internal_transaction import InternalInvokeFunction
+    # Consume message to L2 (only if the transaction is of type L1_HANDLER).
+    consume_l1_to_l2_message(tx=tx)
+    local outputs : OsCarriedOutputs = outputs
 
-        assert isinstance(tx, InternalInvokeFunction), \
-            f'Expected a tx of type InternalInvokeFunction, got {tx}.'
-        ids.tx = segments.gen_arg(
-            arg=[tx.contract_address, tx.entry_point_selector, len(tx.calldata), tx.calldata])
-
-        # Fetch a state_entry in this hint and validate it in the update at the end
-        # of this function.
-        ids.state_entry = __dict_manager.get_dict(
-            ids.global_state_changes)[ids.tx.contract_address]
-    %}
+    let (local state_entry : StateEntry*) = dict_read{dict_ptr=global_state_changes}(
+        key=tx.code_address)
+    local global_state_changes : DictAccess* = global_state_changes
 
     # The key must be at offset 0.
     static_assert ContractDefinitionFact.hash == 0
@@ -283,47 +599,21 @@ func execute_invoke_transaction{
         elm_size=ContractDefinitionFact.SIZE,
         n_elms=execute_tx_context.n_contract_definition_facts,
         key=state_entry.contract_hash)
-
     local contract_definition : ContractDefinition* = contract_definition_fact.contract_definition
 
-    # The key must be at offset 0.
-    static_assert ContractEntryPoint.selector == 0
-    local is_l1_handler : felt
+    let (entry_point_offset) = get_entry_point_offset(
+        contract_definition=contract_definition, tx=tx)
 
-    %{
-        from starkware.starknet.services.api.contract_definition import EntryPointType
-
-        if tx.entry_point_type is EntryPointType.L1_HANDLER:
-            ids.is_l1_handler = 1
-        elif tx.entry_point_type is EntryPointType.EXTERNAL:
-            ids.is_l1_handler = 0
-        else:
-            raise NotImplementedError(f'Unexpected EntryPointType: {tx.entry_point_type}.')
-    %}
-
-    local range_check_ptr = range_check_ptr
-    local global_state_changes : DictAccess* = global_state_changes
-    if is_l1_handler != 0:
-        consume_l1_to_l2_message(tx=tx)
-        tempvar entry_points : ContractEntryPoint* = contract_definition.l1_handlers
-        tempvar n_entry_points : felt = contract_definition.n_l1_handlers
-    else:
-        tempvar outputs = outputs
-        tempvar entry_points : ContractEntryPoint* = contract_definition.external_functions
-        tempvar n_entry_points : felt = contract_definition.n_external_functions
+    %{ syscall_handler.enter_call() %}
+    if entry_point_offset == NOP_ENTRY_POINT_OFFSET:
+        # Assert that there is no call data in the case of NOP entry point.
+        assert tx.calldata_size = 0
+        %{ syscall_handler.exit_call() %}
+        return (retdata_size=0, retdata=cast(0, felt*))
     end
 
-    local outputs : OsCarriedOutputs = outputs
-
-    let (entry_point_desc : ContractEntryPoint*) = find_element(
-        array_ptr=cast(entry_points, felt*),
-        elm_size=ContractEntryPoint.SIZE,
-        n_elms=n_entry_points,
-        key=tx.selector)
     local range_check_ptr = range_check_ptr
-
-    # A pointer to the contract entry point within the bytecode.
-    local contract_entry_point : felt* = contract_definition.bytecode_ptr + entry_point_desc.offset
+    local contract_entry_point : felt* = contract_definition.bytecode_ptr + entry_point_offset
 
     local os_context : felt*
     local syscall_ptr : felt*
@@ -333,7 +623,6 @@ func execute_invoke_transaction{
         ids.syscall_ptr = segments.add()
     %}
     assert [os_context] = cast(syscall_ptr, felt)
-    assert [os_context + 1] = cast(state_entry.storage_ptr, felt)
 
     let n_builtins = BuiltinEncodings.SIZE
     local builtin_params : BuiltinParams* = execute_tx_context.builtin_params
@@ -343,13 +632,18 @@ func execute_invoke_transaction{
         all_ptrs=builtin_ptrs,
         n_selected_builtins=contract_definition.n_builtins,
         selected_encodings=contract_definition.builtin_list,
-        selected_ptrs=os_context + 2)
+        selected_ptrs=os_context + 1)
 
     # Use tempvar to pass arguments to contract_entry_point().
     tempvar context = os_context
     tempvar calldata_size = tx.calldata_size
     tempvar calldata = tx.calldata
-    %{ vm_enter_scope({'__storage' : storage_by_address[ids.tx.contract_address]}) %}
+    %{
+        vm_enter_scope({
+            '__storage' : storage_by_address[ids.tx.contract_address],
+            'syscall_handler' : syscall_handler,
+        })
+    %}
     call abs contract_entry_point
     %{ vm_exit_scope() %}
     # Retrieve returned_builtin_ptrs_subset.
@@ -359,7 +653,7 @@ func execute_invoke_transaction{
     local returned_builtin_ptrs_subset : felt* = cast(
         ap_val - contract_definition.n_builtins - 2, felt*)
     local retdata_size : felt = [ap_val - 2]
-    local retdata_ptr : felt* = cast([ap_val - 1], felt*)
+    local retdata : felt* = cast([ap_val - 1], felt*)
 
     local return_builtin_ptrs : BuiltinPointers*
     %{
@@ -393,61 +687,82 @@ func execute_invoke_transaction{
         builtin_instance_sizes=builtin_params.builtin_instance_sizes,
         n_builtins=n_builtins)
 
-    let syscall_end = cast([returned_builtin_ptrs_subset - 2], felt*)
+    let syscall_end = cast([returned_builtin_ptrs_subset - 1], felt*)
+
+    let builtin_ptrs = return_builtin_ptrs
     execute_syscalls(
         execute_tx_context=execute_tx_context,
-        caller_address=tx.contract_address,
+        calling_tx=tx,
         syscall_size=syscall_end - syscall_ptr,
         syscall_ptr=syscall_ptr)
 
-    local new_state_entry : StateEntry*
-    %{ ids.new_state_entry = segments.add() %}
-    assert new_state_entry.contract_hash = state_entry.contract_hash
-    assert new_state_entry.storage_ptr = cast([returned_builtin_ptrs_subset - 1], DictAccess*)
-
-    validate_builtin(
-        prev_builtin_ptr=cast(state_entry.storage_ptr, felt*),
-        new_builtin_ptr=cast(new_state_entry.storage_ptr, felt*),
-        builtin_instance_size=DictAccess.SIZE)
-
-    dict_update{dict_ptr=global_state_changes}(
-        key=tx.contract_address,
-        prev_value=cast(state_entry, felt),
-        new_value=cast(new_state_entry, felt))
-
-    let builtin_ptrs = return_builtin_ptrs
-    return ()
+    %{ syscall_handler.exit_call() %}
+    return (retdata_size=retdata_size, retdata=retdata)
 end
 
-func execute_deploy_transaction{global_state_changes : DictAccess*}():
+func execute_deploy_transaction{
+        range_check_ptr, builtin_ptrs : BuiltinPointers*, global_state_changes : DictAccess*,
+        outputs : OsCarriedOutputs}(execute_tx_context : ExecuteTransactionContext*):
     alloc_locals
     local contract_address
     local state_entry : StateEntry*
     local new_state_entry : StateEntry*
+
     %{
         ids.contract_address = tx.contract_address
 
         # Fetch a state_entry in this hint and validate it in the update at the end
         # of this function.
         ids.state_entry = __dict_manager.get_dict(
-            ids.global_state_changes)[ids.contract_address]
+            ids.global_state_changes)[tx.contract_address]
 
         ids.new_state_entry = segments.add()
 
         from starkware.starknet.core.os.contract_hash import compute_contract_hash
 
-        ids.new_state_entry.contract_hash = int.from_bytes(
-            compute_contract_hash(tx.contract_definition), 'big')
+        ids.new_state_entry.contract_hash = compute_contract_hash(tx.contract_definition)
     %}
 
-    assert state_entry.contract_hash = UNINITIALIZED_CONTRACT_HASH
+    # Assert that we don't deploy to ORIGIN_ADDRESS.
+    assert_not_zero(contract_address - ORIGIN_ADDRESS)
 
+    assert state_entry.contract_hash = UNINITIALIZED_CONTRACT_HASH
     assert new_state_entry.storage_ptr = state_entry.storage_ptr
 
     dict_update{dict_ptr=global_state_changes}(
         key=contract_address,
         prev_value=cast(state_entry, felt),
         new_value=cast(new_state_entry, felt))
+
+    local calldata_size
+    local calldata : felt* = outputs.deployment_info + DeploymentInfoHeader.SIZE
+    %{
+        ids.calldata_size = len(tx.constructor_calldata)
+        segments.write_arg(ptr=ids.calldata, arg=tx.constructor_calldata)
+    %}
+    assert_nn(calldata_size)
+
+    # Write the contract address and hash to the output.
+    assert [outputs.deployment_info] = DeploymentInfoHeader(
+        contract_address=contract_address, contract_hash=new_state_entry.contract_hash,
+        calldata_size=calldata_size)
+    let outputs = OsCarriedOutputs(
+        messages_to_l1=outputs.messages_to_l1,
+        messages_to_l2=outputs.messages_to_l2,
+        deployment_info=cast(calldata + calldata_size, DeploymentInfoHeader*))
+
+    local tx : Transaction*
+    %{ ids.tx = segments.add() %}
+    assert [tx] = Transaction(
+        tx_type=TX_TYPE_CONSTRUCTOR,
+        caller_address=ORIGIN_ADDRESS,
+        contract_address=contract_address,
+        code_address=contract_address,
+        selector=CONSTRUCTOR_SELECTOR,
+        calldata_size=calldata_size,
+        calldata=calldata)
+
+    execute_invoke_transaction(execute_tx_context=execute_tx_context, tx=tx)
 
     return ()
 end

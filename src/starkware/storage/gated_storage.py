@@ -1,10 +1,10 @@
 import hashlib
-from typing import Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
-from starkware.storage import Storage
 from starkware.storage.names import generate_unique_key
+from starkware.storage.storage import Storage
 
-MAGIC_HEADER = hashlib.sha256(b'Gated storage magic header').digest()
+MAGIC_HEADER = hashlib.sha256(b"Gated storage magic header").digest()
 
 
 class GatedStorage(Storage):
@@ -18,11 +18,13 @@ class GatedStorage(Storage):
         self.storage1 = storage1
 
     @classmethod
-    async def create_from_config(self, limit: int, storage0: dict, storage1: dict):
-        return GatedStorage(
+    async def create_from_config(
+        cls, limit: int, storage0_config: Dict[str, Any], storage1_config: Dict[str, Any]
+    ) -> "GatedStorage":
+        return cls(
             limit=limit,
-            storage0=await Storage.from_config(storage0),
-            storage1=await Storage.from_config(storage1),
+            storage0=await Storage.create_instance_from_config(config=storage0_config),
+            storage1=await Storage.create_instance_from_config(config=storage1_config),
         )
 
     async def _compress_value(self, key: bytes, value: bytes) -> Tuple[bytes, bytes]:
@@ -31,32 +33,32 @@ class GatedStorage(Storage):
         second storage, with a unique key and returns the new value that will be stored to the first
         storage which indicates that the original value is stored in storage1.
         """
-        if value[:len(MAGIC_HEADER)] != MAGIC_HEADER:
+        if value[: len(MAGIC_HEADER)] != MAGIC_HEADER:
             # If the value starts with MAGIC_HEADER, treat the value as a large value; Hence, it
             # will be stored in the second storage.
             if len(value) <= self.limit:
                 return key, value
 
         ukey = generate_unique_key(
-            item_type='gated',
-            props={'orig_key': key.hex()},
+            item_type="gated",
+            props={"orig_key": key.hex()},
         )
         await self.storage1.set_value(key=ukey, value=value)
         new_value = MAGIC_HEADER + ukey
         return key, new_value
 
     async def set_value(self, key: bytes, value: bytes):
-        await self.storage0.set_value(* await self._compress_value(key=key, value=value))
+        await self.storage0.set_value(*await self._compress_value(key=key, value=value))
 
     async def setnx_value(self, key: bytes, value: bytes) -> bool:
-        return await self.storage0.setnx_value(* await self._compress_value(key=key, value=value))
+        return await self.storage0.setnx_value(*await self._compress_value(key=key, value=value))
 
     async def get_value(self, key: bytes) -> Optional[bytes]:
         value = await self.storage0.get_value(key=key)
         if value is None:
             return None
-        if (value[:len(MAGIC_HEADER)]) == MAGIC_HEADER:
-            ukey = value[len(MAGIC_HEADER):]
+        if (value[: len(MAGIC_HEADER)]) == MAGIC_HEADER:
+            ukey = value[len(MAGIC_HEADER) :]
             return await self.storage1.get_value(key=ukey)
 
         return value
@@ -68,8 +70,8 @@ class GatedStorage(Storage):
         value = await self.storage0.get_value(key=key)
         if value is None:
             return
-        if (value[:len(MAGIC_HEADER)]) == MAGIC_HEADER:
-            ukey = value[len(MAGIC_HEADER):]
+        if (value[: len(MAGIC_HEADER)]) == MAGIC_HEADER:
+            ukey = value[len(MAGIC_HEADER) :]
             await self.storage1.del_value(key=ukey)
 
         await self.storage0.del_value(key=key)

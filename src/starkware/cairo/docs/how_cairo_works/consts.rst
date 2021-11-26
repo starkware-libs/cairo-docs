@@ -21,32 +21,39 @@ which is equivalent to
 The line ``const value = 1234`` is not translated to a Cairo instruction;
 it is just used by the compiler to replace ``value`` with ``1234`` in the following instructions.
 
-.. _python_literals:
+.. _short_string_literals:
 
-Python literals
----------------
+Short string literals
+---------------------
 
-Instead of specifying an explicit constant integer using its decimal representation,
-you can use the syntax ``%[ <python-code> %]`` which can contain any python code.
-This code is evaluated to a constant during the compilation of the program.
-This means that it cannot depend
-on the program input, and unlike :ref:`hints <hints>`, the soundness of the program
-*may* rely on the correct evaluation of those literals.
+A short string is a string whose length is at most 31 characters, and therefore can fit into
+a single field element.
 
-For example,
+.. tested-code:: cairo short_string_literals0
 
-.. tested-code:: cairo python_literals
+    [ap] = 'hello'
 
-    [ap] = %[ 0x123456 %]
-    const value = %[ 2 * 3 * 5 %] + 100
+which is equivalent to
+
+.. tested-code:: cairo short_string_literals1
+
+    [ap] = 0x68656c6c6f
+
+It is important to note that a short-string is simply a way to represent a field element,
+it not a real string.
+Cairo doesn't support strings at the moment, and when it does strings will be represented using
+``"`` rather than ``'`` (similar to the distinction in C/C++).
+
+The string's first character is the most significant byte of the integer (big endian
+representation).
 
 .. test::
     from starkware.cairo.lang.compiler.cairo_compile import compile_cairo
 
     PRIME = 2**64 + 13
-    program = compile_cairo(codes['python_literals'], PRIME)
-
-    assert program.get_const('value') == 2 * 3 * 5 + 100
+    program0 = compile_cairo(codes['short_string_literals0'], PRIME)
+    program1 = compile_cairo(codes['short_string_literals1'], PRIME)
+    assert program0.data == program1.data
 
 .. _references:
 
@@ -372,7 +379,7 @@ Exercise
 
 2.  Can you spot an inefficiency in the following code? Hint: take a look
     :ref:`here <continuous_memory>`.
-    Fix the inefficienty in two ways (implement each of the following fixes separately):
+    Fix the inefficiency in two ways (implement each of the following fixes separately):
 
     a. Move the instruction ``alloc_locals``.
     b. Use ``tempvar`` instead of ``local``.
@@ -404,7 +411,7 @@ Exercise
 
     from starkware.cairo.lang.compiler.cairo_compile import compile_cairo
     from starkware.cairo.lang.vm.cairo_runner import CairoRunner
-    from starkware.cairo.lang.vm.vm import VmException
+    from starkware.cairo.lang.vm.vm_exceptions import VmException
 
     locals_exercise1_fix = (codes['locals_exercise1']
         .replace('ap += SIZEOF_LOCALS', '')
