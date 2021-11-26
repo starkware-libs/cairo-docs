@@ -36,6 +36,7 @@ python_lib(cairo_compile_lib
     identifier_manager_field.py
     identifier_utils.py
     import_loader.py
+    injector.py
     instruction_builder.py
     instruction.py
     location_utils.py
@@ -43,13 +44,16 @@ python_lib(cairo_compile_lib
     offset_reference.py
     parser_transformer.py
     parser.py
+    preprocessor/auxiliary_info_collector.py
     preprocessor/compound_expressions.py
     preprocessor/default_pass_manager.py
     preprocessor/dependency_graph.py
+    preprocessor/directives.py
     preprocessor/flow.py
     preprocessor/identifier_aware_visitor.py
     preprocessor/identifier_collector.py
     preprocessor/local_variables.py
+    preprocessor/memento.py
     preprocessor/pass_manager.py
     preprocessor/preprocess_codes.py
     preprocessor/preprocessor_error.py
@@ -59,6 +63,7 @@ python_lib(cairo_compile_lib
     preprocessor/struct_collector.py
     preprocessor/unique_labels.py
     program.py
+    proxy_identifier_manager.py
     references.py
     resolve_search_result.py
     scoped_name.py
@@ -66,13 +71,14 @@ python_lib(cairo_compile_lib
     type_casts.py
     type_system_visitor.py
     type_system.py
+    type_utils.py
 
     LIBS
     cairo_constants_lib
     cairo_version_lib
+    starkware_dataclasses_utils_lib
     starkware_expression_string_lib
     starkware_python_utils_lib
-    starkware_utils_lib
     pip_marshmallow_dataclass
     pip_marshmallow_enum
     pip_marshmallow_oneofschema
@@ -129,6 +135,7 @@ full_python_test(cairo_compile_test
     identifier_manager_test.py
     identifier_utils_test.py
     import_loader_test.py
+    injector_test.py
     instruction_builder_test.py
     instruction_test.py
     module_reader_test.py
@@ -136,6 +143,7 @@ full_python_test(cairo_compile_test
     parser_errors_test.py
     parser_test_utils.py
     parser_test.py
+    preprocessor/memento_test.py
     preprocessor/compound_expressions_test.py
     preprocessor/conftest.py
     preprocessor/dependency_graph_test.py
@@ -147,11 +155,13 @@ full_python_test(cairo_compile_test
     preprocessor/reg_tracking_test.py
     preprocessor/struct_collector_test.py
     preprocessor/unique_labels_test.py
+    proxy_identifier_manager_test.py
     references_test.py
     resolve_search_result_test.py
     scoped_name_test.py
     type_casts_test.py
     type_system_visitor_test.py
+    type_utils_test.py
 
     LIBS
     cairo_compile_lib

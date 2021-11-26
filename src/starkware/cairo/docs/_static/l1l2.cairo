@@ -5,10 +5,9 @@ from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.math import assert_nn
 from starkware.starknet.common.messages import send_message_to_l1
-from starkware.starknet.common.storage import Storage
 
 const L1_CONTRACT_ADDRESS = (
-    0xce08635cc6477f3634551db7613cc4f36b4e49dc)
+    0x2Db8c2615db39a5eD8750B87aC8F217485BE11EC)
 const MESSAGE_WITHDRAW = 0
 
 # A mapping from a user (L1 Ethereum address) to their balance.
@@ -17,14 +16,14 @@ func balance(user : felt) -> (res : felt):
 end
 
 @view
-func get_balance{storage_ptr : Storage*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+func get_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         user : felt) -> (balance : felt):
     let (res) = balance.read(user=user)
     return (res)
 end
 
 @external
-func increase_balance{storage_ptr : Storage*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+func increase_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         user : felt, amount : felt):
     let (res) = balance.read(user=user)
     balance.write(user, res + amount)
@@ -32,8 +31,7 @@ func increase_balance{storage_ptr : Storage*, pedersen_ptr : HashBuiltin*, range
 end
 
 @external
-func withdraw{
-        syscall_ptr : felt*, storage_ptr : Storage*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+func withdraw{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         user : felt, amount : felt):
     # Make sure 'amount' is positive.
     assert_nn(amount)
@@ -58,7 +56,7 @@ func withdraw{
 end
 
 @l1_handler
-func deposit{storage_ptr : Storage*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+func deposit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
         from_address : felt, user : felt, amount : felt):
     # Make sure the message was sent by the intended L1 contract.
     assert from_address = L1_CONTRACT_ADDRESS

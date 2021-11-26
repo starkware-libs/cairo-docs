@@ -1,8 +1,11 @@
 import dataclasses
-from typing import Dict, List, Optional, Set, Union
+from typing import Dict, List, MutableMapping, Optional, Set, Union
 
 from starkware.cairo.lang.compiler.identifier_definition import (
-    AliasDefinition, FutureIdentifierDefinition, IdentifierDefinition)
+    AliasDefinition,
+    FutureIdentifierDefinition,
+    IdentifierDefinition,
+)
 from starkware.cairo.lang.compiler.scoped_name import ScopedName
 
 
@@ -22,11 +25,17 @@ class NotAScopeError(IdentifierError):
     """
 
     def __init__(
-            self, fullname: ScopedName, definition: IdentifierDefinition, non_parsed: ScopedName):
+        self, fullname: ScopedName, definition: IdentifierDefinition, non_parsed: ScopedName
+    ):
         self.fullname = fullname
         self.definition = definition
         self.non_parsed = non_parsed
         super().__init__(f"Identifier '{fullname}' is {definition.TYPE}, expected a scope.")
+
+
+class NotAnIdentifierError(IdentifierError):
+    def __init__(self, fullname: ScopedName):
+        super().__init__(f"Expected '{fullname}' to be an identifier, found a scope name.")
 
 
 @dataclasses.dataclass
@@ -49,7 +58,8 @@ class IdentifierSearchResult:
             return
         raise IdentifierError(
             f"Unexpected '.' after '{self.canonical_name}' which is "
-            f'{self.identifier_definition.TYPE}.')
+            f"{self.identifier_definition.TYPE}."
+        )
 
     def get_canonical_name(self) -> ScopedName:
         """
@@ -77,7 +87,8 @@ class IdentifierManager:
 
     @classmethod
     def from_dict(
-            cls, identifier_dict: Dict[ScopedName, IdentifierDefinition]) -> 'IdentifierManager':
+        cls, identifier_dict: Dict[ScopedName, IdentifierDefinition]
+    ) -> "IdentifierManager":
         identifier_manager = cls()
         for name, identifier_definition in identifier_dict.items():
             identifier_manager.add_identifier(name, identifier_definition)
@@ -111,15 +122,15 @@ class IdentifierManager:
 
             # Detect cycles.
             if current_identifier in visited_identifiers:
-                cycle_str = ' -> '.join(map(str, visited_identifiers + [current_identifier]))
-                raise IdentifierError(f'Cyclic aliasing detected: {cycle_str}')
+                cycle_str = " -> ".join(map(str, visited_identifiers + [current_identifier]))
+                raise IdentifierError(f"Cyclic aliasing detected: {cycle_str}")
             visited_identifiers.append(current_identifier)
 
             try:
                 result = self.root.get(current_identifier)
             except MissingIdentifierError as exc:
-                resolution_str = ' -> '.join(map(str, visited_identifiers))
-                raise IdentifierError(f'Alias resolution failed: {resolution_str}. {exc}')
+                resolution_str = " -> ".join(map(str, visited_identifiers))
+                raise IdentifierError(f"Alias resolution failed: {resolution_str}. {exc}")
 
         return result
 
@@ -134,7 +145,7 @@ class IdentifierManager:
 
         try:
             result = self.root.get(name)
-        except MissingIdentifierError:
+        except (MissingIdentifierError, NotAnIdentifierError):
             return None
 
         if len(result.non_parsed) != 0:
@@ -142,7 +153,7 @@ class IdentifierManager:
 
         return result.identifier_definition
 
-    def get_scope(self, name: ScopedName) -> 'IdentifierScope':
+    def get_scope(self, name: ScopedName) -> "IdentifierScope":
         """
         Finds the scope with the given name. Includes alias resolution.
         """
@@ -170,16 +181,16 @@ class IdentifierManager:
             if len(visited_identifiers) == 1:
                 raise
             # Add a prefix with the alias resolution.
-            resolution_str = ' -> '.join(map(str, visited_identifiers))
-            raise IdentifierError(f'Alias resolution failed: {resolution_str}. {exc}') from None
+            resolution_str = " -> ".join(map(str, visited_identifiers))
+            raise IdentifierError(f"Alias resolution failed: {resolution_str}. {exc}") from None
 
         # We found an alias cycle.
-        cycle_str = ' -> '.join(map(str, visited_identifiers + [current_identifier]))
-        raise IdentifierError(f'Cyclic aliasing detected: {cycle_str}')
+        cycle_str = " -> ".join(map(str, visited_identifiers + [current_identifier]))
+        raise IdentifierError(f"Cyclic aliasing detected: {cycle_str}")
 
     def _search(
-            self, accessible_scopes: List[ScopedName],
-            name: ScopedName, get_scope: bool) -> Union[IdentifierSearchResult, 'IdentifierScope']:
+        self, accessible_scopes: List[ScopedName], name: ScopedName, get_scope: bool
+    ) -> Union[IdentifierSearchResult, "IdentifierScope"]:
         """
         Searches an identifier (if get_scope=False) or a scope (if get_scope=True) in the given
         accessible scopes. Later scopes override the first ones.
@@ -206,7 +217,8 @@ class IdentifierManager:
         raise MissingIdentifierError(name[:1])
 
     def search(
-            self, accessible_scopes: List[ScopedName], name: ScopedName) -> IdentifierSearchResult:
+        self, accessible_scopes: List[ScopedName], name: ScopedName
+    ) -> IdentifierSearchResult:
         """
         Searches an identifier in the given accessible scopes. Later scopes override the first ones.
         """
@@ -215,7 +227,8 @@ class IdentifierManager:
         return res
 
     def search_scope(
-            self, accessible_scopes: List[ScopedName], name: ScopedName) -> 'IdentifierScope':
+        self, accessible_scopes: List[ScopedName], name: ScopedName
+    ) -> "IdentifierScope":
         """
         Searches a scope in the given accessible scopes. Later scopes override the first ones.
         """
@@ -223,16 +236,14 @@ class IdentifierManager:
         assert isinstance(res, IdentifierScope)
         return res
 
-    def exclude(self, other: 'IdentifierManager') -> 'IdentifierManager':
+    def exclude(self, other: "IdentifierManager") -> "IdentifierManager":
         """
         Returns a copy of the identifier manager without the identifiers that exist in other.
         """
         other_as_dict = other.as_dict()
-        return IdentifierManager.from_dict({
-            name: value
-            for name, value in self.as_dict().items()
-            if name not in other_as_dict
-        })
+        return IdentifierManager.from_dict(
+            {name: value for name, value in self.as_dict().items() if name not in other_as_dict}
+        )
 
     def prune(self, prefixes_to_prune: Set[ScopedName]):
         """
@@ -247,9 +258,10 @@ class IdentifierManager:
                     break
                 parent = parent[:-1]
             if parent in prefixes_to_prune:
-                assert isinstance(value, (IdentifierDefinition, FutureIdentifierDefinition)), \
-                    f"Attempted to prune identifier '{value}'" \
+                assert isinstance(value, (IdentifierDefinition, FutureIdentifierDefinition)), (
+                    f"Attempted to prune identifier '{value}'"
                     f" of unprunable type '{type(value).__name__}'."
+                )
                 continue
             new_dict[name] = value
         self.dict = new_dict
@@ -272,27 +284,13 @@ class IdentifierScope:
         self.manager = manager
         self.fullname = fullname
         self.subscopes: Dict[str, IdentifierScope] = {}
-        self.identifiers: Dict[str, IdentifierDefinition] = {}
+        self.identifiers: MutableMapping[str, IdentifierDefinition] = {}
 
-    def add_identifier(self, name: ScopedName, definition: IdentifierDefinition):
+    def get_single_scope(self, name: str) -> Optional["IdentifierScope"]:
         """
-        Adds an identifier to the manager. name is relative to the current scope.
+        Returns the direct child scope by name, or None if not present.
         """
-        if len(name) == 0:
-            raise ValueError('The name argument must not be empty.')
-
-        first_name, non_parsed = name.path[0], name[1:]
-
-        if len(name) == 1:
-            self.identifiers[first_name] = definition
-            self.manager.dict[self.fullname + first_name] = definition
-            return
-
-        if first_name not in self.subscopes:
-            self.subscopes[first_name] = IdentifierScope(
-                manager=self.manager, fullname=self.fullname + first_name)
-
-        self.subscopes[first_name].add_identifier(non_parsed, definition)
+        return self.subscopes.get(name)
 
     def get(self, name: ScopedName) -> IdentifierSearchResult:
         """
@@ -304,18 +302,25 @@ class IdentifierScope:
         first_name, non_parsed = name.path[0], name[1:]
         canonical_name = self.fullname + first_name
 
-        if len(name) > 1 and first_name in self.subscopes:
-            return self.subscopes[first_name].get(non_parsed)
+        if len(name) > 1:
+            scope = self.get_single_scope(first_name)
+            if scope is not None:
+                return scope.get(non_parsed)
 
-        if first_name in self.identifiers:
+        identifier = self.identifiers.get(first_name)
+        if identifier is not None:
             return IdentifierSearchResult(
-                identifier_definition=self.identifiers[first_name],
+                identifier_definition=identifier,
                 canonical_name=canonical_name,
-                non_parsed=non_parsed)
+                non_parsed=non_parsed,
+            )
+
+        if first_name in self.subscopes:
+            raise NotAnIdentifierError(self.fullname + first_name)
 
         raise MissingIdentifierError(fullname=self.fullname + first_name)
 
-    def get_scope(self, name: ScopedName) -> 'IdentifierScope':
+    def get_scope(self, name: ScopedName) -> "IdentifierScope":
         """
         Retrieves the scope with the given name.
         Raises NotAScopeError if name refers to an identifier rather than a scope
@@ -324,12 +329,44 @@ class IdentifierScope:
         if len(name) == 0:
             return self
         first_name, non_parsed = name.path[0], name[1:]
-        if first_name not in self.subscopes:
-            fullname = self.fullname + first_name
-            if first_name in self.identifiers:
-                raise NotAScopeError(
-                    fullname=fullname, definition=self.identifiers[first_name],
-                    non_parsed=non_parsed)
-            else:
-                raise MissingIdentifierError(fullname=fullname)
-        return self.subscopes[first_name].get_scope(non_parsed)
+        scope = self.get_single_scope(first_name)
+        if scope is not None:
+            return scope.get_scope(non_parsed)
+
+        fullname = self.fullname + first_name
+        identifier = self.identifiers.get(first_name)
+        if identifier is None:
+            raise MissingIdentifierError(fullname=fullname)
+
+        raise NotAScopeError(
+            fullname=fullname,
+            definition=identifier,
+            non_parsed=non_parsed,
+        )
+
+    def add_subscope(self, first_name: str):
+        self.subscopes[first_name] = IdentifierScope(
+            manager=self.manager, fullname=self.fullname + first_name
+        )
+
+    def add_identifier(self, name: ScopedName, definition: IdentifierDefinition):
+        """
+        Adds an identifier to the manager. name is relative to the current scope.
+        """
+        if len(name) == 0:
+            raise ValueError("The name argument must not be empty.")
+
+        first_name, non_parsed = name.path[0], name[1:]
+
+        if len(name) == 1:
+            self.identifiers[first_name] = definition
+            self.manager.dict[self.fullname + first_name] = definition
+            return
+
+        scope = self.get_single_scope(first_name)
+        if scope is None:
+            self.add_subscope(first_name=first_name)
+            scope = self.get_single_scope(first_name)
+
+        assert scope is not None
+        scope.add_identifier(non_parsed, definition)
