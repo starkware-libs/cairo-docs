@@ -235,12 +235,12 @@ One can interact with the dictionary using the ``dict_read()``, ``dict_write()``
 operations discussed in the ``dict`` module.
 Note that in order to enforce the consistency of subsequent dictionary accesses with
 the default values, one must eventually call ``default_dict_finalize()`` (which in turn calls
-``dict_squash()``, as discussed in that section). Otherwise, this is only enforced at the
-hints level which can be changed by a malicious prover.
+``dict_squash()``, as discussed in the corresponding section). Otherwise, this is only enforced
+by hints which can be bypassed by a malicious prover.
 
 ..  TODO (perama, 29/08/21): Add links when available (dict module, DictAccess dict_squash).
 
-The function requires the explicit argument:
+The function expects the explicit argument:
 
 -   ``default_value``, the default value.
 
@@ -258,7 +258,7 @@ For more details see ``dict_squash()`` from the ``dict`` module.
 
 ..  TODO (perama, 29/08/21): Add link when available (dict_squash).
 
-The function requires the explicit arguments:
+The function expects three explicit arguments:
 
 -   ``dict_accesses_start``, a pointer to the initial dictionary (first operation).
 -   ``dict_accesses_end``, a pointer to the end of the dictionary (last operation).
