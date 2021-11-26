@@ -493,12 +493,12 @@ module.
 ``set_add()``
 *************
 
-The function either appends an element to a given array or asserts that it exists.
-An honest prover will not append the element if it is already present,
+This function either appends an element to a given array or asserts that it exists.
+An honest prover should not append the element if it is already present,
 but this is not verified. The function requires the implicit arguments
-``set_end_ptr``, the pointer to the end of the list, and ``range_check_ptr``.
+``set_end_ptr`` (the pointer to the end of the list) and ``range_check_ptr``.
 
-The function requires three explicit arguments:
+The function expects three explicit arguments:
 
 - ``set_ptr``, the pointer to the start of the list.
 - ``elm_size``, the size of each list element.
