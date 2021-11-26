@@ -451,8 +451,8 @@ Implicit arguments
 
 Implicit arguments are specified as part of the function signature, and are declared
 inside curly braces ``{implicit_arg_name}``. Implicit arguments are automatically added as an
-argument and a return value to the function. If the implicit argument is not explicitly
-returned, the Cairo compiler takes care to return the current binding of the reference
+argument and a return value to the function. The Cairo compiler takes care to return the
+current binding of the reference
 ``implicit_arg_name``. If no implicit arguments are required the braces can be omitted.
 
 .. tested-code:: cairo syntax_implicit_arguments0
