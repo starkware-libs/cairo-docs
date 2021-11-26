@@ -127,13 +127,12 @@ module.
 ``dict_update()``
 *****************
 
-Updates the value of a particular key in a dictionary. Must be passed an
-implicit argument, ``dict_ptr``, of type ``DictAccess*``, representing a pointer
-to the end of the dictionary. Only available for dictionaries created via ``dict_new()``
-or ``default_dict_new()``.
-No arguments are returned.
+Updates the value of a given key in a dictionary. ``dict_ptr``, of type ``DictAccess*``,
+representing a pointer to the end of the dictionary, must be passed as an
+implicit argument to this function. Only available for dictionaries created via ``dict_new()``
+or ``default_dict_new()``. No values are returned.
 
-The function accepts the explicit arguments of type ``felt``:
+The function expects three explicit arguments of type ``felt``:
 
 -   ``key``, the key to update.
 -   ``prev_value``, the current value assigned to ``key``.
@@ -143,8 +142,8 @@ It is possible to get ``prev_value`` from ``__dict_manager`` using the hint:
 
 ``%{ ids.new_value = __dict_manager.get_dict(ids.dict_ptr)[ids.key] %}``
 
-The example shows how, for a dictionary whose end pointer is ``dict_end``,
-the value of a specified key can be updated.
+The example demonstrates how to update the value of a specified key for a
+dictionary whose end pointer is referenced by ``dict_end``.
 
 .. tested-code:: cairo library_dict_update0
 
@@ -164,7 +163,7 @@ the value of a specified key can be updated.
     end
 
 One can think of ``dict_update()`` as a conditional write. Passing ``prev_value``
-ensures that an override will only happen in case the current value equals ``prev_value``.
+ensures that an override will only occur in case the current value equals ``prev_value``.
 Note that this is only verified at the hint level and consistency relies on eventual
 squashing. Additionally, one can verify that ``dictionary[key]=value`` by calling
 ``dict_update(key, value, value)``.
@@ -174,25 +173,25 @@ squashing. Additionally, one can verify that ``dictionary[key]=value`` by callin
 
 Squashes a dictionary represented by an array of read/write logs.
 A squashed dictionary is one whose intermediate updates have been summarized and each key
-appears exactly once with its most recent value. This is the only function that
-asserts the consistency of the ``DictAccess`` array representing the dictionary,
-a program with inconsistent dict operations can run successfully unless
-we call squash (see example below).
+appears exactly once with its most recent value. This is the only function in this module that
+asserts the consistency of updates that were made to the dictionary represented by ``DictAccess``.
+A program that uses dict operations without ``invoking dict_squash()`` can run successfully
+even if it contains inconsistent updates to the dictionary (see example below).
 
 The function uses the ``range_check`` builtin and thus
 requires ``range_check_pointer`` as an implicit argument
 
-The function accepts the explicit arguments of type ``DictAccess*``:
+The function expects two explicit arguments of type ``DictAccess*``:
 
 -   ``dict_accesses_start``, a pointer to the start of the dictionary (first operation).
 -   ``dict_accesses_end``, a pointer to the end of the dictionary (last operation).
 
-The function returns two arguments of type ``DictAccess*``:
+The function returns two values of type ``DictAccess*``:
 
 -   ``squashed_dict_start``, a pointer to the start of the squashed dictionary.
 -   ``squashed_dict_end``, a pointer to the end of the squashed dictionary.
 
-The only operation that uses ``dict_accesses_start`` is the ``dict_squash()`` function. All
+The only function that uses ``dict_accesses_start`` is ``dict_squash()``. All
 other dictionary operations append to the array of ``DictAccess`` instances.
 
 .. tested-code:: cairo library_dict_squash
@@ -215,7 +214,8 @@ other dictionary operations append to the array of ``DictAccess`` instances.
         # but can be made to pass by a malicious prover.
         dict_update{dict_ptr=squashed_dict_end}(
             key=0, prev_value=3, new_value=2)
-        # Squash fails.
+        # Squash fails. Even a malicious prover can't pass
+        # verification for a failed dict_squash operation.
         let (squashed_dict_start, squashed_dict_end) = dict_squash{
             range_check_ptr=range_check_ptr}(
             squashed_dict_start, squashed_dict_end)
@@ -235,10 +235,10 @@ module.
 **************
 
 A struct specifying the ``DictAccess`` memory structure. Cairo simulates dictionaries
-by an array of read-modify-write instructions, which are specified by the ``DictAccess`` struct.
+by an array of read-modify-write instructions, which are logged by the ``DictAccess`` struct.
 The consistency of such an array can be verified by applying ``squash_dict()``.
 
-For libraries that abstract away Cairo's representation of dictionaries and allow a more
+For libraries that abstract Cairo's representation of dictionaries and allow a more
 standard dictionary interface than what will be shown here, see the
 ``dict`` and ``default_dict`` modules in the common library.
 
@@ -285,7 +285,7 @@ and manually incrementing a pointer to the end of the array.
         return ()
     end
 
-``check_key_ratio()`` checks that the value at key ``b`` is double the value at key ``a``.
+``check_key_ratio()`` checks that the value of key ``b`` is double the value of key ``a``.
 This will only be enforced if we eventually call ``squash_dict()``.
 
 .. tested-code:: cairo library_dictaccess1
