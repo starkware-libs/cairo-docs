@@ -138,8 +138,8 @@ initial values can only be achieved with explicit initialization of the dictiona
 by using the ``default_dict_new()`` from the
 `default_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/default_dict.cairo>`_
 module instead, which is not based on user-defined hints (and is thus also
-available in StarkNet, unlike ``dict_new()``). One must call `dict_squash()`
-before reading from a dictionary.
+available in StarkNet, unlike ``dict_new()``).
+One must eventually call dict_squash() when using the dictionary.
 
 The function returns the argument:
 
@@ -221,8 +221,8 @@ Note how the pointer ``my_dict`` is passed as an implicit argument.
     # The value associated with key=12 is changed.
     dict_write{dict_ptr=my_dict}(key=12, new_value=34)
 
-    # dict_squash() must be called here (omitted for brevity).
     let key_12_val = dict_read{dict_ptr=my_dict}(key=12)
+    # dict_squash() must be called here (omitted for brevity).
     assert key_12_val = 34
 
 .. .. _common_library_dict_access:
