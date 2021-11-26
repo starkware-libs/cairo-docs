@@ -7,8 +7,10 @@ In order to follow this tutorial you should have basic familiarity with writing
 Cairo code. For example, you can read the first few pages of the
 ":ref:`Hello, Cairo <hello_cairo>`" tutorial.
 You should also :ref:`set up your environment <quickstart>` and make sure your
-installed Cairo version is at least ``0.3.1``
+installed Cairo version is at least ``0.6.0``
 (you can check your version by running ``cairo-compile --version``).
+
+.. _first_contract:
 
 Your first contract
 -------------------
@@ -23,7 +25,6 @@ Let's start by looking at the following StarkNet contract:
     %builtins pedersen range_check
 
     from starkware.cairo.common.cairo_builtins import HashBuiltin
-    from starkware.starknet.common.storage import Storage
 
     # Define a storage variable.
     @storage_var
@@ -33,7 +34,7 @@ Let's start by looking at the following StarkNet contract:
     # Increases the balance by the given amount.
     @external
     func increase_balance{
-            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
+            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
             range_check_ptr}(amount : felt):
         let (res) = balance.read()
         balance.write(res + amount)
@@ -43,7 +44,7 @@ Let's start by looking at the following StarkNet contract:
     # Returns the current balance.
     @view
     func get_balance{
-            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
+            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
             range_check_ptr}() -> (res : felt):
         let (res) = balance.read()
         return (res)
@@ -74,11 +75,8 @@ In particular, all storage variables are initially zero.
 
 StarkNet contracts have no ``main()`` function. Instead, each function may be
 annotated as an external function (using the ``@external`` decorator).
-External functions may be called by the users of StarkNet.
-Currently, StarkNet has no authentication mechanism, so any user can invoke any external
-function. If you want to restrict it, or have some authentication,
-you can use the ``ecdsa`` builtin to verify a user's signature
-as part of the internal implementation of the contract's function.
+External functions may be called by the users of StarkNet, and by other contracts
+(see :ref:`calling_contracts`).
 
 In our case, the contract has two external functions: ``increase_balance`` reads
 the current value of balance from the storage, adds the given amount to it
@@ -92,7 +90,8 @@ The only difference is that the method is *annotated* as a method that only quer
 rather than modifying it.
 Note that in the current version this is not enforced by the compiler.
 
-Consider the three implicit arguments: ``storage_ptr``, ``pedersen_ptr`` and ``range_check_ptr``:
+Consider the four implicit arguments:
+``syscall_ptr``, ``pedersen_ptr`` and ``range_check_ptr``:
 
 1.  You should be familiar with ``pedersen_ptr``, which allows to compute the Pedersen
     hash function, and ``range_check_ptr``, which allows to compare integers.
@@ -102,10 +101,10 @@ Consider the three implicit arguments: ``storage_ptr``, ``pedersen_ptr`` and ``r
     the actual memory address of this variable. This may not be needed in simple variables
     such as ``balance``, but with maps (see :ref:`storage_maps`) computing the Pedersen hash
     is part of what ``read()`` and ``write()`` do.
-2.  ``storage_ptr`` is a new primitive unique to StarkNet contracts (it doesn't exist in Cairo)
-    it allows the code to talk with the contract's storage.
-    This is also an implicit argument of ``read()`` and ``write()``
-    (this time, for more obvious reasons).
+2.  ``syscall_ptr`` is a new primitive, unique to StarkNet contracts
+    (it doesn't exist in Cairo). ``syscall_ptr`` allows the code to invoke system calls.
+    It is also implicit arguments of ``read()`` and ``write()``
+    (this time, because storage access is done using system calls).
 
 Programming without hints
 *************************
@@ -130,6 +129,8 @@ This means that not all the Cairo library functions can be used when writing
 a StarkNet contract. See
 `here <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/starknet/security/starknet_common.cairo>`_
 for a list of the whitelisted library functions.
+
+.. _compile_contract:
 
 Compile the contract
 --------------------
@@ -208,7 +209,7 @@ The output should look like:
 
     Deploy transaction was sent.
     Contract address: 0x039564c4f6d9f45a963a6dc8cf32737f0d51a08e446304626173fd838bd70e1c
-    Transaction ID: 0
+    Transaction hash: 0x125e4bc5251af8ee2664ea0d1495b36c593f25f78f1a78f637a3f7aafa9e22
 
 You can see here the address of your new contract. You'll need this address to interact with
 the contract.
@@ -232,26 +233,26 @@ The result should look like:
 .. tested-code:: none starknet_invoke_output
 
     Invoke transaction was sent.
-    Contract address: 0x039564c4f6d9f45a963a6dc8cf32737f0d51a08e446304626173fd838bd70e1c
-    Transaction ID: 1
+    Contract address: 0x05a4d278dceae5ff055796f1f59a646f72628730b7d72acb5483062cb1ce82dd
+    Transaction hash: 0x69d743891f69d758928e163eff1e3d7256752f549f134974d4aa8d26d5d7da8
 
 
 .. _tx_status:
 
-The following command allows you to query the transaction status based on the transaction ID
-that you got (here you'll have to replace ``TRANSACTION_ID`` with the transaction ID printed by
+The following command allows you to query the transaction status based on the transaction hash
+that you got (here you'll have to replace ``TRANSACTION_HASH`` with the transaction hash printed by
 ``starknet invoke``):
 
 .. tested-code:: bash starknet_tx_status
 
-    starknet tx_status --id TRANSACTION_ID
+    starknet tx_status --hash TRANSACTION_HASH
 
 The result should look like:
 
 .. tested-code:: none starknet_tx_status_output
 
     {
-        "block_id": 1,
+        "block_hash": "0x0",
         "tx_status": "PENDING"
     }
 
