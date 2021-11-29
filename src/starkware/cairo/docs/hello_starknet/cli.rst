@@ -1,9 +1,5 @@
 .. proofedDate 2021/11/23
 
-.. comments .. _change_query_context link not working on Ariel's build think it is fine on mine (Harries), just dropping to bottom of page, yes?
-
-.. suggestedEdit1 ?I did not see this in last reviewable sweep?{wip "transaction_id": 1, looks like the actualy property and its value, so why do we SHOUT it in the bash command as TRANSACTION_ID ? Is the capitalization genuine?} > If Not Consider a less shouty form [output is transaction_id, seems nice!]
-
 More CLI commands
 =================
 
@@ -58,17 +54,17 @@ The output should resemble this:
 
 The result contains:
 
-*   ``transaction_hash`` -- The hash of the transaction, out of all sent transactions.
-*   ``status`` -- The status of the transaction. For a detailed list of supported transaction
+*   ``transaction_hash`` : The hash of the transaction, out of all sent transactions.
+*   ``status`` : The status of the transaction. For a detailed list of supported transaction
     statuses, refer to the :ref:`tx_status <tx_status>` usage example.
-*   ``transaction``: The transaction data.
+*   ``transaction`` : The transaction data.
 
 It may also include each of the following optional fields (according to the transaction's status):
 
-*   ``block_hash`` -- The hash of the block containing the transaction.
-*   ``block_number`` -- The sequence number of the block containing the transaction.
-*   ``transaction_index`` -- The index of the transaction within the block containing it.
-*   ``transaction_failure_reason`` -- The reason for the transaction failure.
+*   ``block_hash`` : The hash of the block containing the transaction.
+*   ``block_number`` : The sequence number of the block containing the transaction.
+*   ``transaction_index`` : The index of the transaction within the block containing it.
+*   ``transaction_failure_reason`` : The reason for the transaction failure.
 
 get_transaction_receipt
 -----------------------
@@ -264,8 +260,8 @@ The result contains:
 *   ``transactions``: A mapping of the transactions included in the block, according to their
     transaction hashes. Note that these are the same hashes used in the ``transaction_receipts`` mapping.
 
-To query the last block, simply remove the ``--number`` argument.
-To query a block by hash, use ``--hash`` instead. Note that at most one of these argument can be
+To query the last accepted block, simply remove the ``--number`` argument.
+To query a block by hash, use ``--hash`` instead. Note that, at most, one of these argument can be
 given.
 
 .. _get_storage_at:

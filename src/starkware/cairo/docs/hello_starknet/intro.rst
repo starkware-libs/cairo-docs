@@ -1,10 +1,8 @@
 .. proofedDate 2021/11/23
 
-.. comment For consideration: whitelisting (along with the master branch) are typically deprecated. To be PC the term is allow-list > Please consider (NB affects code base also).
+.. comment For consideration: whitelisting (along with the master branch) are typically deprecated. To be PC and non-racist the term is allowlist > Please consider (NB affects code base also).
 
 .. _list: https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/starknet/security/starknet_common.cairo
-
-.. comment Restructure suggested. toc/overview will assist in page breakdown and nav.
 
 .. _starknet_intro:
 

@@ -1,7 +1,5 @@
 .. proofedDate 2021/11/23
 
-.. comment 1. There is still a TODO.
-
 
 Interact with L1 contracts
 ==========================
@@ -38,7 +36,7 @@ Messages from L2 to L1 work as follows:
 
 .. topic:: Note
 
-    **Note**: Since any L2 contract can send messages to any L1 contract, it is best practice for
+    Since any L2 contract can send messages to any L1 contract, it is best practice for
     the L1 contract to check the "from" address before processing the transaction.
 
 Next, we will demonstrate how one can use this mechanism to implement a withdrawal transaction.
@@ -58,21 +56,19 @@ This direction is useful, for example, for "deposit" transactions.
 
 .. topic:: Note
 
-    Note that while honest Sequencers automatically consume L1->L2
+    While honest Sequencers automatically consume L1->L2
     messages, it is not enforced by the protocol (so a Sequencer may choose to skip a message).
     This should be taken into account when designing the message protocol between the two contracts.
 
-Notes
-*****
+Implications of working in Alpha
+********************************
 
-.. topic:: Note
-
-    The StarkNet Alpha system is still under development and, therefore, from time to time, the
-    state of the system will reset, and all contracts will be removed.
-    This means that you shouldn't move valuable assets
-    to the StarkNet Alpha system unless you have a way to withdraw them, given the removal of the
-    L2 contract.
-    That being said, recall that StarkNet Alpha only runs on the Goerli *testnet*.
+The StarkNet Alpha system is still under development and, therefore, from time to time, the
+state of the system will reset, and all contracts will be removed.
+This means that you shouldn't move valuable assets
+to the StarkNet Alpha system unless you have a way to withdraw them, given the removal of the
+L2 contract.
+That being said, recall that StarkNet Alpha only runs on the Goerli *testnet*.
 
 
 A simple token bridge
