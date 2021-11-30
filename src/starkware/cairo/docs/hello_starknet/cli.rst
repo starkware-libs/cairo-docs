@@ -54,17 +54,17 @@ The output should resemble this:
 
 The result contains:
 
-*   ``transaction_hash`` : The hash of the transaction, out of all sent transactions.
+*   ``transaction_hash`` : The hash of the transaction, out of all sent transactions
 *   ``status`` : The status of the transaction. For a detailed list of supported transaction
-    statuses, refer to the :ref:`tx_status <tx_status>` usage example.
-*   ``transaction`` : The transaction data.
+    statuses, refer to the :ref:`tx_status <tx_status>` usage example
+*   ``transaction`` : The transaction data
 
 It may also include each of the following optional fields (according to the transaction's status):
 
-*   ``block_hash`` : The hash of the block containing the transaction.
-*   ``block_number`` : The sequence number of the block containing the transaction.
-*   ``transaction_index`` : The index of the transaction within the block containing it.
-*   ``transaction_failure_reason`` : The reason for the transaction failure.
+*   ``block_hash`` : The hash of the block containing the transaction
+*   ``block_number`` : The sequence number of the block containing the transaction
+*   ``transaction_index`` : The index of the transaction within the block containing it
+*   ``transaction_failure_reason`` : The reason for the transaction failure
 
 get_transaction_receipt
 -----------------------
@@ -114,9 +114,9 @@ The output should look like:
 
 The result contains (in addition to get_transaction fields):
 
-*   ``l2_to_l1_messages`` -- Messages sent from L2 to L1.
-*   ``l1_to_l2_consumed_message`` -- The consumed message, in case the transaction was sent from L1.
-*   ``execution_resources`` -- Resources consumed by the transaction execution.
+*   ``l2_to_l1_messages`` -- Messages sent from L2 to L1
+*   ``l1_to_l2_consumed_message`` -- The consumed message, in case the transaction was sent from L1
+*   ``execution_resources`` -- Resources consumed by the transaction execution
 
 .. _get_code:
 
@@ -246,23 +246,23 @@ The output should resemble this:
 
 The result contains:
 
-*   ``block_hash``: The block hash, a unique identifier of the block.
-*   ``parent_block_hash``: The block hash of the parent block.
+*   ``block_hash``: The block hash, a unique identifier of the block
+*   ``parent_block_hash``: The block hash of the parent block
 *   ``block_number``: The sequence number of the block, which is the number of
-    blocks prior to this block.
+    blocks prior to this block
 *   ``state_root``: The root of a commitment tree representing the StarkNet's state after the given
-    block.
+    block
 *   ``status``: The status of the block (for example, ``PENDING``, which means that the block
-    was created but has not been accepted on-chain yet).
-*   ``timestamp``: A timestamp representing the time this block was created.
+    was created but has not been accepted on-chain yet)
+*   ``timestamp``: A timestamp representing the time this block was created
 *   ``transaction_receipts``: Information about the transaction status and the corresponding
-    L1<->L2 interaction, for every transaction included in the block.
+    L1<->L2 interaction, for every transaction included in the block
 *   ``transactions``: A mapping of the transactions included in the block, according to their
-    transaction hashes. Note that these are the same hashes used in the ``transaction_receipts`` mapping.
+    transaction hashes. Note that these are the same hashes used in the ``transaction_receipts`` mapping
 
-To query the last accepted block, simply remove the ``--number`` argument.
+To query the last accepted block, simply remove the ``--number`` argument
 To query a block by hash, use ``--hash`` instead. Note that, at most, one of these argument can be
-given.
+given
 
 .. _get_storage_at:
 

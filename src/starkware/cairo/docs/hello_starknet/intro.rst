@@ -290,15 +290,15 @@ The result should resemble this:
 The possible statuses are:
 
 *   ``NOT_RECEIVED``:
-    The transaction has not been received yet (i.e., not written to storage).
+    The transaction has not been received yet (i.e., not written to storage)
 *   ``RECEIVED``:
-    The transaction was received by the Operator.
+    The transaction was received by the Operator
 *   ``PENDING``:
-    The transaction passed the validation and is waiting to be sent on-chain.
+    The transaction passed the validation and is waiting to be sent on-chain
 *   ``REJECTED``:
-    The transaction failed validation and thus was skipped.
+    The transaction failed validation and thus was skipped
 *   ``ACCEPTED_ONCHAIN``:
-    The transaction was accepted on-chain.
+    The transaction was accepted on-chain
 
 Query the balance
 -----------------

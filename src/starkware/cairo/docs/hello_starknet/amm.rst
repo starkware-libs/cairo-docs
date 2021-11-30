@@ -378,7 +378,7 @@ Interaction examples
 
         export STARKNET_NETWORK=alpha
 
-    * for this section, you need to have the contract code.
+    * for this section, you need to have the contract code
 
 
 .. test::
