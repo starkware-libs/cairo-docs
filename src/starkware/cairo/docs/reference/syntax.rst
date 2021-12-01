@@ -540,6 +540,38 @@ See :ref:`program_inputs` for more information.
         a = program_input['user_ids']
     %}
 
+Jumps
+-----
+
+The ``jmp`` instruction allows navigating through the program, either moving to a
+specific label via ``jmp LABEL``, or a specific location defined by a value of the program counter.
+This may be an absolute value with ``jmp abs VALUE`` or an offset relative to the current
+instruction with ``jmp rel OFFSET``.
+Cairo supports conditional jumps with the syntax ``if <expr> != 0`` following a jump instruction.
+It is preferable to use `if` rather than `jmp` where possible. An example use of `if` can be seen
+here :ref:`syntax_reference`.
+
+When the jump condition depends on a value that is determined by the prover, it
+gets to decide whether or not the jump is executed, de facto making this a non deterministic jump.
+
+.. tested-code:: cairo syntax_jumps
+
+  func my_function() -> (result):
+      alloc_locals
+      local a
+      %{ ids.a = 2 %}  # Allows the prover to decide where to branch.
+
+      jmp case_true if a != 0
+
+      case_false:
+      return (result=0)
+
+      case_true:
+      return (result=1)
+  end
+
+See :ref:`non_deterministic_jumps` for more information.
+
 Program output
 --------------
 
@@ -627,3 +659,4 @@ Consider the function ``foo()`` that returns two values.
     let (local a, _) = foo()
 
 For more information see :ref:`return_values_unpacking`.
+
