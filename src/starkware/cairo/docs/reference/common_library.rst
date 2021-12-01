@@ -20,7 +20,8 @@ within each library are outlined under the relevant library heading.
 -   :ref:`common_library_find_element`.
 -   :ref:`common_library_set`.
 
-..  TODO (perama, 16/06/2021): Move the link above when the section is complete.
+
+..  TODO(perama, 16/06/2021): Move the link above when the section is complete.
     -   :ref:`common_library_hash`
     -   :ref:`common_library_hash_chain`
     -   :ref:`common_library_hash_state`
@@ -332,10 +333,12 @@ Example
         # dict_update{dict_ptr=my_dict}(key=1, prev_value=8, new_value=9)
 
         # Finalize fails for the malicious prover with extra update.
-        let (finalized_dict_start, finalized_dict_end) = default_dict_finalize(
+        let (finalized_dict_start,
+            finalized_dict_end) = default_dict_finalize(
             my_dict_start, my_dict, 7)
         return ()
     end
+
 
 .. _common_library_dict:
 
@@ -343,8 +346,111 @@ Example
 --------
 
 This section refers to the common library's
-`common_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/dict.cairo>`_
-module.
+`dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/dict.cairo>`_
+module for working with user defined dictionaries, abstracting away Cairo's simulation
+of dictionaries as an array of read/write logs.
+
+``dict_new()``
+**************
+
+Returns a new dictionary. The function does not require any arguments.
+A new dictionary is initially populated by using a hint with the
+expression ``initial_dict``. The dictionary associated with that expression
+will be found by the ``__dict_manager``.
+
+Note that Cairo has no way to enforce that subsequent read/writes are consistent
+with the ``initial_dict`` hint (this is only enforced at the python level). Technically, the
+return value is a pointer to an empty ``DictAccess`` array. Soundness with respect to the
+initial values can only be achieved with explicit initialization of the dictionary or
+by using the ``default_dict_new()`` from the
+`default_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/default_dict.cairo>`_
+module instead, which is not based on user-defined hints (and is thus also
+available in StarkNet, unlike ``dict_new()``).
+One must eventually call dict_squash() when using the dictionary.
+
+The function returns the argument:
+
+-   ``res``, of type ``DictAccess*``, a pointer to the new dictionary.
+
+.. tested-code:: cairo library_dict_new
+
+    from starkware.cairo.common.dict import dict_new
+    from starkware.cairo.common.dict_access import DictAccess
+
+    alloc_locals
+    %{
+        initial_dict = {
+            5: 8,
+            12: 35,
+            33: 198
+        }
+    %}
+    let (local my_dict : DictAccess*) = dict_new()
+    # 'my_dict' is now associated with the hint's 'initial_dict'.
+
+``dict_read()``
+***************
+
+Returns the value of a specified dictionary key. Must be passed an implicit argument,
+``dict_ptr``, of type ``DictAccess*``, representing the pointer to the end of the dictionary.
+Only available for dictionaries created via ``dict_new()`` or ``default_dict_new()``.
+
+Note that the consistency of the returned value from ``dict_read()`` is only verified
+at the hint level (technically, ``dict_read()`` appends one ``DictAccess`` instruction
+to the dictionary). To make sure that a malicious prover won't be able to return a
+different value one must eventually call ``dict_squash()``.
+
+The function accepts the explicit argument:
+
+-   ``key``, of type ``felt``, the requested key.
+
+The function returns the argument:
+
+-   ``value``, of type ``felt``, the value assigned to ``key``.
+
+The example below shows, for an existing dictionary whose end pointer is ``my_dict``,
+how the value associated with the key ``12`` can be read. Note how the pointer ``my_dict``
+is passed as an implicit argument.
+
+.. tested-code:: cairo library_dict_read
+
+    from starkware.cairo.common.dict import dict_read
+
+    # my_dict has key:val pairs {5: 8, 12: 35, 33: 198}.
+    let (local val : felt) = dict_read{dict_ptr=my_dict}(key=12)
+    assert val = 35
+
+``dict_write()``
+****************
+
+Overrides the current value of an existing key. In order to work with a dynamic
+dictionary one can initialize with ``default_dict_new()`` rather than ``dict_new()``
+(in which case all keys are assumed to be present, initially with the default value).
+Must be passed a pointer to the end of the dictionary, ``dict_ptr``, of
+type ``DictAccess*``, as an implicit argument. No values are returned.
+Only available for dictionaries created via ``dict_new()`` or ``default_dict_new()``.
+
+The function accepts the explicit arguments:
+
+-   ``key``, of type ``felt``, the key to override.
+-   ``new_value``, of type ``felt``, the value to be assigned to ``key``.
+
+The example below shows how, for an existing dictionary whose pointer is ``my_dict``,
+the value associated with the key ``12`` can be changed from ``35`` to ``34``.
+Note how the pointer ``my_dict`` is passed as an implicit argument.
+
+.. tested-code:: cairo library_dict_write
+
+    from starkware.cairo.common.dict import dict_write
+
+    # my_dict has key:val pairs {5: 8, 12: 35, 33: 198}.
+
+    # The value associated with key=12 is changed.
+    dict_write{dict_ptr=my_dict}(key=12, new_value=34)
+
+    let key_12_val = dict_read{dict_ptr=my_dict}(key=12)
+    # dict_squash() must be called here (omitted for brevity).
+    assert key_12_val = 34
 
 ``dict_update()``
 *****************
