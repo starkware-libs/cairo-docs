@@ -11,10 +11,14 @@ for use in any Cairo program.
 The libraries available are listed below, organized alphabetically. The functions
 within each library are outlined under the relevant library heading.
 
+
 -   :ref:`common_library_alloc`.
 -   :ref:`common_library_bitwise`.
+-   :ref:`common_library_cairo_builtins`.
 -   :ref:`common_library_default_dict`.
 -   :ref:`common_library_find_element`.
+-   :ref:`common_library_set`.
+
 
 ..  TODO (perama, 16/06/2021): Move the link above when the section is complete.
     -   :ref:`common_library_cairo_builtins`
@@ -30,7 +34,6 @@ within each library are outlined under the relevant library heading.
     -   :ref:`common_library_merkle_update`
     -   :ref:`common_library_registers`
     -   :ref:`common_library_serialize`
-    -   :ref:`common_library_set`
     -   :ref:`common_library_signature`
     -   :ref:`common_library_small_merkle_tree`
     -   :ref:`common_library_squash_dict`
@@ -632,15 +635,63 @@ Continuing with the same example, since the array is sorted, searching for the k
     `common_serialize <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/serialize.cairo>`_
     module.
 
-.. .. _common_library_set:
+.. _common_library_set:
 
-..  ``set``
-..  -------
+``set``
+-------
 
-..  TODO(perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's
-    `common_set <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/set.cairo>`_
-    module.
+This section refers to the common library's
+`common_set <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/set.cairo>`_
+module.
+
+``set_add()``
+*************
+
+This function either appends an element to a given array or asserts that it exists.
+An honest prover should not append the element if it is already present,
+but this is not verified. The function requires the implicit arguments
+``set_end_ptr`` (the pointer to the end of the list) and ``range_check_ptr``.
+
+The function expects three explicit arguments:
+
+- ``set_ptr``, the pointer to the start of the list.
+- ``elm_size``, the size of each list element.
+- ``elm_ptr``, a pointer to the element being added.
+
+.. tested-code:: cairo library_set
+
+    %builtins range_check
+
+    from starkware.cairo.common.alloc import alloc
+    from starkware.cairo.common.set import set_add
+
+    struct MyStruct:
+        member a : felt
+        member b : felt
+    end
+
+    func main{range_check_ptr}():
+        alloc_locals
+
+        # An array containing two structs.
+        let (local my_list : MyStruct*) = alloc()
+        assert my_list[0] = MyStruct(a=1, b=3)
+        assert my_list[1] = MyStruct(a=5, b=7)
+
+        # Suppose that we want to add the element
+        # MyStruct(a=1, b=3), but only if it is not already
+        # present (for the purpose of the example the contents of the
+        # array are known, but this doesn't have to be the case)
+        let list_end : felt* = &my_list[2]
+        let (new_elm : MyStruct*) = alloc()
+        assert new_elm[0] = MyStruct(a=2, b=3)
+
+        set_add{set_end_ptr=list_end}(
+            set_ptr=my_list,
+            elm_size=MyStruct.SIZE,
+            elm_ptr=new_elm)
+        return ()
+    end
 
 .. .. _common_library_signature:
 
