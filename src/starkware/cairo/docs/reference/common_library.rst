@@ -165,8 +165,7 @@ dictionary whose end pointer is referenced by ``dict_end``.
 One can think of ``dict_update()`` as a conditional write. Passing ``prev_value``
 ensures that an override will only occur in case the current value equals ``prev_value``.
 Note that this is only verified at the hint level and consistency relies on eventual
-squashing. Additionally, one can verify that ``dictionary[key]=value`` by calling
-``dict_update(key, value, value)``.
+squashing.
 
 ``dict_squash()``
 *****************
@@ -174,9 +173,9 @@ squashing. Additionally, one can verify that ``dictionary[key]=value`` by callin
 Squashes a dictionary represented by an array of read/write logs.
 A squashed dictionary is one whose intermediate updates have been summarized and each key
 appears exactly once with its most recent value. This is the only function in this module that
-asserts the consistency of updates that were made to the dictionary represented by ``DictAccess``.
-A program that uses dict operations without ``invoking dict_squash()`` can run successfully
-even if it contains inconsistent updates to the dictionary (see example below).
+asserts the consistency of accesses to the dictionary represented by the ``DictAccess`` array.
+A program that uses dict operations without invoking ``dict_squash()`` can run successfully
+even if it contains inconsistent dictionary operations (see example below).
 
 The function uses the ``range_check`` builtin and thus
 requires ``range_check_pointer`` as an implicit argument
