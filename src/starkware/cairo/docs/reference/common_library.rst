@@ -25,10 +25,13 @@ within each library are outlined under the relevant library heading.
     -   :ref:`common_library_hash_chain`
     -   :ref:`common_library_hash_state`
     -   :ref:`common_library_invoke`
+    -   :ref:`common_library_keccak`
     -   :ref:`common_library_math`
+    -   :ref:`common_library_math_cmp`
     -   :ref:`common_library_memcpy`
     -   :ref:`common_library_merkle_multi_update`
     -   :ref:`common_library_merkle_update`
+    -   :ref:`common_library_pow`
     -   :ref:`common_library_registers`
     -   :ref:`common_library_serialize`
     -   :ref:`common_library_signature`
@@ -293,8 +296,6 @@ Note that in order to enforce the consistency of subsequent dictionary accesses 
 the default values, one must eventually call ``default_dict_finalize()`` (which in turn calls
 ``dict_squash()``, as discussed in the corresponding section). Otherwise, this is only enforced
 by hints which can be bypassed by a malicious prover.
-
-..  TODO (perama, 29/08/21): Add links when available (dict module, DictAccess dict_squash).
 
 The function expects the explicit argument:
 
@@ -562,6 +563,7 @@ This will only be enforced if we eventually call ``squash_dict()``.
         return ()
     end
 
+
 .. _common_library_find_element:
 
 ``find_element``
@@ -716,7 +718,7 @@ Continuing with the same example, since the array is sorted, searching for the k
 
 ..  TODO(perama, 16/06/2021): Uncomment the link when the section is complete.
     This section refers to the common library's
-    `common_hash <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/hash.cairo>`_
+    `hash <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/hash.cairo>`_
     module.
 
 .. .. _common_library_hash_chain:
@@ -726,7 +728,7 @@ Continuing with the same example, since the array is sorted, searching for the k
 
 ..  TODO(perama, 16/06/2021): Uncomment the link when the section is complete.
     This section refers to the common library's
-    `common_hash_chain <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/hash_chain.cairo>`_
+    `hash_chain <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/hash_chain.cairo>`_
     module.
 
 .. .. _common_library_hash_state:
@@ -736,7 +738,7 @@ Continuing with the same example, since the array is sorted, searching for the k
 
 ..  TODO(perama, 16/06/2021): Uncomment the link when the section is complete.
     This section refers to the common library's
-    `common_hash_state <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/hash_state.cairo>`_
+    `hash_state <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/hash_state.cairo>`_
     module.
 
 .. .. _common_library_invoke:
@@ -746,7 +748,17 @@ Continuing with the same example, since the array is sorted, searching for the k
 
 ..  TODO(perama, 16/06/2021): Uncomment the link when the section is complete.
     This section refers to the common library's
-    `common_invoke <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/invoke.cairo>`_
+    `invoke <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/invoke.cairo>`_
+    module.
+
+.. .. _common_library_keccak:
+
+..  ``keccak``
+..  ----------
+
+..  TODO (perama, 26/08/2021): Uncomment the link when the section is complete.
+    This section refers to the common library's
+    `keccak <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/keccak.cairo>`_
     module.
 
 .. .. _common_library_math:
@@ -756,7 +768,17 @@ Continuing with the same example, since the array is sorted, searching for the k
 
 ..  TODO(perama, 16/06/2021): Uncomment the link when the section is complete.
     This section refers to the common library's
-    `common_math <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/math.cairo>`_
+    `math <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/math.cairo>`_
+    module.
+
+.. .. _common_library_math_cmp:
+
+..  ``math_cmp``
+..  ------------
+
+..  TODO (perama, 26/08/2021): Uncomment the link when the section is complete.
+    This section refers to the common library's
+    `math_cmp <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/math_cmp.cairo>`_
     module.
 
 .. .. _common_library_memcpy:
@@ -766,7 +788,7 @@ Continuing with the same example, since the array is sorted, searching for the k
 
 ..  TODO(perama, 16/06/2021): Uncomment the link when the section is complete.
     This section refers to the common library's
-    `common_memcpy <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/memcpy.cairo>`_
+    `memcpy <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/memcpy.cairo>`_
     module.
 
 .. .. _common_library_merkle_multi_update:
@@ -776,7 +798,7 @@ Continuing with the same example, since the array is sorted, searching for the k
 
 ..  TODO(perama, 16/06/2021): Uncomment the link when the section is complete.
     This section refers to the common library's
-    `common_merkle_multi_update <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/merkle_multi_update.cairo>`_
+    `merkle_multi_update <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/merkle_multi_update.cairo>`_
     module.
 
 .. .. _common_library_merkle_update:
@@ -786,7 +808,17 @@ Continuing with the same example, since the array is sorted, searching for the k
 
 ..  TODO(perama, 16/06/2021): Uncomment the link when the section is complete.
     This section refers to the common library's
-    `common_merkle_update <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/merkle_update.cairo>`_
+    `merkle_update <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/merkle_update.cairo>`_
+    module.
+
+.. .. _common_library_pow:
+
+..  ``pow``
+..  -------
+
+..  TODO (perama, 26/08/2021): Uncomment the link when the section is complete.
+    This section refers to the common library's
+    `pow <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/pow.cairo>`_
     module.
 
 .. .. _common_library_registers:
@@ -796,7 +828,7 @@ Continuing with the same example, since the array is sorted, searching for the k
 
 ..  TODO(perama, 16/06/2021): Uncomment the link when the section is complete.
     This section refers to the common library's
-    `common_registers <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/registers.cairo>`_
+    `registers <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/registers.cairo>`_
     module.
 
 .. .. _common_library_serialize:
@@ -806,7 +838,7 @@ Continuing with the same example, since the array is sorted, searching for the k
 
 ..  TODO(perama, 16/06/2021): Uncomment the link when the section is complete.
     This section refers to the common library's
-    `common_serialize <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/serialize.cairo>`_
+    `serialize <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/serialize.cairo>`_
     module.
 
 .. _common_library_set:
@@ -815,7 +847,7 @@ Continuing with the same example, since the array is sorted, searching for the k
 -------
 
 This section refers to the common library's
-`common_set <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/set.cairo>`_
+`set <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/set.cairo>`_
 module.
 
 ``set_add()``
@@ -874,7 +906,7 @@ The function expects three explicit arguments:
 
 ..  TODO(perama, 16/06/2021): Uncomment the link when the section is complete.
     This section refers to the common library's
-    `common_signature <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/signature.cairo>`_
+    `signature <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/signature.cairo>`_
     module.
 
 .. .. _common_library_small_merkle_tree:
@@ -884,7 +916,7 @@ The function expects three explicit arguments:
 
 ..  TODO(perama, 16/06/2021): Uncomment the link when the section is complete.
     This section refers to the common library's
-    `common_small_merkle_tree <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/small_merkle_tree.cairo>`_
+    `small_merkle_tree <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/small_merkle_tree.cairo>`_
     module.
 
 .. .. _common_library_squash_dict:
@@ -894,7 +926,7 @@ The function expects three explicit arguments:
 
 ..  TODO(perama, 16/06/2021): Uncomment the link when the section is complete.
     This section refers to the common library's
-    `common_squash_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/squash_dict.cairo>`_
+    `squash_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/squash_dict.cairo>`_
     module.
 
 .. .. _common_library_uint256:
@@ -904,5 +936,5 @@ The function expects three explicit arguments:
 
 ..  TODO(perama, 16/06/2021): Uncomment the link when the section is complete.
     This section refers to the common library's
-    `common_uint256 <://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/uint256.cairo>`_
+    `uint256 <://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/uint256.cairo>`_
     module.
