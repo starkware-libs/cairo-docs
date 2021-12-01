@@ -6,35 +6,49 @@ Setting up the environment
 Installation
 ------------
 
-We recommend working inside a python virtual environment, but you can also install
-the Cairo package directly.
-To create and enter the virtual environment, type::
+.. only:: not internal
 
-    python3.7 -m venv ~/cairo_venv
-    source ~/cairo_venv/bin/activate
+    We recommend working inside a python virtual environment, but you can also install
+    the Cairo package directly.
+    To create and enter the virtual environment, type::
 
-Make sure the venv is activated -- you should see ``(cairo_venv)`` in the command line prompt.
+        python3.7 -m venv ~/cairo_venv
+        source ~/cairo_venv/bin/activate
 
-Make sure you can install the following pip packages: ``ecdsa``, ``fastecdsa``, ``sympy``
-(using ``pip3 install ecdsa fastecdsa sympy``).
-On Ubuntu, for example, you will have to first run::
+    Make sure the venv is activated -- you should see ``(cairo_venv)`` in the command line prompt.
 
-    sudo apt install -y libgmp3-dev
+    Make sure you can install the following pip packages: ``ecdsa``, ``fastecdsa``, ``sympy``
+    (using ``pip3 install ecdsa fastecdsa sympy``).
+    On Ubuntu, for example, you will have to first run::
 
-On Mac, you can use ``brew``::
+        sudo apt install -y libgmp3-dev
 
-    brew install gmp
+    On Mac, you can use ``brew``::
 
-Download the python package (``cairo-lang-0.3.1.zip``) from
-https://github.com/starkware-libs/cairo-lang/releases/tag/v0.3.1.
-To install it using ``pip``, run::
+        brew install gmp
 
-    pip3 install cairo-lang-0.3.1.zip
+    Install the ``cairo-lang`` python package using::
 
-Cairo was tested with python3.7.
-To make it work with python3.6, you will have to install ``contextvars``::
+        pip3 install cairo-lang
 
-    pip3 install contextvars
+    Alternatively, you can download the package (``cairo-lang-0.6.0.zip``) from
+    https://github.com/starkware-libs/cairo-lang/releases/tag/v0.6.0,
+    and install it using::
+
+        pip3 install cairo-lang-0.6.0.zip
+
+    Cairo was tested with python3.7.
+    To make it work with python3.6, you will have to install ``contextvars``::
+
+        pip3 install contextvars
+
+.. only:: internal
+
+    Make sure you have our main codebase cloned into your workspace folder.
+
+    Note: In the following, replace ``cairo-compile`` and ``cairo-run`` with
+    ``src/starkware/cairo/lang/scripts/cairo-compile`` and
+    ``src/starkware/cairo/lang/scripts/cairo-run`` respectively.
 
 Compiling and running a Cairo program
 -------------------------------------
@@ -105,11 +119,11 @@ Visual Studio Code setup
 
 .. only:: not internal
 
-    Download the Cairo Visual Studio Code extension (``cairo-0.3.1.vsix``) from
-    https://github.com/starkware-libs/cairo-lang/releases/tag/v0.3.1,
+    Download the Cairo Visual Studio Code extension (``cairo-0.6.0.vsix``) from
+    https://github.com/starkware-libs/cairo-lang/releases/tag/v0.6.0,
     and install it using::
 
-        code --install-extension cairo-0.3.1.vsix
+        code --install-extension cairo-0.6.0.vsix
 
     Configure Visual Studio Code settings::
 

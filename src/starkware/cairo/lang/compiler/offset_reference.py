@@ -5,9 +5,10 @@ import marshmallow
 
 from starkware.cairo.lang.compiler.ast.expr import ExprDot, Expression, ExprIdentifier
 from starkware.cairo.lang.compiler.identifier_definition import (
-    IdentifierDefinition, ReferenceDefinition)
-from starkware.cairo.lang.compiler.preprocessor.flow import (
-    FlowTrackingData, FlowTrackingDataActual, ReferenceManager)
+    IdentifierDefinition,
+    ReferenceDefinition,
+)
+from starkware.cairo.lang.compiler.preprocessor.flow import FlowTrackingData, ReferenceManager
 from starkware.cairo.lang.compiler.scoped_name import ScopedName
 
 
@@ -21,21 +22,19 @@ class OffsetReferenceDefinition(IdentifierDefinition):
     In the example, 'x' is the parent reference and 'y.z' is the member path.
     When eval() is called, both 'x' and 'T.y' are evaluated and '[x + T.y]' is returned.
     """
-    TYPE: ClassVar[str] = 'offset-reference'
+
+    TYPE: ClassVar[str] = "offset-reference"
     Schema: ClassVar[Type[marshmallow.Schema]] = marshmallow.Schema
 
     parent: ReferenceDefinition
     member_path: ScopedName
 
     def eval(
-            self, reference_manager: ReferenceManager, flow_tracking_data: FlowTrackingData) -> \
-            Expression:
-        reference = flow_tracking_data.resolve_reference(
-            reference_manager=reference_manager,
-            name=self.parent.full_name)
-        assert isinstance(flow_tracking_data, FlowTrackingDataActual), \
-            'Resolved references can only come from FlowTrackingDataActual.'
-        expr = reference.eval(flow_tracking_data.ap_tracking)
+        self, reference_manager: ReferenceManager, flow_tracking_data: FlowTrackingData
+    ) -> Expression:
+        expr = flow_tracking_data.evaluate_reference(
+            reference_manager=reference_manager, name=self.parent.full_name
+        )
 
         for member_name in self.member_path.path:
             expr = ExprDot(expr=expr, member=ExprIdentifier(name=member_name))

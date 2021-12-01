@@ -357,7 +357,7 @@ The following function verifies that the vote is signed and removes the public k
 There are two options to handle the voting state:
 
 1. Pass it as an argument and return the new state.
-2. Add it as as an implicit argument.
+2. Add it as an implicit argument.
 
 The two options have a different syntax, but they will be compiled to the same bytecode.
 Here we chose the second option as it simplifies the code calling ``process_vote``.

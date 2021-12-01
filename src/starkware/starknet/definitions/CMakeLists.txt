@@ -9,7 +9,28 @@ python_lib(starknet_definitions_lib
 
     LIBS
     cairo_vm_crypto_lib
+    everest_definitions_lib
     starkware_crypto_lib
-    starkware_utils_lib
+    starkware_dataclasses_utils_lib
+    starkware_error_handling_lib
+    starkware_python_utils_lib
+    starkware_storage_lib
     pip_marshmallow
+)
+
+python_lib(starknet_general_config_lib
+    PREFIX starkware/starknet/definitions
+
+    FILES
+    general_config.py
+    general_config.yml
+
+    LIBS
+    starknet_definitions_lib
+    starkware_config_utils_lib
+    starkware_dataclasses_utils_lib
+    starkware_python_utils_lib
+    pip_marshmallow
+    pip_marshmallow_dataclass
+    pip_marshmallow_enum
 )
