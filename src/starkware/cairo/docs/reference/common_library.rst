@@ -11,19 +11,16 @@ for use in any Cairo program.
 The libraries available are listed below, organized alphabetically. The functions
 within each library are outlined under the relevant library heading.
 
-
 -   :ref:`common_library_alloc`.
 -   :ref:`common_library_bitwise`.
 -   :ref:`common_library_cairo_builtins`.
 -   :ref:`common_library_default_dict`.
+-   :ref:`common_library_dict`.
+-   :ref:`common_library_dict_access`.
 -   :ref:`common_library_find_element`.
 -   :ref:`common_library_set`.
 
-
 ..  TODO (perama, 16/06/2021): Move the link above when the section is complete.
-    -   :ref:`common_library_cairo_builtins`
-    -   :ref:`common_library_dict`
-    -   :ref:`common_library_dict_access`
     -   :ref:`common_library_hash`
     -   :ref:`common_library_hash_chain`
     -   :ref:`common_library_hash_state`
@@ -368,25 +365,202 @@ Example
         return ()
     end
 
-.. .. _common_library_dict:
+.. _common_library_dict:
 
-..  ``dict``
-..  --------
+``dict``
+--------
 
-..  TODO(perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's
-    `common_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/dict.cairo>`_
-    module.
+This section refers to the common library's
+`common_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/dict.cairo>`_
+module.
 
-.. .. _common_library_dict_access:
+``dict_update()``
+*****************
 
-..  ``dict_access``
-..  ---------------
+Updates the value of a given key in a dictionary. ``dict_ptr``, of type ``DictAccess*``,
+representing a pointer to the end of the dictionary, must be passed as an
+implicit argument to this function. Only available for dictionaries created via ``dict_new()``
+or ``default_dict_new()``. No values are returned.
 
-..  TODO(perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's
-    `common_dict_access <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/dict_access.cairo>`_
-    module.
+The function expects three explicit arguments of type ``felt``:
+
+-   ``key``, the key to update.
+-   ``prev_value``, the current value assigned to ``key``.
+-   ``new_value``, the value to be assigned to ``key``.
+
+It is possible to get ``prev_value`` from ``__dict_manager`` using the hint:
+
+``%{ ids.new_value = __dict_manager.get_dict(ids.dict_ptr)[ids.key] %}``
+
+The example demonstrates how to update the value of a specified key for a
+dictionary whose end pointer is referenced by ``dict_end``.
+
+.. tested-code:: cairo library_dict_update0
+
+    %builtins range_check
+
+    from starkware.cairo.common.dict import (
+        dict_new, dict_write, dict_update, dict_squash)
+
+    func main{range_check_ptr}() -> ():
+        %{ initial_dict = {0: 0} %}
+        let (dict_start) = dict_new()
+        let dict_end = dict_start
+        dict_write{dict_ptr=dict_end}(key=0, new_value=1)
+        dict_update{dict_ptr=dict_end}(
+            key=0, prev_value=1, new_value=2)
+        return ()
+    end
+
+One can think of ``dict_update()`` as a conditional write. Passing ``prev_value``
+ensures that an override will only occur in case the current value equals ``prev_value``.
+Note that this is only verified at the hint level and consistency relies on eventual
+squashing.
+
+``dict_squash()``
+*****************
+
+Squashes a dictionary represented by an array of read/write logs.
+A squashed dictionary is one whose intermediate updates have been summarized and each key
+appears exactly once with its most recent value. This is the only function in this module that
+asserts the consistency of accesses to the dictionary represented by the ``DictAccess`` array.
+A program that uses dict operations without invoking ``dict_squash()`` can run successfully
+even if it contains inconsistent dictionary operations (see example below).
+
+The function uses the ``range_check`` builtin and thus
+requires ``range_check_pointer`` as an implicit argument
+
+The function expects two explicit arguments of type ``DictAccess*``:
+
+-   ``dict_accesses_start``, a pointer to the start of the dictionary (first operation).
+-   ``dict_accesses_end``, a pointer to the end of the dictionary (last operation).
+
+The function returns two values of type ``DictAccess*``:
+
+-   ``squashed_dict_start``, a pointer to the start of the squashed dictionary.
+-   ``squashed_dict_end``, a pointer to the end of the squashed dictionary.
+
+The only function that uses ``dict_accesses_start`` is ``dict_squash()``. All
+other dictionary operations append to the array of ``DictAccess`` instances.
+
+.. tested-code:: cairo library_dict_squash
+
+    %builtins range_check
+
+    from starkware.cairo.common.dict import (
+        dict_new, dict_write, dict_update, dict_squash)
+
+    func main{range_check_ptr}() -> ():
+        %{ initial_dict = {0: 0} %}
+        let (dict_start) = dict_new()
+        let dict_end = dict_start
+        dict_write{dict_ptr=dict_end}(0, 1)
+        dict_update{dict_ptr=dict_end}(0, 1, 2)
+        let (squashed_dict_start, squashed_dict_end) = dict_squash{
+            range_check_ptr=range_check_ptr}(dict_start, dict_end)
+        # The following is an inconsistent update, 'prev_value'
+        # is now '2'. This will fail while using the library's hints
+        # but can be made to pass by a malicious prover.
+        dict_update{dict_ptr=squashed_dict_end}(
+            key=0, prev_value=3, new_value=2)
+        # Squash fails. Even a malicious prover can't pass
+        # verification for a failed dict_squash operation.
+        let (squashed_dict_start, squashed_dict_end) = dict_squash{
+            range_check_ptr=range_check_ptr}(
+            squashed_dict_start, squashed_dict_end)
+        return ()
+    end
+
+.. _common_library_dict_access:
+
+``dict_access``
+---------------
+
+This section refers to the common library's
+`common_dict_access <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/dict_access.cairo>`_
+module.
+
+``DictAccess``
+**************
+
+A struct specifying the ``DictAccess`` memory structure. Cairo simulates dictionaries
+by an array of read-modify-write instructions, which are logged by the ``DictAccess`` struct.
+The consistency of such an array can be verified by applying ``squash_dict()``.
+
+For libraries that abstract Cairo's representation of dictionaries and allow a more
+standard dictionary interface than what will be shown here, see the
+``dict`` and ``default_dict`` modules in the common library.
+
+The struct has the following members of type ``felt``:
+
+-   ``key``, the key of a key-value pair.
+-   ``prev_value``, the previous value iof a key-value pair.
+-   ``new_value``, the current value of a key-value pair.
+
+In the example below, a dictionary is created by adding ``DictAccess`` structs to an array
+and manually incrementing a pointer to the end of the array.
+
+.. tested-code:: cairo library_dictaccess0
+
+    %builtins range_check
+
+    from starkware.cairo.common.dict import dict_squash
+    from starkware.cairo.common.squash_dict import squash_dict
+    from starkware.cairo.common.alloc import alloc
+    from starkware.cairo.common.dict_access import DictAccess
+
+    func main{range_check_ptr}() -> ():
+        alloc_locals
+        let (dict_start : DictAccess*) = alloc()
+        assert dict_start[0] = DictAccess(
+            key=0, prev_value=100, new_value=100)
+        assert dict_start[1] = DictAccess(
+            key=1, prev_value=200, new_value=200)
+
+        let dict_end = dict_start + 2 * DictAccess.SIZE
+        # (dict_start, dict_end) now represents the dictionary
+        # {0: 100, 1: 200}.
+
+        # Now pass the dictionary to a function for inspection.
+        check_key_ratio{dict_ptr=dict_end}(a=0, b=1)
+
+        # Squash the dictionary from an array of 4 DictAccess structs
+        # to an array of 2, with a single DictAccess entry per key.
+        # Fails if the prover changed 'value_a' and 'value_b'.
+        let (local squashed_dict_start : DictAccess*) = alloc()
+        let (squashed_dict_end) = squash_dict{
+            range_check_ptr=range_check_ptr}(
+            dict_start, dict_end, squashed_dict_start)
+        return ()
+    end
+
+``check_key_ratio()`` checks that the value of key ``b`` is double the value of key ``a``.
+This will only be enforced if we eventually call ``squash_dict()``.
+
+.. tested-code:: cairo library_dictaccess1
+
+    func check_key_ratio{dict_ptr : DictAccess*}(a : felt, b : felt):
+        alloc_locals
+        # Adds more DictAccess entries to the existing array.
+        # Values match previous entries and will be squashed.
+        local value_a
+        local value_b
+        %{
+            ids.value_a = 100  # Malicious prover may change.
+            ids.value_b = 200
+        %}
+        assert value_a * 2 = value_b
+        # Simulate dictionary read by appending a 'DictAccess'
+        # instruction with 'prev_value=new_value=current_value'.
+        assert dict_ptr[0] = DictAccess(
+            key=a, prev_value=value_a, new_value=value_a)
+        assert dict_ptr[1] = DictAccess(
+            key=b, prev_value=value_b, new_value=value_b)
+        let dict_end = dict_ptr + 2 * DictAccess.SIZE
+        # A call to squash_dict() will ensure that the prover
+        # used values that are consistent with the input dictionary.
+        return ()
+    end
 
 .. _common_library_find_element:
 
