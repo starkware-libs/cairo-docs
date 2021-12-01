@@ -450,6 +450,49 @@ See :ref:`import_search_path` for more information.
         assert_not_zero, assert_not_equal)
     from starkware.cairo.common.registers import get_ap
 
+.. _syntax_implicit_arguments:
+
+Implicit arguments
+------------------
+
+Implicit arguments are specified as part of the function signature, and are declared
+inside curly braces ``{implicit_arg_name}``. Implicit arguments are automatically added as an
+argument and a return value to the function. The Cairo compiler takes care to return the
+current binding of the reference
+``implicit_arg_name``. If no implicit arguments are required the braces can be omitted.
+
+.. tested-code:: cairo syntax_implicit_arguments0
+
+    %builtins output
+
+    func serialize_word{output_ptr : felt*}(value : felt):
+        assert [output_ptr] = value
+        let output_ptr = output_ptr + 1
+        # The current binding for output_ptr is implicitly
+        # added as a returned value.
+        return ()
+    end
+
+The function above, which is available in the common library, accepts an impicit argument,
+``output_ptr``, whose new binding is implicitly added as a return value.
+
+.. tested-code:: cairo syntax_implicit_arguments1
+
+    func main{output_ptr : felt*}():
+        alloc_locals
+        local start_output_ptr : felt* = output_ptr
+        serialize_word(value=5)
+        # The compiler automatically rebinds the name of the given
+        # implicit argument to the function's implicit return value.
+        assert output_ptr = start_output_ptr + 1
+        return ()
+    end
+
+Note that it was not necessary to explicitly pass the implicit argument via
+``serialize_word{output_ptr=output_ptr}(value=5)``, since the parent function ``main()``
+already has a binding for ``output_ptr`` and the compiler will automatically pass it to
+``serialize_word()``. For more information, see :ref:`implicit_arguments`.
+
 Builtins
 --------
 
