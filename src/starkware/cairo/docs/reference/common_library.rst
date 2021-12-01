@@ -555,7 +555,7 @@ other dictionary operations append to the array of ``DictAccess`` instances.
 ---------------
 
 This section refers to the common library's
-`common_dict_access <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/dict_access.cairo>`_
+`dict_access <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/dict_access.cairo>`_
 module.
 
 ``DictAccess``
