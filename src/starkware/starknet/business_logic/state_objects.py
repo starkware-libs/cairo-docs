@@ -1,22 +1,24 @@
 import asyncio
 import dataclasses
 from dataclasses import field
-from typing import ClassVar, Dict, Iterable, List, Optional, cast
+from typing import ClassVar, Dict, Iterable, List, cast
 
 import marshmallow_dataclass
 
-from starkware.python.utils import safe_zip
+from starkware.python.utils import safe_zip, to_bytes
 from starkware.starknet.core.os.contract_hash import compute_contract_hash
 from starkware.starknet.definitions import fields
+from starkware.starknet.definitions.error_codes import StarknetErrorCode
 from starkware.starknet.services.api.contract_definition import ContractDefinition
 from starkware.starknet.storage.starknet_storage import StorageLeaf
-from starkware.storage.storage import HASH_BYTES, Fact, FactFetchingContext, HashFunctionType
+from starkware.starkware_utils.commitment_tree.patricia_tree.nodes import EmptyNodeFact
+from starkware.starkware_utils.commitment_tree.patricia_tree.patricia_tree import PatriciaTree
+from starkware.starkware_utils.error_handling import stark_assert
 from starkware.starkware_utils.validated_dataclass import (
     ValidatedDataclass,
     ValidatedMarshmallowDataclass,
 )
-from starkware.starkware_utils.patricia_tree.patricia_tree import PatriciaTree
-from starkware.starkware_utils.patricia_tree.nodes import EmptyNodeFact
+from starkware.storage.storage import HASH_BYTES, Fact, FactFetchingContext, HashFunctionType
 
 
 @marshmallow_dataclass.dataclass(frozen=True)
@@ -29,7 +31,7 @@ class ContractDefinitionFact(ValidatedMarshmallowDataclass, Fact):
     contract_definition: ContractDefinition
 
     async def _hash(self, hash_func: HashFunctionType) -> bytes:
-        return compute_contract_hash(contract_definition=self.contract_definition)
+        return to_bytes(compute_contract_hash(contract_definition=self.contract_definition))
 
 
 @marshmallow_dataclass.dataclass(frozen=True)
@@ -72,10 +74,22 @@ class ContractState(ValidatedMarshmallowDataclass, Fact):
         )
 
     async def _hash(self, hash_func: HashFunctionType) -> bytes:
+        """
+        Computes the hash of the node containing the contract's information, including the contract
+        definition and storage.
+        """
+        CONTRACT_STATE_HASH_VERSION = 0
+        RESERVED = 0
         if self.is_empty:
             return EmptyNodeFact.EMPTY_NODE_HASH
 
-        return await hash_func(self.contract_hash, self.storage_commitment_tree.root)
+        # Set hash_value = H(H(contract_hash, storage_root), RESERVED).
+        hash_value = await hash_func(self.contract_hash, self.storage_commitment_tree.root)
+        hash_value = await hash_func(hash_value, to_bytes(RESERVED))
+
+        # Return H(hash_value, CONTRACT_STATE_HASH_VERSION). CONTRACT_STATE_HASH_VERSION must be in
+        # the outermost hash to guarantee unique "decoding".
+        return await hash_func(hash_value, to_bytes(CONTRACT_STATE_HASH_VERSION))
 
     @staticmethod
     async def fetch_contract_definitions(
@@ -87,15 +101,12 @@ class ContractState(ValidatedMarshmallowDataclass, Fact):
         contract_hashes -= {ContractState.UNINITIALIZED_CONTRACT_HASH}
 
         # Fetch corresponding contract definitions from storage.
-        contract_definition_facts: List[Optional[ContractDefinitionFact]] = await asyncio.gather(
+        contract_definition_facts: List[ContractDefinitionFact] = await asyncio.gather(
             *(
-                ContractDefinitionFact.get(storage=ffc.storage, suffix=contract_hash)
+                ContractDefinitionFact.get_or_fail(storage=ffc.storage, suffix=contract_hash)
                 for contract_hash in contract_hashes
             )
         )
-        assert (
-            None not in contract_definition_facts
-        ), "Not all contract definition facts appear in storage."
         contract_definitions = [
             fact.contract_definition
             for fact in cast(List[ContractDefinitionFact], contract_definition_facts)
@@ -106,6 +117,18 @@ class ContractState(ValidatedMarshmallowDataclass, Fact):
     @property
     def initialized(self) -> bool:
         return self.contract_hash != ContractState.UNINITIALIZED_CONTRACT_HASH
+
+    def assert_initialized(self, contract_address: int):
+        """
+        Asserts that the current ContractState is initialized.
+
+        Takes contract_address as input to improve the error message.
+        """
+        stark_assert(
+            self.initialized,
+            code=StarknetErrorCode.UNINITIALIZED_CONTRACT,
+            message=f"Contract with address {contract_address} is not deployed.",
+        )
 
     async def update(
         self, ffc: FactFetchingContext, updates: Dict[int, StorageLeaf]

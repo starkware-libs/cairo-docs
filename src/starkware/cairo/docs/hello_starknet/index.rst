@@ -7,7 +7,7 @@ StarkNet is a permissionless decentralized ZK-Rollup operating as an L2 network 
 where any dApp can achieve unlimited scale for its computation,
 without compromising Ethereum's composability and security.
 
-Currently, StarkNet's first step, StarkNet Planets Alpha, is deployed.
+Currently, StarkNet's first step, StarkNet Alpha, is deployed.
 This tutorial walks you through writing and deploying a StarkNet contract.
 
 .. toctree::
@@ -16,6 +16,7 @@ This tutorial walks you through writing and deploying a StarkNet contract.
     intro
     cli
     user_auth
+    constructors
     more_features
     calling_contracts
     l1l2
@@ -32,7 +33,6 @@ Some useful links
 *  `Voyager <https://voyager.online>`_ -- The StarkNet block explorer.
 *  `The AMM demo <http://amm-demo.starknet.starkware.co/>`_
 
-StarkNet Alpha version 2
+StarkNet Alpha version 4
 ************************
-*  `The StarkNet core contract <https://goerli.etherscan.io/address/0x5e6229F2D4d977d20A50219E521dE6Dd694d45cc>`_
-*  `Sequencer URL <https://alpha2.starknet.io>`_
+*  `Sequencer URL <https://alpha4.starknet.io>`_

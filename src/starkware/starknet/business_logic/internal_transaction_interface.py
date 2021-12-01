@@ -1,8 +1,9 @@
 import asyncio
 import dataclasses
+import logging
 from abc import abstractmethod
 from dataclasses import field
-from typing import Dict, Iterable, List, Optional, Set, Tuple, cast
+from typing import Iterable, List, Optional, Set, cast
 
 import marshmallow_dataclass
 
@@ -11,17 +12,21 @@ from services.everest.business_logic.internal_transaction import (
     EverestInternalTransaction,
     EverestTransactionExecutionInfo,
 )
-from services.everest.business_logic.internal_transaction import EverestInternalTransaction
 from services.everest.business_logic.state import CarriedStateBase
 from services.everest.definitions import fields as everest_fields
+from starkware.cairo.lang.vm.cairo_pie import ExecutionResources
 from starkware.cairo.lang.vm.utils import RunResources
 from starkware.starknet.business_logic.state import CarriedState, StateSelector
 from starkware.starknet.definitions import fields
+from starkware.starknet.definitions.error_codes import StarknetErrorCode
 from starkware.starknet.definitions.general_config import StarknetGeneralConfig
 from starkware.starknet.services.api.gateway.transaction import Transaction
 from starkware.starkware_utils.config_base import Config
+from starkware.starkware_utils.error_handling import StarkException
 from starkware.starkware_utils.marshmallow_dataclass_fields import SetField
 from starkware.starkware_utils.validated_dataclass import ValidatedDataclass
+
+logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -42,11 +47,6 @@ class ContractCallResponse:
     """
 
     retdata: List[int]
-    # Indicates how far the storage_ptr of the **caller** storage has advanced during this call,
-    # **including** nested calls; kept to hint the StarkNet OS run as to where to advance the
-    # storage_ptr when encountering this system call, while executing the parent call
-    # (which is before the actual execution of this call).
-    storage_ptr_diff: int
 
 
 @dataclasses.dataclass(frozen=True)
@@ -58,11 +58,13 @@ class ContractCall(ValidatedDataclass):
     No need for validations here, as the fields are taken from validated objects.
     """
 
-    # Should be None if the call represents the parent transaction itself.
-    from_address: Optional[int]
+    # Should be zero if the call represents the parent transaction itself.
+    from_address: int
     # The called contract address.
     to_address: int
     calldata: List[int]
+    signature: List[int]
+    cairo_usage: ExecutionResources
 
     # Information kept for the StarkNet OS run in the GpsAmbassador.
     # The response of the direct internal calls invoked by this call; kept in the order
@@ -75,7 +77,7 @@ class ContractCall(ValidatedDataclass):
     storage_accessed_addresses: Set[int] = field(
         metadata=dict(
             marshmallow_field=SetField(
-                fields.felt_metadata("storage_accessed_address")["marshmallow_field"]
+                everest_fields.felt_metadata("storage_accessed_address")["marshmallow_field"]
             )
         )
     )
@@ -83,19 +85,19 @@ class ContractCall(ValidatedDataclass):
     @classmethod
     def empty(cls, to_address: int) -> "ContractCall":
         return cls(
-            from_address=None,
+            from_address=0,
             to_address=to_address,
             calldata=[],
+            signature=[],
+            cairo_usage=ExecutionResources.empty(),
             internal_call_responses=[],
             storage_read_values=[],
             storage_accessed_addresses=set(),
         )
 
     @classmethod
-    def empty_for_tests(cls, internal_call_responses: List[ContractCallResponse]) -> "ContractCall":
-        return dataclasses.replace(
-            cls.empty(to_address=0), internal_call_responses=internal_call_responses
-        )
+    def empty_for_tests(cls) -> "ContractCall":
+        return cls.empty(to_address=0)
 
 
 @marshmallow_dataclass.dataclass(frozen=True)
@@ -191,9 +193,20 @@ class InternalTransactionInterface(EverestInternalTransaction):
         assert isinstance(general_config, StarknetGeneralConfig)
 
         with state.copy_and_apply() as state_to_update:
-            execution_info = await self._apply_specific_state_updates(
-                state=state_to_update, general_config=general_config
-            )
+            try:
+                execution_info = await self._apply_specific_state_updates(
+                    state=state_to_update, general_config=general_config
+                )
+            except StarkException:
+                # Raise StarkException-s as-is, so failure information is not lost.
+                raise
+            except Exception as exception:
+                # Wrap all exceptions with StarkException, so the Batcher can continue running
+                #   even after unexpected errors.
+                logger.error(f"Unexpected failure; exception details: {exception}.", exc_info=True)
+                raise StarkException(
+                    code=StarknetErrorCode.UNEXPECTED_FAILURE, message=str(exception)
+                )
 
         return execution_info
 
@@ -209,9 +222,8 @@ class InternalTransactionInterface(EverestInternalTransaction):
         state: CarriedState,
         general_config: StarknetGeneralConfig,
         loop: asyncio.AbstractEventLoop,
-        caller_address: Optional[int],
         run_resources: RunResources,
-    ) -> Tuple[TransactionExecutionInfo, Dict[int, int]]:
+    ) -> TransactionExecutionInfo:
         pass
 
     def verify_signatures(self):

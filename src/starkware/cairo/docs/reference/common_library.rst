@@ -11,14 +11,17 @@ for use in any Cairo program.
 The libraries available are listed below, organized alphabetically. The functions
 within each library are outlined under the relevant library heading.
 
--   :ref:`common_library_alloc`
--   :ref:`common_library_bitwise`
--   :ref:`common_library_cairo_builtins`
--   :ref:`common_library_find_element`
--   :ref:`common_library_set`
 
-..  TODO(perama, 16/06/2021): Move the link above when the section is complete.
-    -   :ref:`common_library_default_dict`
+-   :ref:`common_library_alloc`.
+-   :ref:`common_library_bitwise`.
+-   :ref:`common_library_cairo_builtins`.
+-   :ref:`common_library_default_dict`.
+-   :ref:`common_library_find_element`.
+-   :ref:`common_library_set`.
+
+
+..  TODO (perama, 16/06/2021): Move the link above when the section is complete.
+    -   :ref:`common_library_cairo_builtins`
     -   :ref:`common_library_dict`
     -   :ref:`common_library_dict_access`
     -   :ref:`common_library_hash`
@@ -274,15 +277,96 @@ results in ``1000``, ``0110`` and ``1110``:
     assert xor = 6  # Binary 0110.
     assert or = 14  # Binary 1110.
 
-.. .. _common_library_default_dict:
+.. _common_library_default_dict:
 
-..  ``default_dict``
-..  ----------------
+``default_dict``
+----------------
 
-..  TODO(perama, 16/06/2021): Uncomment the link when the section is complete.
-    This section refers to the common library's
-    `common_default_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/default_dict.cairo>`_
-    module.
+This section refers to the common library's
+`default_dict <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/default_dict.cairo>`_
+module.
+
+``default_dict_new()``
+**********************
+
+Returns a new dictionary where all keys are initialized with a given default value.
+One can interact with the dictionary using the ``dict_read()``, ``dict_write()``
+operations discussed in the ``dict`` module.
+Note that in order to enforce the consistency of subsequent dictionary accesses with
+the default values, one must eventually call ``default_dict_finalize()`` (which in turn calls
+``dict_squash()``, as discussed in the corresponding section). Otherwise, this is only enforced
+by hints which can be bypassed by a malicious prover.
+
+..  TODO (perama, 29/08/21): Add links when available (dict module, DictAccess dict_squash).
+
+The function expects the explicit argument:
+
+-   ``default_value``, the default value.
+
+The function returns:
+
+-   ``res``, of type ``DictAccess*``, a pointer to the new dictionary.
+
+``default_dict_finalize()``
+***************************
+
+Squashes the dictionary and verifies consistency with respect to the default value.
+A squashed dictionary is one whose intermediate updates have been summarized and each
+key appears exactly once with its most recent value.
+For more details see ``dict_squash()`` from the ``dict`` module.
+
+..  TODO (perama, 29/08/21): Add link when available (dict_squash).
+
+The function expects three explicit arguments:
+
+-   ``dict_accesses_start``, a pointer to the initial dictionary (first operation).
+-   ``dict_accesses_end``, a pointer to the end of the dictionary (last operation).
+-   ``default_value``, the expected initial value of each key.
+
+The function returns the values:
+
+-   ``squashed_dict_start``, a pointer to the start of the squashed dictionary.
+-   ``squashed_dict_end``, a pointer to the end of the squashed dictionary.
+
+Note that one must eventually call ``default_dict_finalize()`` to verify both the internal
+consistency of the ``DictAccess`` entries forming the dictionary and of the consistency
+with the default value.
+
+In the example below we create and finalize a default dictionary, and explain what
+may happen if ``default_dict_finalize()`` is not called.
+
+Example
+*******
+
+.. tested-code:: cairo library_default_dict_finalize
+
+    %builtins range_check
+
+    from starkware.cairo.common.default_dict import (
+        default_dict_new, default_dict_finalize)
+    from starkware.cairo.common.dict import dict_write, dict_update
+
+    func main{range_check_ptr}() -> ():
+        alloc_locals
+        let (local my_dict_start) = default_dict_new(default_value=7)
+        let my_dict = my_dict_start
+        dict_write{dict_ptr=my_dict}(key=0, new_value=8)
+        # The following is an inconsistent update, the entry with
+        # key 1 still contains the default value 7.
+        # This will fail while using the library's hints
+        # but can be made to pass by a malicious prover.
+
+        # For a honest prover, this will fail in the library's hints,
+        # but a malicious prover can make the following dict_update
+        # pass. However, if it does, the code will necessarily fail
+        # at default_dict_finalize.
+        # dict_update{dict_ptr=my_dict}(key=1, prev_value=8, new_value=9)
+
+        # Finalize fails for the malicious prover with extra update.
+        let (finalized_dict_start, finalized_dict_end) = default_dict_finalize(
+            my_dict_start, my_dict, 7)
+        return ()
+    end
 
 .. .. _common_library_dict:
 
@@ -312,7 +396,6 @@ results in ``1000``, ``0110`` and ``1110``:
 This section refers to the common library's
 `find_element <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/find_element.cairo>`_
 module.
-
 
 ``find_element()``
 ******************
@@ -380,6 +463,77 @@ program will fail when the key is not present in the array.
         assert element_ptr.b = 6
         return ()
     end
+
+``search_sorted_lower()``
+*************************
+
+Returns the pointer to the first element in the array whose first field is at least ``key``.
+The array elements must be sorted by the first field in ascending order. If no such item exists,
+it returns a pointer to the end of the array (after the last item). The function requires the
+implicit argument ``range_check_ptr``.
+
+The function accepts the arguments:
+
+-   ``array_ptr``, a pointer to a sorted array.
+-   ``elm_size``, the size (in memory cells) of each element in the array.
+-   ``n_elms``, the number of elements in the array.
+-   ``key``, the key lower bound (the key is assumed to be the first member of
+    each element in the array).
+
+The function returns:
+
+-  ``elm_ptr``, the pointer to the first element whose key is greater or equal to the lower bound.
+
+Continuing with the example above, with lower bound ``2``, the middle element is returned.
+
+.. tested-code:: cairo library_search_sorted_lower
+
+    from starkware.cairo.common.find_element import (
+        search_sorted_lower)
+
+    let (smallest_ptr : MyStruct*) = search_sorted_lower(
+        array_ptr=array_ptr, elm_size=2, n_elms=3, key=2)
+    assert smallest_ptr.a = 3
+    assert smallest_ptr.b = 4
+
+``search_sorted()``
+*******************
+
+Returns both the pointer to the first element in the array whose key matches a specified key, and
+an indicator for the success of the search. The array elements must be sorted by the
+first field in ascending order. If no such item exists, returns an undefined pointer,
+and ``success=0``. The function requires the implicit argument ``range_check_ptr``.
+
+The function accepts the arguments:
+
+-   ``array_ptr``, the pointer to a sorted array.
+-   ``elm_size``, the size (in memory cells) of each element in the array.
+-   ``n_elms``, the number of elements in the array.
+-   ``key``, the key to look for (the key is assumed to be the first member of
+    each element in the array).
+
+The function returns:
+
+-   ``elm_ptr``, the pointer to the first element whose first member is ``key``,
+    namely ``[elm_ptr] = key``.
+-   ``success``, a ``felt`` which equals ``1`` if the key was found and ``0`` otherwise.
+
+Continuing with the same example, since the array is sorted, searching for the key
+``5`` leads to the last element.
+
+.. tested-code:: cairo library_search_sorted
+
+    from starkware.cairo.common.find_element import search_sorted
+
+    let (first_ptr : MyStruct*, success_val) = search_sorted(
+        array_ptr=array_ptr, elm_size=2, n_elms=3, key=5)
+    assert success_val = 1
+    assert first_ptr.a = 5
+    assert first_ptr.b = 6
+    # There is no element with key=2.
+    let (first_ptr : MyStruct*, success_val) = search_sorted(
+        array_ptr=array_ptr, elm_size=2, n_elms=3, key=2)
+    assert success_val = 0
 
 .. .. _common_library_hash:
 

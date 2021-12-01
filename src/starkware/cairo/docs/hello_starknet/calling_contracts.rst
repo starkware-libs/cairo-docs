@@ -1,3 +1,6 @@
+.. _calling_contracts:
+
+
 Calling another contract
 ========================
 
@@ -32,19 +35,16 @@ For example:
 .. tested-code:: cairo call_contract_code
 
     @external
-    func call_increase_balance{
-            syscall_ptr : felt*, storage_ptr : Storage*,
-            range_check_ptr}(contract_address : felt, amount : felt):
+    func call_increase_balance{syscall_ptr : felt*, range_check_ptr}(
+            contract_address : felt, amount : felt):
         IBalanceContract.increase_balance(
             contract_address=contract_address, amount=amount)
         return ()
     end
 
     @view
-    func call_get_balance{
-            syscall_ptr : felt*, storage_ptr : Storage*,
-            range_check_ptr}(contract_address : felt) -> (
-            res : felt):
+    func call_get_balance{syscall_ptr : felt*, range_check_ptr}(
+            contract_address : felt) -> (res : felt):
         let (res) = IBalanceContract.get_balance(
             contract_address=contract_address)
         return (res=res)
@@ -54,7 +54,7 @@ Note that calling a function of another contract requires passing one additional
 before the function's original arguments -- the address of the called contract.
 For example, ``IBalanceContract.increase_balance`` gets two arguments:
 ``contract_address`` and ``amount`` (rather than just ``amount``).
-In addition, the ``syscall_ptr``, the ``storage_ptr`` and the ``range_check_ptr`` implicit arguments
+In addition, the ``syscall_ptr`` and the ``range_check_ptr`` implicit arguments
 are required.
 
 Create a file named ``proxy_contract.cairo`` containing the interface declaration and the two
@@ -111,7 +111,7 @@ using the ``get_caller_address()`` library function:
 
 .. tested-code:: cairo get_caller_address
 
-    from starkware.starknet.common.syscall import get_caller_address
+    from starkware.starknet.common.syscalls import get_caller_address
 
     # ...
 
@@ -129,3 +129,19 @@ Note that if you use ``get_caller_address()`` in a function ``foo()`` that was c
 another function ``bar()`` within your contract,
 it will still return the address of the contract that invoked ``bar()``
 (or 0 if it was invoked by a user).
+
+Getting the current contract's address
+--------------------------------------
+
+You can get the current contract's address by using the ``get_contract_address()`` library function.
+
+.. tested-code:: cairo get_contract_address
+
+    from starkware.starknet.common.syscalls import (
+        get_contract_address)
+
+    # ...
+
+    let (contract_address) = get_contract_address()
+
+The above is similar to ``address(this)`` in Solidity.

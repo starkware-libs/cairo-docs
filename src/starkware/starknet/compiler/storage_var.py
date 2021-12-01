@@ -1,26 +1,17 @@
 import dataclasses
 from typing import Optional, Tuple
 
-from starkware.cairo.lang.compiler.ast.cairo_types import (
-    CairoType,
-    TypeFelt,
-    TypePointer,
-    TypeStruct,
-    TypeTuple,
-)
-from starkware.cairo.lang.compiler.ast.code_elements import (
-    CodeElementFunction,
-)
+from starkware.cairo.lang.compiler.ast.cairo_types import CairoType, TypeFelt, TypePointer
+from starkware.cairo.lang.compiler.ast.code_elements import CodeElementFunction
 from starkware.cairo.lang.compiler.ast.formatting_utils import get_max_line_length
 from starkware.cairo.lang.compiler.error_handling import Location
-from starkware.cairo.lang.compiler.identifier_manager import IdentifierManager
-from starkware.cairo.lang.compiler.identifier_utils import get_struct_definition
 from starkware.cairo.lang.compiler.parser import parse
 from starkware.cairo.lang.compiler.preprocessor.identifier_aware_visitor import (
     IdentifierAwareVisitor,
 )
 from starkware.cairo.lang.compiler.preprocessor.preprocessor_error import PreprocessorError
 from starkware.cairo.lang.compiler.preprocessor.preprocessor_utils import verify_empty_code_block
+from starkware.cairo.lang.compiler.type_utils import check_felts_only_type
 from starkware.starknet.definitions.constants import STARKNET_LANG_DIRECTIVE
 from starkware.starknet.public.abi import MAX_STORAGE_ITEM_SIZE, get_storage_var_address
 
@@ -53,8 +44,8 @@ def generate_storage_var_functions(
 
     code = f"""\
 namespace {var_name}:
-    from starkware.starknet.common.storage import (
-        Storage, normalize_address, storage_read, storage_write)
+    from starkware.starknet.common.storage import normalize_address
+    from starkware.starknet.common.syscalls import storage_read, storage_write
     from starkware.cairo.common.cairo_builtins import HashBuiltin
     from starkware.cairo.common.hash import hash2
 
@@ -62,12 +53,15 @@ namespace {var_name}:
         {addr_func_body}
     end
 
-    func read{{storage_ptr : Storage*, pedersen_ptr : HashBuiltin*, range_check_ptr}}():
+    func read{{
+        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+    }}():
         {read_func_body}
     end
 
-    func write{{storage_ptr : Storage*, pedersen_ptr : HashBuiltin*, range_check_ptr}}(
-            value : felt):
+    func write{{
+        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
+    }}(value : felt):
         {write_func_body}
     end
 end\
@@ -79,29 +73,29 @@ end\
 
     # Copy the arguments and return values.
     assert isinstance(res, CodeElementFunction) and res.element_type == "namespace"
-    addr_func = res.code_block.code_elements[4].code_elm
+    addr_func = res.code_block.code_elements[5].code_elm
     assert (
         isinstance(addr_func, CodeElementFunction)
         and addr_func.element_type == "func"
         and addr_func.identifier.name == "addr"
-    )
+    ), f"Unexpected address function code element: {addr_func}."
     addr_func.arguments = elm.arguments
 
-    read_func = res.code_block.code_elements[6].code_elm
+    read_func = res.code_block.code_elements[7].code_elm
     assert (
         isinstance(read_func, CodeElementFunction)
         and read_func.element_type == "func"
         and read_func.identifier.name == "read"
-    )
+    ), f"Unexpected read function code element: {read_func}."
     read_func.arguments = elm.arguments
     read_func.returns = elm.returns
 
-    write_func = res.code_block.code_elements[8].code_elm
+    write_func = res.code_block.code_elements[9].code_elm
     assert (
         isinstance(write_func, CodeElementFunction)
         and write_func.element_type == "func"
         and write_func.identifier.name == "write"
-    )
+    ), f"Unexpected write function code element: {write_func}."
     # Append the value argument to the storage var arguments.
     write_func.arguments = dataclasses.replace(
         elm.arguments,
@@ -150,7 +144,10 @@ def process_storage_var(visitor: IdentifierAwareVisitor, elm: CodeElementFunctio
 
     unresolved_return_type = get_return_type(elm=elm)
     return_type = visitor.resolve_type(unresolved_return_type)
-    if not check_felts_only_type(cairo_type=return_type, identifier_manager=visitor.identifiers):
+    if (
+        check_felts_only_type(cairo_type=return_type, identifier_manager=visitor.identifiers)
+        is None
+    ):
         raise PreprocessorError(
             "The return type of storage variables must consist of felts.",
             location=elm.returns.location if elm.returns is not None else elm.identifier.location,
@@ -184,7 +181,7 @@ def process_storage_var(visitor: IdentifierAwareVisitor, elm: CodeElementFunctio
         )
     # Copy the return implicit args and the return values to a contiguous segment.
     read_func_body += """
-tempvar storage_ptr = storage_ptr
+tempvar syscall_ptr = syscall_ptr
 tempvar pedersen_ptr = pedersen_ptr
 tempvar range_check_ptr = range_check_ptr
 """
@@ -227,35 +224,6 @@ def is_storage_var(elm: CodeElementFunction) -> Tuple[bool, Optional[Location]]:
         if decorator.name == STORAGE_VAR_DECORATOR:
             return True, decorator.location
     return False, None
-
-
-def check_felts_only_type(cairo_type: CairoType, identifier_manager: IdentifierManager) -> bool:
-    """
-    A felts-only type defined to be either felt or a struct whose members are all felts-only types.
-    Return True if the given type is felts-only.
-    """
-
-    if isinstance(cairo_type, TypeFelt):
-        return True
-    elif isinstance(cairo_type, TypeStruct):
-        struct_definition = get_struct_definition(
-            cairo_type.resolved_scope, identifier_manager=identifier_manager
-        )
-        for member_def in struct_definition.members.values():
-            res = check_felts_only_type(
-                member_def.cairo_type, identifier_manager=identifier_manager
-            )
-            if not res:
-                return False
-        return True
-    elif isinstance(cairo_type, TypeTuple):
-        for item_type in cairo_type.members:
-            res = check_felts_only_type(item_type, identifier_manager=identifier_manager)
-            if not res:
-                return False
-        return True
-    else:
-        return False
 
 
 class StorageVarDeclVisitor(IdentifierAwareVisitor):

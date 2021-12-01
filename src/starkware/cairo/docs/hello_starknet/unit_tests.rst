@@ -22,10 +22,7 @@ Now, copy the following code into a python file named ``contract_test.py``:
     import os
     import pytest
 
-    from starkware.starknet.compiler.compile import (
-        compile_starknet_files)
     from starkware.starknet.testing.starknet import Starknet
-    from starkware.starknet.testing.contract import StarknetContract
 
     # The path to the contract source code.
     CONTRACT_FILE = os.path.join(
@@ -36,21 +33,13 @@ Now, copy the following code into a python file named ``contract_test.py``:
     # decorator and the ``async`` keyword are needed.
     @pytest.mark.asyncio
     async def test_increase_balance():
-        # Compile the contract.
-        contract_definition = compile_starknet_files(
-            [CONTRACT_FILE], debug_info=True)
-
         # Create a new Starknet class that simulates the StarkNet
         # system.
         starknet = await Starknet.empty()
 
         # Deploy the contract.
-        contract_address = await starknet.deploy(
-            contract_definition=contract_definition)
-        contract = StarknetContract(
-            starknet=starknet,
-            abi=contract_definition.abi,
-            contract_address=contract_address,
+        contract = await starknet.deploy(
+            source=CONTRACT_FILE,
         )
 
         # Invoke increase_balance() twice.
@@ -58,7 +47,8 @@ Now, copy the following code into a python file named ``contract_test.py``:
         await contract.increase_balance(amount=20).invoke()
 
         # Check the result of get_balance().
-        assert await contract.get_balance().call() == (30,)
+        execution_info = await contract.get_balance().call()
+        assert execution_info.result == (30,)
 
 This test creates an instance of the Starknet testing class.
 This class allows deploying StarkNet contracts and interacting with them.

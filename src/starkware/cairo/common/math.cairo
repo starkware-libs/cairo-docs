@@ -112,8 +112,9 @@ end
 # element.
 # For example, if value=17 * 2^128 + 8, then high=17 and low=8.
 func split_felt{range_check_ptr}(value) -> (high, low):
-    const MAX_HIGH = %[(PRIME - 1) >> 128%]
-    const MAX_LOW = %[(PRIME - 1) & ((1 << 128) - 1)%]
+    # Note: the following code works because PRIME - 1 is divisible by 2**128.
+    const MAX_HIGH = (-1) / 2 ** 128
+    const MAX_LOW = 0
 
     # Guess the low and high parts of the integer.
     let low = [range_check_ptr]
@@ -122,7 +123,8 @@ func split_felt{range_check_ptr}(value) -> (high, low):
 
     %{
         from starkware.cairo.common.math_utils import assert_integer
-        assert PRIME < 2**256
+        assert ids.MAX_HIGH < 2**128 and ids.MAX_LOW < 2**128
+        assert PRIME - 1 == ids.MAX_HIGH * 2**128 + ids.MAX_LOW
         assert_integer(ids.value)
         ids.low = ids.value & ((1 << 128) - 1)
         ids.high = ids.value >> 128
@@ -291,4 +293,31 @@ func signed_div_rem{range_check_ptr}(value, div, bound) -> (q, r):
     assert_le(r, div - 1)
     assert_le(biased_q, 2 * bound - 1)
     return (q, r)
+end
+
+# Splits the given (unsigned) value into n "limbs", where each limb is in the range [0, bound),
+# as follows:
+#   value = x[0] + x[1] * base + x[2] * base**2 + ... + x[n - 1] * base**(n - 1).
+# bound must be less than the range check bound (2**128).
+# Note that bound may be smaller than base, in which case the function will fail if there is a
+# limb which is >= bound.
+# Assumptions:
+#   1 < bound <= base
+#   base**n < field characteristic.
+func split_int{range_check_ptr}(value, n, base, bound, output : felt*):
+    if n == 0:
+        %{ assert ids.value == 0, 'split_int(): value is out of range.' %}
+        assert value = 0
+        return ()
+    end
+
+    %{
+        memory[ids.output] = res = (int(ids.value) % PRIME) % ids.base
+        assert res < ids.bound, f'split_int(): Limb {res} is out of range.'
+    %}
+    tempvar low_part = [output]
+    assert_nn_le(low_part, bound - 1)
+
+    return split_int(
+        value=(value - low_part) / base, n=n - 1, base=base, bound=bound, output=output + 1)
 end

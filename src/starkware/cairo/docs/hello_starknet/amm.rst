@@ -88,7 +88,7 @@ We write a function that allows us to *modify* the balance of a given token type
 .. tested-code:: cairo sn_amm_modify_account
 
     func modify_account_balance{
-            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
+            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
             range_check_ptr}(
             account_id : felt, token_type : felt, amount : felt):
         let (current_balance) = account_balance.read(
@@ -130,7 +130,7 @@ To allow a user to read the balance of an account, we define the following
 
     @view
     func get_account_token_balance{
-            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
+            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
             range_check_ptr}(
             account_id : felt, token_type : felt) -> (
             balance : felt):
@@ -142,7 +142,7 @@ Similarly, for the pool balance:
 .. tested-code:: cairo sn_amm_get_set_account
 
     func set_pool_token_balance{
-            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
+            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
             range_check_ptr}(token_type : felt, balance : felt):
         assert_nn_le(balance, BALANCE_UPPER_BOUND - 1)
         pool_balance.write(token_type, balance)
@@ -151,7 +151,7 @@ Similarly, for the pool balance:
 
     @view
     func get_pool_token_balance{
-            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
+            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
             range_check_ptr}(token_type : felt) -> (balance : felt):
         return pool_balance.read(token_type)
     end
@@ -164,7 +164,7 @@ We now proceed to the primary functionality of the contract -- swapping tokens.
 .. tested-code:: cairo sn_amm_swap
 
     func swap{
-            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
+            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
             range_check_ptr}(
             account_id : felt, token_from : felt,
             amount_from : felt) -> (amount_to : felt):
@@ -203,7 +203,7 @@ If all checks pass, we proceed to execute the swap.
 .. tested-code:: cairo sn_amm_do_swap
 
     func do_swap{
-            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
+            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
             range_check_ptr}(
             account_id : felt, token_from : felt, token_to : felt,
             amount_from : felt) -> (amount_to : felt):
@@ -266,7 +266,7 @@ how to initialize the AMM -- both the liquidity pool itself and some account bal
 
     @external
     func init_pool{
-            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
+            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
             range_check_ptr}(token_a : felt, token_b : felt):
         assert_nn_le(token_a, POOL_UPPER_BOUND - 1)
         assert_nn_le(token_b, POOL_UPPER_BOUND - 1)
@@ -287,7 +287,7 @@ Having this function defined, we proceed to add demo tokens to an account:
 
     @external
     func add_demo_token{
-            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
+            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
             range_check_ptr}(
             account_id : felt, token_a_amount : felt,
             token_b_amount : felt):
@@ -317,7 +317,14 @@ Interaction examples
 --------------------
 
 We can now explore a few examples which demonstrate contract interaction using the StarkNet CLI
-tool. An instance of this contract is deployed and initialized at address ``0x05``.
+tool. An instance of this contract is deployed and initialized at AMM_ADDRESS.
+Set the following environment variable:
+
+.. tested-code:: bash amm_contract_address
+
+    # The deployment address of the AMM contract.
+    export AMM_ADDRESS=0x1bb929cc5e6d80f0c71e90365ab77e9cbb2e0a290d72255a3f4d34060b5ed52
+
 
 We assume the reader is familiar with the StarkNet CLI. If this is not the case, we recommend you
 review this :ref:`section <starknet_intro>`.
@@ -326,6 +333,7 @@ Also we assume the ``STARKNET_NETWORK`` environment variable is set as follows:
 .. tested-code:: bash amm_starknet_env
 
     export STARKNET_NETWORK=alpha
+
 
 .. test::
 
@@ -348,7 +356,7 @@ First, you can query the pool's balance using:
 .. tested-code:: bash sn_amm_call_pool_balance
 
     starknet call \
-        --address 5 \
+        --address ${AMM_ADDRESS} \
         --abi amm_sample_abi.json \
         --function get_pool_token_balance \
         --inputs 1
@@ -358,13 +366,18 @@ In response, you should get the pool's balance of token 1.
 Now let's add some tokens to our account's balance. Choose your favorite ``ACCOUNT_ID``, it should
 be a 251-bit integer value:
 
+.. tested-code:: bash account_id
+
+    export ACCOUNT_ID="<favorite 251-bit integer>"
+
+
 .. tested-code:: bash sn_amm_invoke_add_tokens
 
     starknet invoke \
-        --address 5 \
+        --address ${AMM_ADDRESS} \
         --abi amm_sample_abi.json \
         --function add_demo_token \
-        --inputs ACCOUNT_ID 1000 1000
+        --inputs ${ACCOUNT_ID} 1000 1000
 
 Now that we have some tokens, we can use the AMM and swap 500 units of token 1 in exchange for
 some units of token 2 (the exact number depends on the current balance of the pool).
@@ -372,20 +385,20 @@ some units of token 2 (the exact number depends on the current balance of the po
 .. tested-code:: bash sn_amm_invoke_swap
 
     starknet invoke \
-        --address 5 \
+        --address ${AMM_ADDRESS} \
         --abi amm_sample_abi.json \
         --function swap \
-        --inputs ACCOUNT_ID 1 500
+        --inputs ${ACCOUNT_ID} 1 500
 
 You can now query the account's balance of token 2 after the swap:
 
 .. tested-code:: bash sn_amm_call_account_balance
 
     starknet call \
-        --address 5 \
+        --address ${AMM_ADDRESS} \
         --abi amm_sample_abi.json \
         --function get_account_token_balance \
-        --inputs ACCOUNT_ID 2
+        --inputs ${ACCOUNT_ID} 2
 
 Note that the change will only take effect after the ``swap`` transaction's status
 is either ``PENDING`` or ``ACCEPTED_ONCHAIN``.

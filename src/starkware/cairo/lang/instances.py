@@ -7,6 +7,8 @@ from starkware.cairo.lang.builtins.hash.instance_def import PedersenInstanceDef
 from starkware.cairo.lang.builtins.range_check.instance_def import RangeCheckInstanceDef
 from starkware.cairo.lang.builtins.signature.instance_def import EcdsaInstanceDef
 
+PRIME = 2 ** 251 + 17 * 2 ** 192 + 1
+
 
 @dataclasses.dataclass
 class CpuInstanceDef:
@@ -29,7 +31,7 @@ class DilutedPoolInstanceDef:
 
 @dataclasses.dataclass
 class CairoLayout:
-    layout_name: str = ''
+    layout_name: str = ""
     cpu_component_step: int = 1
     # Range check units.
     rc_units: int = 16
@@ -43,12 +45,12 @@ class CairoLayout:
 
 
 plain_instance = CairoLayout(
-    layout_name='plain',
+    layout_name="plain",
     n_trace_columns=8,
 )
 
 small_instance = CairoLayout(
-    layout_name='small',
+    layout_name="small",
     rc_units=16,
     builtins=dict(
         output=True,
@@ -58,7 +60,7 @@ small_instance = CairoLayout(
             element_height=256,
             element_bits=252,
             n_inputs=2,
-            hash_limit=2**251 + 17 * 2**192 + 1,
+            hash_limit=PRIME,
         ),
         range_check=RangeCheckInstanceDef(
             ratio=8,
@@ -75,7 +77,7 @@ small_instance = CairoLayout(
 )
 
 dex_instance = CairoLayout(
-    layout_name='dex',
+    layout_name="dex",
     rc_units=4,
     builtins=dict(
         output=True,
@@ -85,7 +87,7 @@ dex_instance = CairoLayout(
             element_height=256,
             element_bits=252,
             n_inputs=2,
-            hash_limit=2**251 + 17 * 2**192 + 1,
+            hash_limit=PRIME,
         ),
         range_check=RangeCheckInstanceDef(
             ratio=8,
@@ -102,7 +104,7 @@ dex_instance = CairoLayout(
 )
 
 all_instance = CairoLayout(
-    layout_name='all',
+    layout_name="all",
     rc_units=8,
     public_memory_fraction=8,
     diluted_pool_instance_def=DilutedPoolInstanceDef(
@@ -118,7 +120,7 @@ all_instance = CairoLayout(
             element_height=256,
             element_bits=252,
             n_inputs=2,
-            hash_limit=2**251 + 17 * 2**192 + 1,
+            hash_limit=PRIME,
         ),
         range_check=RangeCheckInstanceDef(
             ratio=8,
@@ -139,8 +141,8 @@ all_instance = CairoLayout(
 )
 
 LAYOUTS: Dict[str, CairoLayout] = {
-    'plain': plain_instance,
-    'small': small_instance,
-    'dex': dex_instance,
-    'all': all_instance,
+    "plain": plain_instance,
+    "small": small_instance,
+    "dex": dex_instance,
+    "all": all_instance,
 }

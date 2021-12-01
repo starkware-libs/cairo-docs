@@ -30,12 +30,12 @@ The functions ``balance.read()`` and ``balance.write()`` will now have the follo
 .. code-block:: cairo
 
     func read{
-            storage_ptr : Storage*, range_check_ptr,
+            syscall_ptr : felt*, range_check_ptr,
             pedersen_ptr : HashBuiltin*}(
         user : felt) -> (res : felt)
 
     func write{
-            storage_ptr : Storage*, range_check_ptr,
+            syscall_ptr : felt*, range_check_ptr,
             pedersen_ptr : HashBuiltin*}(
         user : felt, value : felt)
 
@@ -70,7 +70,18 @@ and add the following import statement:
     from starkware.cairo.common.hash import hash2
     from starkware.cairo.common.signature import (
         verify_ecdsa_signature)
-    from starkware.starknet.common.storage import Storage
+    from starkware.starknet.common.syscalls import get_tx_signature
+
+While we could add the signature to the transaction calldata
+(that is, add it as additional arguments to ``increase_balance()``),
+StarkNet has a special mechanism for handling transaction signatures,
+freeing the developer from including them in the transaction calldata.
+This does not mean that you must use a specific signature scheme,
+just that the signature data may be kept separately from the calldata.
+The system call function ``get_tx_signature()`` returns the length
+and data of the signature supplied with the transaction.
+It is up to the contract author to check that the signature is valid.
+Note that this function requires the ``syscall_ptr`` implicit argument.
 
 Next, we will change the code of ``increase_balance()`` to:
 
@@ -79,9 +90,15 @@ Next, we will change the code of ``increase_balance()`` to:
     # Increases the balance of the given user by the given amount.
     @external
     func increase_balance{
-            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
+            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
             range_check_ptr, ecdsa_ptr : SignatureBuiltin*}(
-            user : felt, amount : felt, sig_r : felt, sig_s : felt):
+            user : felt, amount : felt):
+        # Fetch the signature.
+        let (sig_len : felt, sig : felt*) = get_tx_signature()
+
+        # Verify the signature length.
+        assert sig_len = 2
+
         # Compute the hash of the message.
         # The hash of (x, 0) is equivalent to the hash of (x).
         let (amount_hash) = hash2{hash_ptr=pedersen_ptr}(amount, 0)
@@ -90,8 +107,8 @@ Next, we will change the code of ``increase_balance()`` to:
         verify_ecdsa_signature(
             message=amount_hash,
             public_key=user,
-            signature_r=sig_r,
-            signature_s=sig_s)
+            signature_r=sig[0],
+            signature_s=sig[1])
 
         let (res) = balance.read(user=user)
         balance.write(user, res + amount)
@@ -118,7 +135,7 @@ so the change is simpler:
     # Returns the balance of the given user.
     @view
     func get_balance{
-            storage_ptr : Storage*, pedersen_ptr : HashBuiltin*,
+            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
             range_check_ptr}(user : felt) -> (res : felt):
         let (res) = balance.read(user=user)
         return (res)
@@ -183,6 +200,7 @@ Now, let's update the balance:
         --inputs \
             1628448741648245036800002906075225705100596136133912895015035902954123957052 \
             4321 \
+        --signature \
             1225578735933442828068102633747590437426782890965066746429241472187377583468 \
             3568809569741913715045370357918125425757114920266578211811626257903121825123
 
@@ -190,7 +208,7 @@ You can query the transaction status:
 
 .. tested-code:: bash user_auth_tx_status
 
-    starknet tx_status --id TX_ID
+    starknet tx_status --hash TX_HASH
 
 Finally, after the transaction is executed (status ``PENDING`` or ``ACCEPTED_ONCHAIN``)
 we may query the user's balance.
@@ -233,8 +251,9 @@ You should get:
 What if we have an invalid signature?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To examine this case, we will modify the signature we obtained before by changing its second
-component to 1, and then invoke ``increase_balance()`` again with this invalid signature:
+To examine this case, we will modify the amount without changing the signature (this will cause the
+signature to be considered invalid).
+Then we will invoke ``increase_balance()`` again with this invalid signature:
 
 .. tested-code:: bash user_auth_invalid_signature
 
@@ -244,9 +263,10 @@ component to 1, and then invoke ``increase_balance()`` again with this invalid s
         --function increase_balance \
         --inputs \
             1628448741648245036800002906075225705100596136133912895015035902954123957052 \
-            4321 \
+            1000 \
+        --signature \
             1225578735933442828068102633747590437426782890965066746429241472187377583468 \
-            1
+            3568809569741913715045370357918125425757114920266578211811626257903121825123
 
 After this, when querying the transaction status, you should get:
 
@@ -255,7 +275,7 @@ After this, when querying the transaction status, you should get:
     {
         "tx_failure_reason": {
             "code": "TRANSACTION_FAILED",
-            "error_message": "Error at pc=0:71:\nSignature (1225578735933442828068102633747590437426782890965066746429241472187377583468, 1), is invalid, with respect to the public key 1628448741648245036800002906075225705100596136133912895015035902954123957052, and the message hash 2145928028330445730928899764978337236302436665109337681432022680924515407233.\nCairo traceback (most recent call last):\nUnknown location (pc=0:155)\nUnknown location (pc=0:127)",
+            "error_message": "Error at pc=0:79:\nSignature (1225578735933442828068102633747590437426782890965066746429241472187377583468, 3568809569741913715045370357918125425757114920266578211811626257903121825123), is invalid, with respect to the public key 1628448741648245036800002906075225705100596136133912895015035902954123957052, and the message hash 1450800376308985472483264025695829910619060514119449623867706636798983320476.\nCairo traceback (most recent call last):\nUnknown location (pc=0:171)\nUnknown location (pc=0:140)",
             "tx_id": 2
         },
         "tx_status": "REJECTED"
@@ -272,7 +292,7 @@ display the error (and only it), add the ``--error_message`` flag as well:
 .. tested-code:: bash user_auth_get_error_message
 
     starknet tx_status \
-        --id TX_ID \
+        --hash TX_HASH \
         --contract user_auth_compiled.json \
         --error_message
 
@@ -280,17 +300,22 @@ The output should look like:
 
 .. tested-code:: none user_auth_get_error_message_output
 
-    .../signature.cairo:11:5: Error at pc=0:71:
+    .../signature.cairo:11:5: Error at pc=0:79:
         assert ecdsa_ptr.pub_key = public_key
         ^***********************************^
-    Signature (1225578735933442828068102633747590437426782890965066746429241472187377583468, 1), is invalid, with respect to the public key 1628448741648245036800002906075225705100596136133912895015035902954123957052, and the message hash 2145928028330445730928899764978337236302436665109337681432022680924515407233.
+    Signature (1225578735933442828068102633747590437426782890965066746429241472187377583468, 3568809569741913715045370357918125425757114920266578211811626257903121825123), is invalid, with respect to the public key 1628448741648245036800002906075225705100596136133912895015035902954123957052, and the message hash 1450800376308985472483264025695829910619060514119449623867706636798983320476.
     Cairo traceback (most recent call last):
     user_auth.cairo:16:6
     func increase_balance{
          ^**************^
-    user_auth.cairo:24:5
+    user_auth.cairo:30:5
         verify_ecdsa_signature(
         ^*********************^
+
+Note that if we only changed the signature (keeping the amount 4321),
+the transaction's hash would have stayed the same.
+Since a transaction with this hash was already sent to the StarkNet,
+the second transaction would have ignored, it would not have been possible to query its status.
 
 .. test::
 
@@ -307,7 +332,6 @@ The output should look like:
         codes['user_auth_builtins'],
         codes['user_auth_imports'],
         'from starkware.cairo.common.cairo_builtins import HashBuiltin',
-        'from starkware.starknet.common.storage import Storage',
         codes['balance_map'],
         codes['user_auth_increase_balance'],
         codes['user_auth_get_balance'],
