@@ -54,17 +54,17 @@ The output should resemble this:
 
 The result contains:
 
-*   ``transaction_hash`` : The hash of the transaction, out of all sent transactions
-*   ``status`` : The status of the transaction. For a detailed list of supported transaction
+*   ``transaction_hash``: The hash of the transaction, out of all sent transactions
+*   ``status``: The status of the transaction. For a detailed list of supported transaction
     statuses, refer to the :ref:`tx_status <tx_status>` usage example
-*   ``transaction`` : The transaction data
+*   ``transaction``: The transaction data
 
 It may also include each of the following optional fields (according to the transaction's status):
 
-*   ``block_hash`` : The hash of the block containing the transaction
-*   ``block_number`` : The sequence number of the block containing the transaction
-*   ``transaction_index`` : The index of the transaction within the block containing it
-*   ``transaction_failure_reason`` : The reason for the transaction failure
+*   ``block_hash``: The hash of the block containing the transaction
+*   ``block_number``: The sequence number of the block containing the transaction
+*   ``transaction_index``: The index of the transaction within the block containing it
+*   ``transaction_failure_reason``: The reason for the transaction failure
 
 get_transaction_receipt
 -----------------------
