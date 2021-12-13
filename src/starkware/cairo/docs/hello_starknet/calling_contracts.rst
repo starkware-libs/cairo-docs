@@ -7,7 +7,7 @@ Call another contract
 
 .. topic:: Overview
 
-    :ref:`Invoke another contract's function <contract function>`
+    :ref:`Invoke another contract's function <contract_function>`
 
     :ref:`Retrieve a caller's address <get address>`
 
@@ -18,7 +18,7 @@ Call another contract
 
         - Denote the address of this contract by ``BALANCE_CONTRACT``.
 
-.. _contract function:
+.. _contract_function:
 
 A contract function may invoke an external function of another contract. To call this contract
 from another contract, define an interface by copying the declarations of the external functions:
