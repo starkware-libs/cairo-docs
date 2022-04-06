@@ -611,7 +611,7 @@ class CodeElementFor(CodeElement):
         clauses_particles = ["for ", *self.clause.get_particles()]
         clauses_particles[-1] += ":"
         code = particles_in_lines(
-            particles=clauses_particles,
+            particles=ParticleList(elements=clauses_particles),
             config=ParticleFormattingConfig(
                 allowed_line_length=allowed_line_length, line_indent=INDENTATION
             ),
