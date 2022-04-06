@@ -935,3 +935,5 @@ def test_for():
 
 # TODO: Tests with start & step arguments
 # TODO: Test with expressions as arguments
+# TODO: Test code elements tree
+# TODO: Test error cases

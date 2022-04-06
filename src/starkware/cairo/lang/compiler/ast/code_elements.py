@@ -596,6 +596,8 @@ class CodeElementIf(CodeElement):
         return [self.condition, self.main_code_block, self.else_code_block]
 
 
+# TODO: Raise in preprocessor with error
+#       raise PreprocessorError("For loops are not supported yet.")
 @dataclasses.dataclass
 class CodeElementFor(CodeElement):
     clause: ForClauseIn
