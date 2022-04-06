@@ -932,7 +932,29 @@ def test_for():
     assert res.clause.generator.step is None
     assert res.format(allowed_line_length=100) == source
 
-# TODO: Tests with start & step arguments
-# TODO: Test with expressions as arguments
-# TODO: Test code elements tree
+
+def test_for_range_start_stop():
+    source = "for i in range(1, x):\n    f()\nend"
+    res = parse_code_element(source)
+    assert isinstance(res, CodeElementFor)
+    assert isinstance(res.clause.generator.start, ExprConst)
+    assert res.clause.generator.start.val == 1
+    assert isinstance(res.clause.generator.stop, ExprIdentifier)
+    assert res.clause.generator.stop.name == "x"
+    assert res.clause.generator.step is None
+    assert res.format(allowed_line_length=100) == source
+
+
+def test_for_range_start_stop_step():
+    source = "for i in range(1, 5, 2):\n    f()\nend"
+    res = parse_code_element(source)
+    assert isinstance(res, CodeElementFor)
+    assert isinstance(res.clause.generator.start, ExprConst)
+    assert res.clause.generator.start.val == 1
+    assert isinstance(res.clause.generator.stop, ExprConst)
+    assert res.clause.generator.stop.val == 5
+    assert isinstance(res.clause.generator.step, ExprConst)
+    assert res.clause.generator.step.val == 2
+    assert res.format(allowed_line_length=100) == source
+
 # TODO: Test error cases
