@@ -9,7 +9,7 @@ from starkware.python.expression_string import ExpressionString
 @dataclass
 class ForGeneratorRange(Expression):
     start: Optional[Expression]
-    end: Expression
+    stop: Expression
     step: Optional[Expression]
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
@@ -21,7 +21,7 @@ class ForGeneratorRange(Expression):
         if self.start is not None:
             args.append(self.start)
 
-        args.append(self.end)
+        args.append(self.stop)
 
         if self.step is not None:
             args.append(self.step)

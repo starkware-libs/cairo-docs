@@ -780,17 +780,17 @@ class ParserTransformer(Transformer):
         assert len(value) == 1 and isinstance(value[0], CommaSeparatedWithNotes)
         args = value[0].args
 
-        start, end, step = None, None, None
+        start, stop, step = None, None, None
         if len(args) == 1:
-            [end] = args
+            [stop] = args
         elif len(args) == 2:
-            [start, end] = args
+            [start, stop] = args
         elif len(args) == 3:
-            [start, end, step] = args
+            [start, stop, step] = args
         else:
             raise NotImplementedError(f"Unexpected argument: value={value}")
 
-        return ForGeneratorRange(start=start, end=end, step=step)
+        return ForGeneratorRange(start=start, stop=stop, step=step)
 
     @v_args(meta=True)
     def code_element_directive(self, value, meta):

@@ -923,9 +923,13 @@ def test_pointer():
 
 def test_for():
     source = "for i in range(5):\n    f()\nend"
-
     res = parse_code_element(source)
     assert isinstance(res, CodeElementFor)
+    assert res.clause.identifier.name == "i"
+    assert isinstance(res.clause.generator.stop, ExprConst)
+    assert res.clause.generator.stop.val == 5
+    assert res.clause.generator.start is None
+    assert res.clause.generator.step is None
     assert res.format(allowed_line_length=100) == source
 
 # TODO: Tests with start & step arguments
