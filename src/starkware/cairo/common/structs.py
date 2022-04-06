@@ -1,5 +1,4 @@
-from collections import namedtuple
-from typing import List, MutableMapping, Optional
+from typing import List, MutableMapping, NamedTuple, Optional
 
 from starkware.cairo.lang.compiler.ast.code_elements import CodeElementFunction
 from starkware.cairo.lang.compiler.identifier_definition import StructDefinition
@@ -12,7 +11,10 @@ from starkware.python.utils import WriteOnceDict
 
 class CairoStructFactory:
     def __init__(
-        self, identifiers: IdentifierManager, additional_imports: Optional[List[str]] = None
+        self,
+        identifiers: IdentifierManager,
+        main_scope: Optional[ScopedName] = None,
+        additional_imports: Optional[List[str]] = None,
     ):
         """
         Creates a CairoStructFactory that converts Cairo structs to python namedtuples.
@@ -22,6 +24,7 @@ class CairoStructFactory:
           Useful for importing absolute paths, rather than relative.
         """
         self.identifiers = identifiers
+        self.main_scopes = [main_scope] if main_scope is not None else []
 
         self.resolved_identifiers: MutableMapping[ScopedName, ScopedName] = WriteOnceDict()
         if additional_imports is not None:
@@ -33,7 +36,11 @@ class CairoStructFactory:
 
     @classmethod
     def from_program(cls, program: Program, additional_imports: Optional[List[str]] = None):
-        return cls(identifiers=program.identifiers, additional_imports=additional_imports)
+        return cls(
+            identifiers=program.identifiers,
+            additional_imports=additional_imports,
+            main_scope=program.main_scope,
+        )
 
     def _get_full_name(self, name: ScopedName):
         full_name = self.resolved_identifiers.get(name)
@@ -41,7 +48,7 @@ class CairoStructFactory:
             return full_name
 
         return self.identifiers.search(
-            accessible_scopes=[ScopedName.from_string("__main__"), ScopedName()], name=name
+            accessible_scopes=[*self.main_scopes, ScopedName()], name=name
         ).get_canonical_name()
 
     def get_struct_definition(self, name: ScopedName) -> StructDefinition:
@@ -55,8 +62,14 @@ class CairoStructFactory:
         """
         Builds and returns namedtuple from a Cairo struct.
         """
-        sturct_def = self.get_struct_definition(name=name)
-        return namedtuple(sturct_def.full_name.path[-1], list(sturct_def.members.keys()))
+        struct_def = self.get_struct_definition(name=name)
+
+        typed_fields = [
+            (member_name, type(member_def.cairo_type))
+            for member_name, member_def in struct_def.members.items()
+        ]
+
+        return NamedTuple(struct_def.full_name.path[-1], typed_fields)
 
     def build_func_args(self, func: ScopedName):
         """
@@ -70,7 +83,13 @@ class CairoStructFactory:
         args = get_struct_definition(
             full_name + CodeElementFunction.ARGUMENT_SCOPE, self.identifiers
         ).members
-        return namedtuple(f"{func[-1:]}_full_args", list({**implict_args, **args}))
+
+        typed_fields = [
+            (member_name, type(member_def.cairo_type))
+            for member_name, member_def in {**implict_args, **args}.items()
+        ]
+
+        return NamedTuple(f"{func[-1:]}_full_args", typed_fields)
 
     @property
     def structs(self):

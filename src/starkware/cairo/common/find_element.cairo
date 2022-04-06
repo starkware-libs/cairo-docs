@@ -1,4 +1,4 @@
-from starkware.cairo.common.math import assert_le, assert_nn_le
+from starkware.cairo.common.math import assert_le, assert_le_felt, assert_nn_le
 
 const FIND_ELEMENT_RANGE_CHECK_USAGE = 2
 
@@ -22,7 +22,7 @@ const FIND_ELEMENT_RANGE_CHECK_USAGE = 2
 #
 # Optional hint variables:
 # __find_element_index - the index that should be returned. If not specified, the function will
-#   search for it.
+#   return the first index that has the key.
 func find_element{range_check_ptr}(array_ptr : felt*, elm_size, n_elms, key) -> (elm_ptr : felt*):
     alloc_locals
     local index
@@ -69,7 +69,8 @@ end
 # array.
 # Prover assumption: all the keys (the first field in each item) are in [0, RANGE_CHECK_BOUND).
 func search_sorted_lower{range_check_ptr}(array_ptr : felt*, elm_size, n_elms, key) -> (
-        elm_ptr : felt*):
+    elm_ptr : felt*
+):
     alloc_locals
     local index
     %{
@@ -98,13 +99,13 @@ func search_sorted_lower{range_check_ptr}(array_ptr : felt*, elm_size, n_elms, k
     local elm_ptr : felt* = array_ptr + elm_size * index
 
     if index != n_elms:
-        assert_le(a=key, b=[elm_ptr])
+        assert_le_felt(a=key, b=[elm_ptr])
     else:
         tempvar range_check_ptr = range_check_ptr
     end
 
     if index != 0:
-        assert_le(a=[elm_ptr - elm_size] + 1, b=key)
+        assert_le_felt(a=[elm_ptr - elm_size] + 1, b=key)
     end
 
     return (elm_ptr=elm_ptr)
@@ -115,9 +116,11 @@ end
 # and success=0.
 # Prover assumption: all the keys (the first field in each item) are in [0, RANGE_CHECK_BOUND).
 func search_sorted{range_check_ptr}(array_ptr : felt*, elm_size, n_elms, key) -> (
-        elm_ptr : felt*, success):
+    elm_ptr : felt*, success
+):
     let (elm_ptr) = search_sorted_lower(
-        array_ptr=array_ptr, elm_size=elm_size, n_elms=n_elms, key=key)
+        array_ptr=array_ptr, elm_size=elm_size, n_elms=n_elms, key=key
+    )
     tempvar array_end = array_ptr + elm_size * n_elms
     if elm_ptr == array_end:
         return (elm_ptr=array_ptr, success=0)

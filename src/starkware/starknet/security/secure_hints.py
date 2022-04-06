@@ -11,6 +11,10 @@ from starkware.cairo.lang.compiler.parser import parse_expr
 from starkware.cairo.lang.compiler.preprocessor.flow import ReferenceManager
 from starkware.cairo.lang.compiler.program import CairoHint, Program
 from starkware.starknet.security.simple_references import is_simple_reference
+from starkware.starkware_utils.validated_dataclass import (
+    ValidatedDataclass,
+    ValidatedMarshmallowDataclass,
+)
 
 
 class SetField(mfields.List):
@@ -18,6 +22,7 @@ class SetField(mfields.List):
         if value is None:
             return None
         res = super()._serialize(value, attr, obj, **kwargs)
+        assert res is not None
         return sorted(res, key=lambda x: (x["name"], x["expr"]))
 
     def _deserialize(self, *args, **kwargs):
@@ -29,7 +34,7 @@ class InsecureHintError(Exception):
 
 
 @marshmallow_dataclass.dataclass(frozen=True)
-class NamedExpression:
+class NamedExpression(ValidatedMarshmallowDataclass):
     name: str
     expr: str
 
@@ -38,16 +43,13 @@ class NamedExpression:
             return NotImplemented
         return (self.name, self.expr) < (other.name, other.expr)
 
-    Schema: ClassVar[marshmallow.Schema]
 
-
-@marshmallow_dataclass.dataclass
-class HintsWhitelistEntry:
+@marshmallow_dataclass.dataclass(frozen=True)
+class HintsWhitelistEntry(ValidatedDataclass):
     hint_lines: List[str]
     allowed_expressions: Set[NamedExpression] = field(
         metadata=dict(marshmallow_field=SetField(mfields.Nested(NamedExpression.Schema)))
     )
-
     Schema: ClassVar[Type[marshmallow.Schema]]
 
     def serialize(self) -> dict:
@@ -73,8 +75,8 @@ class HintsWhitelistDict(mfields.Field):
         return {"\n".join(entry.hint_lines): entry.allowed_expressions for entry in entries}
 
 
-@marshmallow_dataclass.dataclass
-class HintsWhitelist:
+@marshmallow_dataclass.dataclass(frozen=True)
+class HintsWhitelist(ValidatedMarshmallowDataclass):
     """
     Checks the security of hints in a Cairo program against a whitelist.
     """
@@ -83,7 +85,6 @@ class HintsWhitelist:
     allowed_reference_expressions_for_hint: Dict[str, Set[NamedExpression]] = field(
         metadata=dict(marshmallow_field=HintsWhitelistDict())
     )
-    Schema: ClassVar[Type[marshmallow.Schema]]
 
     @classmethod
     def empty(cls):
@@ -96,7 +97,7 @@ class HintsWhitelist:
     @classmethod
     def from_file(cls, filename: str) -> "HintsWhitelist":
         with open(filename, "r") as fp:
-            return cls.Schema().loads(fp.read())
+            return cls.loads(data=fp.read())
 
     @classmethod
     def from_dir(cls, dirname: str) -> "HintsWhitelist":

@@ -8,15 +8,18 @@ from typing import Dict, List, Optional, Set, Tuple, Type, TypeVar, Union
 from starkware.cairo.lang.cairo_constants import DEFAULT_PRIME
 from starkware.python.utils import from_bytes, to_bytes
 from starkware.starkware_utils.commitment_tree.binary_fact_tree import BinaryFactDict
+from starkware.starkware_utils.commitment_tree.leaf_fact import LeafFact
+from starkware.starkware_utils.commitment_tree.patricia_tree.nodes import EmptyNodeFact
 from starkware.starkware_utils.commitment_tree.patricia_tree.patricia_tree import PatriciaTree
-from starkware.storage.storage import HASH_BYTES, Fact, FactFetchingContext, HashFunctionType
+from starkware.starkware_utils.validated_dataclass import ValidatedDataclass
+from starkware.storage.storage import HASH_BYTES, FactFetchingContext, HashFunctionType
 
 
 TStorageLeaf = TypeVar("TStorageLeaf", bound="StorageLeaf")
 
 
 @dataclasses.dataclass(frozen=True)
-class StorageLeaf(Fact):
+class StorageLeaf(LeafFact, ValidatedDataclass):
     """
     A class representing a commitment tree leaf in a Cairo contract storage.
     The content of the leaf is a single integer.
@@ -35,8 +38,14 @@ class StorageLeaf(Fact):
     def serialize(self) -> bytes:
         return to_bytes(self.value)
 
-    async def _hash(self, hash_func: HashFunctionType) -> bytes:
-        # Note that the return value size needs to be HASH_BYTES.
+    def _hash(self, hash_func: HashFunctionType) -> bytes:
+        """
+        Calculates and returns the leaf hash.
+        Note that the return value size needs to be HASH_BYTES.
+        """
+        if self.is_empty:
+            return EmptyNodeFact.EMPTY_NODE_HASH
+
         return self.serialize()
 
     @classmethod
@@ -46,6 +55,10 @@ class StorageLeaf(Fact):
     @classmethod
     def empty(cls) -> "StorageLeaf":
         return cls(value=0)
+
+    @property
+    def is_empty(self) -> bool:
+        return self.value == 0
 
 
 class StarknetStorageInterface(ABC):

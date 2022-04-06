@@ -1,35 +1,29 @@
 %lang starknet
-%builtins pedersen range_check ecdsa
 
-from starkware.cairo.common.cairo_builtins import HashBuiltin, SignatureBuiltin
-from starkware.cairo.common.hash import hash2
-from starkware.cairo.common.signature import verify_ecdsa_signature
-from starkware.starknet.common.syscalls import get_tx_signature
+from starkware.cairo.common.cairo_builtins import HashBuiltin
+from starkware.cairo.common.math import assert_nn
+from starkware.starknet.common.syscalls import get_caller_address
 
-# A map from user (public key) to a balance.
+# A map from user (represented by account contract address)
+# to their balance.
 @storage_var
 func balance(user : felt) -> (res : felt):
 end
 
-# Increases the balance of the given user by the given amount.
+# Increases the balance of the user by the given amount.
 @external
-func increase_balance{
-        syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
-        ecdsa_ptr : SignatureBuiltin*}(user : felt, amount : felt):
-    # Fetch the signature.
-    let (sig_len : felt, sig : felt*) = get_tx_signature()
+func increase_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+    amount : felt
+):
+    # Verify that the amount is positive.
+    with_attr error_message("Amount must be positive. Got: {amount}."):
+        assert_nn(amount)
+    end
 
-    # Verify the signature length.
-    assert sig_len = 2
+    # Obtain the address of the account contract.
+    let (user) = get_caller_address()
 
-    # Compute the hash of the message.
-    # The hash of (x, 0) is equivalent to the hash of (x).
-    let (amount_hash) = hash2{hash_ptr=pedersen_ptr}(amount, 0)
-
-    # Verify the user's signature.
-    verify_ecdsa_signature(
-        message=amount_hash, public_key=user, signature_r=sig[0], signature_s=sig[1])
-
+    # Read and update its balance.
     let (res) = balance.read(user=user)
     balance.write(user, res + amount)
     return ()
@@ -38,7 +32,8 @@ end
 # Returns the balance of the given user.
 @view
 func get_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        user : felt) -> (res : felt):
+    user : felt
+) -> (res : felt):
     let (res) = balance.read(user=user)
     return (res)
 end

@@ -5,15 +5,15 @@
 {%- block extrahead %}
 {{ super() }}
 <!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-0ZJLBV4KE2"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id={{google_analytics_tag}}"></script>
 <script>
     $(document).ready(function () {
-        $('h1.logo > a').attr({ href: 'https://cairo-lang.org/' });
+        $('h1.logo > a').attr({ href: '{{ main_url }}' });
     });
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
 
-    gtag('config', 'G-0ZJLBV4KE2');
+    gtag('config', '{{google_analytics_tag}}');
 </script>
 {% endblock %}

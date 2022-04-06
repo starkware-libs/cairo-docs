@@ -6,6 +6,10 @@ from starkware.cairo.lang.compiler.debug_info import InstructionLocation
 from starkware.cairo.lang.compiler.error_handling import LocationError
 
 
+class SecurityError(Exception):
+    pass
+
+
 class VmExceptionBase(Exception):
     """
     Base class for exceptions thrown by the Cairo VM.
@@ -18,6 +22,7 @@ class VmException(LocationError, VmExceptionBase):
         pc,
         inst_location: Optional[InstructionLocation],
         inner_exc,
+        error_attr_value: Optional[str] = None,
         traceback: Optional[str] = None,
         notes: Optional[List[str]] = None,
         hint_index: Optional[int] = None,
@@ -33,7 +38,11 @@ class VmException(LocationError, VmExceptionBase):
                 if hint_location is not None:
                     location = hint_location.location
         LocationError.__init__(
-            self, f"Error at pc={self.pc}:\n{inner_exc}", location=location, traceback=traceback
+            self,
+            f"Error at pc={self.pc}:\n{inner_exc}",
+            error_attr_value=error_attr_value,
+            location=location,
+            traceback=traceback,
         )
         if notes is not None:
             self.notes += notes
@@ -82,7 +91,7 @@ class HintException(VmExceptionBase):
             return traceback.FrameSummary(filename=filename, lineno=line_num, name=item.name)
 
         tb_exception.stack = traceback.StackSummary.from_list(
-            map(replace_stack_item, tb_exception.stack)
+            map(replace_stack_item, tb_exception.stack)  # type: ignore
         )
         super().__init__(f"Got an exception while executing a hint.")
         self.exception_str = "".join(tb_exception.format())

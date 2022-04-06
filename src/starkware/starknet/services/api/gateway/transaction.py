@@ -11,16 +11,17 @@ import marshmallow_dataclass
 from marshmallow_oneofschema import OneOfSchema
 
 from services.everest.api.gateway.transaction import EverestTransaction
+from starkware.starknet.core.os.transaction_hash.transaction_hash import (
+    TransactionHashPrefix,
+    calculate_deploy_transaction_hash,
+    calculate_transaction_hash_common,
+)
 from starkware.starknet.definitions import fields
 from starkware.starknet.definitions.error_codes import StarknetErrorCode
 from starkware.starknet.definitions.general_config import StarknetGeneralConfig
 from starkware.starknet.definitions.transaction_type import TransactionType
-from starkware.starknet.services.api.contract_definition import (
-    CONSTRUCTOR_SELECTOR,
-    ContractDefinition,
-)
+from starkware.starknet.services.api.contract_definition import ContractDefinition
 from starkware.starknet.services.api.gateway.contract_address import calculate_contract_address
-from starkware.starknet.services.api.gateway.transaction_hash import calculate_transaction_hash
 from starkware.starkware_utils.error_handling import wrap_with_stark_exception
 
 
@@ -42,7 +43,7 @@ class Transaction(EverestTransaction):
     def calculate_hash(self, general_config: StarknetGeneralConfig) -> int:
         """
         Calculates the transaction hash in the StarkNet network - a unique identifier of the
-        transaction. See calculate_transaction_hash() docstring for more details.
+        transaction. See calculate_transaction_hash_common() docstring for more details.
         """
 
 
@@ -102,11 +103,9 @@ class Deploy(Transaction):
             constructor_calldata=self.constructor_calldata,
             caller_address=0,
         )
-        return calculate_transaction_hash(
-            tx_type=TransactionType.DEPLOY,
+        return calculate_deploy_transaction_hash(
             contract_address=contract_address,
-            entry_point_selector=CONSTRUCTOR_SELECTOR,
-            calldata=self.constructor_calldata,
+            constructor_calldata=self.constructor_calldata,
             chain_id=general_config.chain_id.value,
         )
 
@@ -119,9 +118,14 @@ class InvokeFunction(Transaction):
     """
 
     contract_address: int = field(metadata=fields.contract_address_metadata)
-    # A field element that encodes the signature of the called function.
+    # A field element that encodes the signature of the invoked function.
     entry_point_selector: int = field(metadata=fields.entry_point_selector_metadata)
     calldata: List[int] = field(metadata=fields.call_data_metadata)
+    # The maximal fee to be paid in Wei for executing invoked function.
+    max_fee: int = field(metadata=fields.fee_metadata)
+    # The transaction is not valid if its version is lower than current version,
+    # defined by the SN OS.
+    version: int = field(metadata=fields.tx_version_metadata)
     # Additional information given by the caller that represents the signature of the transaction.
     # The exact way this field is handled is defined by the called contract's function, like
     # calldata.
@@ -134,12 +138,15 @@ class InvokeFunction(Transaction):
         """
         Calculates the transaction hash in the StarkNet network.
         """
-        return calculate_transaction_hash(
-            tx_type=TransactionType.INVOKE_FUNCTION,
+        return calculate_transaction_hash_common(
+            tx_hash_prefix=TransactionHashPrefix.INVOKE,
+            version=self.version,
             contract_address=self.contract_address,
             entry_point_selector=self.entry_point_selector,
             calldata=self.calldata,
+            max_fee=self.max_fee,
             chain_id=general_config.chain_id.value,
+            additional_data=[],
         )
 
 

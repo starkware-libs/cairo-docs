@@ -18,7 +18,8 @@ to a map from public key (user) to balance
 
 .. tested-code:: cairo balance_map
 
-    # A map from user (public key) to a balance.
+    # A map from user (represented by account contract address)
+    # to their balance.
     @storage_var
     func balance(user : felt) -> (res : felt):
     end
@@ -41,102 +42,84 @@ The functions ``balance.read()`` and ``balance.write()`` will now have the follo
 
 Note that the default value of all the entries in the map is 0.
 
-Signature verification
-----------------------
+Getting the caller address
+--------------------------
 
-We now have to modify ``increase_balance`` to do the following:
+In order to obtain the address of the account contract
+(or any other contract in the case that the function was invoked by a contract)
+that invoked our function,
+we can use the ``get_caller_address()`` library function:
 
-1.  Write to the appropriate ``balance`` entry.
-2.  Verify that the user has signed on this change.
+.. tested-code:: cairo get_caller_address
 
-For the signature, we will use the STARK-friendly ECDSA signature,
-which is natively supported in Cairo.
-For technical details about this cryptographic primitive see
-`STARK Curve <https://docs.starkware.co/starkex-docs/crypto/stark-curve>`_.
+    from starkware.starknet.common.syscalls import get_caller_address
 
-We will need the ``ecdsa`` builtin to verify the signature, so we will change the ``%builtins``
-line to:
+    # ...
 
-.. tested-code:: cairo user_auth_builtins
+    let (caller_address) = get_caller_address()
 
-    %builtins pedersen range_check ecdsa
+``get_caller_address()`` returns the address of the source contract that
+called this contract.
+It can be the address of the account contract or the address of another contract
+(if the function was invoked by another contract).
+When the contract is called directly (rather than through a contract),
+the function returns 0.
 
-and add the following import statement:
+Note that if you use ``get_caller_address()`` in a function ``foo()`` that was called by
+another function ``bar()`` within your contract,
+it will still return the address of the contract that invoked ``bar()``
+(or 0 if it was invoked directly).
 
-.. tested-code:: cairo user_auth_imports
+Modifying the contract's functions
+----------------------------------
 
-    from starkware.cairo.common.cairo_builtins import (
-        HashBuiltin, SignatureBuiltin)
-    from starkware.cairo.common.hash import hash2
-    from starkware.cairo.common.signature import (
-        verify_ecdsa_signature)
-    from starkware.starknet.common.syscalls import get_tx_signature
-
-While we could add the signature to the transaction calldata
-(that is, add it as additional arguments to ``increase_balance()``),
-StarkNet has a special mechanism for handling transaction signatures,
-freeing the developer from including them in the transaction calldata.
-This does not mean that you must use a specific signature scheme,
-just that the signature data may be kept separately from the calldata.
-The system call function ``get_tx_signature()`` returns the length
-and data of the signature supplied with the transaction.
-It is up to the contract author to check that the signature is valid.
-Note that this function requires the ``syscall_ptr`` implicit argument.
-
-Next, we will change the code of ``increase_balance()`` to:
+Change the code of ``increase_balance()`` to:
 
 .. tested-code:: cairo user_auth_increase_balance
 
-    # Increases the balance of the given user by the given amount.
+    from starkware.cairo.common.math import assert_nn
+
+    # Increases the balance of the user by the given amount.
     @external
     func increase_balance{
-            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
-            range_check_ptr, ecdsa_ptr : SignatureBuiltin*}(
-            user : felt, amount : felt):
-        # Fetch the signature.
-        let (sig_len : felt, sig : felt*) = get_tx_signature()
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(amount : felt):
+        # Verify that the amount is positive.
+        with_attr error_message(
+                "Amount must be positive. Got: {amount}."):
+            assert_nn(amount)
+        end
 
-        # Verify the signature length.
-        assert sig_len = 2
+        # Obtain the address of the account contract.
+        let (user) = get_caller_address()
 
-        # Compute the hash of the message.
-        # The hash of (x, 0) is equivalent to the hash of (x).
-        let (amount_hash) = hash2{hash_ptr=pedersen_ptr}(amount, 0)
-
-        # Verify the user's signature.
-        verify_ecdsa_signature(
-            message=amount_hash,
-            public_key=user,
-            signature_r=sig[0],
-            signature_s=sig[1])
-
+        # Read and update its balance.
         let (res) = balance.read(user=user)
         balance.write(user, res + amount)
         return ()
     end
 
-``verify_ecdsa_signature`` behaves like an assert -- in case the signature is invalid, the function
-will revert the entire transaction.
+Note that we added a constraint that the value of ``amount`` must be nonnegative,
+by calling ``assert_nn``.
+In order to obtain an indicative message in case of an error, we wrapped the function call
+with the ``with_attr error_message(...)`` block.
+See :ref:`revert_reason` for more details.
 
-Note that we don't handle replay attacks here -- once the user signs a transaction
-someone may call it multiple times. One way to prevent replay attacks is to
-add a ``nonce`` argument to ``increase_balance``, change the signed message to
-the Pedersen hash of the nonce and the amount and define
-another storage map from the signed message to a flag (either 0 or 1)
-indicating whether or not that transaction was executed by the system.
-Future versions of StarkNet will handle user authentication and prevent replay attack.
-
-Similarly, change the code of ``get_balance()``. Here we don't need to verify the signature
-(since StarkNet's storage is not private anyway),
-so the change is simpler:
+Similarly, change the code of ``get_balance()``.
+Here we chose to allow the caller to query any user
+(since StarkNet's storage is not private anyway):
 
 .. tested-code:: cairo user_auth_get_balance
 
     # Returns the balance of the given user.
     @view
     func get_balance{
-            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
-            range_check_ptr}(user : felt) -> (res : felt):
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(user : felt) -> (res : felt):
         let (res) = balance.read(user=user)
         return (res)
     end
@@ -157,52 +140,23 @@ Compile and deploy the file:
 
     starknet deploy --contract user_auth_compiled.json
 
-Don't forget to set ``STARKNET_NETWORK=alpha`` before running ``starknet deploy``.
+Don't forget to set the ``STARKNET_NETWORK`` and ``STARKNET_WALLET`` environment variables
+and :ref:`deploy an account contract <create_account>` before running ``starknet deploy``.
 
 Interacting with the contract
 -----------------------------
 
-First, we need to generate a pair of public and private keys.
-We will use a constant private key (of course, in a real application choosing
-a secure random private key is imperative).
-Then, we sign a message to increase the balance by 4321.
-For this, we will use the following python statements:
-
-.. tested-code:: python user_auth_sign
-
-    from starkware.crypto.signature.signature import (
-        pedersen_hash, private_to_stark_key, sign)
-    private_key = 12345
-    message_hash = pedersen_hash(4321)
-    public_key = private_to_stark_key(private_key)
-    signature = sign(
-        msg_hash=message_hash, priv_key=private_key)
-    print(f'Public key: {public_key}')
-    print(f'Signature: {signature}')
-
-You should get:
-
-.. tested-code:: python user_auth_sign_output
-
-    Public key: 1628448741648245036800002906075225705100596136133912895015035902954123957052
-    Signature: (1225578735933442828068102633747590437426782890965066746429241472187377583468, 3568809569741913715045370357918125425757114920266578211811626257903121825123)
-
-Now, let's update the balance:
+Let's update the balance:
 
 .. _user_auth_increase_balance:
 
 .. tested-code:: bash user_auth_invoke
 
     starknet invoke \
-        --address CONTRACT_ADDRESS \
+        --address ${CONTRACT_ADDRESS} \
         --abi user_auth_abi.json \
         --function increase_balance \
-        --inputs \
-            1628448741648245036800002906075225705100596136133912895015035902954123957052 \
-            4321 \
-        --signature \
-            1225578735933442828068102633747590437426782890965066746429241472187377583468 \
-            3568809569741913715045370357918125425757114920266578211811626257903121825123
+        --inputs 4321
 
 You can query the transaction status:
 
@@ -210,16 +164,16 @@ You can query the transaction status:
 
     starknet tx_status --hash TX_HASH
 
-Finally, after the transaction is executed (status ``PENDING`` or ``ACCEPTED_ONCHAIN``)
+Finally, after the transaction is executed (status ``ACCEPTED_ON_L2`` or ``ACCEPTED_ON_L1``)
 we may query the user's balance.
 
 .. tested-code:: bash user_auth_call
 
     starknet call \
-        --address CONTRACT_ADDRESS \
+        --address ${CONTRACT_ADDRESS} \
         --abi user_auth_abi.json \
         --function get_balance \
-        --inputs 1628448741648245036800002906075225705100596136133912895015035902954123957052
+        --inputs ${ACCOUNT_ADDRESS}
 
 You should get:
 
@@ -237,52 +191,38 @@ the user key. Hence, you will need to supply the additional arguments when acqui
 
     from starkware.starknet.public.abi import get_storage_var_address
 
-    user = 1628448741648245036800002906075225705100596136133912895015035902954123957052
+    user = ACCOUNT_ADDRESS
     user_balance_key = get_storage_var_address('balance', user)
     print(f'Storage key for user {user}:\n{user_balance_key}')
 
-You should get:
+.. _revert_reason:
 
-.. tested-code:: none user_auth_balance_key_output
+Retrieving the revert reason
+----------------------------
 
-    Storage key for user 1628448741648245036800002906075225705100596136133912895015035902954123957052:
-    142452623821144136554572927896792266630776240502820879601186867231282346767
+Let's try to invoke ``increase_balance`` with a negative amount:
 
-What if we have an invalid signature?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-To examine this case, we will modify the amount without changing the signature (this will cause the
-signature to be considered invalid).
-Then we will invoke ``increase_balance()`` again with this invalid signature:
-
-.. tested-code:: bash user_auth_invalid_signature
+.. tested-code:: bash user_auth_negative_amount
 
     starknet invoke \
-        --address CONTRACT_ADDRESS \
+        --address ${CONTRACT_ADDRESS} \
         --abi user_auth_abi.json \
         --function increase_balance \
-        --inputs \
-            1628448741648245036800002906075225705100596136133912895015035902954123957052 \
-            1000 \
-        --signature \
-            1225578735933442828068102633747590437426782890965066746429241472187377583468 \
-            3568809569741913715045370357918125425757114920266578211811626257903121825123
+        --inputs -1000
 
 After this, when querying the transaction status, you should get:
 
-.. tested-code:: none user_auth_invalid_signature_output
+.. tested-code:: none user_auth_negative_amount_output
 
     {
         "tx_failure_reason": {
             "code": "TRANSACTION_FAILED",
-            "error_message": "Error at pc=0:79:\nSignature (1225578735933442828068102633747590437426782890965066746429241472187377583468, 3568809569741913715045370357918125425757114920266578211811626257903121825123), is invalid, with respect to the public key 1628448741648245036800002906075225705100596136133912895015035902954123957052, and the message hash 1450800376308985472483264025695829910619060514119449623867706636798983320476.\nCairo traceback (most recent call last):\nUnknown location (pc=0:171)\nUnknown location (pc=0:140)",
-            "tx_id": 2
+            "error_message": "Error at pc=0:32:\nGot an exception while executing a hint.\nCairo traceback (most recent call last):\nUnknown location (pc=0:494)\nUnknown location (pc=0:453)\nUnknown location (pc=0:510)\n\nError in the called contract (0x3632c8d1265888e0eadb518cbf4a83d071d00cd8f946ec72fd661e69eea1963):\nError at pc=0:6:\nGot an exception while executing a hint.\nCairo traceback (most recent call last):\nUnknown location (pc=0:155)\nError message: Amount must be positive. Got: -1000.\nUnknown location (pc=0:129)\n\nTraceback (most recent call last):\n  File \"<hint0>\", line 3, in <module>\nAssertionError: a = 3618502788666131213697322783095070105623107215331596699973092056135872019481 is out of range."
         },
         "tx_status": "REJECTED"
     }
 
-
-This indicates that the transaction was reverted due to an invalid signature.
+This indicates that the transaction was reverted.
 Notice that the error message entry states that the error location is unknown. This is because
 the StarkNet network is not aware of the source code and debug information of a contract.
 To retrieve the error location and reconstruct the traceback, add the path to the relevant
@@ -293,45 +233,51 @@ display the error (and only it), add the ``--error_message`` flag as well:
 
     starknet tx_status \
         --hash TX_HASH \
-        --contract user_auth_compiled.json \
+        --contracts ${CONTRACT_ADDRESS}:user_auth_compiled.json \
         --error_message
 
 The output should look like:
 
 .. tested-code:: none user_auth_get_error_message_output
 
-    .../signature.cairo:11:5: Error at pc=0:79:
-        assert ecdsa_ptr.pub_key = public_key
-        ^***********************************^
-    Signature (1225578735933442828068102633747590437426782890965066746429241472187377583468, 3568809569741913715045370357918125425757114920266578211811626257903121825123), is invalid, with respect to the public key 1628448741648245036800002906075225705100596136133912895015035902954123957052, and the message hash 1450800376308985472483264025695829910619060514119449623867706636798983320476.
+    Error at pc=0:28:
+    Got an exception while executing a hint.
     Cairo traceback (most recent call last):
-    user_auth.cairo:16:6
-    func increase_balance{
-         ^**************^
-    user_auth.cairo:30:5
-        verify_ecdsa_signature(
-        ^*********************^
+    Unknown location (pc=0:494)
+    Unknown location (pc=0:453)
+    Unknown location (pc=0:510)
 
-Note that if we only changed the signature (keeping the amount 4321),
-the transaction's hash would have stayed the same.
-Since a transaction with this hash was already sent to the StarkNet,
-the second transaction would have ignored, it would not have been possible to query its status.
+    Error in the called contract (0x29cd5db92729052b3268471cf1b2327b61523565adeaa1d659236e806bd4b97):
+    math.cairo:45:5: Error at pc=0:6:
+        a = [range_check_ptr]
+        ^*******************^
+    Got an exception while executing a hint.
+    Cairo traceback (most recent call last):
+    user_auth.cairo:15:6
+    func increase_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
+         ^**************^
+    Error message: Amount must be positive. Got: -1000.
+    user_auth.cairo:20:9
+            assert_nn(amount)
+            ^***************^
+
+    Traceback (most recent call last):
+      File "<hint0>", line 3, in <module>
+    AssertionError: a = 3618502788666131213697322783095070105623107215331596699973092056135872019481 is out of range.
+
+You should ignore the first part (before ``Error in the called contract``) --
+it is caused by the account contract.
 
 .. test::
 
-    import json
     import os
-    import subprocess
-    import sys
-    import tempfile
 
     from starkware.cairo.docs.test_utils import reorganize_code
 
     code = reorganize_code('\n\n'.join([
         '%lang starknet',
-        codes['user_auth_builtins'],
-        codes['user_auth_imports'],
         'from starkware.cairo.common.cairo_builtins import HashBuiltin',
+        'from starkware.starknet.common.syscalls import get_caller_address',
         codes['balance_map'],
         codes['user_auth_increase_balance'],
         codes['user_auth_get_balance'],

@@ -77,7 +77,8 @@ For the account balances we define:
 
     @storage_var
     func account_balance(account_id : felt, token_type : felt) -> (
-            balance : felt):
+        balance : felt
+    ):
     end
 
 The account balance is defined as a mapping between a the account id and token type,
@@ -88,17 +89,20 @@ We write a function that allows us to *modify* the balance of a given token type
 .. tested-code:: cairo sn_amm_modify_account
 
     func modify_account_balance{
-            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
-            range_check_ptr}(
-            account_id : felt, token_type : felt, amount : felt):
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(account_id : felt, token_type : felt, amount : felt):
         let (current_balance) = account_balance.read(
-            account_id, token_type)
+            account_id, token_type
+        )
         tempvar new_balance = current_balance + amount
         assert_nn_le(new_balance, BALANCE_UPPER_BOUND - 1)
         account_balance.write(
             account_id=account_id,
             token_type=token_type,
-            value=new_balance)
+            value=new_balance,
+        )
         return ()
     end
 
@@ -130,10 +134,10 @@ To allow a user to read the balance of an account, we define the following
 
     @view
     func get_account_token_balance{
-            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
-            range_check_ptr}(
-            account_id : felt, token_type : felt) -> (
-            balance : felt):
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(account_id : felt, token_type : felt) -> (balance : felt):
         return account_balance.read(account_id, token_type)
     end
 
@@ -142,8 +146,10 @@ Similarly, for the pool balance:
 .. tested-code:: cairo sn_amm_get_set_account
 
     func set_pool_token_balance{
-            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
-            range_check_ptr}(token_type : felt, balance : felt):
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(token_type : felt, balance : felt):
         assert_nn_le(balance, BALANCE_UPPER_BOUND - 1)
         pool_balance.write(token_type, balance)
         return ()
@@ -151,8 +157,10 @@ Similarly, for the pool balance:
 
     @view
     func get_pool_token_balance{
-            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
-            range_check_ptr}(token_type : felt) -> (balance : felt):
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(token_type : felt) -> (balance : felt):
         return pool_balance.read(token_type)
     end
 
@@ -164,10 +172,12 @@ We now proceed to the primary functionality of the contract -- swapping tokens.
 .. tested-code:: cairo sn_amm_swap
 
     func swap{
-            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
-            range_check_ptr}(
-            account_id : felt, token_from : felt,
-            amount_from : felt) -> (amount_to : felt):
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(account_id : felt, token_from : felt, amount_from : felt) -> (
+        amount_to : felt
+    ):
         # Verify that token_from is either TOKEN_TYPE_A or TOKEN_TYPE_B.
         assert (token_from - TOKEN_TYPE_A) * (token_from - TOKEN_TYPE_B) = 0
 
@@ -176,7 +186,8 @@ We now proceed to the primary functionality of the contract -- swapping tokens.
 
         # Check user has enough funds.
         let (account_from_balance) = get_account_token_balance(
-            account_id=account_id, token_type=token_from)
+            account_id=account_id, token_type=token_from
+        )
         assert_le(amount_from, account_from_balance)
 
         # Execute the actual swap.
@@ -185,7 +196,8 @@ We now proceed to the primary functionality of the contract -- swapping tokens.
             account_id=account_id,
             token_from=token_from,
             token_to=token_to,
-            amount_from=amount_from)
+            amount_from=amount_from,
+        )
 
         return (amount_to=amount_to)
     end
@@ -203,39 +215,51 @@ If all checks pass, we proceed to execute the swap.
 .. tested-code:: cairo sn_amm_do_swap
 
     func do_swap{
-            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
-            range_check_ptr}(
-            account_id : felt, token_from : felt, token_to : felt,
-            amount_from : felt) -> (amount_to : felt):
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(
+        account_id : felt,
+        token_from : felt,
+        token_to : felt,
+        amount_from : felt,
+    ) -> (amount_to : felt):
         alloc_locals
 
         # Get pool balance.
         let (local amm_from_balance) = get_pool_token_balance(
-            token_type=token_from)
+            token_type=token_from
+        )
         let (local amm_to_balance) = get_pool_token_balance(
-            token_type=token_to)
+            token_type=token_to
+        )
 
         # Calculate swap amount.
         let (local amount_to, _) = unsigned_div_rem(
             amm_to_balance * amount_from,
-            amm_from_balance + amount_from)
+            amm_from_balance + amount_from,
+        )
 
         # Update token_from balances.
         modify_account_balance(
             account_id=account_id,
             token_type=token_from,
-            amount=-amount_from)
+            amount=-amount_from,
+        )
         set_pool_token_balance(
             token_type=token_from,
-            balance=amm_from_balance + amount_from)
+            balance=amm_from_balance + amount_from,
+        )
 
         # Update token_to balances.
         modify_account_balance(
             account_id=account_id,
             token_type=token_to,
-            amount=amount_to)
+            amount=amount_to,
+        )
         set_pool_token_balance(
-            token_type=token_to, balance=amm_to_balance - amount_to)
+            token_type=token_to, balance=amm_to_balance - amount_to
+        )
         return (amount_to=amount_to)
     end
 
@@ -266,8 +290,10 @@ how to initialize the AMM -- both the liquidity pool itself and some account bal
 
     @external
     func init_pool{
-            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
-            range_check_ptr}(token_a : felt, token_b : felt):
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(token_a : felt, token_b : felt):
         assert_nn_le(token_a, POOL_UPPER_BOUND - 1)
         assert_nn_le(token_b, POOL_UPPER_BOUND - 1)
 
@@ -287,10 +313,14 @@ Having this function defined, we proceed to add demo tokens to an account:
 
     @external
     func add_demo_token{
-            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
-            range_check_ptr}(
-            account_id : felt, token_a_amount : felt,
-            token_b_amount : felt):
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(
+        account_id : felt,
+        token_a_amount : felt,
+        token_b_amount : felt,
+    ):
         # Make sure the account's balance is much smaller then pool init balance.
         assert_nn_le(token_a_amount, ACCOUNT_BALANCE_BOUND - 1)
         assert_nn_le(token_b_amount, ACCOUNT_BALANCE_BOUND - 1)
@@ -298,11 +328,13 @@ Having this function defined, we proceed to add demo tokens to an account:
         modify_account_balance(
             account_id=account_id,
             token_type=TOKEN_TYPE_A,
-            amount=token_a_amount)
+            amount=token_a_amount,
+        )
         modify_account_balance(
             account_id=account_id,
             token_type=TOKEN_TYPE_B,
-            amount=token_b_amount)
+            amount=token_b_amount,
+        )
 
         return ()
     end
@@ -323,8 +355,7 @@ Set the following environment variable:
 .. tested-code:: bash amm_contract_address
 
     # The deployment address of the AMM contract.
-    export AMM_ADDRESS=0x1bb929cc5e6d80f0c71e90365ab77e9cbb2e0a290d72255a3f4d34060b5ed52
-
+    export AMM_ADDRESS=0x1020ea863b3cfd528f8d43fa739c8f3c2b24e919914c616c004f29a8896cca8
 
 We assume the reader is familiar with the StarkNet CLI. If this is not the case, we recommend you
 review this :ref:`section <starknet_intro>`.
@@ -332,8 +363,7 @@ Also we assume the ``STARKNET_NETWORK`` environment variable is set as follows:
 
 .. tested-code:: bash amm_starknet_env
 
-    export STARKNET_NETWORK=alpha
-
+    export STARKNET_NETWORK=alpha-goerli
 
 .. test::
 
@@ -370,7 +400,6 @@ be a 251-bit integer value:
 
     export ACCOUNT_ID="<favorite 251-bit integer>"
 
-
 .. tested-code:: bash sn_amm_invoke_add_tokens
 
     starknet invoke \
@@ -401,4 +430,4 @@ You can now query the account's balance of token 2 after the swap:
         --inputs ${ACCOUNT_ID} 2
 
 Note that the change will only take effect after the ``swap`` transaction's status
-is either ``PENDING`` or ``ACCEPTED_ONCHAIN``.
+is either ``ACCEPTED_ON_L2`` or ``ACCEPTED_ON_L1``.

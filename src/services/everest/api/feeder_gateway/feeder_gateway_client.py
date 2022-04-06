@@ -11,9 +11,10 @@ class EverestFeederGatewayClient(BaseClient):
 
     prefix: ClassVar[str] = "/feeder_gateway"
 
-    async def is_alive(self) -> str:
-        return await self._send_request(send_method="GET", uri="/is_alive")
-
     async def get_last_batch_id(self) -> int:
         raw_response = await self._send_request(send_method="GET", uri="/get_last_batch_id")
+        return json.loads(raw_response)
+
+    async def get_l1_blockchain_id(self) -> int:
+        raw_response = await self._send_request(send_method="GET", uri="/get_l1_blockchain_id")
         return json.loads(raw_response)

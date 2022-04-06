@@ -36,17 +36,21 @@ For example:
 
     @external
     func call_increase_balance{syscall_ptr : felt*, range_check_ptr}(
-            contract_address : felt, amount : felt):
+        contract_address : felt, amount : felt
+    ):
         IBalanceContract.increase_balance(
-            contract_address=contract_address, amount=amount)
+            contract_address=contract_address, amount=amount
+        )
         return ()
     end
 
     @view
     func call_get_balance{syscall_ptr : felt*, range_check_ptr}(
-            contract_address : felt) -> (res : felt):
+        contract_address : felt
+    ) -> (res : felt):
         let (res) = IBalanceContract.get_balance(
-            contract_address=contract_address)
+            contract_address=contract_address
+        )
         return (res=res)
     end
 
@@ -102,34 +106,6 @@ check the balance using the following two ways:
 
 Both commands should return ``10000``.
 
-Getting the caller address
---------------------------
-
-You can retrieve the address of the contract that invoked your function
-(if the function was called by another contract)
-using the ``get_caller_address()`` library function:
-
-.. tested-code:: cairo get_caller_address
-
-    from starkware.starknet.common.syscalls import get_caller_address
-
-    # ...
-
-    let (caller_address) = get_caller_address()
-
-When the contract is called by a user (rather than another contract),
-the function returns 0.
-
-Consider what would happen if you added a call to ``get_caller_address()``
-to the ``increase_balance()`` function of ``BALANCE_CONTRACT``:
-It would return ``PROXY_CONTRACT`` if called from
-``PROXY_CONTRACT``, and 0 if called directly.
-
-Note that if you use ``get_caller_address()`` in a function ``foo()`` that was called by
-another function ``bar()`` within your contract,
-it will still return the address of the contract that invoked ``bar()``
-(or 0 if it was invoked by a user).
-
 Getting the current contract's address
 --------------------------------------
 
@@ -138,10 +114,55 @@ You can get the current contract's address by using the ``get_contract_address()
 .. tested-code:: cairo get_contract_address
 
     from starkware.starknet.common.syscalls import (
-        get_contract_address)
+        get_contract_address,
+    )
 
     # ...
 
     let (contract_address) = get_contract_address()
 
 The above is similar to ``address(this)`` in Solidity.
+
+Delegate calls
+--------------
+
+A delegate call is a way to invoke a function declared in another contract within the context of the
+calling contract.
+
+In particular, storage-changing operations in the invoked function will change the state of the
+calling contract instead of affecting the state of the contract containing the function itself.
+Similarly, ``get_caller_address()`` and ``get_contract_address()`` will return the same value they
+would have returned if they were called from the **calling** function
+
+To perform a delegate call, use the contract interface as above, but prepend ``delegate_`` to the
+function name.
+
+.. tested-code:: cairo delegate_increase_balance
+
+    # Define local balance variable in our proxy contract.
+    @storage_var
+    func balance() -> (res : felt):
+    end
+
+    @external
+    func increase_my_balance{syscall_ptr : felt*, range_check_ptr}(
+        other_contract_address : felt, amount : felt
+    ):
+        # Increase the local balance variable using a function from a different contract by adding
+        # delegate_ before the function name.
+        IBalanceContract.delegate_increase_balance(
+            contract_address=other_contract_address, amount=amount
+        )
+        return ()
+    end
+
+Invoking increase_my_balance will increase the balance in the calling contract's storage using the
+``increase_balance()`` function of the other contract.
+
+Unlike a regular contract call, here the balance of the calling contract (rather than the called
+contract) is modified.
+
+Note: you can use delegate call to invoke a function that changes a storage variable
+which wasn't defined in the calling contract. In such a case, the new corresponding
+storage variable will be created in the calling contract, but it won't be easily accessible (you can
+access it by a second delegate call, or directly using ``storage_read()``).

@@ -6,7 +6,7 @@ from typing import Optional
 from starkware.storage.storage import HASH_BYTES, LockError, LockManager, LockObject, Storage
 
 
-async def hash_func(left: bytes, right: bytes) -> bytes:
+def hash_func(left: bytes, right: bytes) -> bytes:
     assert len(left) == HASH_BYTES
     assert len(right) == HASH_BYTES
     return hashlib.sha256(left + right).digest()
@@ -116,7 +116,9 @@ def check_time(t0, min_t, max_t):
     """
     t1 = asyncio.get_event_loop().time()
     delta = t1 - t0
-    assert min_t <= delta <= max_t, "Timing test failed"
+    assert (
+        min_t <= delta <= max_t
+    ), f"Timing test failed, expected range [{min_t}, {max_t}], got {delta}."
 
 
 @contextmanager

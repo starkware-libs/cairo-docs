@@ -1,5 +1,4 @@
 %lang starknet
-%builtins pedersen range_check
 
 from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin
@@ -17,14 +16,16 @@ end
 
 @view
 func get_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        user : felt) -> (balance : felt):
+    user : felt
+) -> (balance : felt):
     let (res) = balance.read(user=user)
     return (res)
 end
 
 @external
 func increase_balance{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        user : felt, amount : felt):
+    user : felt, amount : felt
+):
     let (res) = balance.read(user=user)
     balance.write(user, res + amount)
     return ()
@@ -32,7 +33,8 @@ end
 
 @external
 func withdraw{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        user : felt, amount : felt):
+    user : felt, amount : felt
+):
     # Make sure 'amount' is positive.
     assert_nn(amount)
 
@@ -57,7 +59,8 @@ end
 
 @l1_handler
 func deposit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(
-        from_address : felt, user : felt, amount : felt):
+    from_address : felt, user : felt, amount : felt
+):
     # Make sure the message was sent by the intended L1 contract.
     assert from_address = L1_CONTRACT_ADDRESS
 

@@ -2,7 +2,10 @@ import pytest
 
 from starkware.cairo.lang.compiler.ast.ast_objects_test_utils import remove_parentheses
 from starkware.cairo.lang.compiler.ast.expr import ExprConst, ExprNeg, ExprOperator
-from starkware.cairo.lang.compiler.ast.formatting_utils import FormattingError
+from starkware.cairo.lang.compiler.ast.formatting_utils import (
+    FormattingError,
+    set_one_item_per_line,
+)
 from starkware.cairo.lang.compiler.parser import parse_code_element, parse_expr, parse_file
 
 
@@ -52,6 +55,8 @@ def test_format_parentheses():
     assert remove_parentheses(parse_expr("x[(y+z)]")).format() == "x[y + z]"
 
     assert remove_parentheses(parse_expr("[((x+y) + z)]")).format() == "[x + y + z]"
+
+    assert remove_parentheses(parse_expr("new (2+3)")).format() == "new (2 + 3)"
 
     # Test that parentheses are not added if they were already present.
     assert parse_expr("(a * (b + c))").format() == "(a * (b + c))"
@@ -451,7 +456,8 @@ func myfunc{
     ret
 end
 """
-    assert parse_file(before).format(allowed_line_length=25) == after
+    with set_one_item_per_line(False):
+        assert parse_file(before).format(allowed_line_length=25) == after
 
 
 def test_return_splitting():
@@ -469,7 +475,8 @@ return (
     variable_name_which_is_way_too_long_but_has_to_be_supported,
     g)
 """
-    assert parse_file(before).format(allowed_line_length=20) == after
+    with set_one_item_per_line(False):
+        assert parse_file(before).format(allowed_line_length=20) == after
 
 
 def test_func_arg_ret_splitting():
@@ -492,7 +499,8 @@ func myfunc(
     ret
 end
 """
-    assert parse_file(before).format(allowed_line_length=25) == after
+    with set_one_item_per_line(False):
+        assert parse_file(before).format(allowed_line_length=25) == after
     before = """\
 func myfunc(a, b, c, foo, bar,
     variable_name_which_is_way_too_long_but_has_to_be_supported, g) ->
@@ -509,7 +517,8 @@ func myfunc(
     ret
 end
 """
-    assert parse_file(before).format(allowed_line_length=25) == after
+    with set_one_item_per_line(False):
+        assert parse_file(before).format(allowed_line_length=25) == after
     before = """\
 func myfunc(ab, cd, ef) -> (x, y, z, a_return_arg_which_is_also_waaaaaaay_too_long, w):
   ret
@@ -524,7 +533,148 @@ func myfunc(
     ret
 end
 """
-    assert parse_file(before).format(allowed_line_length=25) == after
+    with set_one_item_per_line(False):
+        assert parse_file(before).format(allowed_line_length=25) == after
+
+
+def test_func_one_per_line_splitting():
+    before = """\
+func myfunc{x, y}(a, b):
+    ret
+end
+"""
+    with set_one_item_per_line(True):
+        assert parse_file(before).format(allowed_line_length=25) == before
+    before = """\
+func myfunc{x: felt*, y: felt*}(a, b, c, d):
+    ret
+end
+"""
+    after = """\
+func myfunc{
+    x : felt*, y : felt*
+}(a, b, c, d):
+    ret
+end
+"""
+    with set_one_item_per_line(True):
+        assert parse_file(before).format(allowed_line_length=25) == after
+    before = """\
+func myfunc{long_imp_arg1, long_imp_arg2,long_imp_arg3}(
+        very_long_arg1, very_long_arg2):
+    ret
+end
+"""
+    after = """\
+func myfunc{
+    long_imp_arg1,
+    long_imp_arg2,
+    long_imp_arg3,
+}(
+    very_long_arg1,
+    very_long_arg2,
+):
+    ret
+end
+"""
+    with set_one_item_per_line(True):
+        assert parse_file(before).format(allowed_line_length=25) == after
+    before = """\
+func myfunc{}(a, variable_name_which_is_way_too_long_but_has_to_be_supported):
+    ret
+end
+"""
+    after = """\
+func myfunc{}(
+    a,
+    variable_name_which_is_way_too_long_but_has_to_be_supported,
+):
+    ret
+end
+"""
+    with set_one_item_per_line(True):
+        assert parse_file(before).format(allowed_line_length=25) == after
+    before = """\
+func myfunc(ab, cd, ef) -> (
+        long_return_arg1, long_return_arg2):
+    ret
+end
+"""
+    after = """\
+func myfunc(
+    ab, cd, ef
+) -> (
+    long_return_arg1,
+    long_return_arg2,
+):
+    ret
+end
+"""
+    with set_one_item_per_line(True):
+        assert parse_file(before).format(allowed_line_length=25) == after
+
+
+def test_return_one_per_line_splitting():
+    before = """\
+return (a, b, c, foo, bar,
+        variable_name_which_is_way_too_long_but_has_to_be_supported, g)
+"""
+    after = """\
+return (
+    a,
+    b,
+    c,
+    foo,
+    bar,
+    variable_name_which_is_way_too_long_but_has_to_be_supported,
+    g,
+)
+"""
+    with set_one_item_per_line(True):
+        assert parse_file(before).format(allowed_line_length=25) == after
+
+
+def test_func_call_one_per_line_splitting():
+    before = """\
+let (a, b, c) = foo(long_arg1, long_arg2, long_arg3)
+"""
+    after = """\
+let (a, b, c) = foo(
+    long_arg1,
+    long_arg2,
+    long_arg3,
+)
+"""
+    with set_one_item_per_line(True):
+        assert parse_file(before).format(allowed_line_length=25) == after
+    before = """\
+return foo(long_arg1, long_arg2, long_arg3)
+"""
+    after = """\
+return foo(
+    long_arg1,
+    long_arg2,
+    long_arg3,
+)
+"""
+    with set_one_item_per_line(True):
+        assert parse_file(before).format(allowed_line_length=25) == after
+
+
+def test_import_one_per_line_splitting():
+    before = """\
+from a.b.c import (import1)
+from d import (import1, import2)
+"""
+    after = """\
+from a.b.c import import1
+from d import (
+    import1,
+    import2,
+)
+"""
+    with set_one_item_per_line(True):
+        assert parse_file(before).format(allowed_line_length=25) == after
 
 
 def test_directives():
@@ -581,3 +731,13 @@ with_attr attribute_name  ("Comments"
 end"""
     with pytest.raises(FormattingError, match="Comments inside expressions are not supported"):
         parse_code_element(code).format(allowed_line_length=100)
+
+
+def test_100_chars_long_import():
+    code = """\
+from a.b.c import (
+    import1, import2, import3, import4, import5, import6, import6, import8, import8, aaaaaaaaaaaaaa,
+    import9)
+"""
+    with set_one_item_per_line(False):
+        assert parse_file(code).format() == code

@@ -1,10 +1,11 @@
 import dataclasses
 from abc import abstractmethod
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 from starkware.cairo.lang.compiler.ast.aliased_identifier import AliasedIdentifier
 from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
 from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr
+from starkware.cairo.lang.compiler.ast.cairo_types import CairoType
 from starkware.cairo.lang.compiler.ast.expr import (
     ExprAssignment,
     Expression,
@@ -14,8 +15,10 @@ from starkware.cairo.lang.compiler.ast.expr import (
 from starkware.cairo.lang.compiler.ast.formatting_utils import (
     INDENTATION,
     LocationField,
+    Particle,
     ParticleFormattingConfig,
-    create_particle_sublist,
+    ParticleList,
+    SeparatedParticleList,
     particles_in_lines,
 )
 from starkware.cairo.lang.compiler.ast.instructions import InstructionAst
@@ -169,10 +172,14 @@ class CodeElementReturn(CodeElement):
 
     def format(self, allowed_line_length):
         expr_codes = [x.format() for x in self.exprs]
-        particles = ["return (", create_particle_sublist(expr_codes, ")")]
 
         return particles_in_lines(
-            particles=particles,
+            particles=ParticleList(
+                elements=[
+                    "return (",
+                    SeparatedParticleList(elements=expr_codes, end=")"),
+                ]
+            ),
             config=ParticleFormattingConfig(
                 allowed_line_length=allowed_line_length, line_indent=INDENTATION, one_per_line=True
             ),
@@ -198,7 +205,7 @@ class CodeElementTailCall(CodeElement):
 
     def format(self, allowed_line_length):
         return particles_in_lines(
-            particles=self.get_particles(),
+            particles=ParticleList(elements=self.get_particles()),
             config=ParticleFormattingConfig(
                 allowed_line_length=allowed_line_length, line_indent=INDENTATION, one_per_line=True
             ),
@@ -247,7 +254,7 @@ class CodeElementReturnValueReference(CodeElement):
         first_particle = f"let {self.typed_identifier.format()} = " + call_particles[0]
 
         return particles_in_lines(
-            particles=[first_particle] + call_particles[1:],
+            particles=ParticleList(elements=[first_particle] + call_particles[1:]),
             config=ParticleFormattingConfig(
                 allowed_line_length=allowed_line_length, line_indent=INDENTATION, one_per_line=True
             ),
@@ -274,14 +281,13 @@ class CodeElementUnpackBinding(CodeElement):
         particles = self.rvalue.get_particles()
 
         end_particle = ") = " + particles[0]
-        particles = (
-            ["let ("]
-            + create_particle_sublist(self.unpacking_list.get_particles(), end_particle)
-            + particles[1:]
+        unpacking_list_particles = SeparatedParticleList(
+            elements=self.unpacking_list.get_particles(), end=end_particle
         )
+        particles = ["let ("] + unpacking_list_particles.to_strings() + particles[1:]
 
         return particles_in_lines(
-            particles=particles,
+            particles=ParticleList(elements=particles),
             config=ParticleFormattingConfig(
                 allowed_line_length=allowed_line_length, line_indent=INDENTATION, one_per_line=True
             ),
@@ -428,13 +434,16 @@ class CodeElementFunction(CodeElement):
     def format(self, allowed_line_length):
         code = self.code_block.format(allowed_line_length=allowed_line_length - INDENTATION)
         code = indent(code, INDENTATION)
+        particles: List[Union[Particle, str]]
         if self.element_type in ["struct", "namespace"]:
             particles = [f"{self.element_type} {self.name}:"]
         else:
             if self.implicit_arguments is not None:
                 first_particle_suffix = "{"
                 implicit_args_particles = [
-                    create_particle_sublist(self.implicit_arguments.get_particles(), "}(")
+                    SeparatedParticleList(
+                        elements=self.implicit_arguments.get_particles(), end="}("
+                    )
                 ]
             else:
                 first_particle_suffix = "("
@@ -444,21 +453,23 @@ class CodeElementFunction(CodeElement):
                 particles = [
                     f"{self.element_type} {self.name}{first_particle_suffix}",
                     *implicit_args_particles,
-                    create_particle_sublist(self.arguments.get_particles(), ") -> ("),
-                    create_particle_sublist(self.returns.get_particles(), "):"),
+                    SeparatedParticleList(elements=self.arguments.get_particles(), end=") -> ("),
+                    SeparatedParticleList(elements=self.returns.get_particles(), end="):"),
                 ]
             else:
                 particles = [
                     f"{self.element_type} {self.name}{first_particle_suffix}",
                     *implicit_args_particles,
-                    create_particle_sublist(self.arguments.get_particles(), "):"),
+                    SeparatedParticleList(elements=self.arguments.get_particles(), end="):"),
                 ]
 
         decorators = "".join(f"@{decorator.format()}\n" for decorator in self.decorators)
         header = particles_in_lines(
-            particles=particles,
+            particles=ParticleList(elements=particles),
             config=ParticleFormattingConfig(
-                allowed_line_length=allowed_line_length, line_indent=INDENTATION * 2
+                allowed_line_length=allowed_line_length,
+                line_indent=INDENTATION,
+                double_indentation=True,
             ),
         )
         return f"{decorators}{header}\n{code}end"
@@ -471,6 +482,30 @@ class CodeElementFunction(CodeElement):
             self.returns,
             self.code_block,
         ]
+
+
+@dataclasses.dataclass
+class CodeElementTypeDef(CodeElement):
+    """
+    Represents a statement of the form:
+      using new_type_name = old_type
+    For example,
+      using Point = (x : felt, y : felt)
+    """
+
+    identifier: ExprIdentifier
+    cairo_type: CairoType
+    location: Optional[Location] = LocationField
+
+    def format(self, allowed_line_length):
+        return f"using {self.identifier.format()} = {self.cairo_type.format()}"
+
+    @property
+    def name(self) -> str:
+        return self.identifier.name
+
+    def get_children(self) -> Sequence[Optional[AstNode]]:
+        return [self.identifier, self.cairo_type]
 
 
 @dataclasses.dataclass
@@ -504,6 +539,9 @@ class CodeElementWithAttr(CodeElement):
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return [self.attribute_name, self.code_block]
 
+    def get_value(self):
+        return "".join(clause[1:-1] for clause in self.attribute_value)
+
 
 @dataclasses.dataclass
 class CodeElementWith(CodeElement):
@@ -533,7 +571,7 @@ class CodeElementIf(CodeElement):
         cond_particles = ["if ", *self.condition.get_particles()]
         cond_particles[-1] = cond_particles[-1] + ":"
         code = particles_in_lines(
-            particles=cond_particles,
+            particles=ParticleList(elements=cond_particles),
             config=ParticleFormattingConfig(
                 allowed_line_length=allowed_line_length, line_indent=INDENTATION
             ),
@@ -617,11 +655,15 @@ class CodeElementImport(CodeElement):
         if len(one_liner) <= allowed_line_length:
             return one_liner
 
-        particles = [f"{prefix}(", create_particle_sublist(items, ")")]
         return particles_in_lines(
-            particles=particles,
+            particles=ParticleList(
+                elements=[f"{prefix}(", SeparatedParticleList(elements=items, end=")")]
+            ),
             config=ParticleFormattingConfig(
-                allowed_line_length=allowed_line_length, line_indent=INDENTATION, one_per_line=False
+                allowed_line_length=allowed_line_length,
+                line_indent=INDENTATION,
+                one_per_line=False,
+                force_one_per_line=True,
             ),
         )
 

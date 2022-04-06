@@ -22,20 +22,19 @@ from starkware.cairo.common.math import assert_lt_felt
 # Implicit arguments:
 # range_check_ptr - range check builtin pointer.
 func squash_dict{range_check_ptr}(
-        dict_accesses : DictAccess*, dict_accesses_end : DictAccess*,
-        squashed_dict : DictAccess*) -> (squashed_dict : DictAccess*):
-    let ptr_diff = [ap]
+    dict_accesses : DictAccess*, dict_accesses_end : DictAccess*, squashed_dict : DictAccess*
+) -> (squashed_dict : DictAccess*):
+    alloc_locals
     %{ vm_enter_scope() %}
-    ptr_diff = dict_accesses_end - dict_accesses; ap++
+    local ptr_diff = dict_accesses_end - dict_accesses
 
     if ptr_diff == 0:
         # Access array is empty, nothing to check.
         %{ vm_exit_scope() %}
         return (squashed_dict=squashed_dict)
     end
-    let first_key = [fp + 1]
-    let big_keys = [fp + 2]
-    ap += 2
+    local first_key
+    local big_keys
     tempvar n_accesses = ptr_diff / DictAccess.SIZE
     %{
         dict_access_size = ids.DictAccess.SIZE
@@ -73,7 +72,8 @@ func squash_dict{range_check_ptr}(
         key=first_key,
         remaining_accesses=n_accesses,
         squashed_dict=squashed_dict,
-        big_keys=big_keys)
+        big_keys=big_keys,
+    )
     %{ vm_exit_scope() %}
     return (squashed_dict=squashed_dict)
 end
@@ -99,9 +99,14 @@ end
 # range_check_ptr - updated range check builtin pointer.
 # squashed_dict - end pointer to squashed_dict.
 func squash_dict_inner(
-        range_check_ptr, dict_accesses : DictAccess*, dict_accesses_end_minus1 : felt*, key,
-        remaining_accesses, squashed_dict : DictAccess*, big_keys) -> (
-        range_check_ptr, squashed_dict : DictAccess*):
+    range_check_ptr,
+    dict_accesses : DictAccess*,
+    dict_accesses_end_minus1 : felt*,
+    key,
+    remaining_accesses,
+    squashed_dict : DictAccess*,
+    big_keys,
+) -> (range_check_ptr, squashed_dict : DictAccess*):
     alloc_locals
 
     let dict_diff : DictAccess* = squashed_dict
@@ -147,11 +152,17 @@ func squash_dict_inner(
     assert first_value = dict_diff.prev_value
 
     # Skip loop nondeterministically if necessary.
+    # The verifier doesn't care if the loop is skipped or not. The only thing it checks is that
+    # the function iterated over remaining_accesses accesses in total
+    # with ascending keys and ascending indices for the same key.
+    # This guarantees that all the entries were visited exactly once.
     local should_skip_loop
     %{ ids.should_skip_loop = 0 if current_access_indices else 1 %}
     jmp skip_loop if should_skip_loop != 0
 
     loop:
+    # Define references to access the values from the previous iteration,
+    # the temporary variables and the values for the current iteration.
     let prev_loop_locals = cast(ap - LoopLocals.SIZE, LoopLocals*)
     let loop_temps = cast(ap, LoopTemps*)
     let loop_locals = cast(ap + LoopTemps.SIZE, LoopLocals*)
@@ -179,6 +190,7 @@ func squash_dict_inner(
     # Next range_check_ptr.
     loop_locals.range_check_ptr = prev_loop_locals.range_check_ptr + 1; ap++
 
+    # The verifier doesn't care how many loop iterations are executed. See comment above.
     %{ ids.loop_temps.should_continue = 1 if current_access_indices else 0 %}
     jmp loop if loop_temps.should_continue != 0; ap++
 
@@ -189,6 +201,7 @@ func squash_dict_inner(
     %{ assert len(current_access_indices) == 0 %}
     [ap] = dict_accesses_end_minus1 - cast(last_loop_locals.access_ptr, felt)
     [ap] = [last_loop_locals.range_check_ptr]; ap++
+    # Calculating the number of used accesses from the number of range check usages for efficiency.
     tempvar n_used_accesses = last_loop_locals.range_check_ptr - range_check_ptr
     %{ assert ids.n_used_accesses == len(access_indices[key]) %}
 
@@ -204,6 +217,7 @@ func squash_dict_inner(
         return (range_check_ptr=range_check_ptr, squashed_dict=squashed_dict + DictAccess.SIZE)
     end
 
+    # ap points to the address of the beginning of the next access in the list.
     let next_key = [ap]
     ap += 1
     # Guess next_key and check that next_key > key.
@@ -234,5 +248,6 @@ func squash_dict_inner(
         key=next_key,
         remaining_accesses=remaining_accesses,
         squashed_dict=squashed_dict + DictAccess.SIZE,
-        big_keys=big_keys)
+        big_keys=big_keys,
+    )
 end

@@ -5,13 +5,18 @@ import marshmallow_dataclass
 from starkware.starkware_utils.commitment_tree.binary_fact_tree import (
     BinaryFactDict,
     BinaryFactTree,
-    TFact,
+    TLeafFact,
 )
+from starkware.starkware_utils.commitment_tree.leaf_fact import LeafFact
 from starkware.starkware_utils.commitment_tree.patricia_tree.nodes import EmptyNodeFact
+from starkware.starkware_utils.commitment_tree.patricia_tree.virtual_calculation_node import (
+    VirtualCalculationNode,
+)
 from starkware.starkware_utils.commitment_tree.patricia_tree.virtual_patricia_node import (
     VirtualPatriciaNode,
 )
-from starkware.storage.storage import Fact, FactFetchingContext
+from starkware.starkware_utils.commitment_tree.update_tree import update_tree
+from starkware.storage.storage import FactFetchingContext
 
 
 @marshmallow_dataclass.dataclass(frozen=True)
@@ -22,7 +27,7 @@ class PatriciaTree(BinaryFactTree):
 
     @classmethod
     async def empty_tree(
-        cls, ffc: FactFetchingContext, height: int, leaf_fact: Fact
+        cls, ffc: FactFetchingContext, height: int, leaf_fact: LeafFact
     ) -> "PatriciaTree":
         """
         Initializes an empty PatriciaTree of the given height.
@@ -35,13 +40,13 @@ class PatriciaTree(BinaryFactTree):
 
         return PatriciaTree(root=EmptyNodeFact.EMPTY_NODE_HASH, height=height)
 
-    async def get_leaves(
+    async def _get_leaves(
         self,
         ffc: FactFetchingContext,
         indices: Collection[int],
-        fact_cls: Type[TFact],
+        fact_cls: Type[TLeafFact],
         facts: Optional[BinaryFactDict] = None,
-    ) -> Dict[int, TFact]:
+    ) -> Dict[int, TLeafFact]:
         """
         Returns the values of the leaves whose indices are given.
         """
@@ -53,7 +58,7 @@ class PatriciaTree(BinaryFactTree):
     async def update(
         self,
         ffc: FactFetchingContext,
-        modifications: Collection[Tuple[int, Fact]],
+        modifications: Collection[Tuple[int, LeafFact]],
         facts: Optional[BinaryFactDict] = None,
     ) -> "PatriciaTree":
         """
@@ -61,8 +66,12 @@ class PatriciaTree(BinaryFactTree):
         storage and returns a new PatriciaTree representing the fact of the root of the new tree.
         """
         virtual_root_node = VirtualPatriciaNode.from_hash(hash_value=self.root, height=self.height)
-        updated_virtual_root_node = await virtual_root_node._update(
-            ffc=ffc, modifications=modifications, facts=facts
+        updated_virtual_root_node = await update_tree(
+            tree=virtual_root_node,
+            ffc=ffc,
+            modifications=modifications,
+            facts=facts,
+            calculation_node_cls=VirtualCalculationNode,
         )
 
         # In case root is an edge node, its fact must be explicitly written to DB.

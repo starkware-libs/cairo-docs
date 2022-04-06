@@ -592,6 +592,8 @@ The above statement compiles to:
     assert x = 1
     assert y = 2
 
+See :ref:`tuple_types` for more information about the type of a tuple expression.
+
 Tuple elements are accessed with the tuple expression followed by brackets containing a zero-based
 index to the element. The index must be known at compile time.
 
@@ -634,11 +636,8 @@ Arrays
 ------
 
 In order to represent an array (an ordered collection of homogeneous elements) in Cairo, one may
-use a pointer to the beginning of the array. The standard library function ``alloc()`` may
-be used to "dynamically" allocate a new array.
-
-For example, ``let (local struct_array : MyStruct*) = alloc()`` allocates a new memory segment and
-treats it as a pointer to ``MyStruct``.
+use a pointer to the beginning of the array. See :ref:`alloc` for allocating a new memory segment
+for arrays.
 
 The expression ``struct_array[n]`` is used to access the n-th element of the array,
 where n=0 is the first element. ``struct_array[index]`` is compiled to

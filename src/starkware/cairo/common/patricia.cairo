@@ -3,7 +3,13 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.dict_access import DictAccess
 from starkware.cairo.common.hash import hash2
 from starkware.cairo.common.math import (
-    assert_in_range, assert_le, assert_lt_felt, assert_nn, assert_nn_le, assert_not_zero)
+    assert_in_range,
+    assert_le,
+    assert_lt_felt,
+    assert_nn,
+    assert_nn_le,
+    assert_not_zero,
+)
 
 # Maximum length of an edge.
 const MAX_LENGTH = 251
@@ -24,9 +30,15 @@ struct NodeEdge:
     member bottom : felt
 end
 
+# Holds the constants needed for Patricia updates.
+struct PatriciaUpdateConstants:
+    member globals_pow2 : felt*
+end
+
 # Given an edge node hash, opens the hash using the preimage hint, and returns a NodeEdge object.
 func open_edge{hash_ptr : HashBuiltin*, range_check_ptr}(
-        globals : ParticiaGlobals*, node : felt) -> (edge : NodeEdge*):
+    globals : ParticiaGlobals*, node : felt
+) -> (edge : NodeEdge*):
     alloc_locals
     local edge : NodeEdge*
 
@@ -82,7 +94,8 @@ end
 
 # Traverses an empty subtree.
 func traverse_empty{update_ptr : DictAccess*, range_check_ptr, siblings : felt*}(
-        globals : ParticiaGlobals*, height : felt, path : felt):
+    globals : ParticiaGlobals*, height : felt, path : felt
+):
     if height == 0:
         assert update_ptr.key = path
         let value = [cast(update_ptr, felt*) + globals.access_offset]
@@ -154,8 +167,8 @@ end
 
 # Traverses a subtree rooted at the given NodeEdge.
 func traverse_edge{
-        hash_ptr : HashBuiltin*, range_check_ptr, update_ptr : DictAccess*, siblings : felt*}(
-        globals : ParticiaGlobals*, height : felt, path : felt, edge : NodeEdge):
+    hash_ptr : HashBuiltin*, range_check_ptr, update_ptr : DictAccess*, siblings : felt*
+}(globals : ParticiaGlobals*, height : felt, path : felt, edge : NodeEdge):
     if edge.length == 0:
         return traverse_binary_or_leaf(globals=globals, height=height, path=path, node=edge.bottom)
     end
@@ -297,7 +310,8 @@ func traverse_edge{
         vm_enter_scope(dict(node=new_node, **common_args))
     %}
     traverse_edge(
-        globals=globals, height=height - length, path=path * length_pow2 + word, edge=new_edge)
+        globals=globals, height=height - length, path=path * length_pow2 + word, edge=new_edge
+    )
     %{ vm_exit_scope() %}
 
     return ()
@@ -305,8 +319,8 @@ end
 
 # Traverses a subtree rooted at the given binary or leaf node with given hash/value.
 func traverse_binary_or_leaf{
-        hash_ptr : HashBuiltin*, range_check_ptr, update_ptr : DictAccess*, siblings : felt*}(
-        globals : ParticiaGlobals*, height : felt, path : felt, node : felt):
+    hash_ptr : HashBuiltin*, range_check_ptr, update_ptr : DictAccess*, siblings : felt*
+}(globals : ParticiaGlobals*, height : felt, path : felt, node : felt):
     if height == 0:
         # Leaf.
         assert update_ptr.key = path
@@ -383,8 +397,8 @@ end
 
 # Traverses some of the leaves in the subtree rooted at node.
 func traverse_node{
-        hash_ptr : HashBuiltin*, range_check_ptr, update_ptr : DictAccess*, siblings : felt*}(
-        globals : ParticiaGlobals*, height : felt, path : felt, node : felt):
+    hash_ptr : HashBuiltin*, range_check_ptr, update_ptr : DictAccess*, siblings : felt*
+}(globals : ParticiaGlobals*, height : felt, path : felt, node : felt):
     if node == 0:
         # Empty:
         traverse_empty(globals=globals, height=height, path=path)
@@ -396,8 +410,8 @@ end
 
 # Same as traverse_node, but disallows empty nodes.
 func traverse_non_empty{
-        hash_ptr : HashBuiltin*, range_check_ptr, update_ptr : DictAccess*, siblings : felt*}(
-        globals : ParticiaGlobals*, height : felt, path : felt, node : felt):
+    hash_ptr : HashBuiltin*, range_check_ptr, update_ptr : DictAccess*, siblings : felt*
+}(globals : ParticiaGlobals*, height : felt, path : felt, node : felt):
     %{ memory[ap] = 1 if ids.height == 0 or len(preimage[ids.node]) == 2 else 0 %}
     jmp binary if [ap] != 0; ap++
     # Edge.
@@ -439,8 +453,37 @@ end
 # Assumptions: The keys in the update_ptr list are unique and sorted.
 # Guarantees: All the keys in the update_ptr list are < 2**height.
 func patricia_update{hash_ptr : HashBuiltin*, range_check_ptr}(
-        update_ptr : DictAccess*, n_updates : felt, height : felt, prev_root : felt,
-        new_root : felt):
+    update_ptr : DictAccess*, n_updates : felt, height : felt, prev_root : felt, new_root : felt
+):
+    let (patricia_update_constants : PatriciaUpdateConstants*) = patricia_update_constants_new()
+    patricia_update_using_update_constants(
+        patricia_update_constants=patricia_update_constants,
+        update_ptr=update_ptr,
+        n_updates=n_updates,
+        height=height,
+        prev_root=prev_root,
+        new_root=new_root,
+    )
+
+    return ()
+end
+
+func patricia_update_constants_new() -> (patricia_update_constants : PatriciaUpdateConstants*):
+    # Compute power-of-2 array for patricia updates.
+    alloc_locals
+    let (local globals_pow2 : felt*) = alloc()
+    compute_pow2_array(pow2_ptr=globals_pow2, cur=1, n=MAX_LENGTH + 1)
+    return (patricia_update_constants=new PatriciaUpdateConstants(globals_pow2=globals_pow2))
+end
+
+func patricia_update_using_update_constants{hash_ptr : HashBuiltin*, range_check_ptr}(
+    patricia_update_constants : PatriciaUpdateConstants*,
+    update_ptr : DictAccess*,
+    n_updates : felt,
+    height : felt,
+    prev_root : felt,
+    new_root : felt,
+):
     if n_updates == 0:
         prev_root = new_root
         return ()
@@ -476,16 +519,13 @@ func patricia_update{hash_ptr : HashBuiltin*, range_check_ptr}(
     alloc_locals
     local update_end : DictAccess* = update_ptr + n_updates * DictAccess.SIZE
 
-    # Compute globals.
-    let (local globals_pow2 : felt*) = alloc()
-    compute_pow2_array(globals_pow2, 1, MAX_LENGTH + 1)
-
     # Traverse prev tree.
     let (local siblings) = alloc()
     let original_update_ptr = update_ptr
     let original_siblings = siblings
     let (local globals_prev : ParticiaGlobals*) = alloc()
-    assert [globals_prev] = ParticiaGlobals(pow2=globals_pow2, access_offset=DictAccess.prev_value)
+    assert [globals_prev] = ParticiaGlobals(
+        pow2=patricia_update_constants.globals_pow2, access_offset=DictAccess.prev_value)
 
     assert_le(height, MAX_LENGTH)
     %{ vm_enter_scope(dict(node=node, **common_args)) %}
@@ -500,7 +540,8 @@ func patricia_update{hash_ptr : HashBuiltin*, range_check_ptr}(
     let update_ptr = original_update_ptr
     let siblings = original_siblings
     let (local globals_new : ParticiaGlobals*) = alloc()
-    assert [globals_new] = ParticiaGlobals(pow2=globals_pow2, access_offset=DictAccess.new_value)
+    assert [globals_new] = ParticiaGlobals(
+        pow2=patricia_update_constants.globals_pow2, access_offset=DictAccess.new_value)
 
     %{ vm_enter_scope(dict(node=node, **common_args)) %}
     with update_ptr, siblings:

@@ -11,10 +11,10 @@ Traders perform trades against liquidity pools.
 Every liquidity pool supports two or more assets,
 and allows trading according to some predetermined formula.
 This means that for every quantity of some asset that you want to buy,
-you can compute exactly how much you’d have to pay to receive it
+you can compute exactly how much you'd have to pay to receive it
 (given the current state of the pool).
 
-Unlike the regular order book matching, it’s very easy to write and run AMM logic.
+Unlike the regular order book matching, it's very easy to write and run AMM logic.
 So easy that it can be fully deployed on Ethereum and still provide efficient, inexpensive trading.
 The user interface is extremely simple -- you only need to specify the quantity of the assets
 you want to trade, and you know you'll get a fair rate.
@@ -109,8 +109,8 @@ Now we can write a function that updates the balances of a given account and ret
     from starkware.cairo.common.registers import get_fp_and_pc
 
     func modify_account{range_check_ptr}(
-            state : AmmState, account_id, diff_a, diff_b) -> (
-            state : AmmState, key):
+        state : AmmState, account_id, diff_a, diff_b
+    ) -> (state : AmmState, key):
         alloc_locals
 
         # Define a reference to state.account_dict_end so that we
@@ -119,7 +119,8 @@ Now we can write a function that updates the balances of a given account and ret
 
         # Retrieve the pointer to the current state of the account.
         let (local old_account : Account*) = dict_read{
-            dict_ptr=account_dict_end}(key=account_id)
+            dict_ptr=account_dict_end
+        }(key=account_id)
 
         # Compute the new account values.
         tempvar new_token_a_balance = (
@@ -140,7 +141,8 @@ Now we can write a function that updates the balances of a given account and ret
         # Perform the account update.
         let (__fp__, _) = get_fp_and_pc()
         dict_write{dict_ptr=account_dict_end}(
-            key=account_id, new_value=cast(&new_account, felt))
+            key=account_id, new_value=cast(&new_account, felt)
+        )
 
         # Construct and return the new state.
         local new_state : AmmState
@@ -196,8 +198,8 @@ Let's isolate b (as the rest of the values are known):
     end
 
     func swap{range_check_ptr}(
-            state : AmmState, transaction : SwapTransaction*) -> (
-            state : AmmState):
+        state : AmmState, transaction : SwapTransaction*
+    ) -> (state : AmmState):
         alloc_locals
 
         tempvar a = transaction.token_a_amount
@@ -218,7 +220,8 @@ Let's isolate b (as the rest of the values are known):
             state=state,
             account_id=transaction.account_id,
             diff_a=-a,
-            diff_b=b)
+            diff_b=b,
+        )
 
         # Here you should verify the user has signed on a message
         # specifying that they would like to sell 'a' tokens of
@@ -262,20 +265,24 @@ The following function takes an array of transactions and applies them to the st
 .. tested-code:: cairo transaction_loop
 
     func transaction_loop{range_check_ptr}(
-            state : AmmState, transactions : SwapTransaction**,
-            n_transactions) -> (state : AmmState):
+        state : AmmState,
+        transactions : SwapTransaction**,
+        n_transactions,
+    ) -> (state : AmmState):
         if n_transactions == 0:
             return (state=state)
         end
 
         let first_transaction : SwapTransaction* = [transactions]
         let (state) = swap(
-            state=state, transaction=first_transaction)
+            state=state, transaction=first_transaction
+        )
 
         return transaction_loop(
             state=state,
             transactions=transactions + 1,
-            n_transactions=n_transactions - 1)
+            n_transactions=n_transactions - 1,
+        )
     end
 
 The type ``SwapTransaction**`` represents a pointer to a pointer to an instance
@@ -304,12 +311,15 @@ We will do so by computing the hash of the ``Account`` struct's members:
     #   H(H(public_key, token_a_balance), token_b_balance).
     # where H is the Pedersen hash function.
     func hash_account{pedersen_ptr : HashBuiltin*}(
-            account : Account*) -> (res : felt):
+        account : Account*
+    ) -> (res : felt):
         let res = account.public_key
         let (res) = hash2{hash_ptr=pedersen_ptr}(
-            res, account.token_a_balance)
+            res, account.token_a_balance
+        )
         let (res) = hash2{hash_ptr=pedersen_ptr}(
-            res, account.token_b_balance)
+            res, account.token_b_balance
+        )
         return (res=res)
     end
 
@@ -319,7 +329,7 @@ We need to take the dict of changes to the accounts, squash it and compute
 the Merkle roots before and after applying the batch of transactions.
 Unlike the voting tutorial, where the values in the dict were the leaves themselves,
 here the values are pointers to ``Account`` so
-before calling ``small_merkle_tree`` (and after squashing the dictionary)
+before calling ``small_merkle_tree_update`` (and after squashing the dictionary)
 we call ``hash_account`` on all the values (both before and after the batch):
 
 .. tested-code:: cairo hash_dict_values
@@ -331,9 +341,10 @@ we call ``hash_account`` on all the values (both before and after the batch):
     # hash_dict_start and hash_dict_end) after applying hash_account
     # on prev_value and new_value and keeping the same key.
     func hash_dict_values{pedersen_ptr : HashBuiltin*}(
-            dict_start : DictAccess*, dict_end : DictAccess*,
-            hash_dict_start : DictAccess*) -> (
-            hash_dict_end : DictAccess*):
+        dict_start : DictAccess*,
+        dict_end : DictAccess*,
+        hash_dict_start : DictAccess*,
+    ) -> (hash_dict_end : DictAccess*):
         if dict_start == dict_end:
             return (hash_dict_end=hash_dict_start)
         end
@@ -341,19 +352,23 @@ we call ``hash_account`` on all the values (both before and after the batch):
         # Compute the hash of the account before and after the
         # change.
         let (prev_hash) = hash_account(
-            account=cast(dict_start.prev_value, Account*))
+            account=cast(dict_start.prev_value, Account*)
+        )
         let (new_hash) = hash_account(
-            account=cast(dict_start.new_value, Account*))
+            account=cast(dict_start.new_value, Account*)
+        )
 
         # Add an entry to the output dict.
         dict_update{dict_ptr=hash_dict_start}(
             key=dict_start.key,
             prev_value=prev_hash,
-            new_value=new_hash)
+            new_value=new_hash,
+        )
         return hash_dict_values(
             dict_start=dict_start + DictAccess.SIZE,
             dict_end=dict_end,
-            hash_dict_start=hash_dict_start)
+            hash_dict_start=hash_dict_start,
+        )
     end
 
 Now we can compute the Merkle roots (we have arbitrarily chosen to use height of 10 in the
@@ -363,7 +378,8 @@ Merkle tree, supporting :math:`2^{10} = 1024` accounts):
 
     from starkware.cairo.common.dict import dict_new, dict_squash
     from starkware.cairo.common.small_merkle_tree import (
-        small_merkle_tree)
+        small_merkle_tree_update,
+    )
 
     const LOG_N_ACCOUNTS = 10
 
@@ -371,14 +387,15 @@ Merkle tree, supporting :math:`2^{10} = 1024` accounts):
     # Hint argument: initial_account_dict should be a dictionary
     # from account_id to an address in memory of the Account struct.
     func compute_merkle_roots{
-            pedersen_ptr : HashBuiltin*, range_check_ptr}(
-            state : AmmState) -> (root_before, root_after):
+        pedersen_ptr : HashBuiltin*, range_check_ptr
+    }(state : AmmState) -> (root_before, root_after):
         alloc_locals
 
         # Squash the account dictionary.
         let (squashed_dict_start, squashed_dict_end) = dict_squash(
             dict_accesses_start=state.account_dict_start,
-            dict_accesses_end=state.account_dict_end)
+            dict_accesses_end=state.account_dict_end,
+        )
         local range_check_ptr = range_check_ptr
 
         # Hash the dict values.
@@ -401,14 +418,17 @@ Merkle tree, supporting :math:`2^{10} = 1024` accounts):
         let (hash_dict_end) = hash_dict_values(
             dict_start=squashed_dict_start,
             dict_end=squashed_dict_end,
-            hash_dict_start=hash_dict_start)
+            hash_dict_start=hash_dict_start,
+        )
 
         # Compute the two Merkle roots.
-        let (root_before, root_after) = small_merkle_tree{
-            hash_ptr=pedersen_ptr}(
+        let (root_before, root_after) = small_merkle_tree_update{
+            hash_ptr=pedersen_ptr
+        }(
             squashed_dict_start=hash_dict_start,
             squashed_dict_end=hash_dict_end,
-            height=LOG_N_ACCOUNTS)
+            height=LOG_N_ACCOUNTS,
+        )
 
         return (root_before=root_before, root_after=root_after)
     end
@@ -473,7 +493,8 @@ is in range (rather than a negative number, for example).
 .. tested-code:: cairo get_transactions
 
     func get_transactions() -> (
-            transactions : SwapTransaction**, n_transactions : felt):
+        transactions : SwapTransaction**, n_transactions : felt
+    ):
         alloc_locals
         local transactions : SwapTransaction**
         local n_transactions : felt
@@ -489,8 +510,8 @@ is in range (rather than a negative number, for example).
             ids.n_transactions = len(transactions)
         %}
         return (
-            transactions=transactions,
-            n_transactions=n_transactions)
+            transactions=transactions, n_transactions=n_transactions
+        )
     end
 
     func get_account_dict() -> (account_dict : DictAccess*):
@@ -611,8 +632,10 @@ Now we're ready to write the ``main()`` function:
     end
 
     func main{
-            output_ptr : felt*, pedersen_ptr : HashBuiltin*,
-            range_check_ptr}():
+        output_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }():
         alloc_locals
 
         # Create the initial state.
@@ -644,7 +667,8 @@ Now we're ready to write the ``main()`` function:
         let (state : AmmState) = transaction_loop(
             state=state,
             transactions=transactions,
-            n_transactions=n_transactions)
+            n_transactions=n_transactions,
+        )
 
         # Output the AMM's balances after applying the batch.
         assert output.token_a_after = state.token_a_balance
@@ -652,7 +676,8 @@ Now we're ready to write the ``main()`` function:
 
         # Write the Merkle roots to the output.
         let (root_before, root_after) = compute_merkle_roots(
-            state=state)
+            state=state
+        )
         assert output.account_root_before = root_before
         assert output.account_root_after = root_after
 

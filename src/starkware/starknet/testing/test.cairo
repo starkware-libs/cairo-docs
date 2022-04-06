@@ -1,10 +1,15 @@
 %lang starknet
-%builtins pedersen range_check
 
+from starkware.cairo.common.alloc import alloc
 from starkware.cairo.common.cairo_builtins import HashBuiltin
+from starkware.cairo.common.registers import get_fp_and_pc
 from starkware.starknet.common.messages import send_message_to_l1
 from starkware.starknet.common.syscalls import (
-    get_caller_address, get_tx_signature, storage_read, storage_write)
+    get_caller_address,
+    get_tx_info,
+    storage_read,
+    storage_write,
+)
 
 @contract_interface
 namespace MyContract:
@@ -20,7 +25,8 @@ end
 
 @external
 func call_increase_value{syscall_ptr : felt*, range_check_ptr}(
-        contract_address : felt, address : felt, value : felt):
+    contract_address : felt, address : felt, value : felt
+):
     MyContract.increase_value(contract_address=contract_address, address=address, value=value)
     return ()
 end
@@ -44,9 +50,10 @@ end
 
 @external
 func get_signature{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*}() -> (
-        res_len : felt, res : felt*):
-    let (sig_len, sig) = get_tx_signature()
-    return (res_len=sig_len, res=sig)
+    res_len : felt, res : felt*
+):
+    let (tx_info) = get_tx_info()
+    return (res_len=tx_info.signature_len, res=tx_info.signature)
 end
 
 @external
@@ -66,15 +73,36 @@ struct Point:
     member y : felt
 end
 
+@event
+func log_sum_points(points_len : felt, points : Point*, sum : Point):
+end
+
 @view
-func sum_points(points : (Point, Point)) -> (res : Point):
+func sum_points{syscall_ptr : felt*, range_check_ptr}(points : (Point, Point)) -> (res : Point):
+    # Calculate sum.
     let res : Point = Point(x=points[0].x + points[1].x, y=points[0].y + points[1].y)
+
+    # Log points and their sum.
+    let (__fp__, _) = get_fp_and_pc()
+    log_sum_points.emit(points_len=2, points=&points[0], sum=res)
+
     return (res=res)
 end
 
 @view
-func sum_and_mult_points(points : (Point, Point)) -> (sum_res : Point, mult_res : felt):
+func sum_and_mult_points{syscall_ptr : felt*, range_check_ptr}(points : (Point, Point)) -> (
+    sum_res : Point, mult_res : felt
+):
     let sum_res : Point = sum_points(points=points)
     let mult_res : felt = (points[0].x * points[1].x) + (points[0].y * points[1].y)
     return (sum_res=sum_res, mult_res=mult_res)
+end
+
+@external
+func transpose(inp_len : felt, inp : Point*) -> (res_len : felt, res : Point*):
+    assert inp_len = 2
+    let (res : Point*) = alloc()
+    assert res[0] = Point(x=inp[0].x, y=inp[1].x)
+    assert res[1] = Point(x=inp[0].y, y=inp[1].y)
+    return (res_len=2, res=res)
 end

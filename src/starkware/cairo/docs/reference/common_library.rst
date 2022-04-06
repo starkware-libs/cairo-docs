@@ -85,7 +85,7 @@ module.
 A struct specifying the bitwise builtin memory structure.
 This struct is used by functions from the common library that use the ``bitwise`` builtin.
 For example, the ``bitwise_xor()`` function accepts an implicit
-argument of type ``BitWiseBuiltin*``, which is used internally to track the next available
+argument of type ``BitwiseBuiltin*``, which is used internally to track the next available
 builtin instance. See the function
 `here <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/bitwise.cairo>`__.
 
@@ -97,7 +97,7 @@ The struct has the following members of type ``felt``:
 -   ``x_xor_y``, the result of bitwise XOR operation on x and y.
 -   ``x_or_y``, the result of bitwise OR operation on x and y.
 
-A pointer to the ``bitwise`` builtin, ``bitwise_ptr``, has the type ``BitWiseBuiltin*``.
+A pointer to the ``bitwise`` builtin, ``bitwise_ptr``, has the type ``BitwiseBuiltin*``.
 
 
 ``HashBuiltin``
@@ -285,7 +285,7 @@ A squashed dictionary is one whose intermediate updates have been summarized and
 key appears exactly once with its most recent value.
 For more details see ``dict_squash()`` from the ``dict`` module.
 
-..  TODO (perama, 29/08/21): Add link when available (dict_squash).
+..  TODO(perama, 29/08/2021): Add link when available (dict_squash).
 
 The function expects three explicit arguments:
 
@@ -313,7 +313,9 @@ Example
     %builtins range_check
 
     from starkware.cairo.common.default_dict import (
-        default_dict_new, default_dict_finalize)
+        default_dict_new,
+        default_dict_finalize,
+    )
     from starkware.cairo.common.dict import dict_write, dict_update
 
     func main{range_check_ptr}() -> ():
@@ -335,7 +337,8 @@ Example
         # Finalize fails for the malicious prover with extra update.
         let (finalized_dict_start,
             finalized_dict_end) = default_dict_finalize(
-            my_dict_start, my_dict, 7)
+            my_dict_start, my_dict, 7
+        )
         return ()
     end
 
@@ -478,7 +481,11 @@ dictionary whose end pointer is referenced by ``dict_end``.
     %builtins range_check
 
     from starkware.cairo.common.dict import (
-        dict_new, dict_write, dict_update, dict_squash)
+        dict_new,
+        dict_write,
+        dict_update,
+        dict_squash,
+    )
 
     func main{range_check_ptr}() -> ():
         %{ initial_dict = {0: 0} %}
@@ -486,7 +493,8 @@ dictionary whose end pointer is referenced by ``dict_end``.
         let dict_end = dict_start
         dict_write{dict_ptr=dict_end}(key=0, new_value=1)
         dict_update{dict_ptr=dict_end}(
-            key=0, prev_value=1, new_value=2)
+            key=0, prev_value=1, new_value=2
+        )
         return ()
     end
 
@@ -526,7 +534,11 @@ other dictionary operations append to the array of ``DictAccess`` instances.
     %builtins range_check
 
     from starkware.cairo.common.dict import (
-        dict_new, dict_write, dict_update, dict_squash)
+        dict_new,
+        dict_write,
+        dict_update,
+        dict_squash,
+    )
 
     func main{range_check_ptr}() -> ():
         %{ initial_dict = {0: 0} %}
@@ -535,17 +547,19 @@ other dictionary operations append to the array of ``DictAccess`` instances.
         dict_write{dict_ptr=dict_end}(0, 1)
         dict_update{dict_ptr=dict_end}(0, 1, 2)
         let (squashed_dict_start, squashed_dict_end) = dict_squash{
-            range_check_ptr=range_check_ptr}(dict_start, dict_end)
+            range_check_ptr=range_check_ptr
+        }(dict_start, dict_end)
         # The following is an inconsistent update, 'prev_value'
         # is now '2'. This will fail while using the library's hints
         # but can be made to pass by a malicious prover.
         dict_update{dict_ptr=squashed_dict_end}(
-            key=0, prev_value=3, new_value=2)
+            key=0, prev_value=3, new_value=2
+        )
         # Squash fails. Even a malicious prover can't pass
         # verification for a failed dict_squash operation.
         let (squashed_dict_start, squashed_dict_end) = dict_squash{
-            range_check_ptr=range_check_ptr}(
-            squashed_dict_start, squashed_dict_end)
+            range_check_ptr=range_check_ptr
+        }(squashed_dict_start, squashed_dict_end)
         return ()
     end
 
@@ -607,8 +621,8 @@ and manually incrementing a pointer to the end of the array.
         # Fails if the prover changed 'value_a' and 'value_b'.
         let (local squashed_dict_start : DictAccess*) = alloc()
         let (squashed_dict_end) = squash_dict{
-            range_check_ptr=range_check_ptr}(
-            dict_start, dict_end, squashed_dict_start)
+            range_check_ptr=range_check_ptr
+        }(dict_start, dict_end, squashed_dict_start)
         return ()
     end
 
@@ -700,7 +714,8 @@ program will fail when the key is not present in the array.
             array_ptr=array_ptr,
             elm_size=MyStruct.SIZE,
             n_elms=3,
-            key=5)
+            key=5,
+        )
         # A pointer to the element with index 2 is returned.
         assert element_ptr.a = 5
         assert element_ptr.b = 6
@@ -711,7 +726,8 @@ program will fail when the key is not present in the array.
             array_ptr=array_ptr,
             elm_size=MyStruct.SIZE,
             n_elms=3,
-            key=5)
+            key=5,
+        )
         assert element_ptr.a = 5
         assert element_ptr.b = 6
         return ()
@@ -742,10 +758,12 @@ Continuing with the example above, with lower bound ``2``, the middle element is
 .. tested-code:: cairo library_search_sorted_lower
 
     from starkware.cairo.common.find_element import (
-        search_sorted_lower)
+        search_sorted_lower,
+    )
 
     let (smallest_ptr : MyStruct*) = search_sorted_lower(
-        array_ptr=array_ptr, elm_size=2, n_elms=3, key=2)
+        array_ptr=array_ptr, elm_size=2, n_elms=3, key=2
+    )
     assert smallest_ptr.a = 3
     assert smallest_ptr.b = 4
 
@@ -779,13 +797,15 @@ Continuing with the same example, since the array is sorted, searching for the k
     from starkware.cairo.common.find_element import search_sorted
 
     let (first_ptr : MyStruct*, success_val) = search_sorted(
-        array_ptr=array_ptr, elm_size=2, n_elms=3, key=5)
+        array_ptr=array_ptr, elm_size=2, n_elms=3, key=5
+    )
     assert success_val = 1
     assert first_ptr.a = 5
     assert first_ptr.b = 6
     # There is no element with key=2.
     let (first_ptr : MyStruct*, success_val) = search_sorted(
-        array_ptr=array_ptr, elm_size=2, n_elms=3, key=2)
+        array_ptr=array_ptr, elm_size=2, n_elms=3, key=2
+    )
     assert success_val = 0
 
 .. .. _common_library_hash:
@@ -833,7 +853,7 @@ Continuing with the same example, since the array is sorted, searching for the k
 ..  ``keccak``
 ..  ----------
 
-..  TODO (perama, 26/08/2021): Uncomment the link when the section is complete.
+..  TODO(perama, 26/08/2021): Uncomment the link when the section is complete.
     This section refers to the common library's
     `keccak <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/keccak.cairo>`_
     module.
@@ -853,7 +873,7 @@ Continuing with the same example, since the array is sorted, searching for the k
 ..  ``math_cmp``
 ..  ------------
 
-..  TODO (perama, 26/08/2021): Uncomment the link when the section is complete.
+..  TODO(perama, 26/08/2021): Uncomment the link when the section is complete.
     This section refers to the common library's
     `math_cmp <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/math_cmp.cairo>`_
     module.
@@ -893,7 +913,7 @@ Continuing with the same example, since the array is sorted, searching for the k
 ..  ``pow``
 ..  -------
 
-..  TODO (perama, 26/08/2021): Uncomment the link when the section is complete.
+..  TODO(perama, 26/08/2021): Uncomment the link when the section is complete.
     This section refers to the common library's
     `pow <https://github.com/starkware-libs/cairo-lang/blob/master/src/starkware/cairo/common/pow.cairo>`_
     module.
@@ -970,9 +990,8 @@ The function expects three explicit arguments:
         assert new_elm[0] = MyStruct(a=2, b=3)
 
         set_add{set_end_ptr=list_end}(
-            set_ptr=my_list,
-            elm_size=MyStruct.SIZE,
-            elm_ptr=new_elm)
+            set_ptr=my_list, elm_size=MyStruct.SIZE, elm_ptr=new_elm
+        )
         return ()
     end
 

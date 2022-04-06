@@ -11,7 +11,6 @@ from starkware.cairo.lang.builtins.range_check.range_check_builtin_runner import
     RangeCheckBuiltinRunner,
 )
 from starkware.cairo.lang.builtins.signature.signature_builtin_runner import SignatureBuiltinRunner
-from starkware.cairo.lang.compiler.identifier_definition import LabelDefinition
 from starkware.cairo.lang.compiler.program import Program
 from starkware.cairo.lang.compiler.scoped_name import ScopedName
 from starkware.cairo.lang.tracer.tracer import trace_runner
@@ -19,9 +18,9 @@ from starkware.cairo.lang.vm.cairo_runner import CairoRunner, process_ecdsa, ver
 from starkware.cairo.lang.vm.crypto import pedersen_hash
 from starkware.cairo.lang.vm.output_builtin_runner import OutputBuiltinRunner
 from starkware.cairo.lang.vm.relocatable import MaybeRelocatable, RelocatableValue
-from starkware.cairo.lang.vm.security import SecurityError, verify_secure_runner
+from starkware.cairo.lang.vm.security import verify_secure_runner
 from starkware.cairo.lang.vm.utils import RunResources
-from starkware.cairo.lang.vm.vm_exceptions import VmException
+from starkware.cairo.lang.vm.vm_exceptions import SecurityError, VmException
 
 
 class CairoFunctionRunner(CairoRunner):
@@ -33,7 +32,7 @@ class CairoFunctionRunner(CairoRunner):
         )
         self.builtin_runners["pedersen_builtin"] = pedersen_builtin
         range_check_builtin = RangeCheckBuiltinRunner(
-            included=True, ratio=None, inner_rc_bound=2 ** 16, n_parts=8
+            included=True, ratio=1, inner_rc_bound=2 ** 16, n_parts=8
         )
         self.builtin_runners["range_check_builtin"] = range_check_builtin
         output_builtin = OutputBuiltinRunner(included=True)
@@ -41,19 +40,19 @@ class CairoFunctionRunner(CairoRunner):
         signature_builtin = SignatureBuiltinRunner(
             name="ecdsa",
             included=True,
-            ratio=None,
+            ratio=1,
             process_signature=process_ecdsa,
             verify_signature=verify_ecdsa_sig,
         )
         self.builtin_runners["ecdsa_builtin"] = signature_builtin
         bitwise_builtin = BitwiseBuiltinRunner(
-            included=True, bitwise_builtin=BitwiseInstanceDef(ratio=None, total_n_bits=251)
+            included=True, bitwise_builtin=BitwiseInstanceDef(ratio=1, total_n_bits=251)
         )
         self.builtin_runners["bitwise_builtin"] = bitwise_builtin
         ec_op_builtin = EcOpBuiltinRunner(
             included=True,
             ec_op_builtin=EcOpInstanceDef(
-                ratio=None,
+                ratio=1,
                 scalar_height=256,
                 scalar_bits=252,
                 scalar_limit=None,
@@ -126,30 +125,23 @@ class CairoFunctionRunner(CairoRunner):
         verify_secure - Run verify_secure_runner to do extra verifications.
         trace_on_failure - Run the tracer in case of failure to help debugging.
         apply_modulo_to_args - Apply modulo operation on integer arguments.
-        use_full_name - Treat func_name as a fully qualified identifer name, instance of a relative
-          one.
+        use_full_name - Treat 'func_name' as a fully qualified identifier name, rather than a
+         relative one.
         """
         assert isinstance(self.program, Program)
+        entrypoint = self.program.get_label(func_name, full_name_lookup=use_full_name)
+
         structs_factory = CairoStructFactory.from_program(program=self.program)
         full_args_struct = structs_factory.build_func_args(
             func=ScopedName.from_string(scope=func_name)
         )
         all_args = full_args_struct(*args, **kwargs)
 
-        entrypoint: Union[str, int]
-        if use_full_name:
-            identifier = self.program.identifiers.get_by_full_name(
-                name=ScopedName.from_string(scope=func_name)
-            )
-            assert isinstance(identifier, LabelDefinition)
-            entrypoint = identifier.pc
-        else:
-            entrypoint = func_name
-
         try:
             self.run_from_entrypoint(
                 entrypoint,
-                *all_args,
+                all_args,
+                typed_args=True,
                 hint_locals=hint_locals,
                 static_locals=static_locals,
                 verify_secure=verify_secure,
@@ -170,6 +162,7 @@ Got {type(ex).__name__} exception during the execution of {func_name}:
         self,
         entrypoint: Union[str, int],
         *args,
+        typed_args: Optional[bool] = False,
         hint_locals: Optional[Dict[str, Any]] = None,
         static_locals: Optional[Dict[str, Any]] = None,
         run_resources: Optional[RunResources] = None,
@@ -180,6 +173,8 @@ Got {type(ex).__name__} exception during the execution of {func_name}:
         Runs the program from the given entrypoint.
 
         Additional params:
+        typed_args - If true, the arguments are given as Cairo typed NamedTuple generated
+          with CairoStructFactory.
         verify_secure - Run verify_secure_runner to do extra verifications.
         apply_modulo_to_args - Apply modulo operation on integer arguments.
         """
@@ -192,7 +187,13 @@ Got {type(ex).__name__} exception during the execution of {func_name}:
         if apply_modulo_to_args is None:
             apply_modulo_to_args = True
 
-        real_args = [self.gen_arg(arg=x, apply_modulo_to_args=apply_modulo_to_args) for x in args]
+        if typed_args:
+            assert len(args) == 1, "len(args) must be 1 when using typed args."
+            real_args = self.segments.gen_typed_args(args=args[0])
+        else:
+            real_args = [
+                self.gen_arg(arg=x, apply_modulo_to_args=apply_modulo_to_args) for x in args
+            ]
         end = self.initialize_function_entrypoint(entrypoint=entrypoint, args=real_args)
         self.initialize_vm(hint_locals=hint_locals, static_locals=static_locals)
 

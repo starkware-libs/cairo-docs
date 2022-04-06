@@ -15,11 +15,12 @@ from typing import List
 
 sys.path.insert(0, os.path.abspath("."))
 
+is_starknet = os.environ.get("GENERATE_STARKNET_DOCS") == "1"
 
 # Project information.
 
-project = "Cairo"
-copyright = "2020, StarkWare Industries Ltd."
+project = "StarkNet" if is_starknet else "Cairo"
+copyright = "2021, StarkWare Industries Ltd."
 author = "StarkWare Industries Ltd."
 
 # General configuration.
@@ -36,6 +37,11 @@ extensions = [
     "toggle",
 ]
 
+html_context = {
+    "main_url": "https://starknet.io/" if is_starknet else "https://cairo-lang.org/",
+    "google_analytics_tag": "G-7Z0075QZ3C" if is_starknet else "G-0ZJLBV4KE2",
+}
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
@@ -50,7 +56,7 @@ exclude_patterns: List[str] = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 html_theme = "alabaster"
-html_favicon = "favicon.svg"
+html_favicon = "sn_favicon.png" if is_starknet else "favicon.svg"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -63,3 +69,8 @@ html_theme_options = {
     "github_button": "true",
     "github_type": "star",
 }
+
+if is_starknet:
+    html_css_files = [
+        "https://starknet.io/wp-content/themes/starknet/sphinx.css",
+    ]

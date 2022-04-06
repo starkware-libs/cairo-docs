@@ -7,7 +7,7 @@ interface IStarknetCore {
       Returns the hash of the message.
     */
     function sendMessageToL2(
-        uint256 to_address,
+        uint256 toAddress,
         uint256 selector,
         uint256[] calldata payload
     ) external returns (bytes32);

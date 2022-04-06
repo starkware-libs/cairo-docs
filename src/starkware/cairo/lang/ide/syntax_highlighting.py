@@ -32,6 +32,9 @@ KEYWORDS = [
     "with_attr",
     "nondet",
     "dw",
+    "codeoffset",
+    "new",
+    "using",
 ]
 
 
@@ -63,5 +66,6 @@ class CairoLexer(RegexLexer):
             (r"<[a-zA-Z0-9 _\-]+>", token.Comment),
             (r" ", token.Text),
             (r"'[^']*'", token.String),
+            (r'"[^"]*"', token.String),
         ]
     }
