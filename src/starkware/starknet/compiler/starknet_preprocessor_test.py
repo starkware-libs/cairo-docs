@@ -103,7 +103,7 @@ def test_abi_basic():
 
 namespace MyNamespace:
     struct ExternalStruct:
-        member y: (felt, felt)
+        member y: (x : felt, y : felt)
     end
 end
 
@@ -124,7 +124,7 @@ func constructor{syscall_ptr}():
 end
 
 @external
-func f(a : felt, arr_len : felt, arr : felt*) -> (b : felt, c : felt):
+func f(a : (x : felt, y : felt), arr_len : felt, arr : felt*) -> (b : felt, c : felt):
     return (0, 1)
 end
 
@@ -136,6 +136,13 @@ end
 @l1_handler
 func handler(from_address, a: ExternalStruct2):
     return ()
+end
+
+struct ExternalStruct4:
+end
+
+@event
+func status(a: felt, arr_len : felt, arr : felt*, external_struct : ExternalStruct4):
 end
 """
     )
@@ -156,8 +163,14 @@ end
         {
             "type": "struct",
             "name": "ExternalStruct",
-            "members": [{"name": "y", "offset": 0, "type": "(felt, felt)"}],
+            "members": [{"name": "y", "offset": 0, "type": "(x : felt, y : felt)"}],
             "size": 2,
+        },
+        {
+            "type": "struct",
+            "name": "ExternalStruct4",
+            "members": [],
+            "size": 0,
         },
         {
             "inputs": [],
@@ -167,7 +180,7 @@ end
         },
         {
             "inputs": [
-                {"name": "a", "type": "felt"},
+                {"name": "a", "type": "(x : felt, y : felt)"},
                 {"name": "arr_len", "type": "felt"},
                 {"name": "arr", "type": "felt*"},
             ],
@@ -195,6 +208,17 @@ end
             "name": "handler",
             "outputs": [],
             "type": "l1_handler",
+        },
+        {
+            "name": "status",
+            "type": "event",
+            "keys": [],
+            "data": [
+                {"name": "a", "type": "felt"},
+                {"name": "arr_len", "type": "felt"},
+                {"name": "arr", "type": "felt*"},
+                {"name": "external_struct", "type": "ExternalStruct4"},
+            ],
         },
     ]
 

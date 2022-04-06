@@ -57,7 +57,8 @@ anymore after that. Thus, ``fp`` serves as an anchor to access these values.
 Exercise
 ********
 
-Compile and run (with at least 10 steps) the following code:
+Compile and run (with at least 10 steps) the following code.
+Use the ``--print_memory`` and ``--relocate_prints`` flags for ``cairo-run``.
 
 .. tested-code:: cairo functions_exercise
 

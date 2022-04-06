@@ -17,7 +17,7 @@ prometheus-client
 pytest
 pytest-asyncio
 sphinx
-PyYAML>=5.3.1,<5.4
+PyYAML
 sympy
 Web3
 typeguard

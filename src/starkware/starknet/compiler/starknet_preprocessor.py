@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from starkware.cairo.lang.compiler.ast.code_elements import (
     BuiltinsDirective,
@@ -7,7 +7,7 @@ from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeElementInstruction,
     LangDirective,
 )
-from starkware.cairo.lang.compiler.identifier_definition import StructDefinition
+from starkware.cairo.lang.compiler.error_handling import Location
 from starkware.cairo.lang.compiler.identifier_utils import get_struct_definition
 from starkware.cairo.lang.compiler.preprocessor.preprocessor import (
     PreprocessedProgram,
@@ -17,14 +17,17 @@ from starkware.cairo.lang.compiler.preprocessor.preprocessor_error import Prepro
 from starkware.cairo.lang.compiler.program import CairoHint
 from starkware.cairo.lang.compiler.scoped_name import ScopedName
 from starkware.cairo.lang.compiler.type_system import is_type_resolved
+from starkware.starknet.compiler.event import EVENT_ATTR, EventInfo
 from starkware.starknet.compiler.external_wrapper import (
-    ENTRY_POINT_DECORATORS,
+    SUPPORTED_DECORATORS,
     VIEW_DECORATOR,
     WRAPPER_SCOPE,
     get_abi_entry_type,
-    get_external_decorator,
+    parse_entry_point_decorators,
 )
-from starkware.starknet.definitions.constants import STARKNET_LANG_DIRECTIVE
+from starkware.starknet.compiler.validation_utils import get_function_attr
+from starkware.starknet.definitions import constants
+from starkware.starknet.public.abi import AbiType
 from starkware.starknet.public.abi_structs import (
     prepare_type_for_abi,
     struct_definition_to_abi_entry,
@@ -37,13 +40,13 @@ from starkware.starkware_utils.subsequence import is_subsequence
 @dataclasses.dataclass
 class StarknetPreprocessedProgram(PreprocessedProgram):
     # JSON dict that contains information on the callable functions in the contract.
-    abi: Any
+    abi: AbiType
 
 
 class StarknetPreprocessor(Preprocessor):
     def __init__(self, **kwargs):
         kwargs = dict(kwargs)
-        supported_decorators = kwargs.pop("supported_decorators", ENTRY_POINT_DECORATORS)
+        supported_decorators = kwargs.pop("supported_decorators", SUPPORTED_DECORATORS)
 
         # A whitelist of allowed hints.
         # None means that any hint is allowed.
@@ -52,7 +55,7 @@ class StarknetPreprocessor(Preprocessor):
         super().__init__(supported_decorators=supported_decorators, **kwargs)
 
         # JSON dict for the ABI output.
-        self.abi: List[dict] = []
+        self.abi: AbiType = []
         # A map from external struct (short) name to its ABI entry.
         self.abi_structs: Dict[str, dict] = {}
         # A map from external struct (short) name to the fully qualified name.
@@ -69,7 +72,7 @@ class StarknetPreprocessor(Preprocessor):
             )
 
     def visit_LangDirective(self, directive: LangDirective):
-        if directive.name != STARKNET_LANG_DIRECTIVE:
+        if directive.name != constants.STARKNET_LANG_DIRECTIVE:
             raise PreprocessorError(
                 f"Unsupported %lang directive. Are you using the correct compiler?",
                 location=directive.location,
@@ -84,23 +87,38 @@ class StarknetPreprocessor(Preprocessor):
             return
         super().handle_missing_future_definition(name=name, location=location)
 
-    def add_abi_entry(
-        self,
-        name: str,
-        arg_struct_def: StructDefinition,
-        ret_struct_def: StructDefinition,
-        is_view: bool,
-        entry_type: str,
-    ):
+    def add_abi_event_entry(self, event_info: EventInfo):
         """
-        Adds an entry describing the function to the contract's ABI.
+        Adds an entry describing the event to the contract's ABI.
         """
-        inputs = []
-        outputs = []
+        elm_scope = ScopedName.from_string(event_info.elm.name) + "emit"
+        data = self.process_abi_arguments(
+            arg_full_scope=elm_scope + CodeElementFunction.ARGUMENT_SCOPE,
+            location=event_info.parent_location[0],
+        )
+        self.abi.append(
+            {
+                "name": event_info.elm.name,
+                "type": "event",
+                "keys": [],
+                "data": data,
+            }
+        )
+
+    def process_abi_arguments(
+        self, arg_full_scope: ScopedName, location: Optional[Location]
+    ) -> List[Dict[str, str]]:
+        """
+        Returns a list of dictionaries describing the function's arguments or return values.
+        Processes structs used by each argument and adds them to the abi.
+        """
+        arg_struct_def = self.get_struct_definition(name=arg_full_scope, location=location)
+
+        arguments = []
         for m_name, member in arg_struct_def.members.items():
             assert is_type_resolved(member.cairo_type)
             abi_type_info = prepare_type_for_abi(member.cairo_type)
-            inputs.append(
+            arguments.append(
                 {
                     "name": m_name,
                     "type": abi_type_info.modified_type.format(),
@@ -108,25 +126,32 @@ class StarknetPreprocessor(Preprocessor):
             )
             for struct_name in abi_type_info.structs:
                 self.add_struct_to_abi(struct_name)
-        for m_name, member in ret_struct_def.members.items():
-            assert is_type_resolved(member.cairo_type)
-            abi_type_info = prepare_type_for_abi(member.cairo_type)
-            outputs.append(
-                {
-                    "name": m_name,
-                    "type": abi_type_info.modified_type.format(),
-                }
-            )
-            for struct_name in abi_type_info.structs:
-                self.add_struct_to_abi(struct_name)
+
+        return arguments
+
+    def add_abi_function_entry(self, elm: CodeElementFunction, external_decorator_name: str):
+        """
+        Adds an entry describing the function to the contract's ABI.
+        """
+        entry_type = get_abi_entry_type(external_decorator_name=external_decorator_name)
+        elm_scope = ScopedName.from_string(elm.name)
+        inputs = self.process_abi_arguments(
+            arg_full_scope=elm_scope + CodeElementFunction.ARGUMENT_SCOPE,
+            location=elm.identifier.location,
+        )
+        outputs = self.process_abi_arguments(
+            arg_full_scope=elm_scope + CodeElementFunction.RETURN_SCOPE,
+            location=elm.identifier.location,
+        )
         res = {
-            "name": name,
+            "name": elm.name,
             "type": entry_type,
             "inputs": inputs,
             "outputs": outputs,
         }
-        if is_view:
+        if external_decorator_name == VIEW_DECORATOR:
             res["stateMutability"] = "view"
+
         self.abi.append(res)
 
     def add_struct_to_abi(self, struct_name: ScopedName):
@@ -171,27 +196,21 @@ class StarknetPreprocessor(Preprocessor):
     def visit_CodeElementFunction(self, elm: CodeElementFunction):
         super().visit_CodeElementFunction(elm)
 
-        external_decorator = get_external_decorator(elm)
-        if external_decorator is None or self.current_scope == WRAPPER_SCOPE:
+        if self.current_scope == WRAPPER_SCOPE:
             return
 
-        # Add an entry to the ABI.
-        arg_struct_def = self.get_struct_definition(
-            name=ScopedName.from_string(elm.name) + CodeElementFunction.ARGUMENT_SCOPE,
-            location=elm.identifier.location,
-        )
+        external_decorator, _, _ = parse_entry_point_decorators(elm=elm)
+        if external_decorator is not None:
+            # Add a function/constructor entry to the ABI.
+            self.add_abi_function_entry(
+                elm=elm,
+                external_decorator_name=external_decorator.name,
+            )
 
-        ret_struct_def = self.get_struct_definition(
-            name=ScopedName.from_string(elm.name) + CodeElementFunction.RETURN_SCOPE,
-            location=elm.identifier.location,
-        )
-        self.add_abi_entry(
-            name=elm.name,
-            arg_struct_def=arg_struct_def,
-            ret_struct_def=ret_struct_def,
-            is_view=external_decorator.name == VIEW_DECORATOR,
-            entry_type=get_abi_entry_type(external_decorator_name=external_decorator.name),
-        )
+        event_info = get_function_attr(elm=elm, attr_name=EVENT_ATTR, attr_type=EventInfo)
+        if event_info is not None:
+            # Add an event entry to the ABI.
+            self.add_abi_event_entry(event_info=event_info)
 
     def visit_CodeElementInstruction(self, elm: CodeElementInstruction):
         if self.hint_whitelist is not None:

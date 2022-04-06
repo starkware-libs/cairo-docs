@@ -141,7 +141,8 @@ Let's take a look at the final ``main()`` function:
         %}
 
         check_solution(
-            loc_list=loc_list, tile_list=tile_list, n_steps=n_steps)
+            loc_list=loc_list, tile_list=tile_list, n_steps=n_steps
+        )
         return ()
     end
 
@@ -229,7 +230,8 @@ Then, we check that we got the correct key, and that the index is in range:
 
     # Returns the value associated with the given key.
     func get_value_by_key{range_check_ptr}(
-            list : KeyValue*, size, key) -> (value):
+        list : KeyValue*, size, key
+    ) -> (value):
         alloc_locals
         local idx
         %{
@@ -316,7 +318,8 @@ the way the verifier sees the program is as follows:
 
     # Returns the value associated with the given key.
     func get_value_by_key{range_check_ptr}(
-            list : KeyValue*, size, key) -> (value):
+        list : KeyValue*, size, key
+    ) -> (value):
         alloc_locals
         local idx
 
@@ -397,7 +400,8 @@ Here is a template for your code:
     # Builds a DictAccess list for the computation of the cumulative
     # sum for each key.
     func build_dict(list : KeyValue*, size, dict : DictAccess*) -> (
-            dict):
+        dict
+    ):
         if size == 0:
             return (dict=dict)
         end
@@ -414,9 +418,10 @@ Here is a template for your code:
     # Verifies that the initial values were 0, and writes the final
     # values to result.
     func verify_and_output_squashed_dict(
-            squashed_dict : DictAccess*,
-            squashed_dict_end : DictAccess*, result : KeyValue*) -> (
-            result):
+        squashed_dict : DictAccess*,
+        squashed_dict_end : DictAccess*,
+        result : KeyValue*,
+    ) -> (result):
         tempvar diff = squashed_dict_end - squashed_dict
         if diff == 0:
             return (result=result)
@@ -431,7 +436,8 @@ Here is a template for your code:
     # Given a list of KeyValue, sums the values, grouped by key,
     # and returns a list of pairs (key, sum_of_values).
     func sum_by_key{range_check_ptr}(list : KeyValue*, size) -> (
-            result, result_size):
+        result, result_size
+    ):
         %{
             # Initialize cumulative_sums with an empty dictionary.
             # This variable will be used by ``build_dict`` to hold

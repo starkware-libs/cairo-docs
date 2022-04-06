@@ -1,13 +1,17 @@
 import dataclasses
 from collections import defaultdict
 from contextlib import contextmanager
+from dataclasses import field
 from enum import Enum, auto
-from typing import DefaultDict, Dict, List, Optional, Set, Tuple, Type, cast
+from typing import DefaultDict, Dict, List, Optional, Set, Tuple, Type, Union, cast
+
+import marshmallow.fields as mfields
 
 from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
 from starkware.cairo.lang.compiler.ast.cairo_types import (
     CairoType,
     CastType,
+    TypeCodeoffset,
     TypeFelt,
     TypePointer,
     TypeStruct,
@@ -38,6 +42,7 @@ from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeElementStaticAssert,
     CodeElementTailCall,
     CodeElementTemporaryVariable,
+    CodeElementTypeDef,
     CodeElementUnpackBinding,
     CodeElementWith,
     CodeElementWithAttr,
@@ -54,6 +59,7 @@ from starkware.cairo.lang.compiler.ast.expr import (
     ExprFutureLabel,
     ExprHint,
     ExprIdentifier,
+    ExprNewOperator,
     ExprOperator,
     ExprReg,
     ExprTuple,
@@ -79,6 +85,7 @@ from starkware.cairo.lang.compiler.ast.types import TypedIdentifier
 from starkware.cairo.lang.compiler.constants import SIZE_CONSTANT
 from starkware.cairo.lang.compiler.error_handling import Location
 from starkware.cairo.lang.compiler.expression_simplifier import ExpressionSimplifier
+from starkware.cairo.lang.compiler.expression_transformer import ExpressionTransformer
 from starkware.cairo.lang.compiler.identifier_definition import (
     ConstDefinition,
     DefinitionError,
@@ -145,11 +152,12 @@ from starkware.cairo.lang.compiler.preprocessor.reg_tracking import (
 from starkware.cairo.lang.compiler.proxy_identifier_manager import IdentifierManagerMemento
 from starkware.cairo.lang.compiler.references import FlowTrackingError, Reference, translate_ap
 from starkware.cairo.lang.compiler.resolve_search_result import resolve_search_result
-from starkware.cairo.lang.compiler.scoped_name import ScopedName
+from starkware.cairo.lang.compiler.scoped_name import ScopedName, ScopedNameAsStr
 from starkware.cairo.lang.compiler.substitute_identifiers import substitute_identifiers
 from starkware.cairo.lang.compiler.type_casts import check_cast
 from starkware.cairo.lang.compiler.type_system_visitor import get_expr_addr, simplify_type_system
 from starkware.python.utils import safe_zip
+from starkware.starkware_utils.validated_dataclass import ValidatedDataclass
 
 # Indicates that the compiler should be able to deduce the change in the ap register for this
 # function.
@@ -157,6 +165,22 @@ KNOWN_AP_CHANGE_DECORATOR = "known_ap_change"
 
 # Maximum number of tries in a reference trial. See ReferenceTrial.
 MAX_REFERENCE_RETRIES = 4
+
+
+class ReferenceChecker(ExpressionTransformer):
+    """
+    Checks that a reference expression is valid. Raises a PreprocessorError otherwise.
+    """
+
+    def visit_ExprHint(self, expr: ExprHint):
+        raise PreprocessorError(
+            "The use of hints in reference expressions is not allowed.", location=expr.location
+        )
+
+    def visit_ExprNewOperator(self, expr: ExprNewOperator):
+        raise PreprocessorError(
+            "The use of 'new' in reference expressions is not allowed.", location=expr.location
+        )
 
 
 class ReferenceTrial:
@@ -204,12 +228,29 @@ class PreprocessedInstruction:
         )
 
 
+@dataclasses.dataclass(frozen=True)
+class AttributeBase:
+    name: str
+    value: str
+
+
+@dataclasses.dataclass(frozen=True)
+class AttributeScope(AttributeBase, ValidatedDataclass):
+    start_pc: int
+    end_pc: int
+    flow_tracking_data: Optional[FlowTrackingDataActual] = field(metadata=dict(load_default=None))
+    accessible_scopes: List[ScopedName] = field(
+        metadata=dict(marshmallow_field=mfields.List(ScopedNameAsStr, load_default=list)),
+    )
+
+
 @dataclasses.dataclass
 class PreprocessedProgram:
     prime: int
     reference_manager: ReferenceManager
     instructions: List[PreprocessedInstruction]
     identifiers: IdentifierManager
+    attributes: List[AttributeScope]
     # A map from an identifier fully qualified name to the location of its definition.
     # This provides additional information on the compiled program which can be used by IDEs.
     identifier_locations: Dict[ScopedName, Location]
@@ -268,6 +309,7 @@ class PreprocessorMemento(MembersMemento["Preprocessor"]):
             next_temp_id=ByValueMemento[int],
             reference_states=ChainMapMemento[ScopedName, ReferenceState],
             scoped_temp_ids=ChainMapMemento[ScopedName, bool],
+            attributes=AppendOnlyListMemento[AttributeScope],
             identifiers=IdentifierManagerMemento,
             identifier_locations=ChainMapMemento[ScopedName, Location],
         )
@@ -343,6 +385,8 @@ class Preprocessor(IdentifierAwareVisitor):
         # identifier manager.
         self.removed_prefixes: Set[ScopedName] = set()
 
+        self.attributes: List[AttributeScope] = []
+
         self.auxiliary_info = (
             auxiliary_info_cls.create(prime) if auxiliary_info_cls is not None else None
         )
@@ -353,6 +397,9 @@ class Preprocessor(IdentifierAwareVisitor):
         # When a reference trial is active, this object holds the required information about it.
         # See ReferenceTrial.
         self.reference_trial: Optional[ReferenceTrial] = None
+
+    def check_reference_expression(self, expr: Expression):
+        ReferenceChecker().visit(expr)
 
     def search_identifier(
         self, name: str, location: Optional[Location]
@@ -465,6 +512,7 @@ class Preprocessor(IdentifierAwareVisitor):
             instructions=list(self.instructions),
             identifiers=self.identifiers,
             identifier_locations=self.identifier_locations,
+            attributes=self.attributes,
             builtins=self.builtins,
             auxiliary_info=self.auxiliary_info,
         )
@@ -747,6 +795,9 @@ Expected 'elm.element_type' to be a 'namespace'. Found: '{elm.element_type}'."""
             injections=injections,
         )
 
+    def visit_CodeElementTypeDef(self, elm: CodeElementTypeDef):
+        self.check_no_hints('Hints before "using" statements are not allowed.')
+
     def visit_CodeElementWith(self, elm: CodeElementWith):
         new_reference_states = dict(self.reference_states)
         for aliased_identifier in elm.identifiers:
@@ -777,8 +828,21 @@ Expected 'elm.element_type' to be a 'namespace'. Found: '{elm.element_type}'."""
             self.visit(elm.code_block)
 
     def visit_CodeElementWithAttr(self, elm: CodeElementWithAttr):
-        raise PreprocessorError(
-            "with_attr is not supported yet.", location=elm.attribute_name.location
+        start_pc = self.current_pc
+        # Retrieve the flow_tracking_data and accessible_scopes before visiting the code block.
+        flow_tracking_data = self.flow_tracking.get()
+        accessible_scopes = self.accessible_scopes.copy()
+        self.visit(elm.code_block)
+        end_pc = self.current_pc
+        self.attributes.append(
+            AttributeScope(
+                name=elm.attribute_name.name,
+                value=elm.get_value(),
+                start_pc=start_pc,
+                end_pc=end_pc,
+                flow_tracking_data=flow_tracking_data,
+                accessible_scopes=accessible_scopes,
+            )
         )
 
     @contextmanager
@@ -808,11 +872,9 @@ Expected 'elm.element_type' to be a 'namespace'. Found: '{elm.element_type}'."""
                 expr_a=elm.condition.a, expr_b=elm.condition.b, cond_eq=elm.condition.eq
             )
 
-        compound_expressions_code_elements, (res_cond_expr,) = process_compound_expressions(
+        (res_cond_expr,) = process_compound_expressions(
             [cond_expr], [SimplicityLevel.DEREF], context=self._compound_expression_context
         )
-        for code_element in compound_expressions_code_elements:
-            self.visit(code_element)
 
         # Prepare labels.
         assert elm.label_neq is not None
@@ -946,6 +1008,7 @@ Expected 'elm.element_type' to be a 'namespace'. Found: '{elm.element_type}'."""
         val, val_type = self.simplify_expr(elm.expr)
 
         assert_no_modifier(elm.typed_identifier)
+        self.check_reference_expression(val)
 
         if elm.typed_identifier.expr_type is not None:
             dst_type = self.resolve_type(elm.typed_identifier.expr_type)
@@ -957,6 +1020,7 @@ Expected 'elm.element_type' to be a 'namespace'. Found: '{elm.element_type}'."""
             dest_type=dst_type,
             identifier_manager=self.identifiers,
             cast_type=CastType.ASSIGN,
+            location=dst_type.location,
         ):
             raise PreprocessorError(
                 f"Cannot assign an expression of type '{val_type.format()}' "
@@ -1000,6 +1064,61 @@ Expected 'elm.element_type' to be a 'namespace'. Found: '{elm.element_type}'."""
             "Local variables are not supported outside of functions.", location=elm.location
         )
 
+    def get_expr_for_new_operator(self, new_expr: ExprNewOperator) -> Expression:
+        """
+        Given a new expression, pushes the inner expression onto the stack, calls get_ap
+        and returns a pointer to the inner expression on the stack.
+        """
+        location = new_expr.location
+
+        # Push new_expr.expr onto the stack.
+        inner_expr, inner_type = self.simplify_expr(new_expr.expr)
+        inner_exprs = self.simplified_expr_to_felt_expr_list(expr=inner_expr, expr_type=inner_type)
+        self.push_compound_expressions(compound_expressions=inner_exprs, location=location)
+
+        # Call get_ap().
+        code_elm_call = CodeElementInstruction(
+            instruction=InstructionAst(
+                body=CallLabelInstruction(
+                    label=ExprIdentifier(
+                        name="starkware.cairo.lang.compiler.lib.registers.get_ap", location=location
+                    ),
+                    location=location,
+                    fully_qualified_label=True,
+                ),
+                inc_ap=False,
+                location=location,
+            )
+        )
+        self.visit(code_elm_call)
+
+        inner_expr_size = self.get_size(cairo_type=inner_type)
+
+        # Create the expression that computes '[ap - 1] - inner_expr_size'.
+        # Note that here [ap - 1] is the value returned by get_ap().
+        current_ap_expr = create_simple_ref_expr(
+            reg=Register.AP,
+            offset=-1,
+            cairo_type=TypeFelt(location=location),
+            location=location,
+        )
+
+        expr: Expression = ExprOperator(
+            a=current_ap_expr,
+            op="-",
+            b=ExprConst(inner_expr_size, location=location),
+            location=location,
+        )
+
+        if new_expr.is_typed:
+            # Cast pointer_expr to the correct type.
+            expr = ExprCast(
+                expr=expr,
+                dest_type=TypePointer(pointee=inner_type, location=location),
+                location=location,
+            )
+        return expr
+
     def visit_CodeElementTemporaryVariable(self, elm: CodeElementTemporaryVariable):
         assert_no_modifier(elm.typed_identifier)
 
@@ -1016,14 +1135,15 @@ Expected 'elm.element_type' to be a 'namespace'. Found: '{elm.element_type}'."""
             src_size = self.get_size(dest_type)
 
             if isinstance(elm.expr, ExprHint):
-                if not isinstance(dest_type, TypeFelt):
+                if not isinstance(dest_type, (TypeFelt, TypePointer)):
                     raise PreprocessorError(
-                        "Hint tempvars must be of type felt.", location=elm.expr.location
+                        "Hint tempvars must be of type felt or a pointer.",
+                        location=elm.expr.location,
                     )
                 self.visit(
                     CodeElementHint(
                         hint=ExprHint(
-                            hint_code=f"memory[ap] = int({elm.expr.hint_code})",
+                            hint_code=f"memory[ap] = to_felt_or_relocatable({elm.expr.hint_code})",
                             n_prefix_newlines=0,
                             location=elm.location,
                         ),
@@ -1044,7 +1164,12 @@ Expected 'elm.element_type' to be a 'namespace'. Found: '{elm.element_type}'."""
                 ),
             )
         else:
-            expr, src_type = self.simplify_expr(elm.expr)
+            if isinstance(elm.expr, ExprNewOperator):
+                expr = self.get_expr_for_new_operator(elm.expr)
+            else:
+                expr = elm.expr
+
+            expr, src_type = self.simplify_expr(expr)
             src_size = self.get_size(src_type)
 
             if elm.typed_identifier.expr_type is None:
@@ -1056,6 +1181,7 @@ Expected 'elm.element_type' to be a 'namespace'. Found: '{elm.element_type}'."""
                     dest_type=dest_type,
                     identifier_manager=self.identifiers,
                     cast_type=CastType.ASSIGN,
+                    location=elm.location,
                 ):
                     raise PreprocessorError(
                         f"Cannot assign an expression of type '{src_type.format()}' "
@@ -1092,17 +1218,15 @@ Expected 'elm.element_type' to be a 'namespace'. Found: '{elm.element_type}'."""
         if self.auxiliary_info is not None:
             self.auxiliary_info.start_compound_assert_eq(lhs=instruction.a, rhs=instruction.b)
 
-        src_exprs = self.simplified_expr_to_felt_expr_list(expr=expr_a, expr_type=expr_type_a)
-        dst_exprs = self.simplified_expr_to_felt_expr_list(expr=expr_b, expr_type=expr_type_b)
+        dst_exprs = self.simplified_expr_to_felt_expr_list(expr=expr_a, expr_type=expr_type_a)
+        src_exprs = self.simplified_expr_to_felt_expr_list(expr=expr_b, expr_type=expr_type_b)
         original_ap_tracking = self.flow_tracking.get_ap_tracking()
 
-        for src, dst in safe_zip(src_exprs, dst_exprs):
+        for dst, src in safe_zip(dst_exprs, src_exprs):
             ap_diff = self.flow_tracking.get_ap_tracking() - original_ap_tracking
-            src = self.simplifier.visit(translate_ap(src, ap_diff))
             dst = self.simplifier.visit(translate_ap(dst, ap_diff))
-            compound_expressions_code_elements, (expr_a, expr_b) = process_compound_assert(
-                src, dst, self._compound_expression_context
-            )
+            src = self.simplifier.visit(translate_ap(src, ap_diff))
+            (expr_a, expr_b) = process_compound_assert(dst, src, self._compound_expression_context)
             assert_eq = CodeElementInstruction(
                 instruction=InstructionAst(
                     body=AssertEqInstruction(a=expr_a, b=expr_b, location=instruction.location),
@@ -1111,8 +1235,6 @@ Expected 'elm.element_type' to be a 'namespace'. Found: '{elm.element_type}'."""
                 )
             )
 
-            for code_element in compound_expressions_code_elements:
-                self.visit(code_element)
             self.visit(assert_eq)
 
         if self.auxiliary_info is not None:
@@ -1328,14 +1450,11 @@ Expected 'elm.element_type' to be a 'namespace'. Found: '{elm.element_type}'."""
         location - location to attach to errors if no finer location is relevant.
         """
         # Generate instructions.
-        compound_expressions_code_elements, simple_exprs = process_compound_expressions(
+        simple_exprs = process_compound_expressions(
             compound_expressions,
             SimplicityLevel.OPERATION,
             context=self._compound_expression_context,
         )
-
-        for code_element in compound_expressions_code_elements:
-            self.visit(code_element)
 
         assert len(simple_exprs) == len(compound_expressions)
         simple_exprs = self.optimize_expressions_for_push(simple_exprs)
@@ -1421,7 +1540,10 @@ Expected 'elm.element_type' to be a 'namespace'. Found: '{elm.element_type}'."""
             self.auxiliary_info.finish_return(exprs=elm.exprs)
 
     def check_tail_call_cast(
-        self, src_struct: StructDefinition, dest_struct: StructDefinition
+        self,
+        src_struct: StructDefinition,
+        dest_struct: StructDefinition,
+        location: Optional[Location],
     ) -> bool:
         """
         Checks if src_struct can be converted to dest_struct in the context of a tail call.
@@ -1438,6 +1560,7 @@ Expected 'elm.element_type' to be a 'namespace'. Found: '{elm.element_type}'."""
                 dest_type=dest_member.cairo_type,
                 identifier_manager=self.identifiers,
                 cast_type=CastType.ASSIGN,
+                location=location,
             ):
                 return False
 
@@ -1467,7 +1590,9 @@ Expected 'elm.element_type' to be a 'namespace'. Found: '{elm.element_type}'."""
             identifier_manager=self.identifiers,
         )
 
-        if not self.check_tail_call_cast(src_struct=src_struct, dest_struct=dest_struct):
+        if not self.check_tail_call_cast(
+            src_struct=src_struct, dest_struct=dest_struct, location=elm.location
+        ):
             raise PreprocessorError(
                 f"""\
 Cannot convert the return type of {func_name} to the return type of {self.current_scope[-1:]}.""",
@@ -1527,7 +1652,7 @@ Cannot convert the implicit arguments of {func_name} to the implicit arguments o
         implicit_args_struct = self.get_struct_definition(
             name=called_function + CodeElementFunction.IMPLICIT_ARGUMENT_SCOPE, location=location
         )
-        return_size = self.get_struct_size(
+        return_size = self.get_size_by_type_name(
             struct_name=called_function + CodeElementFunction.RETURN_SCOPE, location=location
         )
 
@@ -1671,6 +1796,9 @@ Cannot convert the implicit arguments of {func_name} to the implicit arguments o
             func_ident = None
             if isinstance(elm.func_call.call_inst, CallLabelInstruction):
                 func_ident = elm.func_call.call_inst.label
+                assert (
+                    not elm.func_call.call_inst.fully_qualified_label
+                ), "Expecting a relative label."
         elif isinstance(elm.func_call, RvalueFuncCall):
             # If the function name is the name of a struct, replace the
             # CodeElementReturnValueReference with a regular reference.
@@ -1778,6 +1906,7 @@ Expected {expected_len} unpacking identifier{suffix}, found {len(unpacking_ident
                 dest_type=cairo_type,
                 identifier_manager=self.identifiers,
                 cast_type=CastType.UNPACKING,
+                location=typed_identifier.location,
             ):
                 raise PreprocessorError(
                     f"""\
@@ -1862,7 +1991,11 @@ Expected expression of type '{member_def.cairo_type.format()}', got '{cairo_type
         self.add_label(elm.identifier)
 
         if self.auxiliary_info is not None:
-            _, label_full_name = self.get_label(elm.identifier.name, elm.identifier.location)
+            _, label_full_name = self.get_label(
+                label_name=elm.identifier.name,
+                fully_qualified_label=False,
+                location=elm.identifier.location,
+            )
             self.auxiliary_info.record_label(label_full_name=label_full_name)
 
     def visit_CodeElementHint(self, elm: CodeElementHint):
@@ -1912,7 +2045,11 @@ Expected expression of type '{member_def.cairo_type.format()}', got '{cairo_type
 
     def visit_JumpToLabelInstruction(self, instruction: JumpToLabelInstruction):
         label_name = instruction.label.name
-        label_pc, label_full_name = self.get_label(label_name, instruction.label.location)
+        label_pc, label_full_name = self.get_label(
+            label_name=label_name,
+            fully_qualified_label=False,
+            location=instruction.label.location,
+        )
 
         # Process instruction.
         res_instruction: InstructionBody
@@ -1990,7 +2127,11 @@ Expected expression of type '{member_def.cairo_type.format()}', got '{cairo_type
 
     def visit_CallLabelInstruction(self, instruction: CallLabelInstruction):
         label_name = instruction.label.name
-        label_pc, full_label_scope = self.get_label(label_name, instruction.label.location)
+        label_pc, full_label_scope = self.get_label(
+            label_name=label_name,
+            fully_qualified_label=instruction.fully_qualified_label,
+            location=instruction.label.location,
+        )
 
         # If the function has a known reg change, use it.
         ap_change = RegChangeUnknown()
@@ -2052,6 +2193,7 @@ Expected expression of type '{member_def.cairo_type.format()}', got '{cairo_type
             expr=expr,
             get_identifier_callback=self.get_variable,
             resolve_type_callback=self.resolve_type,
+            get_struct_members_callback=self.get_struct_members,
         )
         expr, expr_type = simplify_type_system(expr, identifiers=self.identifiers)
         return self.simplifier.visit(expr), self.resolve_type(expr_type)
@@ -2062,7 +2204,7 @@ Expected expression of type '{member_def.cairo_type.format()}', got '{cairo_type
         to felt (felt or pointer) and it does not return the type.
         """
         expr, expr_type = self.simplify_expr(expr)
-        if not isinstance(expr_type, (TypeFelt, TypePointer)):
+        if not isinstance(expr_type, (TypeFelt, TypePointer, TypeCodeoffset)):
             raise PreprocessorError(
                 f"Expected a 'felt' or a pointer type. Got: '{expr_type.format()}'.",
                 location=expr.location,
@@ -2087,6 +2229,7 @@ Expected expression of type '{member_def.cairo_type.format()}', got '{cairo_type
             dest_type=expected_type,
             identifier_manager=self.identifiers,
             cast_type=CastType.ASSIGN,
+            location=location,
         ):
             raise PreprocessorError(
                 f"""\
@@ -2104,12 +2247,12 @@ Expected expression of type '{expected_type.format()}', got '{expr_type.format()
         that can be passed to process_compound_expressions.
         """
 
-        if isinstance(expr_type, (TypeFelt, TypePointer)):
+        if isinstance(expr_type, (TypeFelt, TypePointer, TypeCodeoffset)):
             return [expr]
 
         # Get the list of member types.
         if isinstance(expr_type, TypeTuple):
-            member_types = expr_type.members
+            member_types = expr_type.types
         elif isinstance(expr_type, TypeStruct):
             struct_definition = get_struct_definition(
                 expr_type.scope, identifier_manager=self.identifiers
@@ -2156,16 +2299,24 @@ Expected expression of type '{expected_type.format()}', got '{expr_type.format()
         return expr_list
 
     def get_label(
-        self, label_name: str, location: Optional[Location]
+        self, label_name: str, fully_qualified_label: bool, location: Optional[Location]
     ) -> Tuple[Optional[int], Optional[ScopedName]]:
         """
         Returns a pair (pc, canonical_name) for the given label, or (None, None) if this label
         hasn't been processed yet.
+
+        fully_qualified_label indicates that 'label_name' is a fully qualified identifier,
+        rather than a relative one.
         """
         try:
-            search_result = self.identifiers.search(
-                accessible_scopes=self.accessible_scopes, name=ScopedName.from_string(label_name)
-            )
+            scoped_name = ScopedName.from_string(label_name)
+            if fully_qualified_label:
+                search_result = self.identifiers.get(name=scoped_name)
+            else:
+                search_result = self.identifiers.search(
+                    accessible_scopes=self.accessible_scopes,
+                    name=scoped_name,
+                )
             search_result.assert_fully_parsed()
         except IdentifierError as exc:
             raise PreprocessorError(str(exc), location=location)
@@ -2181,7 +2332,7 @@ Expected expression of type '{expected_type.format()}', got '{expr_type.format()
             )
         return search_result.identifier_definition.pc, search_result.canonical_name
 
-    def get_variable(self, var: ExprIdentifier):
+    def get_variable(self, var: ExprIdentifier) -> Union[int, Expression]:
         identifier_definition = self.search_identifier(var.name, var.location)
         # Check that identifier_definition is not None for mypy.
         assert identifier_definition is not None
@@ -2189,7 +2340,7 @@ Expected expression of type '{expected_type.format()}', got '{expr_type.format()
         if isinstance(identifier_definition, FutureIdentifierDefinition):
             if identifier_definition.identifier_type in [LabelDefinition, FunctionDefinition]:
                 # Allow future label assignment.
-                return ExprFutureLabel(identifier=var)
+                return ExprFutureLabel(identifier=var, is_typed=True, location=var.location)
             raise PreprocessorError(
                 f"Identifier '{var.name}' referenced before definition.", location=var.location
             )
@@ -2197,11 +2348,16 @@ Expected expression of type '{expected_type.format()}', got '{expr_type.format()
         if isinstance(identifier_definition, ConstDefinition):
             return identifier_definition.value
 
-        if isinstance(identifier_definition, LabelDefinition):
-            return identifier_definition.pc
-
         if isinstance(identifier_definition, MemberDefinition):
             return identifier_definition.offset
+
+        if isinstance(identifier_definition, LabelDefinition):
+            location = var.location
+            return ExprCast(
+                expr=ExprConst(identifier_definition.pc, location=location),
+                dest_type=TypeCodeoffset(location=location),
+                location=location,
+            )
 
         if isinstance(identifier_definition, (ReferenceDefinition, OffsetReferenceDefinition)):
             try:
@@ -2249,11 +2405,14 @@ Expected expression of type '{expected_type.format()}', got '{expr_type.format()
             raise NotImplementedError(
                 f"Unsupported identifier type {type(identifier_definition).__name__}."
             )
+        location = None
+        if len(parent.references[0].locations) > 0:
+            location = parent.references[0].locations[-1]
         expr = create_simple_ref_expr(
             reg=Register.FP,
             offset=0,
             cairo_type=parent.cairo_type,
-            location=None,
+            location=location,
         )
         if isinstance(identifier_definition, OffsetReferenceDefinition):
             for member_name in identifier_definition.member_path.path:
@@ -2303,6 +2462,16 @@ Expected expression of type '{expected_type.format()}', got '{expr_type.format()
         self.scoped_temp_ids[self.current_scope + name] = True
         return name
 
+    def get_struct_members(self, struct_type: TypeStruct) -> List[str]:
+        """
+        Returns the list of members of the given struct.
+        """
+        struct_definition = self.identifiers.get_by_full_name(name=struct_type.resolved_scope)
+        assert isinstance(
+            struct_definition, StructDefinition
+        ), f"Expected StructDefinition, found: {type(struct_definition).__name__}."
+        return list(struct_definition.members.keys())
+
     def _add_next_hint(self, hint: CodeElementHint):
         self.next_instruction_hints.append((hint, self.flow_tracking.get()))
 
@@ -2329,3 +2498,9 @@ class PreprocessorCompoundExpressionContext(CompoundExpressionContext):
                 "Using the value of fp directly, requires defining a variable named __fp__.",
                 location=exc.location,
             )
+
+    def visit(self, elm: CodeElement):
+        self.preprocessor.visit(elm)
+
+    def get_ap_tracking(self) -> RegTrackingData:
+        return self.preprocessor.flow_tracking.get_ap_tracking()

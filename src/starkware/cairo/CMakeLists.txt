@@ -1,4 +1,4 @@
-add_subdirectory(bootloader)
+add_subdirectory(bootloaders)
 add_subdirectory(common)
 add_subdirectory(docs)
 add_subdirectory(lang)

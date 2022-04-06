@@ -61,7 +61,10 @@ end
 
 # Verifies that 0 <= a <= b.
 #
-# Prover assumption: a, b < RANGE_CHECK_BOUND.
+# Prover assumption: b < RANGE_CHECK_BOUND.
+#
+# This function is still sound without the prover assumptions. In that case, it is guaranteed
+# that a < RANGE_CHECK_BOUND and b < 2 * RANGE_CHECK_BOUND.
 func assert_nn_le{range_check_ptr}(a, b):
     assert_nn(a)
     assert_le(a, b)
@@ -69,6 +72,10 @@ func assert_nn_le{range_check_ptr}(a, b):
 end
 
 # Asserts that value is in the range [lower, upper).
+# Or more precisely:
+# (0 <= value - lower < RANGE_CHECK_BOUND) and (0 <= upper - 1 - value < RANGE_CHECK_BOUND).
+#
+# Prover assumption: 0 <= upper - lower <= RANGE_CHECK_BOUND.
 func assert_in_range{range_check_ptr}(value, lower, upper):
     assert_le(lower, value)
     assert_le(value, upper - 1)
@@ -111,6 +118,7 @@ end
 # The unsigned integer lift is the unique integer in the range [0, PRIME) that represents the field
 # element.
 # For example, if value=17 * 2^128 + 8, then high=17 and low=8.
+@known_ap_change
 func split_felt{range_check_ptr}(value) -> (high, low):
     # Note: the following code works because PRIME - 1 is divisible by 2**128.
     const MAX_HIGH = (-1) / 2 ** 128
@@ -133,7 +141,7 @@ func split_felt{range_check_ptr}(value) -> (high, low):
     if high == MAX_HIGH:
         assert_le(low, MAX_LOW)
     else:
-        assert_le(high, MAX_HIGH)
+        assert_le(high, MAX_HIGH - 1)
     end
     return (high=high, low=low)
 end
@@ -141,15 +149,27 @@ end
 # Asserts that the unsigned integer lift (as a number in the range [0, PRIME)) of a is lower than
 # or equal to that of b.
 # See split_felt() for more details.
+@known_ap_change
 func assert_le_felt{range_check_ptr}(a, b):
+    alloc_locals
+    local small_inputs
     %{
         from starkware.cairo.common.math_utils import assert_integer
         assert_integer(ids.a)
         assert_integer(ids.b)
-        assert (ids.a % PRIME) <= (ids.b % PRIME), \
-            f'a = {ids.a % PRIME} is not less than or equal to b = {ids.b % PRIME}.'
+        a = ids.a % PRIME
+        b = ids.b % PRIME
+        assert a <= b, f'a = {a} is not less than or equal to b = {b}.'
+
+        ids.small_inputs = int(
+            a < range_check_builtin.bound and (b - a) < range_check_builtin.bound)
     %}
-    alloc_locals
+    if small_inputs != 0:
+        assert_nn_le(a, b)
+        ap += 33
+        return ()
+    end
+
     let (local a_high, local a_low) = split_felt(a)
     let (b_high, b_low) = split_felt(b)
 
@@ -163,6 +183,7 @@ end
 
 # Asserts that the unsigned integer lift (as a number in the range [0, PRIME)) of a is lower than
 # that of b.
+@known_ap_change
 func assert_lt_felt{range_check_ptr}(a, b):
     %{
         from starkware.cairo.common.math_utils import assert_integer
@@ -254,7 +275,7 @@ func unsigned_div_rem{range_check_ptr}(value, div) -> (q, r):
     return (q, r)
 end
 
-# Returns q and r such that. -bound <= q < bound, 0 <= r < div -1 and value = q * div + r.
+# Returns q and r such that. -bound <= q < bound, 0 <= r < div and value = q * div + r.
 # value < PRIME / 2 is considered positive and value > PRIME / 2 is considered negative.
 #
 # Assumptions:
@@ -319,5 +340,39 @@ func split_int{range_check_ptr}(value, n, base, bound, output : felt*):
     assert_nn_le(low_part, bound - 1)
 
     return split_int(
-        value=(value - low_part) / base, n=n - 1, base=base, bound=bound, output=output + 1)
+        value=(value - low_part) / base, n=n - 1, base=base, bound=bound, output=output + 1
+    )
+end
+
+# Returns the floor value of the square root of the given value.
+# Assumptions: 0 <= value < 2**250.
+func sqrt{range_check_ptr}(value) -> (res):
+    alloc_locals
+    local root : felt
+
+    %{
+        from starkware.python.math_utils import isqrt
+        value = ids.value % PRIME
+        assert value < 2 ** 250, f"value={value} is outside of the range [0, 2**250)."
+        assert 2 ** 250 < PRIME
+        ids.root = isqrt(value)
+    %}
+
+    assert_nn_le(root, 2 ** 125 - 1)
+    tempvar root_plus_one = root + 1
+    assert_in_range(value, root * root, root_plus_one * root_plus_one)
+
+    return (res=root)
+end
+
+# Computes the evaluation of a polynomial on the given point.
+func horner_eval(n_coefficients : felt, coefficients : felt*, point : felt) -> (res : felt):
+    if n_coefficients == 0:
+        return (res=0)
+    end
+
+    let (n_minus_one_res) = horner_eval(
+        n_coefficients=n_coefficients - 1, coefficients=&coefficients[1], point=point
+    )
+    return (res=n_minus_one_res * point + [coefficients])
 end

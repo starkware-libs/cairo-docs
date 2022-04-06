@@ -7,7 +7,7 @@ In order to follow this tutorial you should have basic familiarity with writing
 Cairo code. For example, you can read the first few pages of the
 ":ref:`Hello, Cairo <hello_cairo>`" tutorial.
 You should also :ref:`set up your environment <quickstart>` and make sure your
-installed Cairo version is at least ``0.6.0``
+installed Cairo version is at least ``0.8.1``
 (you can check your version by running ``cairo-compile --version``).
 
 .. _first_contract:
@@ -19,10 +19,8 @@ Let's start by looking at the following StarkNet contract:
 
 .. tested-code:: cairo first_starknet_contract
 
-    # Declare this file as a StarkNet contract and set the required
-    # builtins.
+    # Declare this file as a StarkNet contract.
     %lang starknet
-    %builtins pedersen range_check
 
     from starkware.cairo.common.cairo_builtins import HashBuiltin
 
@@ -34,8 +32,10 @@ Let's start by looking at the following StarkNet contract:
     # Increases the balance by the given amount.
     @external
     func increase_balance{
-            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
-            range_check_ptr}(amount : felt):
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(amount : felt):
         let (res) = balance.read()
         balance.write(res + amount)
         return ()
@@ -44,8 +44,10 @@ Let's start by looking at the following StarkNet contract:
     # Returns the current balance.
     @view
     func get_balance{
-            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
-            range_check_ptr}() -> (res : felt):
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }() -> (res : felt):
         let (res) = balance.read()
         return (res)
     end
@@ -55,8 +57,9 @@ file, rather than a regular Cairo program file. Trying to compile this file with
 will result in a compilation error. Compiling StarkNet contracts should be done with the
 ``starknet-compile`` command as we shall see below.
 
-Next, we have the ``%builtins`` directive and two import statements. If you're not familiar with
-these types of statements, refer to the ":ref:`Hello, Cairo <hello_cairo>`" tutorial.
+Next, we have two import statements. If you're not familiar with
+this type of statement, refer to the ":ref:`Hello, Cairo <hello_cairo>`" tutorial.
+Note that you don't need to explicitly use the ``%builtins`` directive in StarkNet contracts.
 
 The first new primitive that we see in the code is ``@storage_var``.
 Unlike a Cairo program, which is stateless, StarkNet contracts have a state,
@@ -90,7 +93,7 @@ The only difference is that the method is *annotated* as a method that only quer
 rather than modifying it.
 Note that in the current version this is not enforced by the compiler.
 
-Consider the four implicit arguments:
+Consider the three implicit arguments:
 ``syscall_ptr``, ``pedersen_ptr`` and ``range_check_ptr``:
 
 1.  You should be familiar with ``pedersen_ptr``, which allows to compute the Pedersen
@@ -187,12 +190,12 @@ Deploy the contract on the StarkNet testnet
 -------------------------------------------
 
 In order to instruct the CLI to work with the StarkNet testnet you should either
-pass ``--network=alpha`` on every use, or set the ``STARKNET_NETWORK`` environment variable
+pass ``--network=alpha-goerli`` on every use, or set the ``STARKNET_NETWORK`` environment variable
 as follows:
 
 .. tested-code:: bash starknet_env
 
-    export STARKNET_NETWORK=alpha
+    export STARKNET_NETWORK=alpha-goerli
 
 **Important note**: The alpha release is an experimental release. Newer versions may
 require a reset of the network's state (resulting in the removal of the deployed contracts).
@@ -214,16 +217,22 @@ The output should look like:
 You can see here the address of your new contract. You'll need this address to interact with
 the contract.
 
+Set the following environment variable:
+
+.. tested-code:: bash intro_contract_address
+
+    # The deployment address of the previous contract.
+    export CONTRACT_ADDRESS="<address of the previous contract>"
+
 Interact with the contract
 --------------------------
 
-Run the following command to invoke the ``increase_balance()`` function (note that you'll
-have to replace ``CONTRACT_ADDRESS`` with the address you got during the contract deployment):
+Run the following command to invoke the ``increase_balance()``:
 
 .. tested-code:: bash starknet_invoke
 
     starknet invoke \
-        --address CONTRACT_ADDRESS \
+        --address ${CONTRACT_ADDRESS} \
         --abi contract_abi.json \
         --function increase_balance \
         --inputs 1234
@@ -235,7 +244,6 @@ The result should look like:
     Invoke transaction was sent.
     Contract address: 0x05a4d278dceae5ff055796f1f59a646f72628730b7d72acb5483062cb1ce82dd
     Transaction hash: 0x69d743891f69d758928e163eff1e3d7256752f549f134974d4aa8d26d5d7da8
-
 
 .. _tx_status:
 
@@ -253,7 +261,7 @@ The result should look like:
 
     {
         "block_hash": "0x0",
-        "tx_status": "PENDING"
+        "tx_status": "ACCEPTED_ON_L2"
     }
 
 The possible statuses are:
@@ -261,12 +269,14 @@ The possible statuses are:
 *   ``NOT_RECEIVED``:
     The transaction has not been received yet (i.e., not written to storage).
 *   ``RECEIVED``:
-    The transaction was received by the operator.
+    The transaction was received by the sequencer.
 *   ``PENDING``:
-    The transaction passed the validation and is waiting to be sent on-chain.
+    The transaction passed the validation and entered the pending block.
 *   ``REJECTED``:
     The transaction failed validation and thus was skipped.
-*   ``ACCEPTED_ONCHAIN``:
+*   ``ACCEPTED_ON_L2``:
+    The transaction passed the validation and entered an actual created block.
+*   ``ACCEPTED_ON_L1``:
     The transaction was accepted on-chain.
 
 Query the balance
@@ -277,7 +287,7 @@ Use the following command to query the current balance:
 .. tested-code:: bash starknet_call
 
     starknet call \
-        --address CONTRACT_ADDRESS \
+        --address ${CONTRACT_ADDRESS} \
         --abi contract_abi.json \
         --function get_balance
 
@@ -288,7 +298,7 @@ The result should be:
     1234
 
 Note that to see the up-to-date balance you should wait until the ``increase_balance``
-transaction status is at least ``PENDING`` (that is, ``PENDING`` or ``ACCEPTED_ONCHAIN``).
+transaction status is at least ``ACCEPTED_ON_L2`` (that is, ``ACCEPTED_ON_L2`` or ``ACCEPTED_ON_L1``).
 Otherwise, you'll see the balance before the execution of the ``increase_balance`` transaction
 (that is, 0).
 

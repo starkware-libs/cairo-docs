@@ -45,7 +45,7 @@ The other direction is similar:
 
 1.  The L1 contract calls (on L1) the ``send_message()`` function of the StarkNet
     core contract, which stores the message.
-    In this case the message include an additional field - the "selector", which determines
+    In this case the message includes an additional field - the "selector", which determines
     what function to call in the corresponding L2 contract.
 2.  The StarkNet Sequencer automatically consumes the message and invokes the requested
     L2 function of the contract designated by the "to" address.
@@ -79,12 +79,11 @@ which will decrease their L2 balance and increase their L1 balance in return.
 Some preparations
 *****************
 
-Start with the ``%lang`` and ``%builtins`` directives, a few imports and a few constants:
+Start with the ``%lang`` directive, a few imports and a few constants:
 
 .. tested-code:: cairo l1l2_header
 
     %lang starknet
-    %builtins pedersen range_check
 
     from starkware.cairo.common.alloc import alloc
     from starkware.cairo.common.cairo_builtins import HashBuiltin
@@ -110,8 +109,10 @@ Then, define the storage variable that holds the balances, together with a gette
 
     @view
     func get_balance{
-            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
-            range_check_ptr}(user : felt) -> (balance : felt):
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(user : felt) -> (balance : felt):
         let (res) = balance.read(user=user)
         return (res)
     end
@@ -124,8 +125,10 @@ effectively "print" money. In addition, you'll want to check that ``amount`` is 
 
     @external
     func increase_balance{
-            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
-            range_check_ptr}(user : felt, amount : felt):
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(user : felt, amount : felt):
         let (res) = balance.read(user=user)
         balance.write(user, res + amount)
         return ()
@@ -145,8 +148,10 @@ when doing so.
 
     @external
     func withdraw{
-            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
-            range_check_ptr}(user : felt, amount : felt):
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(user : felt, amount : felt):
         # Make sure 'amount' is positive.
         assert_nn(amount)
 
@@ -167,7 +172,8 @@ when doing so.
         send_message_to_l1(
             to_address=L1_CONTRACT_ADDRESS,
             payload_size=3,
-            payload=message_payload)
+            payload=message_payload,
+        )
 
         return ()
     end
@@ -205,9 +211,10 @@ L1 handler:
 
     @l1_handler
     func deposit{
-            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
-            range_check_ptr}(
-            from_address : felt, user : felt, amount : felt):
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(from_address : felt, user : felt, amount : felt):
         # Make sure the message was sent by the intended L1 contract.
         assert from_address = L1_CONTRACT_ADDRESS
 
@@ -261,7 +268,7 @@ Compile and deploy the contract:
 
     starknet deploy --contract l1l2_compiled.json
 
-Don't forget to set the ``STARKNET_NETWORK`` environment variable to ``alpha``
+Don't forget to set the ``STARKNET_NETWORK`` environment variable to ``alpha-goerli``
 before running ``starknet deploy``.
 
 Set the following environment variable:
@@ -315,8 +322,6 @@ You should get:
 .. tested-code:: bash l1l2_get_balance_output
 
     2333
-
-.. TODO(lior, 15/07/2021): Add the deployed contract address once the example contract is deployed.
 
 Wait for the transaction to be accepted on-chain (this may take some time) -- you can
 use ``starknet tx_status`` to track the transaction's progress.

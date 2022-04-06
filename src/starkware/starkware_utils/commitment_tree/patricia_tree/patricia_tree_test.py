@@ -5,7 +5,7 @@ from typing import Iterable, Set, Tuple
 import pytest
 from queue import Queue
 
-from starkware.crypto.signature.fast_pedersen_hash import async_pedersen_hash_func
+from starkware.crypto.signature.fast_pedersen_hash import pedersen_hash_func
 from starkware.python.random_test import parametrize_random_object
 from starkware.python.utils import from_bytes, to_bytes
 from starkware.starkware_utils.commitment_tree.binary_fact_tree import BinaryFactDict
@@ -16,16 +16,16 @@ from starkware.starkware_utils.commitment_tree.patricia_tree.nodes import (
 )
 from starkware.starkware_utils.commitment_tree.patricia_tree.patricia_tree import PatriciaTree
 from starkware.storage.storage import FactFetchingContext
-from starkware.storage.storage_utils import LeafFact
+from starkware.storage.storage_utils import SimpleLeafFact
 from starkware.storage.test_utils import MockStorage
 
 
 @pytest.fixture
 def ffc() -> FactFetchingContext:
-    return FactFetchingContext(storage=MockStorage(), hash_func=async_pedersen_hash_func)
+    return FactFetchingContext(storage=MockStorage(), hash_func=pedersen_hash_func)
 
 
-async def hash_preimage(preimage: Tuple[int, ...]) -> int:
+def hash_preimage(preimage: Tuple[int, ...]) -> int:
     """
     Preimages have variadic length.
 
@@ -38,7 +38,7 @@ async def hash_preimage(preimage: Tuple[int, ...]) -> int:
     else:
         length, path, bottom = preimage
         node_fact = EdgeNodeFact(bottom_node=to_bytes(bottom), edge_path=path, edge_length=length)
-    return from_bytes(await node_fact._hash(hash_func=async_pedersen_hash_func))
+    return from_bytes(node_fact._hash(hash_func=pedersen_hash_func))
 
 
 def verify_leaves_are_reachable_from_root(
@@ -86,11 +86,13 @@ async def test_update_and_decommit(
     """
     Builds a Patricia tree using update(), and tests that the facts stored suffice to decommit.
     """
-    tree = await PatriciaTree.empty_tree(ffc=ffc, height=height, leaf_fact=LeafFact(value=0))
+    tree = await PatriciaTree.empty_tree(ffc=ffc, height=height, leaf_fact=SimpleLeafFact(value=0))
 
     # Create some random modifications, store the facts and update the tree.
     # Note that leaves with value 0 are not modifications (hence, range(1, ...)).
-    leaves = [LeafFact(value=value) for value in random_object.choices(range(1, 1000), k=n_leaves)]
+    leaves = [
+        SimpleLeafFact(value=value) for value in random_object.choices(range(1, 1000), k=n_leaves)
+    ]
     leaf_hashes_bytes = await asyncio.gather(*(leaf_fact.set_fact(ffc=ffc) for leaf_fact in leaves))
     leaf_hashes = [from_bytes(leaf_hash_bytes) for leaf_hash_bytes in leaf_hashes_bytes]
     indices = random_object.sample(range(2 ** height), k=n_leaves)
@@ -102,7 +104,7 @@ async def test_update_and_decommit(
     # Sanity check - the hash of the values should be the keys.
     for fact, preimage in preimages.items():
         assert (
-            await hash_preimage(preimage=preimage) == fact
+            hash_preimage(preimage=preimage) == fact
         ), f"Corrupted preimages: hash of {preimage} is not {fact}."
 
     # Verify that the root can be reached using the preimages, from every leaf.

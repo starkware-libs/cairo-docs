@@ -61,7 +61,8 @@ We can use :ref:`typed_references` with the type ``HashBuiltin`` from
     from starkware.cairo.common.cairo_builtins import HashBuiltin
 
     func hash2(hash_ptr : HashBuiltin*, x, y) -> (
-            hash_ptr : HashBuiltin*, z):
+        hash_ptr : HashBuiltin*, z
+    ):
         let hash = hash_ptr
         # Invoke the hash function.
         hash.x = x
@@ -162,7 +163,8 @@ You can call ``hash2()`` in a few ways:
         from starkware.cairo.common.hash import hash2
 
         func foo(hash_ptr : HashBuiltin*) -> (
-                hash_ptr : HashBuiltin*, z):
+            hash_ptr : HashBuiltin*, z
+        ):
             # Use a with-statement, since 'hash_ptr' is not an
             # implicit argument.
             with hash_ptr:

@@ -17,8 +17,9 @@ import marshmallow_dataclass
 
 from starkware.cairo.lang.compiler.program import StrippedProgram, is_valid_builtin_name
 from starkware.cairo.lang.vm.memory_dict import MemoryDict
+from starkware.cairo.lang.vm.memory_segments import is_valid_memory_addr, is_valid_memory_value
 from starkware.cairo.lang.vm.relocatable import RelocatableValue
-from starkware.python.utils import add_counters, sub_counters
+from starkware.python.utils import add_counters, multiply_counter_by_scalar, sub_counters
 
 DEFAULT_CAIRO_PIE_VERSION = "1.0"
 CURRENT_CAIRO_PIE_VERSION = "1.1"
@@ -126,7 +127,7 @@ class ExecutionResources:
 
     n_steps: int
     builtin_instance_counter: Dict[str, int]
-    n_memory_holes: int = field(metadata=dict(marshmallow_field=mfields.Integer(missing=0)))
+    n_memory_holes: int = field(metadata=dict(marshmallow_field=mfields.Integer(load_default=0)))
     Schema: ClassVar[Type[marshmallow.Schema]] = marshmallow.Schema
 
     def run_validity_checks(self):
@@ -156,14 +157,28 @@ class ExecutionResources:
         diff_builtin_instance_counter = sub_counters(
             self.builtin_instance_counter, other.builtin_instance_counter
         )
-        diff_execution_resources = ExecutionResources(
+        return ExecutionResources(
             n_steps=self.n_steps - other.n_steps,
             builtin_instance_counter=diff_builtin_instance_counter,
             n_memory_holes=self.n_memory_holes - other.n_memory_holes,
         )
-        diff_execution_resources.run_validity_checks()
 
-        return diff_execution_resources
+    def __mul__(self, other: int) -> "ExecutionResources":
+        if not isinstance(other, int):
+            return NotImplemented
+
+        total_builtin_instance_counter = multiply_counter_by_scalar(
+            scalar=other, counter=self.builtin_instance_counter
+        )
+
+        return ExecutionResources(
+            n_steps=other * self.n_steps,
+            builtin_instance_counter=total_builtin_instance_counter,
+            n_memory_holes=other * self.n_memory_holes,
+        )
+
+    def __rmul__(self, other: int) -> "ExecutionResources":
+        return self * other
 
     @classmethod
     def empty(cls):
@@ -171,6 +186,12 @@ class ExecutionResources:
 
     def copy(self) -> "ExecutionResources":
         return copy.deepcopy(self)
+
+    def to_dict(self) -> Dict[str, int]:
+        return dict(
+            **self.builtin_instance_counter,
+            n_steps=self.n_steps + self.n_memory_holes,
+        )
 
 
 @dataclasses.dataclass
@@ -290,29 +311,13 @@ class CairoPie:
 
     def run_memory_validity_checks(self):
         segment_sizes = self.metadata.segment_sizes()
-
-        def is_valid_memory_addr(addr, allow_end_of_segment: bool = False):
-            """
-            Returns True if addr is a relocatable value, such that its segment index appears in
-            segment_sizes and its offset is in the valid range (if allow_end_of_segment=True, offset
-            may refer to the next cell *after* the segment).
-            """
-            return (
-                isinstance(addr, RelocatableValue)
-                and isinstance(addr.segment_index, int)
-                and isinstance(addr.offset, int)
-                and addr.segment_index in segment_sizes
-                and 0
-                <= addr.offset
-                < segment_sizes[addr.segment_index] + (1 if allow_end_of_segment else 0)
-            )
-
-        def is_valid_memory_value(value):
-            return isinstance(value, int) or is_valid_memory_addr(value, allow_end_of_segment=True)
-
         for addr, value in self.memory.items():
-            assert is_valid_memory_addr(addr), "Invalid memory cell address."
-            assert is_valid_memory_value(value), f"Invalid memory cell value."
+            assert is_valid_memory_addr(
+                addr=addr, segment_sizes=segment_sizes
+            ), "Invalid memory cell address."
+            assert is_valid_memory_value(
+                value=value, segment_sizes=segment_sizes
+            ), "Invalid memory cell value."
 
     @classmethod
     def verify_zip_format(cls, zf: zipfile.ZipFile):

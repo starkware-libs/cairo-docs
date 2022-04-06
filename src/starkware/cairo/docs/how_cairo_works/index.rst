@@ -17,6 +17,9 @@ take a look at the :ref:`"Hello, Cairo" tutorial <hello_cairo>`.
     program_counter
     consts
     functions
+    types
+    object_allocation
+    scope_attributes
     imports
     hints
     program_input_and_output

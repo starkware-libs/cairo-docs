@@ -52,11 +52,14 @@ Type system
 
 Cairo have the following types:
 
-* ``felt`` -- a field element (see :ref:`field_elements`).
-* ``MyStruct`` where ``MyStruct`` is a :ref:`struct <syntax_structs>` name.
-* A tuple -- For example ``(a, b)`` where ``a`` and ``b`` are types (see :ref:`syntax_tuples`).
-* ``T*`` where ``T`` is any type -- a pointer to type ``T``. For example: ``MyStruct*`` or
-  ``felt**``.
+*   ``felt`` -- a field element (see :ref:`field_elements`).
+*   ``MyStruct`` where ``MyStruct`` is a :ref:`struct <syntax_structs>` name.
+*   An unnamed tuple -- For example: ``(a, b)`` where ``a`` and ``b`` are types
+    (see :ref:`syntax_tuples`).
+*   A named tuple -- For example: ``(x : a, y : b)`` where ``a`` and ``b`` are types
+    (see :ref:`syntax_tuples`).
+*   ``T*`` where ``T`` is any type -- a pointer to type ``T``. For example: ``MyStruct*`` or
+    ``felt**``.
 
 Expressions
 -----------
@@ -249,7 +252,8 @@ follows:
 .. tested-code:: cairo struct-constructor0
 
     let struct_instance = MyStruct(
-        first_member=value0, second_member=value1)
+        first_member=value0, second_member=value1
+    )
 
 Members must be declared in order of appearance. Struct constructors may be nested as follows:
 
@@ -330,7 +334,7 @@ nested tuple elements as shown below.
     local tuple0 : (felt, felt, felt) = (7, 9, 13)
     local tuple1 : (felt) = (5,)  # (5) is not a valid tuple.
     # A named tuple does not require a trailing comma.
-    local tuple2 : (felt) = (a=5)
+    local tuple2 : (a : felt) = (a=5)
     # Tuple contains another tuple.
     local tuple3 : (felt, (felt, felt, felt), felt) = (1, tuple0, 5)
     local tuple4 : ((felt, (felt, felt, felt), felt), felt, felt) = (
@@ -355,8 +359,8 @@ You can define a function as follows:
 .. tested-code:: cairo syntax_function
 
     func func_name{implicit_arg1 : felt, implicit_arg2 : felt*}(
-            arg1 : felt, arg2 : MyStruct*) -> (
-            ret1 : felt, fet2 : felt):
+        arg1 : felt, arg2 : MyStruct*
+    ) -> (ret1 : felt, fet2 : felt):
         # Function body.
     end
 
@@ -433,6 +437,20 @@ Option (3) unpacks the return value into ``ret1`` and ``ret2``.
 Option (4) is a tail recursion -- after ``foo`` returns, the calling function returns the
 same return value.
 
+Scope attributes
+----------------
+
+You can define a string attribute for a code block by surrounding it with a ``with_attr`` statement
+as follows:
+
+.. tested-code:: cairo syntax_with_attr
+
+    with_attr attribute_name("Attribute value"):
+        # Code block.
+    end
+
+See :ref:`scope_attributes` for more information.
+
 Library imports
 ---------------
 
@@ -447,8 +465,53 @@ See :ref:`import_search_path` for more information.
 
     %builtins output pedersen
     from starkware.cairo.common.math import (
-        assert_not_zero, assert_not_equal)
+        assert_not_zero,
+        assert_not_equal,
+    )
     from starkware.cairo.common.registers import get_ap
+
+.. _syntax_implicit_arguments:
+
+Implicit arguments
+------------------
+
+Implicit arguments are specified as part of the function signature, and are declared
+inside curly braces ``{implicit_arg_name}``. Implicit arguments are automatically added as an
+argument and a return value to the function. The Cairo compiler takes care to return the
+current binding of the reference
+``implicit_arg_name``. If no implicit arguments are required the braces can be omitted.
+
+.. tested-code:: cairo syntax_implicit_arguments0
+
+    %builtins output
+
+    func serialize_word{output_ptr : felt*}(value : felt):
+        assert [output_ptr] = value
+        let output_ptr = output_ptr + 1
+        # The current binding for output_ptr is implicitly
+        # added as a returned value.
+        return ()
+    end
+
+The function above, which is available in the common library, accepts an impicit argument,
+``output_ptr``, whose new binding is implicitly added as a return value.
+
+.. tested-code:: cairo syntax_implicit_arguments1
+
+    func main{output_ptr : felt*}():
+        alloc_locals
+        local start_output_ptr : felt* = output_ptr
+        serialize_word(value=5)
+        # The compiler automatically rebinds the name of the given
+        # implicit argument to the function's implicit return value.
+        assert output_ptr = start_output_ptr + 1
+        return ()
+    end
+
+Note that it was not necessary to explicitly pass the implicit argument via
+``serialize_word{output_ptr=output_ptr}(value=5)``, since the parent function ``main()``
+already has a binding for ``output_ptr`` and the compiler will automatically pass it to
+``serialize_word()``. For more information, see :ref:`implicit_arguments`.
 
 Builtins
 --------
@@ -493,12 +556,18 @@ the convention:
     %builtins output pedersen range_check ecdsa bitwise
 
     from starkware.cairo.common.cairo_builtins import (
-        BitwiseBuiltin, HashBuiltin, SignatureBuiltin)
+        BitwiseBuiltin,
+        HashBuiltin,
+        SignatureBuiltin,
+    )
 
     func main{
-            output_ptr : felt*, pedersen_ptr : HashBuiltin*,
-            range_check_ptr, ecdsa_ptr : SignatureBuiltin*,
-            bitwise_ptr : BitwiseBuiltin*}():
+        output_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+        ecdsa_ptr : SignatureBuiltin*,
+        bitwise_ptr : BitwiseBuiltin*,
+    }():
         # Code body here.
         return ()
     end
@@ -539,6 +608,38 @@ See :ref:`program_inputs` for more information.
         # provided in the .json file.
         a = program_input['user_ids']
     %}
+
+Jumps
+-----
+
+The ``jmp`` instruction allows navigating through the program, either moving to a
+specific label via ``jmp LABEL``, or a specific location defined by a value of the program counter.
+This may be an absolute value with ``jmp abs VALUE`` or an offset relative to the current
+instruction with ``jmp rel OFFSET``.
+Cairo supports conditional jumps with the syntax ``if <expr> != 0`` following a jump instruction.
+It is preferable to use `if` rather than `jmp` where possible. An example use of `if` can be seen
+here :ref:`syntax_reference`.
+
+When the jump condition depends on a value that is determined by the prover, it
+gets to decide whether or not the jump is executed, de facto making this a non deterministic jump.
+
+.. tested-code:: cairo syntax_jumps
+
+  func my_function() -> (result):
+      alloc_locals
+      local a
+      %{ ids.a = 2 %}  # Allows the prover to decide where to branch.
+
+      jmp case_true if a != 0
+
+      case_false:
+      return (result=0)
+
+      case_true:
+      return (result=1)
+  end
+
+See :ref:`non_deterministic_jumps` for more information.
 
 Program output
 --------------

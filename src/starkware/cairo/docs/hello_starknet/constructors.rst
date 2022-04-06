@@ -15,7 +15,6 @@ For example, we can define an ownable contract as follows:
 .. tested-code:: cairo ownable
 
     %lang starknet
-    %builtins pedersen range_check
 
     from starkware.cairo.common.cairo_builtins import HashBuiltin
 
@@ -26,8 +25,10 @@ For example, we can define an ownable contract as follows:
 
     @constructor
     func constructor{
-            syscall_ptr : felt*, pedersen_ptr : HashBuiltin*,
-            range_check_ptr}(owner_address : felt):
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }(owner_address : felt):
         owner.write(value=owner_address)
         return ()
     end

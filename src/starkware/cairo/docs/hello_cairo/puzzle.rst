@@ -137,7 +137,8 @@ and indeed ``(0, 2) - (1, 2) = (-1, 0)``.
 .. tested-code:: cairo verify_adjacent_locations
 
     func verify_adjacent_locations(
-            loc0 : Location*, loc1 : Location*):
+        loc0 : Location*, loc1 : Location*
+    ):
         alloc_locals
         local row_diff = loc0.row - loc1.row
         local col_diff = loc0.col - loc1.col
@@ -234,11 +235,13 @@ on the entire location list.
         end
 
         verify_adjacent_locations(
-            loc0=loc_list, loc1=loc_list + Location.SIZE)
+            loc0=loc_list, loc1=loc_list + Location.SIZE
+        )
 
         # Call verify_location_list recursively.
         verify_location_list(
-            loc_list=loc_list + Location.SIZE, n_steps=n_steps - 1)
+            loc_list=loc_list + Location.SIZE, n_steps=n_steps - 1
+        )
         return ()
     end
 
@@ -270,7 +273,8 @@ main function):
         # Since the tuple elements are next to each other we can use the
         # address of loc_tuple as a pointer to the 5 locations.
         verify_location_list(
-            loc_list=cast(&loc_tuple, Location*), n_steps=4)
+            loc_list=cast(&loc_tuple, Location*), n_steps=4
+        )
         return ()
     end
 

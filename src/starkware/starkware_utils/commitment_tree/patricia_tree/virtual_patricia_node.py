@@ -1,6 +1,5 @@
-import asyncio
 import dataclasses
-from typing import Optional, Tuple
+from typing import Collection, Dict, Optional, Tuple, Type
 
 from starkware.starkware_utils.commitment_tree.binary_fact_tree import BinaryFactDict
 from starkware.starkware_utils.commitment_tree.binary_fact_tree_node import (
@@ -8,6 +7,7 @@ from starkware.starkware_utils.commitment_tree.binary_fact_tree_node import (
     read_node_fact,
     write_node_fact,
 )
+from starkware.starkware_utils.commitment_tree.leaf_fact import TLeafFact
 from starkware.starkware_utils.commitment_tree.patricia_tree.nodes import (
     BinaryNodeFact,
     EdgeNodeFact,
@@ -15,12 +15,12 @@ from starkware.starkware_utils.commitment_tree.patricia_tree.nodes import (
     PatriciaNodeFact,
     verify_path_value,
 )
-from starkware.starkware_utils.validated_dataclass import ValidatedDataclass
 from starkware.storage.storage import FactFetchingContext
 
 
+# NOTE: We avoid using ValidatedDataclass here for performance.
 @dataclasses.dataclass(frozen=True)
-class VirtualPatriciaNode(BinaryFactTreeNode, ValidatedDataclass):
+class VirtualPatriciaNode(BinaryFactTreeNode):
     """
     Represents a virtual Patricia node.
     Virtual node instances are used to build and traverse through a Patricia tree.
@@ -43,8 +43,6 @@ class VirtualPatriciaNode(BinaryFactTreeNode, ValidatedDataclass):
         Note that many of the functions in this class rely on the invariants checked in this
         function, and on the fact they are made at initialization time (the object is immutable).
         """
-        super().__post_init__()
-
         verify_path_value(path=self.path, length=self.length)
 
     @classmethod
@@ -101,66 +99,6 @@ class VirtualPatriciaNode(BinaryFactTreeNode, ValidatedDataclass):
         )
         return await write_node_fact(ffc=ffc, inner_node_fact=edge_node_fact, facts=facts)
 
-    async def decommit(
-        self, ffc: FactFetchingContext, facts: Optional[BinaryFactDict]
-    ) -> "VirtualPatriciaNode":
-        """
-        Returns the canonical representation of the information embedded in self.
-        Returns (bottom, path, length) for an edge node of form (hash, 0, 0), which is the
-        canonical form.
-        """
-        if self.is_leaf or self.is_empty or self.is_virtual_edge:
-            # Node is already decommitted (of canonical form); no work to be done.
-            return self
-
-        # Need to read fact from storage to understand if (hash, 0, 0) represents a binary node,
-        # or a committed edge node.
-        # Note that a fact that was written in a previous combine while building this tree will
-        # appear in cache (in case the FFC's storage is cached).
-        root_node_fact = await self.read_bottom_node_fact(ffc=ffc, facts=facts)
-
-        if isinstance(root_node_fact, BinaryNodeFact):
-            return self
-        if isinstance(root_node_fact, EdgeNodeFact):
-            return VirtualPatriciaNode(
-                bottom_node=root_node_fact.bottom_node,
-                path=root_node_fact.edge_path,
-                length=root_node_fact.edge_length,
-                height=self.height,
-            )
-
-        raise NotImplementedError(f"Unexpected node fact type: {type(root_node_fact).__name__}.")
-
-    @classmethod
-    async def combine(
-        cls,
-        ffc: FactFetchingContext,
-        left: "BinaryFactTreeNode",
-        right: "BinaryFactTreeNode",
-        facts: Optional[BinaryFactDict] = None,
-    ) -> "VirtualPatriciaNode":
-        """
-        Gets two VirtualPatriciaNode objects left and right representing children nodes, and builds
-        their parent node. Returns a new VirtualPatriciaNode.
-
-        If facts argument is not None, this dictionary is filled with facts read from the DB.
-        """
-        # Downcast arguments.
-        assert isinstance(left, VirtualPatriciaNode) and isinstance(right, VirtualPatriciaNode)
-
-        assert (
-            right.height == left.height
-        ), f"Only trees of same height can be combined; got: {right.height} and {left.height}."
-
-        parent_height = right.height + 1
-        if left.is_empty and right.is_empty:
-            return VirtualPatriciaNode.empty_node(height=parent_height)
-
-        if not left.is_empty and not right.is_empty:
-            return await cls._combine_to_binary_node(ffc=ffc, left=left, right=right, facts=facts)
-
-        return await cls._combine_to_virtual_edge_node(ffc=ffc, left=left, right=right, facts=facts)
-
     async def get_children(
         self, ffc: FactFetchingContext, facts: Optional[BinaryFactDict] = None
     ) -> Tuple["VirtualPatriciaNode", "VirtualPatriciaNode"]:
@@ -200,65 +138,6 @@ class VirtualPatriciaNode(BinaryFactTreeNode, ValidatedDataclass):
             self.from_hash(hash_value=fact.right_node, height=children_height),
         )
 
-    # Internal utils.
-
-    @classmethod
-    async def _combine_to_binary_node(
-        cls,
-        ffc: FactFetchingContext,
-        left: "VirtualPatriciaNode",
-        right: "VirtualPatriciaNode",
-        facts: Optional[BinaryFactDict],
-    ) -> "VirtualPatriciaNode":
-        """
-        Combines two non-empty nodes to form a binary node.
-        Writes the constructed node fact to the DB, as well as (up to) two other facts for the
-        children if they were not previously committed.
-        """
-        left_node_hash, right_node_hash = await asyncio.gather(
-            *(node.commit(ffc=ffc, facts=facts) for node in (left, right))
-        )
-        parent_node_fact = BinaryNodeFact(left_node=left_node_hash, right_node=right_node_hash)
-        parent_fact_hash = await write_node_fact(
-            ffc=ffc, inner_node_fact=parent_node_fact, facts=facts
-        )
-
-        return VirtualPatriciaNode(
-            bottom_node=parent_fact_hash, path=0, length=0, height=right.height + 1
-        )
-
-    @classmethod
-    async def _combine_to_virtual_edge_node(
-        cls,
-        ffc: FactFetchingContext,
-        left: "VirtualPatriciaNode",
-        right: "VirtualPatriciaNode",
-        facts: Optional[BinaryFactDict],
-    ) -> "VirtualPatriciaNode":
-        """
-        Combines an empty node and a non-empty node to form a virtual edge node.
-        If the non-empty node is not known to be of canonical form, reads its fact from the DB
-        in order to make it such (or make sure it is).
-        """
-        assert (
-            left.is_empty != right.is_empty
-        ), "_combine_to_virtual_edge_node() must be called on one empty and one non-empty nodes."
-
-        non_empty_child = right if left.is_empty else left
-        non_empty_child = await non_empty_child.decommit(ffc=ffc, facts=facts)
-
-        parent_path = non_empty_child.path
-        if left.is_empty:
-            # Turn on the MSB bit if the non-empty child is on the right.
-            parent_path += 1 << non_empty_child.length
-
-        return VirtualPatriciaNode(
-            bottom_node=non_empty_child.bottom_node,
-            path=parent_path,
-            length=non_empty_child.length + 1,
-            height=non_empty_child.height + 1,
-        )
-
     def _get_virtual_edge_node_children(
         self,
     ) -> Tuple["VirtualPatriciaNode", "VirtualPatriciaNode"]:
@@ -283,3 +162,92 @@ class VirtualPatriciaNode(BinaryFactTreeNode, ValidatedDataclass):
         else:
             # Non-empty on the right.
             return empty_child, non_empty_child
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, VirtualPatriciaNode):
+            return NotImplemented
+
+        return (
+            self.bottom_node == other.bottom_node
+            and self.path == other.path
+            and self.length == other.length
+            and self.height == other.height
+        )
+
+    async def _get_leaves(
+        self,
+        ffc: FactFetchingContext,
+        indices: Collection[int],
+        fact_cls: Type[TLeafFact],
+        facts: Optional[BinaryFactDict] = None,
+    ) -> Dict[int, TLeafFact]:
+        """
+        See base class for documentation.
+        """
+        if len(indices) == 0:
+            return {}
+
+        if self.is_leaf:
+            return await self._get_leaf(ffc=ffc, indices=indices, fact_cls=fact_cls)
+
+        if self.is_virtual_edge:
+            return await self._get_edge_node_leaves(
+                ffc=ffc, indices=indices, fact_cls=fact_cls, facts=facts
+            )
+
+        return await self._get_binary_node_leaves(
+            ffc=ffc, indices=indices, fact_cls=fact_cls, facts=facts
+        )
+
+    async def _get_edge_node_leaves(
+        self,
+        ffc: FactFetchingContext,
+        indices: Collection[int],
+        fact_cls: Type[TLeafFact],
+        facts: Optional[BinaryFactDict] = None,
+    ) -> Dict[int, TLeafFact]:
+        """
+        Returns the values of the leaves whose indices are given.
+        """
+        # Partition indices.
+        path_suffix_width = self.height - self.length
+        path_prefix = self.path << path_suffix_width
+        bottom_subtree_indices = [
+            index - path_prefix for index in indices if (index >> path_suffix_width) == self.path
+        ]
+        empty_indices = [index for index in indices if (index >> path_suffix_width) != self.path]
+
+        # Get bottom subtree root.
+        bottom_subtree_root = self.from_hash(hash_value=self.bottom_node, height=path_suffix_width)
+        bottom_subtree_leaves = await bottom_subtree_root._get_leaves(
+            ffc=ffc, indices=bottom_subtree_indices, fact_cls=fact_cls, facts=facts
+        )
+        empty_leaves = await get_empty_leaves(ffc=ffc, indices=empty_indices, fact_cls=fact_cls)
+        return unify_edge_leaves(
+            path_prefix=path_prefix,
+            bottom_subtree_leaves=bottom_subtree_leaves,
+            empty_leaves=empty_leaves,
+        )
+
+
+# Utilities.
+
+
+async def get_empty_leaves(
+    ffc: FactFetchingContext, indices: Collection[int], fact_cls: Type[TLeafFact]
+) -> Dict[int, TLeafFact]:
+    if len(indices) == 0:
+        return {}
+
+    empty_leaf = await fact_cls.get_or_fail(
+        storage=ffc.storage, suffix=EmptyNodeFact.EMPTY_NODE_HASH
+    )
+    return {index: empty_leaf for index in indices}
+
+
+def unify_edge_leaves(
+    path_prefix: int,
+    bottom_subtree_leaves: Dict[int, TLeafFact],
+    empty_leaves: Dict[int, TLeafFact],
+) -> Dict[int, TLeafFact]:
+    return {**empty_leaves, **{x + path_prefix: y for x, y in bottom_subtree_leaves.items()}}

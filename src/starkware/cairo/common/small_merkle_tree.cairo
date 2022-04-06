@@ -20,7 +20,7 @@ from starkware.cairo.common.merkle_multi_update import merkle_multi_update
 #       dict_accesses_start=dict_ptr_start,
 #       dict_accesses_end=dict_ptr)
 #   const HEIGHT = 3
-#   let (prev_root, new_root) = small_merkle_tree(
+#   let (prev_root, new_root) = small_merkle_tree_update(
 #        squashed_dict_start, squashed_dict_end, HEIGHT)
 #
 # In this example prev_root is the Merkle root of [0, 2, 0, 4, 0, 6, 0, 0], and new_root
@@ -46,9 +46,9 @@ from starkware.cairo.common.merkle_multi_update import merkle_multi_update
 # * squashed_dict was created using the higher-level API dict_squash() (rather than squash_dict()).
 # * This function can be used for (relatively) small Merkle trees whose leaves can be loaded
 #   to the memory.
-func small_merkle_tree{hash_ptr : HashBuiltin*}(
-        squashed_dict_start : DictAccess*, squashed_dict_end : DictAccess*, height : felt) -> (
-        prev_root : felt, new_root : felt):
+func small_merkle_tree_update{hash_ptr : HashBuiltin*}(
+    squashed_dict_start : DictAccess*, squashed_dict_end : DictAccess*, height : felt
+) -> (prev_root : felt, new_root : felt):
     %{ vm_enter_scope({'__dict_manager': __dict_manager}) %}
     alloc_locals
     # Allocate memory cells for the roots.
@@ -95,7 +95,8 @@ func small_merkle_tree{hash_ptr : HashBuiltin*}(
         n_updates=(squashed_dict_end - squashed_dict_start) / DictAccess.SIZE,
         height=height,
         prev_root=prev_root,
-        new_root=new_root)
+        new_root=new_root,
+    )
     %{ vm_exit_scope() %}
     return (prev_root=prev_root, new_root=new_root)
 end

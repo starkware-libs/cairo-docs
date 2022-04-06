@@ -41,7 +41,7 @@ Create a file named ``input.json`` with the program input:
 
 The following command will compile the program, run it on the given input and send
 it to SHARP. Make sure you have the latest version of the cairo-lang package installed
-(currently, 0.6.0), see :ref:`quickstart`.
+(currently, 0.8.1), see :ref:`quickstart`.
 
 .. code-block:: bash
 
@@ -81,4 +81,4 @@ To see if when your fact is successfully registered you can use ``cairo-sharp is
         0xf457e4311f8229ab7b08191a6658112a29a962a9f2fe95d7a3d4f1200eef0195 \
         --node_url=<URL_of_an_Ethereum_node>
 
-.. TODO(lior, 08/06/2021): Consider adding a link to Etherscan.
+.. TODO(lior, 08/02/2022): Consider adding a link to Etherscan.

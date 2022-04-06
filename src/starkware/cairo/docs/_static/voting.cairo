@@ -6,7 +6,7 @@ from starkware.cairo.common.dict import DictAccess, dict_new, dict_squash, dict_
 from starkware.cairo.common.hash import hash2
 from starkware.cairo.common.math import assert_not_zero
 from starkware.cairo.common.signature import verify_ecdsa_signature
-from starkware.cairo.common.small_merkle_tree import small_merkle_tree
+from starkware.cairo.common.small_merkle_tree import small_merkle_tree_update
 
 struct VoteInfo:
     # The ID of the voter.
@@ -57,14 +57,16 @@ end
 const POLL_ID = 10018
 
 func verify_vote_signature{pedersen_ptr : HashBuiltin*, ecdsa_ptr : SignatureBuiltin*}(
-        vote_info_ptr : VoteInfo*):
+    vote_info_ptr : VoteInfo*
+):
     let (message) = hash2{hash_ptr=pedersen_ptr}(x=POLL_ID, y=vote_info_ptr.vote)
 
     verify_ecdsa_signature(
         message=message,
         public_key=vote_info_ptr.pub_key,
         signature_r=vote_info_ptr.r,
-        signature_s=vote_info_ptr.s)
+        signature_s=vote_info_ptr.s,
+    )
     return ()
 end
 
@@ -99,7 +101,8 @@ func init_voting_state() -> (state : VotingState):
 end
 
 func process_vote{pedersen_ptr : HashBuiltin*, ecdsa_ptr : SignatureBuiltin*, state : VotingState}(
-        vote_info_ptr : VoteInfo*):
+    vote_info_ptr : VoteInfo*
+):
     alloc_locals
 
     # Verify that pub_key != 0.
@@ -111,7 +114,8 @@ func process_vote{pedersen_ptr : HashBuiltin*, ecdsa_ptr : SignatureBuiltin*, st
     # Update the public key dict.
     let public_key_tree_end = state.public_key_tree_end
     dict_update{dict_ptr=public_key_tree_end}(
-        key=vote_info_ptr.voter_id, prev_value=vote_info_ptr.pub_key, new_value=0)
+        key=vote_info_ptr.voter_id, prev_value=vote_info_ptr.pub_key, new_value=0
+    )
 
     # Generate the new state.
     local new_state : VotingState
@@ -141,7 +145,8 @@ func process_vote{pedersen_ptr : HashBuiltin*, ecdsa_ptr : SignatureBuiltin*, st
 end
 
 func process_votes{pedersen_ptr : HashBuiltin*, ecdsa_ptr : SignatureBuiltin*, state : VotingState}(
-        votes : VoteInfo*, n_votes : felt):
+    votes : VoteInfo*, n_votes : felt
+):
     if n_votes == 0:
         return ()
     end
@@ -160,8 +165,8 @@ struct BatchOutput:
 end
 
 func main{
-        output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr,
-        ecdsa_ptr : SignatureBuiltin*}():
+    output_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, ecdsa_ptr : SignatureBuiltin*
+}():
     alloc_locals
 
     let output = cast(output_ptr, BatchOutput*)
@@ -179,15 +184,16 @@ func main{
 
     # Squash the dict.
     let (squashed_dict_start, squashed_dict_end) = dict_squash(
-        dict_accesses_start=state.public_key_tree_start,
-        dict_accesses_end=state.public_key_tree_end)
+        dict_accesses_start=state.public_key_tree_start, dict_accesses_end=state.public_key_tree_end
+    )
     local range_check_ptr = range_check_ptr
 
     # Compute the two Merkle roots.
-    let (root_before, root_after) = small_merkle_tree{hash_ptr=pedersen_ptr}(
+    let (root_before, root_after) = small_merkle_tree_update{hash_ptr=pedersen_ptr}(
         squashed_dict_start=squashed_dict_start,
         squashed_dict_end=squashed_dict_end,
-        height=LOG_N_VOTERS)
+        height=LOG_N_VOTERS,
+    )
 
     # Write the Merkle roots to the output.
     assert output.public_keys_root_before = root_before

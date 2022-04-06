@@ -31,8 +31,8 @@ end
 # Verifies that the initial values were 0, and writes the final
 # values to result.
 func verify_and_output_squashed_dict(
-        squashed_dict : DictAccess*, squashed_dict_end : DictAccess*, result : KeyValue*) -> (
-        result : KeyValue*):
+    squashed_dict : DictAccess*, squashed_dict_end : DictAccess*, result : KeyValue*
+) -> (result : KeyValue*):
     tempvar diff = squashed_dict_end - squashed_dict
     jmp body if diff != 0
     return (result=result)
@@ -48,7 +48,8 @@ func verify_and_output_squashed_dict(
     return verify_and_output_squashed_dict(
         squashed_dict=squashed_dict + DictAccess.SIZE,
         squashed_dict_end=squashed_dict_end,
-        result=result + KeyValue.SIZE)
+        result=result + KeyValue.SIZE,
+    )
 end
 
 # Given a list of KeyValue, sums the values, grouped by key,
@@ -70,10 +71,12 @@ func sum_by_key{range_check_ptr}(list : KeyValue*, size) -> (result : KeyValue*,
     let (dict_end) = build_dict(list=list, size=size, dict=dict)
     # Call squash_dict().
     let (local squashed_dict_end) = squash_dict(
-        dict_accesses=dict, dict_accesses_end=dict_end, squashed_dict=squashed_dict)
+        dict_accesses=dict, dict_accesses_end=dict_end, squashed_dict=squashed_dict
+    )
     local range_check_ptr = range_check_ptr
     # Call verify_and_output_squashed_dict().
     verify_and_output_squashed_dict(
-        squashed_dict=squashed_dict, squashed_dict_end=squashed_dict_end, result=result)
+        squashed_dict=squashed_dict, squashed_dict_end=squashed_dict_end, result=result
+    )
     return (result=result, result_size=(squashed_dict_end - squashed_dict) / DictAccess.SIZE)
 end

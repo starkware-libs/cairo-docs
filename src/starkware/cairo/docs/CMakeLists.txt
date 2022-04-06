@@ -40,6 +40,17 @@ add_custom_command(
 )
 
 add_custom_command(
+    OUTPUT "external-starknet/html/index.html"
+    COMMAND
+        GENERATE_STARKNET_DOCS=1
+        ${VENV_PYTHON}
+        -m sphinx.cmd.build
+        -M html "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/external-starknet" -W
+    COMMENT "Generating Cairo docs..."
+    DEPENDS cairo_docs_venv ${VENV_STAMP} ${RST_FILES} ${TEMPLATE_FILES}
+)
+
+add_custom_command(
     OUTPUT "internal/html/index.html"
     COMMAND ${VENV_PYTHON}
         -m sphinx.cmd.build
@@ -50,7 +61,10 @@ add_custom_command(
 )
 
 add_custom_target(cairo_docs_html ALL
-    DEPENDS "external/html/index.html" "internal/html/index.html"
+    DEPENDS
+    "external/html/index.html"
+    "external-starknet/html/index.html"
+    "internal/html/index.html"
 )
 
 python_exe(cairo_docs_test

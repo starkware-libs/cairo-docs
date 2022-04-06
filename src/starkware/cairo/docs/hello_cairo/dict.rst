@@ -89,8 +89,11 @@ Here we chose to go with option (2).
     from starkware.cairo.common.squash_dict import squash_dict
 
     func build_dict(
-            loc_list : Location*, tile_list : felt*, n_steps,
-            dict : DictAccess*) -> (dict : DictAccess*):
+        loc_list : Location*,
+        tile_list : felt*,
+        n_steps,
+        dict : DictAccess*,
+    ) -> (dict : DictAccess*):
         if n_steps == 0:
             # When there are no more steps, just return the dict
             # pointer.
@@ -114,7 +117,8 @@ Here we chose to go with option (2).
             loc_list=next_loc,
             tile_list=tile_list + 1,
             n_steps=n_steps - 1,
-            dict=dict + DictAccess.SIZE)
+            dict=dict + DictAccess.SIZE,
+        )
     end
 
 The function gets a pointer to the list of locations, a pointer to the list of tiles
@@ -159,7 +163,8 @@ It is slightly more efficient to write the loop backwards:
 .. tested-code:: cairo finalize_state
 
     func finalize_state(dict : DictAccess*, idx) -> (
-            dict : DictAccess*):
+        dict : DictAccess*
+    ):
         if idx == 0:
             return (dict=dict)
         end
@@ -170,7 +175,8 @@ It is slightly more efficient to write the loop backwards:
 
         # Call finalize_state recursively.
         return finalize_state(
-            dict=dict + DictAccess.SIZE, idx=idx - 1)
+            dict=dict + DictAccess.SIZE, idx=idx - 1
+        )
     end
 
 Note that we keep using the pattern where the ``dict`` argument refers to the place
@@ -191,7 +197,8 @@ will know the initial configuration which we solved.
     from starkware.cairo.common.serialize import serialize_word
 
     func output_initial_values{output_ptr : felt*}(
-            squashed_dict : DictAccess*, n):
+        squashed_dict : DictAccess*, n
+    ):
         if n == 0:
             return ()
         end
@@ -200,7 +207,8 @@ will know the initial configuration which we solved.
 
         # Call output_initial_values recursively.
         return output_initial_values(
-            squashed_dict=squashed_dict + DictAccess.SIZE, n=n - 1)
+            squashed_dict=squashed_dict + DictAccess.SIZE, n=n - 1
+        )
     end
 
 Note that we need the implicit argument ``output_ptr`` in order to call ``serialize_word()``.
@@ -213,7 +221,8 @@ Putting it all together
     from starkware.cairo.common.alloc import alloc
 
     func check_solution{output_ptr : felt*, range_check_ptr}(
-            loc_list : Location*, tile_list : felt*, n_steps):
+        loc_list : Location*, tile_list : felt*, n_steps
+    ):
         alloc_locals
 
         # Start by verifying that loc_list is valid.
@@ -227,14 +236,16 @@ Putting it all together
             loc_list=loc_list,
             tile_list=tile_list,
             n_steps=n_steps,
-            dict=dict_start)
+            dict=dict_start,
+        )
 
         let (dict_end) = finalize_state(dict=dict_end, idx=15)
 
         let (squashed_dict_end : DictAccess*) = squash_dict(
             dict_accesses=dict_start,
             dict_accesses_end=dict_end,
-            squashed_dict=squashed_dict)
+            squashed_dict=squashed_dict,
+        )
 
         # Store range_check_ptr in a local variable to make it
         # accessible after the call to output_initial_values().
@@ -323,7 +334,8 @@ and use ``--layout=small`` to ``cairo-run`` due to the usage of builtins):
         check_solution(
             loc_list=cast(&loc_tuple, Location*),
             tile_list=cast(&tiles, felt*),
-            n_steps=4)
+            n_steps=4,
+        )
         return ()
     end
 

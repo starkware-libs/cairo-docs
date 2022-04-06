@@ -12,18 +12,15 @@ from starkware.crypto.signature.signature import FIELD_PRIME
 from starkware.python.utils import initialize_random
 from starkware.starkware_utils.error_handling import StarkErrorCode
 from starkware.starkware_utils.field_validators import validate_non_negative
+from starkware.starkware_utils.marshmallow_dataclass_fields import StrictRequiredInteger
 from starkware.starkware_utils.validated_fields import Field, RangeValidatedField
 
 # Fields data: validation data, dataclass metadata.
-tx_id_marshmallow_field = mfields.Integer(
-    strict=True, required=True, validate=validate_non_negative("tx_id")
-)
-
+tx_id_marshmallow_field = StrictRequiredInteger(validate=validate_non_negative("tx_id"))
 tx_id_field_metadata = dict(marshmallow_field=tx_id_marshmallow_field)
 
+
 # Fact Registry Address.
-
-
 class EthAddressTypeField(Field[str]):
     """
     A field representation of an Ethereum address.
@@ -58,8 +55,8 @@ class EthAddressTypeField(Field[str]):
         )
 
     # Serialization.
-    def get_marshmallow_field(self) -> mfields.Field:
-        return mfields.String(required=True)
+    def get_marshmallow_field(self, required: bool, load_default: Any) -> mfields.Field:
+        return mfields.String(required=required, load_default=load_default)
 
     def convert_valid_to_checksum(self, value: str) -> ChecksumAddress:
         self.validate(value=value)
@@ -84,6 +81,7 @@ EthAddressIntField = RangeValidatedField(
     upper_bound=constants.ETH_ADDRESS_UPPER_BOUND,
     name="Ethereum address",
     error_code=StarkErrorCode.OUT_OF_RANGE_ETH_ADDRESS,
+    formatter=None,
 )
 
 FeltField = RangeValidatedField(
@@ -95,5 +93,9 @@ FeltField = RangeValidatedField(
 )
 
 
+def felt(name_in_error_message: str) -> RangeValidatedField:
+    return dataclasses.replace(FeltField, name=name_in_error_message)
+
+
 def felt_metadata(name_in_error_message: str) -> Dict[str, Any]:
-    return dataclasses.replace(FeltField, name=name_in_error_message).metadata()
+    return felt(name_in_error_message=name_in_error_message).metadata()

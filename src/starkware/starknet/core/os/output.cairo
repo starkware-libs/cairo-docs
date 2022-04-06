@@ -1,14 +1,26 @@
+from starkware.cairo.common.registers import get_fp_and_pc
 from starkware.cairo.common.segments import relocate_segment
 from starkware.cairo.common.serialize import serialize_word
+from starkware.starknet.core.os.block_context import BlockContext, BlockInfo
 from starkware.starknet.core.os.state import CommitmentTreeUpdateOutput
 
-# A cross layer message header, the message payload is concatenated to the end of the header.
-# The sender/receiver can be on L1 or L2 depending on the message direction.
-struct MessageHeader:
-    # The address of the contract sending the message.
+# An L2 to L1 message header, the message payload is concatenated to the end of the header.
+struct MessageToL1Header:
+    # The L2 address of the contract sending the message.
     member from_address : felt
-    # The address of the contract receiving the message.
+    # The L1 address of the contract receiving the message.
     member to_address : felt
+    member payload_size : felt
+end
+
+# An L1 to L2 message header, the message payload is concatenated to the end of the header.
+struct MessageToL2Header:
+    # The L1 address of the contract sending the message.
+    member from_address : felt
+    # The L2 address of the contract receiving the message.
+    member to_address : felt
+    member nonce : felt
+    member selector : felt
     member payload_size : felt
 end
 
@@ -22,56 +34,69 @@ end
 
 # Holds all the information that StarkNet's OS needs to output.
 struct OsCarriedOutputs:
-    member messages_to_l1 : MessageHeader*
-    member messages_to_l2 : MessageHeader*
+    member messages_to_l1 : MessageToL1Header*
+    member messages_to_l2 : MessageToL2Header*
     # A concatenated list of deployment infos, each consists of DeploymentInfoHeader and calldata.
     member deployment_info : DeploymentInfoHeader*
 end
 
-struct OsOutput:
-    # The previous and new root of the contract's storage.
-    member commitment_tree_update_output : CommitmentTreeUpdateOutput*
-    member initial_outputs : OsCarriedOutputs
-    member final_outputs : OsCarriedOutputs
+func os_carried_outputs_new(
+    messages_to_l1 : MessageToL1Header*,
+    messages_to_l2 : MessageToL2Header*,
+    deployment_info : DeploymentInfoHeader*,
+) -> (os_carried_outputs : OsCarriedOutputs*):
+    let (fp_val, pc_val) = get_fp_and_pc()
+    static_assert OsCarriedOutputs.SIZE == Args.SIZE
+    return (os_carried_outputs=cast(fp_val - 2 - OsCarriedOutputs.SIZE, OsCarriedOutputs*))
 end
 
 func os_output_serialize{output_ptr : felt*}(
-        os_output : OsOutput*, storage_updates_ptr_start : felt*, storage_updates_ptr_end : felt*):
+    block_context : BlockContext*,
+    commitment_tree_update_output : CommitmentTreeUpdateOutput*,
+    initial_carried_outputs : OsCarriedOutputs*,
+    final_carried_outputs : OsCarriedOutputs*,
+    storage_updates_ptr_start : felt*,
+    storage_updates_ptr_end : felt*,
+    starknet_os_config_hash : felt,
+):
     # Serialize program output.
 
     # Serialize roots.
-    serialize_word(os_output.commitment_tree_update_output.initial_storage_root)
-    serialize_word(os_output.commitment_tree_update_output.final_storage_root)
+    serialize_word(commitment_tree_update_output.initial_storage_root)
+    serialize_word(commitment_tree_update_output.final_storage_root)
+
+    serialize_word(block_context.block_info.block_number)
+    serialize_word(starknet_os_config_hash)
 
     let messages_to_l1_segment_size = (
-        os_output.final_outputs.messages_to_l1 -
-        os_output.initial_outputs.messages_to_l1)
+        final_carried_outputs.messages_to_l1 -
+        initial_carried_outputs.messages_to_l1)
     serialize_word(messages_to_l1_segment_size)
 
     # Relocate 'messages_to_l1_segment' to the correct place in the output segment.
-    relocate_segment(src_ptr=os_output.initial_outputs.messages_to_l1, dest_ptr=output_ptr)
-    let output_ptr = cast(os_output.final_outputs.messages_to_l1, felt*)
+    relocate_segment(src_ptr=initial_carried_outputs.messages_to_l1, dest_ptr=output_ptr)
+    let output_ptr = cast(final_carried_outputs.messages_to_l1, felt*)
 
     let messages_to_l2_segment_size = (
-        os_output.final_outputs.messages_to_l2 -
-        os_output.initial_outputs.messages_to_l2)
+        final_carried_outputs.messages_to_l2 -
+        initial_carried_outputs.messages_to_l2)
     serialize_word(messages_to_l2_segment_size)
 
     # Relocate 'messages_to_l2_segment' to the correct place in the output segment.
-    relocate_segment(src_ptr=os_output.initial_outputs.messages_to_l2, dest_ptr=output_ptr)
-    let output_ptr = cast(os_output.final_outputs.messages_to_l2, felt*)
+    relocate_segment(src_ptr=initial_carried_outputs.messages_to_l2, dest_ptr=output_ptr)
+    let output_ptr = cast(final_carried_outputs.messages_to_l2, felt*)
 
     # Serialize data availability.
     let da_start = output_ptr
 
     let deployment_info_segment_size = (
-        os_output.final_outputs.deployment_info -
-        os_output.initial_outputs.deployment_info)
+        final_carried_outputs.deployment_info -
+        initial_carried_outputs.deployment_info)
     serialize_word(deployment_info_segment_size)
 
     # Relocate 'deployment_info_segment' to the correct place in the output segment.
-    relocate_segment(src_ptr=os_output.initial_outputs.deployment_info, dest_ptr=output_ptr)
-    let output_ptr = cast(os_output.final_outputs.deployment_info, felt*)
+    relocate_segment(src_ptr=initial_carried_outputs.deployment_info, dest_ptr=output_ptr)
+    let output_ptr = cast(final_carried_outputs.deployment_info, felt*)
 
     # Relocate 'storage_updates_segment' to the correct place in the output segment.
     relocate_segment(src_ptr=storage_updates_ptr_start, dest_ptr=output_ptr)

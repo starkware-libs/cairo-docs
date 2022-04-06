@@ -75,6 +75,25 @@ def sqrt(n, p):
     return min(sympy.ntheory.residue_ntheory.sqrt_mod(n, p, all_roots=True))
 
 
+def isqrt(n: int) -> int:
+    """
+    Returns the integer square root of the nonnegative integer n. This is the floor of the exact
+    square root of n.
+    Unlike math.sqrt(), this function doesn't have rounding error issues.
+    """
+    assert n >= 0
+
+    # The following algorithm was copied from
+    # https://stackoverflow.com/questions/15390807/integer-square-root-in-python.
+    x = n
+    y = (x + 1) // 2
+    while y < x:
+        x = y
+        y = (x + n // x) // 2
+    assert x ** 2 <= n < (x + 1) ** 2
+    return x
+
+
 # Elliptic curve functions.
 class EcInfinity:
     pass
@@ -83,26 +102,43 @@ class EcInfinity:
 EC_INFINITY = EcInfinity()
 
 
-def ec_add(point1, point2, p):
+def line_slope(point1: Tuple[int, int], point2: Tuple[int, int], p: int) -> int:
+    """
+    Computes the slope of the line connecting the two given EC points over the field GF(p).
+    Assumes the points are given in affine form (x, y) and have different x coordinates.
+    """
+    assert (point1[0] - point2[0]) % p != 0
+    return div_mod(point1[1] - point2[1], point1[0] - point2[0], p)
+
+
+def ec_add(point1: Tuple[int, int], point2: Tuple[int, int], p: int) -> Tuple[int, int]:
     """
     Gets two points on an elliptic curve mod p and returns their sum.
     Assumes the points are given in affine form (x, y) and have different x coordinates.
     """
-    assert (point1[0] - point2[0]) % p != 0
-    m = div_mod(point1[1] - point2[1], point1[0] - point2[0], p)
+    m = line_slope(point1=point1, point2=point2, p=p)
     x = (m * m - point1[0] - point2[0]) % p
     y = (m * (point1[0] - x) - point1[1]) % p
     return x, y
 
 
 
-def ec_double(point, alpha, p):
+def ec_double_slope(point: Tuple[int, int], alpha: int, p: int) -> int:
+    """
+    Computes the slope of an elliptic curve with the equation y^2 = x^3 + alpha*x + beta mod p, at
+    the given point.
+    Assumes the point is given in affine form (x, y) and has y != 0.
+    """
+    assert point[1] % p != 0
+    return div_mod(3 * point[0] * point[0] + alpha, 2 * point[1], p)
+
+
+def ec_double(point: Tuple[int, int], alpha: int, p: int) -> Tuple[int, int]:
     """
     Doubles a point on an elliptic curve with the equation y^2 = x^3 + alpha*x + beta mod p.
     Assumes the point is given in affine form (x, y) and has y != 0.
     """
-    assert point[1] % p != 0
-    m = div_mod(3 * point[0] * point[0] + alpha, 2 * point[1], p)
+    m = ec_double_slope(point=point, alpha=alpha, p=p)
     x = (m * m - 2 * point[0]) % p
     y = (m * (point[0] - x) - point[1]) % p
     return x, y
@@ -151,3 +187,13 @@ def ec_safe_mult(m: int, point: Tuple[int, int], alpha: int, p: int) -> Union[Tu
     if m % 2 == 0:
         return ec_safe_mult(m // 2, ec_safe_add(point, point, alpha, p), alpha, p)
     return ec_safe_add(ec_safe_mult(m - 1, point, alpha, p), point, alpha, p)
+
+
+def horner_eval(coefs, point, prime):
+    """
+    Computes the evaluation of a polynomial on the given point in the field GF(prime).
+    """
+    res = 0
+    for coef in coefs[::-1]:
+        res = (res * point + coef) % prime
+    return res

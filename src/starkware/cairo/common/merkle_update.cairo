@@ -7,7 +7,8 @@ from starkware.cairo.common.cairo_builtins import HashBuiltin
 # the root to the leaf), this function computes the roots twice - once with prev_leaf and once with
 # new_leaf, where the verifier is guaranteed that the same authentication path is used.
 func merkle_update{hash_ptr : HashBuiltin*}(height, prev_leaf, new_leaf, index) -> (
-        prev_root, new_root):
+    prev_root, new_root
+):
     if height == 0:
         # Assert that index is 0.
         index = 0
@@ -42,11 +43,17 @@ func merkle_update{hash_ptr : HashBuiltin*}(height, prev_leaf, new_leaf, index) 
     [right_sibling] = new_node_hash.y; ap++
 
     # Call merkle_update recursively.
+
+    # Index must be even.
+    # We can show by induction that index is in the range [0, 2 ** height) (We know that when height
+    # is 0 index must be 0). If index was odd, then index / 2 is larger than PRIME / 2 which
+    # contradicts the fact that index / 2 is in the range [0, 2 ** (height - 1)).
     return merkle_update(
         height=height - 1,
         prev_leaf=prev_node_hash.result,
         new_leaf=new_node_hash.result,
-        index=index / 2)
+        index=index / 2,
+    )
 
     update_right:
     %{
@@ -63,9 +70,11 @@ func merkle_update{hash_ptr : HashBuiltin*}(height, prev_leaf, new_leaf, index) 
     [left_sibling] = prev_node_hash.x
     [left_sibling] = new_node_hash.x; ap++
 
+    # Similarly to the description above, index must be odd at this point.
     return merkle_update(
         height=height - 1,
         prev_leaf=prev_node_hash.result,
         new_leaf=new_node_hash.result,
-        index=(index - 1) / 2)
+        index=(index - 1) / 2,
+    )
 end

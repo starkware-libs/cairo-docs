@@ -28,7 +28,6 @@ Now, copy the following code into a python file named ``contract_test.py``:
     CONTRACT_FILE = os.path.join(
         os.path.dirname(__file__), "contract.cairo")
 
-
     # The testing library uses python's asyncio. So the following
     # decorator and the ``async`` keyword are needed.
     @pytest.mark.asyncio
