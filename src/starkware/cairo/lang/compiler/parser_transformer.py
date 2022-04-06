@@ -776,7 +776,19 @@ class ParserTransformer(Transformer):
         generator = value[1]
         return ForClauseIn(identifier=identifier, generator=generator)
 
-    def for_generator_range(self, value):
+    @v_args(meta=True)
+    def for_generator_range(self, value, meta):
+        # Create a location for the range keyword.
+        location: Optional[Location] = None
+        if not meta.empty:
+            location = Location(
+                start_line=meta.line,
+                start_col=meta.column,
+                end_line=meta.line,
+                end_col=meta.column + len("range"),
+                input_file=self.input_file,
+            )
+
         assert len(value) == 1 and isinstance(value[0], CommaSeparatedWithNotes)
         args = value[0].args
 
@@ -787,10 +799,19 @@ class ParserTransformer(Transformer):
             [start, stop] = args
         elif len(args) == 3:
             [start, stop, step] = args
+        elif len(args) == 0:
+            raise ParserError("Range generator excepts at least the stop argument.",
+                              location=location)
         else:
-            raise NotImplementedError(f"Unexpected argument: value={value}")
+            if args[3].location is not None and args[-1].location is not None:
+                excessive_args_location = args[3].location | args[-1].location
+            else:
+                excessive_args_location = location
 
-        return ForGeneratorRange(start=start, stop=stop, step=step)
+            raise ParserError("Too many arguments passed to range generator.",
+                              location=excessive_args_location)
+
+        return ForGeneratorRange(start=start, stop=stop, step=step, location=location)
 
     @v_args(meta=True)
     def code_element_directive(self, value, meta):

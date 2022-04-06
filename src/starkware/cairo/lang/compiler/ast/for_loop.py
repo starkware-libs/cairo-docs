@@ -3,6 +3,7 @@ from typing import Sequence, Optional
 
 from starkware.cairo.lang.compiler.ast.expr import ExprIdentifier, Expression
 from starkware.cairo.lang.compiler.ast.node import AstNode
+from starkware.cairo.lang.compiler.error_handling import Location
 from starkware.python.expression_string import ExpressionString
 
 
@@ -11,6 +12,7 @@ class ForGeneratorRange(Expression):
     start: Optional[Expression]
     stop: Expression
     step: Optional[Expression]
+    location: Optional[Location]
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return self.get_arguments()
