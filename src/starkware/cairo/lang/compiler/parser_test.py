@@ -1,4 +1,3 @@
-from textwrap import dedent
 from typing import List
 
 import pytest
@@ -923,11 +922,7 @@ def test_pointer():
 
 
 def test_for():
-    source = dedent("""
-    for i in range(5):
-        f()
-    end
-    """).strip()
+    source = "for i in range(5):\n    f()\nend"
 
     res = parse_code_element(source)
     assert isinstance(res, CodeElementFor)
