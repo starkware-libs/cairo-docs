@@ -97,6 +97,34 @@ class Location:
 
         return parent_locations
 
+    def span(self, other: "Location"):
+        """
+        Builds a span (set union) between two locations.
+
+        Both locations must point to the same input file and have no parent location attached.
+        """
+
+        if self.input_file != other.input_file:
+            raise ValueError("Locations point to different input files.")
+
+        if self.parent_location != other.parent_location:
+            raise ValueError("Locations have different parent locations.")
+
+        (start_line, start_col) = min(
+            (self.start_line, self.start_col), (other.start_line, other.start_col)
+        )
+
+        (end_line, end_col) = max((self.end_line, self.end_col), (other.end_line, other.end_col))
+
+        return Location(
+            start_line=start_line,
+            start_col=start_col,
+            end_line=end_line,
+            end_col=end_col,
+            input_file=self.input_file,
+            parent_location=self.parent_location,
+        )
+
 
 def get_location_marks(content: str, location: Location):
     lines = content.splitlines()
