@@ -128,7 +128,8 @@ _if: "if" bool_expr ":" _NEWLINE code_block ("else" ":" _NEWLINE code_block)? "e
 // For loops
 for_generator: "range" "(" comma_separated_with_notes{expr} ")" -> for_generator_range
 for_clause: identifier_def "in" for_generator -> for_clause_in
-_for: "for" for_clause ":" _NEWLINE code_block "end"
+FOR: "for"
+_for: FOR for_clause ":" _NEWLINE code_block "end"
 
 !_some_namespace: "struct" | "namespace"
 _struct: decorator_list _some_namespace identifier_def ":"_NEWLINE code_block "end"
