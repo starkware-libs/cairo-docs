@@ -56,9 +56,9 @@ def test_location_span():
     file = InputFile(filename="file.cairo", content="")
 
     a = Location(1, 2, 3, 4, file)
-    b = Location(5, 6, 7, 8, file)
+    b = Location(5, 0, 7, 2, file)
 
-    assert a.span(b) == Location(1, 2, 7, 8, file)
+    assert a.span(b) == Location(1, 2, 7, 2, file)
     assert a.span(b) == b.span(a)
 
 
