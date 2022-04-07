@@ -46,7 +46,6 @@ from starkware.cairo.lang.compiler.ast.code_elements import (
     CommentedCodeElement,
     LangDirective,
 )
-from starkware.cairo.lang.compiler.ast.for_loop import ForClauseIn, ForGeneratorRange
 from starkware.cairo.lang.compiler.ast.expr import (
     ArgList,
     ExprAddressOf,
@@ -67,6 +66,7 @@ from starkware.cairo.lang.compiler.ast.expr import (
     ExprTuple,
 )
 from starkware.cairo.lang.compiler.ast.expr_func_call import ExprFuncCall
+from starkware.cairo.lang.compiler.ast.for_loop import ForClauseIn, ForGeneratorRange
 from starkware.cairo.lang.compiler.ast.instructions import (
     AddApInstruction,
     AssertEqInstruction,
@@ -749,11 +749,9 @@ class ParserTransformer(Transformer):
 
     @v_args(meta=True)
     def code_element_for(self, value, meta):
-        assert len(value) == 2
-        clause = value[0]
-        code_block = value[-1]
+        [clause, code_block] = value
 
-        # Create a location for the for keyword.
+        # Create a location for the "for" keyword.
         location: Optional[Location] = None
         if not meta.empty:
             location = Location(
@@ -771,9 +769,7 @@ class ParserTransformer(Transformer):
         )
 
     def for_clause_in(self, value):
-        assert len(value) == 2
-        identifier = value[0]
-        generator = value[1]
+        [identifier, generator] = value
         return ForClauseIn(identifier=identifier, generator=generator)
 
     @v_args(meta=True)
