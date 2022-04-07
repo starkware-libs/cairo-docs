@@ -2,6 +2,7 @@ import dataclasses
 import re
 from typing import List, Optional, Tuple
 
+import lark
 from lark import Transformer, v_args
 
 from starkware.cairo.lang.compiler.ast.aliased_identifier import AliasedIdentifier
@@ -830,7 +831,7 @@ class ParserTransformer(Transformer):
             comments=comments, starts_new_line=starts_new_line, location=self.meta2loc(meta)
         )
 
-    def meta2loc(self, meta):
+    def meta2loc(self, meta: lark.tree.Meta) -> Optional[Location]:
         if meta.empty:
             return None
         return Location(
@@ -842,6 +843,14 @@ class ParserTransformer(Transformer):
             parent_location=self.parser_context.parent_location,
         )
 
+    def token2loc(self, token: lark.lexer.Token) -> Location:
+        return Location(
+            start_line=token.line,
+            start_col=token.column,
+            end_line=token.end_line,
+            end_col=token.end_column,
+            input_file=self.input_file,
+        )
 
 def backslash_to_hex(value: bytes) -> bytes:
     r"""
