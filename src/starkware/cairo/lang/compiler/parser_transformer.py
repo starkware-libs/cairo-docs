@@ -799,10 +799,8 @@ class ParserTransformer(Transformer):
             raise ParserError("Range generator excepts at least the stop argument.",
                               location=location)
         else:
-            if args[3].location is not None and args[-1].location is not None:
-                excessive_args_location = args[3].location | args[-1].location
-            else:
-                excessive_args_location = location
+            assert args[3].location is not None and args[-1].location is not None
+            excessive_args_location = args[3].location.span(args[-1].location)
 
             raise ParserError("Too many arguments passed to range generator.",
                               location=excessive_args_location)
