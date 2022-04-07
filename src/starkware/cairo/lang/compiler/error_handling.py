@@ -99,9 +99,19 @@ class Location:
 
     def span(self, other: "Location"):
         """
-        Builds a span (set union) between two locations.
+        Builds a span between two locations.
 
-        Both locations must point to the same input file and have no parent location attached.
+        A *span* is the shortest location which contains both locations. For example in such setup:
+
+            Some long code line.
+                 ^**^      ^**^
+
+        the span of these two locations will look like this:
+
+            Some long code line.
+                 ^************^
+
+        Both locations must point to the same input file and same parent location (if any).
         """
 
         if self.input_file != other.input_file:
