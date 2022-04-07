@@ -97,7 +97,7 @@ class Location:
 
         return parent_locations
 
-    def __or__(self, other: "Location"):
+    def span(self, other: "Location"):
         """
         Builds a span (set union) between two locations.
 
@@ -107,31 +107,23 @@ class Location:
         if self.input_file != other.input_file:
             raise ValueError("Locations point to different input files.")
 
-        if self.parent_location is not None or other.parent_location is not None:
-            raise ValueError("Locations must not have parent locations.")
+        if self.parent_location != other.parent_location:
+            raise ValueError("Locations have different parent locations.")
 
-        if self.start_line < other.start_line:
-            start_line = self.start_line
-            start_col = self.start_col
-        elif self.start_line > other.start_line:
-            start_line = other.start_line
-            start_col = other.start_col
-        else:
-            start_line = self.start_line
-            start_col = min(self.start_col, other.start_col)
+        (start_line, start_col) = min(
+            (self.start_line, self.start_col), (other.start_line, other.start_col)
+        )
 
-        if self.end_line > other.end_line:
-            end_line = self.end_line
-            end_col = self.end_col
-        elif self.end_line < other.end_line:
-            end_line = other.end_line
-            end_col = other.end_col
-        else:
-            end_line = self.end_line
-            end_col = max(self.end_col, other.end_col)
+        (end_line, end_col) = max((self.end_line, self.end_col), (other.end_line, other.end_col))
 
-        return Location(start_line=start_line, start_col=start_col, end_line=end_line,
-                        end_col=end_col, input_file=self.input_file)
+        return Location(
+            start_line=start_line,
+            start_col=start_col,
+            end_line=end_line,
+            end_col=end_col,
+            input_file=self.input_file,
+            parent_location=self.parent_location,
+        )
 
 
 def get_location_marks(content: str, location: Location):
