@@ -777,14 +777,16 @@ class ParserTransformer(Transformer):
         elif len(args) == 3:
             [start, stop, step] = args
         elif len(args) == 0:
-            raise ParserError("Range generator excepts at least the stop argument.",
-                              location=self.meta2loc(meta))
+            raise ParserError(
+                "Range generator excepts at least the stop argument.", location=self.meta2loc(meta)
+            )
         else:
             assert args[3].location is not None and args[-1].location is not None
             excessive_args_location = args[3].location.span(args[-1].location)
 
-            raise ParserError("Too many arguments passed to range generator.",
-                              location=excessive_args_location)
+            raise ParserError(
+                "Too many arguments passed to range generator.", location=excessive_args_location
+            )
 
         return ForGeneratorRange(start=start, stop=stop, step=step, location=self.meta2loc(meta))
 
@@ -894,10 +896,11 @@ class ParserTransformer(Transformer):
             input_file=self.input_file,
         )
 
+
 def backslash_to_hex(value: bytes) -> bytes:
     r"""
     Replaces substrings of the form '\x**' with the corresponding byte.
     """
-    pattern = br"\\x([0-9a-fA-F]{2})"
+    pattern = rb"\\x([0-9a-fA-F]{2})"
     replacer = lambda m: bytes.fromhex(m.group(1).decode("ascii"))
     return re.sub(pattern, replacer, value)

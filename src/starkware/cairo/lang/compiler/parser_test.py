@@ -276,7 +276,7 @@ def test_operator_precedence():
     assert expr.format() == code
 
     # Compute the value of expr from the tree and compare it with the correct value.
-    PRIME = 3 * 2 ** 30 + 1
+    PRIME = 3 * 2**30 + 1
     simplified_expr = ExpressionSimplifier(PRIME).visit(expr)
     assert isinstance(simplified_expr, ExprConst)
     assert simplified_expr.val == eval(code)
@@ -293,7 +293,7 @@ def test_div_expr():
     code = "120 / 2 / 3 / 4"
     expr = parse_expr(code)
     # Compute the value of expr from the tree and compare it with the correct value.
-    PRIME = 3 * 2 ** 30 + 1
+    PRIME = 3 * 2**30 + 1
     simplified_expr = ExpressionSimplifier(PRIME).visit(expr)
     assert isinstance(simplified_expr, ExprConst)
     assert simplified_expr.val == 5
@@ -965,7 +965,7 @@ def test_for_range_without_arguments():
 file:?:?: Range generator excepts at least the stop argument.
 for i in range():
          ^*****^
-"""
+""",
     )
 
 
@@ -976,7 +976,7 @@ def test_for_range_with_too_many_arguments():
 file:?:?: Too many arguments passed to range generator.
 for i in range(1, 2, 3, 4, 5):
                         ^**^ 
-        """
+        """,
     )
 
 
@@ -987,5 +987,5 @@ def test_for_without_clauses():
 file:?:?: Unexpected token Token('COLON', ':'). Expected: identifier.
 for:
    ^
-"""
+""",
     )
