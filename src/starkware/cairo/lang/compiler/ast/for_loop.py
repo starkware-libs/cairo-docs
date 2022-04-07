@@ -40,6 +40,7 @@ class ForGeneratorRange(Expression):
 class ForClauseIn(AstNode):
     identifier: ExprIdentifier
     generator: ForGeneratorRange
+    location: Optional[Location]
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return [self.identifier, self.generator]
