@@ -6,7 +6,7 @@ import lark
 from lark import Token, Transformer, v_args
 
 from starkware.cairo.lang.compiler.ast.aliased_identifier import AliasedIdentifier
-from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
+from starkware.cairo.lang.compiler.ast.arguments import IdentifierList, CommaSeparatedWithNotes
 from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr
 from starkware.cairo.lang.compiler.ast.cairo_types import (
     CairoType,
@@ -117,17 +117,6 @@ class ParserContext:
 
 class ParserError(LocationError):
     pass
-
-
-@dataclasses.dataclass
-class CommaSeparatedWithNotes:
-    """
-    Represents a list of comma separated values, such as expressions or types.
-    """
-
-    args: list
-    notes: List[Notes]
-    has_trailing_comma: bool
 
 
 class ParserTransformer(Transformer):

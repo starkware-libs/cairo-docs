@@ -21,3 +21,14 @@ class IdentifierList(AstNode):
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return self.identifiers
+
+
+@dataclasses.dataclass
+class CommaSeparatedWithNotes:
+    """
+    Represents a list of comma separated values, such as expressions or types.
+    """
+
+    args: list
+    notes: List[Notes]
+    has_trailing_comma: bool
