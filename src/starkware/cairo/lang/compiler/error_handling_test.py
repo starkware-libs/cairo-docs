@@ -56,9 +56,9 @@ def test_location_span():
     file = InputFile(filename="file.cairo", content="")
 
     a = Location(1, 2, 3, 4, file)
-    b = Location(5, 6, 7, 8, file)
+    b = Location(5, 0, 7, 2, file)
 
-    assert a.span(b) == Location(1, 2, 7, 8, file)
+    assert a.span(b) == Location(1, 2, 7, 2, file)
     assert a.span(b) == b.span(a)
 
 
@@ -90,7 +90,7 @@ def test_location_span_raises_if_input_files_differ():
     a = Location(1, 2, 3, 4, file1)
     b = Location(5, 6, 7, 8, file2)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Locations point to different input files."):
         a.span(b)
 
 
@@ -100,5 +100,5 @@ def test_location_span_raises_if_parent_location_differs():
     a = Location(1, 2, 3, 4, file, parent_location=(Location(1, 1, 1, 10, file), "a"))
     b = Location(5, 6, 7, 8, file, parent_location=(Location(2, 2, 2, 20, file), "b"))
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Locations have different parent locations."):
         a.span(b)
