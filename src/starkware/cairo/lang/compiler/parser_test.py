@@ -964,7 +964,7 @@ def test_for_range_without_arguments():
         """
 file:?:?: Range generator excepts at least the stop argument.
 for i in range():
-         ^***^
+         ^*****^
 """
     )
 
