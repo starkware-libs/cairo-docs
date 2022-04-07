@@ -3,7 +3,7 @@ import re
 from typing import List, Optional, Tuple
 
 import lark
-from lark import Transformer, v_args
+from lark import Token, Transformer, v_args
 
 from starkware.cairo.lang.compiler.ast.aliased_identifier import AliasedIdentifier
 from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
@@ -120,11 +120,6 @@ class ParserError(LocationError):
 
 
 @dataclasses.dataclass
-class Comma:
-    location: Optional[Location]
-
-
-@dataclasses.dataclass
 class CommaSeparatedWithNotes:
     """
     Represents a list of comma separated values, such as expressions or types.
@@ -147,12 +142,6 @@ class ParserTransformer(Transformer):
     def __default__(self, data: str, children, meta):
         raise TypeError(f"Unable to parse tree node of type {data}")
 
-    # Comma separated list with notes.
-
-    @v_args(meta=True)
-    def comma(self, value, meta):
-        return Comma(location=self.meta2loc(meta))
-
     def comma_separated_with_notes(self, value) -> CommaSeparatedWithNotes:
         saw_comma = True
         all_notes: List[Notes] = []
@@ -162,9 +151,9 @@ class ParserTransformer(Transformer):
             if isinstance(v, Notes):
                 # Join the notes before and after the comma.
                 current_notes.append(v)
-            elif isinstance(v, Comma):
+            elif isinstance(v, Token) and v.type == "COMMA":
                 if saw_comma:
-                    raise ParserError("Unexpected comma.", location=v.location)
+                    raise ParserError("Unexpected comma.", location=self.token2loc(v))
                 saw_comma = True
             else:
                 if not saw_comma:
@@ -887,7 +876,7 @@ class ParserTransformer(Transformer):
             parent_location=self.parser_context.parent_location,
         )
 
-    def token2loc(self, token: lark.lexer.Token) -> Location:
+    def token2loc(self, token: Token) -> Location:
         return Location(
             start_line=token.line,
             start_col=token.column,

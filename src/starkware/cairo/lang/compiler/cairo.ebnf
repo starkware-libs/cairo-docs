@@ -16,8 +16,8 @@ _ARROW: "->"
 _AT: "@"
 
 // Comma separated list with notes.
-comma: ","
-_expr_sep: (comma | nonempty_notes)+
+COMMA: ","
+_expr_sep: (COMMA | nonempty_notes)+
 comma_separated_with_notes{item}: notes item? (_expr_sep item)* _expr_sep?
 
 // Types.
