@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+import dataclasses
 from typing import Sequence, Optional
 
 from starkware.cairo.lang.compiler.ast.expr import ExprIdentifier, Expression
@@ -7,7 +7,7 @@ from starkware.cairo.lang.compiler.error_handling import Location
 from starkware.python.expression_string import ExpressionString
 
 
-@dataclass
+@dataclasses.dataclass
 class ForGeneratorRange(Expression):
     start: Optional[Expression]
     stop: Expression
@@ -36,7 +36,7 @@ class ForGeneratorRange(Expression):
         return ExpressionString.highest(f"range({args})")
 
 
-@dataclass
+@dataclasses.dataclass
 class ForClauseIn(AstNode):
     identifier: ExprIdentifier
     generator: ForGeneratorRange
