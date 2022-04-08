@@ -5,11 +5,10 @@ from starkware.cairo.lang.compiler.ast.arguments import CommaSeparatedWithNotes
 from starkware.cairo.lang.compiler.ast.expr import ExprIdentifier, Expression
 from starkware.cairo.lang.compiler.ast.node import AstNode
 from starkware.cairo.lang.compiler.error_handling import Location
-from starkware.python.expression_string import ExpressionString
 
 
 @dataclasses.dataclass
-class ForGeneratorRange(Expression):
+class ForGeneratorRange(AstNode):
     args: CommaSeparatedWithNotes
     location: Optional[Location]
 
@@ -37,10 +36,10 @@ class ForGeneratorRange(Expression):
     def get_children(self) -> Sequence[Expression]:
         return self.args.args
 
-    def to_expr_str(self) -> ExpressionString:
-        # TODO: Better line breaking for arguments
+    def format(self):
+        # TODO(mkaput, 08/04/2022): Better line breaking for arguments
         args = ", ".join([child.format() for child in self.get_children()])
-        return ExpressionString.highest(f"range({args})")
+        return f"range({args})"
 
 
 @dataclasses.dataclass
