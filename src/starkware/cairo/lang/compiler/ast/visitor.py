@@ -1,3 +1,4 @@
+import dataclasses
 from contextlib import contextmanager
 from typing import List, Optional
 
@@ -10,11 +11,12 @@ from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeElementWith,
     CodeElementWithAttr,
     CommentedCodeElement,
-    LangDirective,
+    LangDirective, CodeElementFor,
 )
 from starkware.cairo.lang.compiler.ast.module import CairoFile, CairoModule
 from starkware.cairo.lang.compiler.ast.node import AstNode
 from starkware.cairo.lang.compiler.error_handling import LocationError
+from starkware.cairo.lang.compiler.preprocessor.preprocessor_error import PreprocessorError
 from starkware.cairo.lang.compiler.scoped_name import ScopedName
 
 
@@ -95,6 +97,9 @@ class Visitor:
             label_end=elm.label_end,
             location=elm.location,
         )
+
+    def visit_CodeElementFor(self, elm: CodeElementFor):
+        raise PreprocessorError("For loops are unsupported yet.", location=elm.location)
 
     def visit_CodeElementWithAttr(self, elm: CodeElementWithAttr):
         return CodeElementWithAttr(
