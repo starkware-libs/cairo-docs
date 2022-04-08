@@ -14,18 +14,21 @@ class ForGeneratorRange(AstNode):
 
     @property
     def start(self) -> Optional[Expression]:
-        return self.padded_args[0]
+        return self.args_or_nones[0]
 
     @property
     def stop(self) -> Expression:
-        return self.padded_args[1]
+        return self.args_or_nones[1]
 
     @property
     def step(self) -> Optional[Expression]:
-        return self.padded_args[2]
+        return self.args_or_nones[2]
 
     @property
-    def padded_args(self) -> Tuple[Optional[Expression], Expression, Optional[Expression]]:
+    def args_or_nones(self) -> Tuple[Optional[Expression], Expression, Optional[Expression]]:
+        """
+        Returns (start, stop, step) arguments tuple, with `None` if argument was not provided.
+        """
         args = self.args.args
         if len(args) < 2:
             args = [None, *args]
