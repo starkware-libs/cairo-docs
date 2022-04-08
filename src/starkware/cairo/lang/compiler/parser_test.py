@@ -1,4 +1,3 @@
-from textwrap import dedent
 from typing import List
 
 import pytest
@@ -923,7 +922,11 @@ def test_pointer():
 
 
 def test_for():
-    source = "for i in range(5):\n    f()\nend"
+    source = """\
+for i in range(5):
+    f()
+end\
+"""
     res = parse_code_element(source)
     assert isinstance(res, CodeElementFor)
     assert res.clause.identifier.name == "i"
@@ -935,7 +938,11 @@ def test_for():
 
 
 def test_for_range_start_stop():
-    source = "for i in range(1, x):\n    f()\nend"
+    source = """\
+for i in range(1, x):
+    f()
+end\
+"""
     res = parse_code_element(source)
     assert isinstance(res, CodeElementFor)
     assert isinstance(res.clause.generator.start, ExprConst)
@@ -947,7 +954,11 @@ def test_for_range_start_stop():
 
 
 def test_for_range_start_stop_step():
-    source = "for i in range(1, 5, 2):\n    f()\nend"
+    source = """\
+for i in range(1, 5, 2):
+    f()
+end\
+"""
     res = parse_code_element(source)
     assert isinstance(res, CodeElementFor)
     assert isinstance(res.clause.generator.start, ExprConst)
@@ -993,18 +1004,18 @@ for:
 
 
 def test_for_formatting_with_notes():
-    source = dedent("""
-    for i in range(
-        # Comment 1
-        # Comment 2
-        0,
-        # Comment 3
-        1,
-        2
-        # Comment 4
-    ):
-        f()
-    end
-    """).strip()
+    source = """\
+for i in range(
+    # Comment 1
+    # Comment 2
+    0,
+    # Comment 3
+    1,
+    2
+    # Comment 4
+):
+    f()
+end\
+"""
     res = parse_code_element(source)
     assert res.format(allowed_line_length=100) == source
