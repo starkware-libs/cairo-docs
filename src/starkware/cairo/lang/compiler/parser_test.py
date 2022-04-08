@@ -1,3 +1,4 @@
+from textwrap import dedent
 from typing import List
 
 import pytest
@@ -989,3 +990,21 @@ for:
    ^
 """,
     )
+
+
+def test_for_formatting_with_notes():
+    source = dedent("""
+    for i in range(
+        # Comment 1
+        # Comment 2
+        0,
+        # Comment 3
+        1,
+        2
+        # Comment 4
+    ):
+        f()
+    end
+    """).strip()
+    res = parse_code_element(source)
+    assert res.format(allowed_line_length=100) == source
