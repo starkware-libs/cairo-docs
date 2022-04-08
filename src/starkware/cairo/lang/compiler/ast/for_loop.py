@@ -16,47 +16,6 @@ class ForGeneratorRange(AstNode):
     args: ArgList
     location: Optional[Location] = LocationField
 
-    # def __post_init__(self):
-    #     # Validate arguments.
-    #     args = self.args.args
-    #
-    #     if len(args) == 0:
-    #         raise LocationError(
-    #             "Range generator excepts at least the stop argument.", location=self.location
-    #         )
-    #
-    #     if len(args) > 3:
-    #         assert args[3].location is not None and args[-1].location is not None
-    #         excessive_args_location = args[3].location.span(args[-1].location)
-    #
-    #         raise LocationError(
-    #             "Too many arguments passed to range generator.", location=excessive_args_location
-    #         )
-    #
-    # @property
-    # def start(self) -> Optional[Expression]:
-    #     return self.args_or_nones[0]
-    #
-    # @property
-    # def stop(self) -> Expression:
-    #     return self.args_or_nones[1]
-    #
-    # @property
-    # def step(self) -> Optional[Expression]:
-    #     return self.args_or_nones[2]
-    #
-    # @property
-    # def args_or_nones(self) -> Tuple[Optional[Expression], Expression, Optional[Expression]]:
-    #     """
-    #     Returns (start, stop, step) arguments tuple, with `None` if argument was not provided.
-    #     """
-    #     args = self.args.args
-    #     if len(args) < 2:
-    #         args = [None, *args]
-    #     if len(args) < 3:
-    #         args = [*args, None]
-    #     return tuple(args)
-
     def get_children(self):
         return self.args
 

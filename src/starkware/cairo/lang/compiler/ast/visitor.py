@@ -11,7 +11,8 @@ from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeElementWith,
     CodeElementWithAttr,
     CommentedCodeElement,
-    LangDirective, CodeElementFor,
+    LangDirective,
+    CodeElementFor,
 )
 from starkware.cairo.lang.compiler.ast.module import CairoFile, CairoModule
 from starkware.cairo.lang.compiler.ast.node import AstNode

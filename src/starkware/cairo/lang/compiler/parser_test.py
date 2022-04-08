@@ -1015,28 +1015,6 @@ end\
     assert res.format(allowed_line_length=100) == source
 
 
-# def test_for_range_without_arguments():
-#     verify_exception(
-#         "for i in range():\n    f()\nend",
-#         """
-# file:?:?: Range generator excepts at least the stop argument.
-# for i in range():
-#          ^*****^
-# """,
-#     )
-#
-#
-# def test_for_range_with_too_many_arguments():
-#     verify_exception(
-#         "for i in range(1, 2, 3, 4, 5):\n    f()\nend",
-#         """
-# file:?:?: Too many arguments passed to range generator.
-# for i in range(1, 2, 3, 4, 5):
-#                         ^**^
-#         """,
-#     )
-
-
 def test_for_without_clauses():
     verify_exception(
         "for:\n    f()\nend",
