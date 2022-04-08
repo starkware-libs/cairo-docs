@@ -737,9 +737,8 @@ class ParserTransformer(Transformer):
             location=location,
         )
 
-    def code_element_for(self, value):
-        [kw_for, clause, code_block] = value
-
+    @v_args(inline=True)
+    def code_element_for(self, kw_for, clause, code_block):
         # Create a location for the "for" keyword.
         location = self.token2loc(kw_for)
 
@@ -749,29 +748,13 @@ class ParserTransformer(Transformer):
             location=location,
         )
 
-    def for_clause_in(self, value):
-        [identifier, generator] = value
+    @v_args(inline=True)
+    def for_clause_in(self, identifier, generator):
         return ForClauseIn(identifier=identifier, generator=generator, location=identifier.location)
 
-    @v_args(meta=True)
-    def for_generator_range(self, value, meta):
-        [args] = value
-        assert isinstance(args, CommaSeparatedWithNotes)
-
-        # Validate arguments.
-        arg_nodes = args.args
-        if len(arg_nodes) == 0:
-            raise ParserError(
-                "Range generator excepts at least the stop argument.", location=self.meta2loc(meta)
-            )
-        elif len(arg_nodes) > 3:
-            assert arg_nodes[3].location is not None and arg_nodes[-1].location is not None
-            excessive_args_location = arg_nodes[3].location.span(arg_nodes[-1].location)
-
-            raise ParserError(
-                "Too many arguments passed to range generator.", location=excessive_args_location
-            )
-
+    @v_args(inline=True, meta=True)
+    def for_generator_range(self, meta, args):
+        assert isinstance(args, ArgList)
         return ForGeneratorRange(args=args, location=self.meta2loc(meta))
 
     @v_args(meta=True)

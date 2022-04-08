@@ -608,8 +608,7 @@ class CodeElementFor(CodeElement):
         return [self.clause, self.code_block]
 
     def format(self, allowed_line_length):
-        clauses_particles = ["for ", *self.clause.get_particles()]
-        clauses_particles[-1] += ":"
+        clauses_particles = ["for ", *self.clause.get_particles(), ":"]
         code = particles_in_lines(
             particles=ParticleList(elements=clauses_particles),
             config=ParticleFormattingConfig(
