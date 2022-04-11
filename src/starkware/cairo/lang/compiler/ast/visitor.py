@@ -100,7 +100,7 @@ class Visitor:
         )
 
     def visit_CodeElementFor(self, elm: CodeElementFor):
-        raise PreprocessorError("For loops are unsupported yet.", location=elm.location)
+        raise PreprocessorError("For loops are not supported yet.", location=elm.location)
 
     def visit_CodeElementWithAttr(self, elm: CodeElementWithAttr):
         return CodeElementWithAttr(
