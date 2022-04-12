@@ -839,7 +839,9 @@ class ParserTransformer(Transformer):
             end_line=token.end_line,
             end_col=token.end_column,
             input_file=self.input_file,
+            parent_location=self.parser_context.parent_location,
         )
+
 
 def backslash_to_hex(value: bytes) -> bytes:
     r"""
