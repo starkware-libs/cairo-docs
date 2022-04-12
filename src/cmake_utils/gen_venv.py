@@ -9,7 +9,6 @@ import json
 import os
 import shutil
 import subprocess
-import sys
 from argparse import ArgumentParser
 from typing import Dict, List
 
@@ -89,19 +88,14 @@ def find_python(exec_name):
     :return: Absolute path to found Python executable.
     """
 
-    lookup_paths = [
-        "/usr/bin",
-        "/usr/local/bin",
-    ]
-    python_exec = shutil.which(exec_name, path=":".join(lookup_paths))
+    path = "/usr/bin:/usr/local/bin:" + os.getenv("PATH", default="")
+    python_exec = shutil.which(exec_name, path=path)
     if python_exec is not None:
         return python_exec
 
-    python_exec = sys.executable
-    if python_exec is not None:
-        return python_exec
-
-    raise RuntimeError(f"Unable to find Python executable named {exec_name}")
+    raise RuntimeError(
+        f"Unable to find Python executable named {exec_name} in PATH or well known directories."
+    )
 
 
 def main():
