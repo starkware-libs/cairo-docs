@@ -79,13 +79,12 @@ def get_pth_dir(python: str, venv_dir: str):
         raise NotImplementedError(f"Unsupported python executable {python}")
 
 
-def find_python(exec_name):
+def find_python(exec_name: str) -> str:
     """
     Tries to find Python executable in well known paths.
 
-    :param exec_name: Expected name of the Python executable, for example `python3.7`.
-    :raises RuntimeError: if unable to find Python executable.
-    :return: Absolute path to found Python executable.
+    Arguments:
+    exec_name: Expected name of the Python executable, for example `python3.7`.
     """
 
     path = "/usr/bin:/usr/local/bin:" + os.getenv("PATH", default="")
