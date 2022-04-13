@@ -1,3 +1,4 @@
+import dataclasses
 from contextlib import contextmanager
 from typing import List, Optional
 
@@ -98,7 +99,7 @@ class Visitor:
         )
 
     def visit_CodeElementFor(self, elm: CodeElementFor):
-        raise VisitorError("For loops are not supported yet.", location=elm.location)
+        return dataclasses.replace(elm, code_block=self.visit(elm.code_block))
 
     def visit_CodeElementWithAttr(self, elm: CodeElementWithAttr):
         return CodeElementWithAttr(
