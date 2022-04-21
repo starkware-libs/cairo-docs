@@ -26,6 +26,7 @@ from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeElementConst,
     CodeElementDirective,
     CodeElementEmptyLine,
+    CodeElementFor,
     CodeElementFuncCall,
     CodeElementFunction,
     CodeElementHint,
@@ -934,6 +935,12 @@ Expected 'elm.element_type' to be a 'namespace'. Found: '{elm.element_type}'."""
 
         # Add the end label.
         self.visit(CodeElementLabel(identifier=label_end))
+
+    def visit_CodeElementFor(self, elm: CodeElementFor):
+        raise PreprocessorError(
+            "Internal compiler error: for loops should be lowered before preprocessor stage.",
+            location=elm.location,
+        )
 
     def visit_CodeElementDirective(self, elm: CodeElementDirective):
         # Visit directive.
