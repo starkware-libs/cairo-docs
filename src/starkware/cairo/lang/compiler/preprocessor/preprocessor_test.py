@@ -4472,13 +4472,12 @@ call rel 5
 [ap] = 1234; ap++
 ret
 [ap] = [fp + (-3)] + (-24); ap++
-jmp rel 8 if [ap + (-1)] != 0
+jmp rel 11 if [ap + (-1)] != 0
 [ap] = 42; ap++
 [ap] = 43; ap++
-jmp rel 3
-ret
 [ap] = [fp + (-3)] + 2; ap++
-call rel -13
+call rel -10
+ret
 ret
 """
     )
@@ -4501,12 +4500,11 @@ end
 call rel 3
 ret
 [ap] = [fp + (-3)] + 7; ap++
-jmp rel 6 if [ap + (-1)] != 0
+jmp rel 9 if [ap + (-1)] != 0
 [ap] = 42; ap++
-jmp rel 3
-ret
 [ap] = [fp + (-3)] + (-2); ap++
-call rel -11
+call rel -8
+ret
 ret
 """
     )
@@ -4531,12 +4529,11 @@ call rel 5
 [ap] = 1234; ap++
 ret
 [ap] = [fp + (-3)] + (-5); ap++
-jmp rel 6 if [ap + (-1)] != 0
+jmp rel 9 if [ap + (-1)] != 0
 [ap] = [fp + (-3)] * 456
-jmp rel 3
-ret
 [ap] = [fp + (-3)] + 1; ap++
-call rel -11
+call rel -8
+ret
 ret
 """
     )

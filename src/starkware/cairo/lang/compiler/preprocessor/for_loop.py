@@ -45,33 +45,30 @@ class ForLoopLoweringStage(VisitorStage):
     Lowering algorithm
     ==================
 
-    The general rule, expressed in Cairo pseudocode (dollar names are compiler-defined),
-    would transform this::
+    The general rule, expressed in Cairo pseudocode would transform this::
 
         for $I in {generator}:
             {instructions}
         END
 
-    into following Cairo code sections::
+    into following Cairo code::
 
-        local $I: $Iterator
-        assert $I = {initialize $G}
-        $F($I)
+        {initialize iterator if necessary}
+        $F({starting iterator value})
 
         # separate code section
         func $F($I: $Iterator):
-            alloc_locals
-            local $I': $Iterator     # next iterator
+            {alloc_locals if necessary}
 
             {initialize condition if necessary}
             if {condition}:
                 {instructions}
+
+                {initialize next($I) if necessary}
+                return $F({next($I)})
             else
                 ret
             end
-
-            assert $I' = {next($I)}
-            return $F($I')
         end
     """
 
@@ -222,40 +219,50 @@ def _build_iterator_function(elm: CodeElementFor, gl: InRangeLowering) -> CodeEl
     assert elm.label_if_neq is not None
     assert elm.label_if_end is not None
 
-    arguments = IdentifierList(identifiers=[TypedIdentifier(
-        identifier=_iter_name_body(gl),
-        expr_type=gl.iterator_type(),
-        location=gl.iterator_location,
-    )], location=elm.location)
+    arguments = IdentifierList(
+        identifiers=[
+            TypedIdentifier(
+                identifier=_iter_name_body(gl),
+                expr_type=gl.iterator_type(),
+                location=gl.iterator_location,
+            )
+        ],
+        location=elm.location,
+    )
 
     condition_init, condition_expr = gl.condition(iter_expr=_iter_name_body(gl))
     next_init, next_expr = gl.increment_iterator(iter_expr=_iter_name_body(gl))
 
-    code_elements = []
-
-    if gl.needs_locals_in_iterator_function():
-        code_elements.append(CodeElementAllocLocals(location=elm.location))
-
-    code_elements.extend(condition_init)
-
-    code_elements.append(
-        CodeElementIf(
-            condition=condition_expr,
-            main_code_block=elm.code_block,
-            else_code_block=CodeBlock.from_code_elements(
-                [
-                    CodeElementReturn(exprs=[], location=elm.location),
-                ]
+    code_block = CodeBlock.from_code_elements(
+        [
+            *condition_init,
+            CodeElementIf(
+                condition=condition_expr,
+                main_code_block=(
+                    elm.code_block
+                    + CodeBlock.from_code_elements(
+                        [*next_init, _tail_call_iterator_function(elm, gl, next_expr)]
+                    )
+                ),
+                else_code_block=(
+                    CodeBlock.from_code_elements(
+                        [
+                            CodeElementReturn(exprs=[], location=elm.location),
+                        ]
+                    )
+                ),
+                label_neq=elm.label_if_neq,
+                label_end=elm.label_if_end,
+                location=elm.location,
             ),
-            label_neq=elm.label_if_neq,
-            label_end=elm.label_if_end,
-            location=elm.location,
-        )
+        ]
     )
 
-    code_elements.extend(next_init)
-
-    code_elements.append(_tail_call_iterator_function(elm, gl, next_expr))
+    if gl.needs_locals_in_iterator_function():
+        code_block = (
+            CodeBlock.from_code_elements([CodeElementAllocLocals(location=elm.location)])
+            + code_block
+        )
 
     return CodeElementFunction(
         element_type="func",
@@ -264,7 +271,7 @@ def _build_iterator_function(elm: CodeElementFor, gl: InRangeLowering) -> CodeEl
         # TODO(mkaput, 22/04/2022): Implement implicit arguments in for loops.
         implicit_arguments=None,
         returns=None,
-        code_block=CodeBlock.from_code_elements(code_elements),
+        code_block=code_block,
         decorators=[],
     )
 
