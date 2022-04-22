@@ -4539,5 +4539,36 @@ ret
     )
 
 
+def test_for_range_reference_start():
+    code = """
+func main():
+    alloc_locals
+    local start = -10
+    for i in range(start, 5):
+        [ap] = i * 456
+    end
+    ret
+end
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+        program.format()
+        == """\
+ap += 1
+[fp] = -10
+[ap] = [fp]; ap++
+call rel 3
+ret
+[ap] = [fp + (-3)] + (-5); ap++
+jmp rel 9 if [ap + (-1)] != 0
+[ap] = [fp + (-3)] * 456
+[ap] = [fp + (-3)] + 1; ap++
+call rel -8
+ret
+ret
+"""
+    )
+
+
 # TODO(mkaput, 22/04/2022): Implement using references as range() arguments.
 # TODO(mkaput, 22/04/2022): Implement using references in loop body.
