@@ -386,6 +386,10 @@ class CodeBlock(AstNode):
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return self.code_elements
 
+    def __add__(self, other: "CodeBlock") -> "CodeBlock":
+        assert isinstance(other, self.__class__)
+        return CodeBlock(code_elements=self.code_elements + other.code_elements)
+
     @classmethod
     def from_code_elements(cls, code_elements: Iterable[CodeElement]) -> "CodeBlock":
         return cls(
