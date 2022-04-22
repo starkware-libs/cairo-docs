@@ -613,6 +613,9 @@ class CodeElementIf(CodeElement):
 class CodeElementFor(CodeElement):
     clause: ForClauseIn
     code_block: CodeBlock
+    label_func: Optional[str] = None
+    label_if_neq: Optional[str] = None
+    label_if_end: Optional[str] = None
     location: Optional[Location] = LocationField
 
     def get_children(self) -> Sequence[Optional[AstNode]]:

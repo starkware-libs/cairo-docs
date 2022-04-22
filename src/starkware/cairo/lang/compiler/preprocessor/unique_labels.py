@@ -1,4 +1,10 @@
-from starkware.cairo.lang.compiler.ast.code_elements import CodeElement, CodeElementIf
+import dataclasses
+
+from starkware.cairo.lang.compiler.ast.code_elements import (
+    CodeElement,
+    CodeElementIf,
+    CodeElementFor,
+)
 from starkware.cairo.lang.compiler.ast.node import AstNode
 from starkware.cairo.lang.compiler.ast.visitor import Visitor
 
@@ -58,4 +64,13 @@ class UniqueLabelCreator(Visitor):
             label_neq=label_neq,
             label_end=label_end,
             location=elm.location,
+        )
+
+    def visit_CodeElementFor(self, elm: CodeElementFor):
+        assert elm.label_func is None
+        return dataclasses.replace(
+            elm,
+            label_func=self.anon_label_gen.get(),
+            label_if_neq=self.anon_label_gen.get(),
+            label_if_end=self.anon_label_gen.get(),
         )
