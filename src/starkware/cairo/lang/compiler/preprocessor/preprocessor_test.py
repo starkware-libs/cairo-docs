@@ -4452,19 +4452,95 @@ file:?:?: Hints before "using" statements are not allowed.
     )
 
 
-def test_for_unsupported():
-    verify_exception(
-        """
+def test_for_unused_iterator():
+    code = """
+func main():
+    for _i in range(7, 24, 2):
+        [ap] = 42; ap++
+        [ap] = 43; ap++
+    end
+    [ap] = 1234; ap++
+    ret
+end
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+        program.format()
+        == """\
+[ap] = 7; ap++
+call rel 5
+[ap] = 1234; ap++
+ret
+[ap] = [fp + (-3)] + (-24); ap++
+jmp rel 8 if [ap + (-1)] != 0
+[ap] = 42; ap++
+[ap] = 43; ap++
+jmp rel 3
+ret
+[ap] = [fp + (-3)] + 2; ap++
+call rel -13
+ret
+"""
+    )
+
+
+def test_for_range_backward():
+    code = """
+func main():
+    for _i in range(24, -7, -2):
+        [ap] = 42; ap++
+    end
+    ret
+end
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+        program.format()
+        == """\
+[ap] = 24; ap++
+call rel 3
+ret
+[ap] = [fp + (-3)] + 7; ap++
+jmp rel 6 if [ap + (-1)] != 0
+[ap] = 42; ap++
+jmp rel 3
+ret
+[ap] = [fp + (-3)] + (-2); ap++
+call rel -11
+ret
+"""
+    )
+
+
+def test_for_const():
+    code = """
 func main():
     for i in range(5):
-        f()
+        [ap] = i * 456
     end
+    [ap] = 1234; ap++
+    ret
 end
-""",
-        """
-file:?:?: For loops are not supported yet.
-    for i in range(5):
-    ^*^
-""",
-        exc_type=VisitorError,
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+        program.format()
+        == """\
+[ap] = 0; ap++
+call rel 5
+[ap] = 1234; ap++
+ret
+[ap] = [fp + (-3)] + (-5); ap++
+jmp rel 6 if [ap + (-1)] != 0
+[ap] = [fp + (-3)] * 456
+jmp rel 3
+ret
+[ap] = [fp + (-3)] + 1; ap++
+call rel -11
+ret
+"""
     )
+
+
+# TODO(mkaput, 22/04/2022): Implement using references as range() arguments.
+# TODO(mkaput, 22/04/2022): Implement using references in loop body.
