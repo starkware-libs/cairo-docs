@@ -1,6 +1,6 @@
 import dataclasses
 from abc import abstractmethod
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import Any, Dict, List, Optional, Sequence, Union, Iterable
 
 from starkware.cairo.lang.compiler.ast.aliased_identifier import AliasedIdentifier
 from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
@@ -385,6 +385,19 @@ class CodeBlock(AstNode):
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return self.code_elements
+
+    @classmethod
+    def from_code_elements(cls, code_elements: Iterable[CodeElement]) -> "CodeBlock":
+        return cls(
+            code_elements=[
+                CommentedCodeElement(
+                    code_elm=elm,
+                    comment=None,
+                    location=getattr(elm, "location", None),
+                )
+                for elm in code_elements
+            ]
+        )
 
 
 @dataclasses.dataclass
