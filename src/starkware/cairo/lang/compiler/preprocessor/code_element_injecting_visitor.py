@@ -38,8 +38,6 @@ class CodeElementInjectingVisitor(ABC, Visitor):
         Call from visitor method to register a new function to be added to current Cairo module
         as close as possible to source code location where this visitor has been called.
         """
-
-        assert isinstance(func, CodeElementFunction)
         self._inject_functions.append(func)
 
     def visit_CodeBlock(self, elm: CodeBlock):
