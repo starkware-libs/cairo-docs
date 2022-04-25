@@ -179,8 +179,10 @@ class ForLoopLoweringVisitor(CodeElementInjectingVisitor):
         return envelope
 
 
-# Common codegen utilities
-def _iter_name_body(gl):
+# Common codegen utilities.
+
+
+def _iter_name_body(gl: InRangeLowering) -> ExprIdentifier:
     return ExprIdentifier(name=gl.iter_name_body, location=gl.iterator_location)
 
 
@@ -188,8 +190,10 @@ def _iterator_function_identifier(elm: CodeElementFor) -> ExprIdentifier:
     return ExprIdentifier(name=elm.label_func, location=elm.location)
 
 
-# Envelope generation
-def _build_envelope(elm, gl):
+# Envelope generation.
+
+
+def _build_envelope(elm: CodeElementFor, gl: InRangeLowering) -> List[CodeElement]:
     iterator_init, iterator_expr = gl.init_envelope_iterator()
     return [
         *iterator_init,
@@ -213,7 +217,9 @@ def _build_envelope(elm, gl):
     ]
 
 
-# Iterator function generation
+# Iterator function generation.
+
+
 def _build_iterator_function(elm: CodeElementFor, gl: InRangeLowering) -> CodeElementFunction:
     assert elm.label_func is not None
     assert elm.label_if_neq is not None
@@ -276,7 +282,9 @@ def _build_iterator_function(elm: CodeElementFor, gl: InRangeLowering) -> CodeEl
     )
 
 
-def _tail_call_iterator_function(elm, gl, next_expr):
+def _tail_call_iterator_function(
+    elm: CodeElementFor, gl: InRangeLowering, next_expr: Expression
+) -> CodeElementTailCall:
     return CodeElementTailCall(
         func_call=RvalueFuncCall(
             func_ident=_iterator_function_identifier(elm),

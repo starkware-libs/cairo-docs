@@ -1,6 +1,7 @@
 import dataclasses
 from abc import ABC
 from collections.abc import Iterable
+from typing import List
 
 from starkware.cairo.lang.compiler.ast.code_elements import (
     CommentedCodeElement,
@@ -26,6 +27,8 @@ class CodeElementInjectingVisitor(ABC, Visitor):
     For example usage check out ``ForLoopLoweringVisitor.visit_CodeElementFor``.
     """
 
+    _inject_functions: List[CodeElementFunction]
+
     def __init__(self):
         super().__init__()
         self._inject_functions = []
@@ -44,22 +47,21 @@ class CodeElementInjectingVisitor(ABC, Visitor):
 
         code_elements = []
         for commented_code_elm in elm.code_elements:
-            visited_elm = self.visit(commented_code_elm.code_elm)
+            visited_elms = self.visit(commented_code_elm.code_elm)
 
             # Flatten lists of code elements if returned from visitor method.
-            if isinstance(visited_elm, Iterable):
+            if isinstance(visited_elms, Iterable):
                 # This line forgets the comment assigned to commented_code_elm.
                 # This shouldn't matter in current use cases, but please be aware of this.
-                visited_elm = CodeBlock.from_code_elements(visited_elm).code_elements
+                visited_elms = CodeBlock.from_code_elements(visited_elms).code_elements
             else:
-                visited_elm = [dataclasses.replace(commented_code_elm, code_elm=visited_elm)]
+                visited_elms = [dataclasses.replace(commented_code_elm, code_elm=visited_elms)]
 
-            code_elements.extend(visited_elm)
+            code_elements.extend(visited_elms)
 
             # Inject any new functions if possible.
             if can_inject_functions:
                 for func in self._inject_functions:
-                    assert isinstance(func, CodeElementFunction)
                     code_elements.append(
                         CommentedCodeElement(
                             code_elm=func,
