@@ -68,9 +68,10 @@ class UniqueLabelCreator(Visitor):
 
     def visit_CodeElementFor(self, elm: CodeElementFor):
         assert elm.label_func is None
-        return dataclasses.replace(
+        elm = dataclasses.replace(
             elm,
             label_func=self.anon_label_gen.get(),
             label_if_neq=self.anon_label_gen.get(),
             label_if_end=self.anon_label_gen.get(),
         )
+        return super().visit_CodeElementFor(elm)
