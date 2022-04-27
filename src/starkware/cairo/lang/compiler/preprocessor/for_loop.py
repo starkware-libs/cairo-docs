@@ -10,7 +10,6 @@ from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeBlock,
     CodeElementReturn,
     CodeElementFuncCall,
-    CodeElementAllocLocals,
     CodeElementIf,
     CodeElementTailCall,
 )
@@ -169,9 +168,6 @@ class InRangeLowering:
             assert isinstance(step, ExprAssignment)
             self.step = step.expr
 
-    def needs_locals_in_iterator_function(self) -> bool:
-        return False
-
     def iterator_type(self) -> CairoType:
         return TypeFelt(location=self.generator_location)
 
@@ -273,12 +269,6 @@ def _build_iterator_function(elm: CodeElementFor, gl: InRangeLowering) -> CodeEl
             ),
         ]
     )
-
-    if gl.needs_locals_in_iterator_function():
-        code_block = (
-            CodeBlock.from_code_elements([CodeElementAllocLocals(location=elm.location)])
-            + code_block
-        )
 
     return CodeElementFunction(
         element_type="func",
