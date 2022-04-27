@@ -41,6 +41,29 @@ class ForLoopLoweringStage(VisitorStage):
     Lowers for loops into calls to recursive functions.
 
     This stage is relatively high level and should be placed early in the compilation pass chain.
+    """
+
+    def __init__(self):
+        super().__init__(visitor_factory=ForLoopLoweringVisitor, modify_ast=True)
+
+
+class ForLoopLoweringVisitor(CodeElementInjectingVisitor):
+    def __init__(self, context: PassManagerContext):
+        super().__init__()
+        self.context = context
+
+    def _visit_default(self, elm):
+        return elm
+
+    def visit_CodeElementFor(self, elm: CodeElementFor):
+        envelope, iterator_function = lower_for_loop(elm)
+        self.inject_function(iterator_function)
+        return envelope
+
+
+def lower_for_loop(elm: CodeElementFor) -> Tuple[List[CodeElement], CodeElementFunction]:
+    """
+    Lowers for loops into calls to recursive functions.
 
     Lowering algorithm
     ==================
@@ -72,8 +95,10 @@ class ForLoopLoweringStage(VisitorStage):
         end
     """
 
-    def __init__(self):
-        super().__init__(visitor_factory=ForLoopLoweringVisitor, modify_ast=True)
+    gl = InRangeLowering(clause=elm.clause)
+    envelope = _build_envelope(elm, gl)
+    iterator_function = _build_iterator_function(elm, gl)
+    return envelope, iterator_function
 
 
 class InRangeLowering:
@@ -162,21 +187,6 @@ class InRangeLowering:
         init = []
         expr = ExprOperator(op="+", a=iter_expr, b=self.step)
         return init, expr
-
-
-class ForLoopLoweringVisitor(CodeElementInjectingVisitor):
-    def __init__(self, context: PassManagerContext):
-        super().__init__()
-        self.context = context
-
-    def _visit_default(self, elm):
-        return elm
-
-    def visit_CodeElementFor(self, elm: CodeElementFor):
-        gl = InRangeLowering(clause=elm.clause)
-        envelope = _build_envelope(elm, gl)
-        self.inject_function(_build_iterator_function(elm, gl))
-        return envelope
 
 
 # Common codegen utilities.
