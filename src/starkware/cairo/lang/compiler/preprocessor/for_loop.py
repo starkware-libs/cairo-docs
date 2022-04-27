@@ -111,9 +111,9 @@ class InRangeLowering:
             )
 
         # TODO(mkaput, 21/04/2022): Support keyword arguments here.
-        #                           There is a refactoring opportunity here, as this functionality
-        #                           is implemented in process_expr_assignment_list in Preprocessor.
-        #                           As for now, we just error proactively.
+        #   There is a refactoring opportunity here, as this functionality
+        #   is implemented in process_expr_assignment_list in Preprocessor.
+        #   As for now, we just error proactively.
         for arg in args:
             if arg.identifier is not None:
                 raise ForLoopLoweringError(
