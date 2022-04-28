@@ -67,10 +67,7 @@ class ForGeneratorRange(RvalueFuncCall):
 class ForClauseIn(ForClause):
     identifier: ExprIdentifier
     generator: ForGeneratorRange
-
-    @property
-    def location(self) -> Optional[Location]:
-        return self.identifier.location
+    location: Optional[Location] = LocationField
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return [self.identifier, self.generator]
