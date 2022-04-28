@@ -126,7 +126,7 @@ _func: decorator_list _funcdecl _NEWLINE code_block "end"
 _if: "if" bool_expr ":" _NEWLINE code_block ("else" ":" _NEWLINE code_block)? "end"
 
 // For loops
-for_generator: "range" "(" arg_list ")" -> for_generator_range
+for_generator: function_call
 for_clause: identifier_def "in" for_generator -> for_clause_in
 FOR: "for"
 _for: FOR for_clause ":" _NEWLINE code_block "end"

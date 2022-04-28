@@ -940,8 +940,8 @@ end\
     assert isinstance(res, CodeElementFor)
     assert res.clause == ForClauseIn(
         identifier=ExprIdentifier(name="i"),
-        generator=ForGeneratorRange(
-            args=arg_list(
+        generator=ForGeneratorRange.from_arguments(
+            arg_list(
                 [
                     ExprAssignment(identifier=None, expr=ExprConst(val=0)),
                     ExprAssignment(identifier=None, expr=ExprConst(val=10)),
@@ -951,6 +951,27 @@ end\
         ),
     )
     assert res.format(allowed_line_length=100) == source
+
+
+def test_range_is_contextual_keyword():
+    source = """\
+for _ in range(10):
+    local range = 5
+end\
+"""
+    res = parse_code_element(source)
+    assert isinstance(res, CodeElementFor)
+
+
+def test_for_with_unknown_generator():
+    verify_exception(
+        "for _ in foobar():\n    f()\nend",
+        """
+file:?:?: Unknown for loop generator 'foobar'. Only 'range' is supported here.
+for _ in foobar():
+         ^****^
+""",
+    )
 
 
 def test_for_without_clauses():
