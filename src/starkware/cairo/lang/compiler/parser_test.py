@@ -1065,3 +1065,19 @@ end\
     res = parse_code_element(source)
     assert isinstance(res, CodeElementFor)
     assert res.format(allowed_line_length=100) == source
+
+
+def test_for_clauses_are_sorted_on_format():
+    # We expect sorting to be stable!
+    source = """\
+for bind(y), i in range(1), bind(x), j in range(2):
+    f()
+end\
+"""
+    expected = """\
+for i in range(1), j in range(2), bind(y), bind(x):
+    f()
+end\
+"""
+    res = parse_code_element(source)
+    assert res.format(allowed_line_length=100) == expected

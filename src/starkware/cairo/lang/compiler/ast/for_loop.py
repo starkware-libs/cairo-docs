@@ -35,7 +35,14 @@ class ForClausesList(AstNode):
 
     def get_particles(self) -> SeparatedParticleList:
         self.assert_no_comments()
-        return SeparatedParticleList(elements=[clause.get_particles() for clause in self.clauses])
+
+        def clause_order(clause: ForClause):
+            order = [ForClauseIn, ForClauseBind]
+            return order.index(type(clause))
+
+        return SeparatedParticleList(
+            elements=[clause.get_particles() for clause in (sorted(self.clauses, key=clause_order))]
+        )
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return self.clauses
