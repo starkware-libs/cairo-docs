@@ -29,7 +29,11 @@ from starkware.cairo.lang.compiler.ast.expr import (
     ArgList,
     ExprAssignment,
 )
-from starkware.cairo.lang.compiler.ast.for_loop import ForClauseIn, ForGeneratorRange
+from starkware.cairo.lang.compiler.ast.for_loop import (
+    ForClauseIn,
+    ForGeneratorRange,
+    ForClausesList,
+)
 from starkware.cairo.lang.compiler.ast.formatting_utils import FormattingError
 from starkware.cairo.lang.compiler.ast.instructions import (
     AddApInstruction,
@@ -932,17 +936,23 @@ end\
 """
     res = parse_code_element(source)
     assert isinstance(res, CodeElementFor)
-    assert res.clause == ForClauseIn(
-        identifier=ExprIdentifier(name="i"),
-        generator=ForGeneratorRange.from_arguments(
-            ArgList.from_args(
-                [
-                    ExprAssignment(identifier=None, expr=ExprConst(val=0)),
-                    ExprAssignment(identifier=None, expr=ExprConst(val=10)),
-                    ExprAssignment(identifier=ExprIdentifier(name="step"), expr=ExprConst(val=2)),
-                ]
+    assert res.clauses == ForClausesList.from_clauses(
+        [
+            ForClauseIn(
+                identifier=ExprIdentifier(name="i"),
+                generator=ForGeneratorRange.from_arguments(
+                    ArgList.from_args(
+                        [
+                            ExprAssignment(identifier=None, expr=ExprConst(val=0)),
+                            ExprAssignment(identifier=None, expr=ExprConst(val=10)),
+                            ExprAssignment(
+                                identifier=ExprIdentifier(name="step"), expr=ExprConst(val=2)
+                            ),
+                        ]
+                    )
+                ),
             )
-        ),
+        ]
     )
     assert res.format(allowed_line_length=100) == source
 
@@ -969,11 +979,51 @@ for _ in foobar():
 
 
 def test_for_without_clauses():
-    verify_exception(
-        "for:\n    f()\nend",
-        """
-file:?:?: Unexpected token Token('COLON', ':'). Expected: identifier.
+    source = """\
 for:
-   ^
-""",
-    )
+    f()
+end\
+"""
+    res = parse_code_element(source)
+    assert isinstance(res, CodeElementFor)
+    assert res.clauses == ForClausesList.from_clauses([])
+    assert res.format(allowed_line_length=100) == source
+
+
+def test_for_with_two_in_clauses():
+    source = """\
+for i in range(0, 10, 2), j in range(10, 20, 3):
+    f()
+end\
+"""
+    res = parse_code_element(source)
+    assert isinstance(res, CodeElementFor)
+    assert len(res.clauses.clauses) == 2
+    assert res.format(allowed_line_length=100) == source
+
+
+# TODO(mkaput, 28/04/2022): Always remove last comma in clauses list.
+#   We do not support this syntax in for loop stage, so this is low priority.
+#   Ideally, there should be an "keep_trailing_separator" flag in SeparatedParticlesList.
+def test_for_with_many_clauses():
+    source = """\
+for
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+:
+    f()
+end\
+"""
+    res = parse_code_element(source)
+    assert isinstance(res, CodeElementFor)
+    assert res.format(allowed_line_length=100) == source
