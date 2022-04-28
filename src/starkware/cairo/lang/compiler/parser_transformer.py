@@ -753,8 +753,7 @@ class ParserTransformer(Transformer):
         return ForClauseIn(identifier=identifier, generator=generator, location=identifier.location)
 
     @v_args(inline=True, meta=True)
-    def for_generator_range(self, meta, args):
-        assert isinstance(args, ArgList)
+    def for_generator_range(self, meta, args: ArgList):
         return ForGeneratorRange(args=args, location=self.meta2loc(meta))
 
     @v_args(meta=True)
