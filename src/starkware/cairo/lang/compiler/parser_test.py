@@ -3,6 +3,7 @@ from typing import List
 import pytest
 
 from starkware.cairo.lang.compiler.ast.aliased_identifier import AliasedIdentifier
+from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
 from starkware.cairo.lang.compiler.ast.cairo_types import (
     CairoType,
     TypeCodeoffset,
@@ -33,6 +34,7 @@ from starkware.cairo.lang.compiler.ast.for_loop import (
     ForClauseIn,
     ForGeneratorRange,
     ForClausesList,
+    ForClauseBind,
 )
 from starkware.cairo.lang.compiler.ast.formatting_utils import FormattingError
 from starkware.cairo.lang.compiler.ast.instructions import (
@@ -957,10 +959,46 @@ end\
     assert res.format(allowed_line_length=100) == source
 
 
+def test_for_bind():
+    source = """\
+for bind(i, j, k):
+    f()
+end\
+"""
+    res = parse_code_element(source)
+    assert isinstance(res, CodeElementFor)
+    assert res.clauses == ForClausesList.from_clauses(
+        [
+            ForClauseBind(
+                identifiers=IdentifierList.from_identifiers(
+                    [
+                        TypedIdentifier(identifier=ExprIdentifier(name="i"), expr_type=None),
+                        TypedIdentifier(identifier=ExprIdentifier(name="j"), expr_type=None),
+                        TypedIdentifier(identifier=ExprIdentifier(name="k"), expr_type=None),
+                    ],
+                )
+            )
+        ]
+    )
+    assert res.format(allowed_line_length=100) == source
+
+
 def test_range_is_contextual_keyword():
     source = """\
 for _ in range(10):
     local range = 5
+end\
+"""
+    res = parse_code_element(source)
+    assert isinstance(res, CodeElementFor)
+
+
+# TODO(mkaput, 28/04/2022): Make "bind" contextual terminal in grammar.
+@pytest.mark.skip("Bind is global keyword at this moment.")
+def test_bind_is_contextual_keyword():
+    source = """\
+for _ in range(10), bind(i):
+    local bind = i
 end\
 """
     res = parse_code_element(source)

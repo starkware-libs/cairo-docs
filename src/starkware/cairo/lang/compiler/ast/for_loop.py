@@ -2,6 +2,7 @@ import dataclasses
 from abc import ABC, abstractmethod
 from typing import Sequence, Optional, List
 
+from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
 from starkware.cairo.lang.compiler.ast.expr import ExprIdentifier, ArgList
 from starkware.cairo.lang.compiler.ast.formatting_utils import (
     LocationField,
@@ -34,9 +35,7 @@ class ForClausesList(AstNode):
 
     def get_particles(self) -> SeparatedParticleList:
         self.assert_no_comments()
-        return SeparatedParticleList(
-            elements=[ParticleList(clause.get_particles()) for clause in self.clauses]
-        )
+        return SeparatedParticleList(elements=[clause.get_particles() for clause in self.clauses])
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return self.clauses
@@ -76,4 +75,18 @@ class ForClauseIn(ForClause):
         return [self.identifier, self.generator]
 
     def get_particles(self):
-        return [f"{self.identifier.format()} in ", *self.generator.get_particles()]
+        return ParticleList([f"{self.identifier.format()} in ", *self.generator.get_particles()])
+
+
+@dataclasses.dataclass
+class ForClauseBind(ForClause):
+    identifiers: IdentifierList
+    location: Optional[Location] = LocationField
+
+    def get_children(self) -> Sequence[Optional[AstNode]]:
+        return [self.identifiers]
+
+    def get_particles(self):
+        return SeparatedParticleList(
+            start="bind(", elements=self.identifiers.get_particles(), end=")"
+        )
