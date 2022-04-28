@@ -756,9 +756,9 @@ class ParserTransformer(Transformer):
     def for_clauses_list(self, meta, nodes: CommaSeparatedWithNotes):
         return ForClausesList(clauses=nodes.args, notes=nodes.notes, location=self.meta2loc(meta))
 
-    @v_args(inline=True)
-    def for_clause_in(self, identifier: ExprIdentifier, generator: ForGeneratorRange):
-        return ForClauseIn(identifier=identifier, generator=generator)
+    @v_args(inline=True, meta=True)
+    def for_clause_in(self, meta, identifier: ExprIdentifier, generator: ForGeneratorRange):
+        return ForClauseIn(identifier=identifier, generator=generator, location=self.meta2loc(meta))
 
     @v_args(inline=True)
     def for_generator(self, function_call: RvalueFuncCall):
