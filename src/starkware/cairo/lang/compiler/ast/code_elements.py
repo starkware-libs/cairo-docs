@@ -12,7 +12,7 @@ from starkware.cairo.lang.compiler.ast.expr import (
     ExprHint,
     ExprIdentifier,
 )
-from starkware.cairo.lang.compiler.ast.for_loop import ForClauseIn
+from starkware.cairo.lang.compiler.ast.for_loop import ForClausesList
 from starkware.cairo.lang.compiler.ast.formatting_utils import (
     INDENTATION,
     LocationField,
@@ -546,8 +546,8 @@ class CodeElementWithAttr(CodeElement):
 
         len_without_value = len(f"with_attr {self.attribute_name.format()}():")
         if (
-                len(self.attribute_value) == 1
-                and len_without_value + len(self.attribute_value[0]) <= allowed_line_length
+            len(self.attribute_value) == 1
+            and len_without_value + len(self.attribute_value[0]) <= allowed_line_length
         ):
             attribute_value = self.attribute_value[0]
         else:
@@ -615,7 +615,7 @@ class CodeElementIf(CodeElement):
 
 @dataclasses.dataclass
 class CodeElementFor(CodeElement):
-    clause: ForClauseIn
+    clauses: ForClausesList
     code_block: CodeBlock
     label_func: Optional[str] = None
     label_if_neq: Optional[str] = None
@@ -623,16 +623,22 @@ class CodeElementFor(CodeElement):
     location: Optional[Location] = LocationField
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
-        return [self.clause, self.code_block]
+        return [self.clauses, self.code_block]
 
     def format(self, allowed_line_length: int) -> str:
-        clauses_particles = self.clause.get_particles()
-        assert clauses_particles
-        clauses_particles[0] = f"for {clauses_particles[0]}"
-        clauses_particles[-1] = f"{clauses_particles[-1]}:"
+        clauses_particles = self.clauses.get_particles()
+
+        clauses_particles.start = "for"
+
+        # If there are any clauses, we need to separate "for" keyword from them with whitespace;
+        # otherwise, we want to stick "for" with ":" together.
+        if clauses_particles.elements:
+            clauses_particles.start += " "
+
+        clauses_particles.end = ":"
 
         code = particles_in_lines(
-            particles=ParticleList(elements=clauses_particles),
+            particles=clauses_particles,
             config=ParticleFormattingConfig(
                 allowed_line_length=allowed_line_length, line_indent=INDENTATION
             ),
@@ -741,13 +747,12 @@ def is_empty_line(code_element: CommentedCodeElement):
 
 def is_comment_line(code_element: CommentedCodeElement):
     return (
-            isinstance(code_element.code_elm,
-                       CodeElementEmptyLine) and code_element.comment is not None
+        isinstance(code_element.code_elm, CodeElementEmptyLine) and code_element.comment is not None
     )
 
 
 def remove_redundant_empty_lines(
-        code_elements: List[CommentedCodeElement],
+    code_elements: List[CommentedCodeElement],
 ) -> List[CommentedCodeElement]:
     """
     Returns a new list of code elements where redundant empty lines are removed.
@@ -777,7 +782,7 @@ def remove_redundant_empty_lines(
 
 
 def add_empty_lines_before_labels(
-        code_elements: List[CommentedCodeElement],
+    code_elements: List[CommentedCodeElement],
 ) -> List[CommentedCodeElement]:
     """
     Makes sure there is an empty line before labels.

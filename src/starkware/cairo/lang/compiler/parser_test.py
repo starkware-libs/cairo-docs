@@ -29,7 +29,11 @@ from starkware.cairo.lang.compiler.ast.expr import (
     ArgList,
     ExprAssignment,
 )
-from starkware.cairo.lang.compiler.ast.for_loop import ForClauseIn, ForGeneratorRange
+from starkware.cairo.lang.compiler.ast.for_loop import (
+    ForClauseIn,
+    ForGeneratorRange,
+    ForClausesList,
+)
 from starkware.cairo.lang.compiler.ast.formatting_utils import FormattingError
 from starkware.cairo.lang.compiler.ast.instructions import (
     AddApInstruction,
@@ -42,7 +46,6 @@ from starkware.cairo.lang.compiler.ast.instructions import (
     JumpToLabelInstruction,
     RetInstruction,
 )
-from starkware.cairo.lang.compiler.ast.notes import Notes
 from starkware.cairo.lang.compiler.ast.types import TypedIdentifier
 from starkware.cairo.lang.compiler.error_handling import Location, LocationError, get_location_marks
 from starkware.cairo.lang.compiler.expression_simplifier import ExpressionSimplifier
@@ -58,11 +61,6 @@ from starkware.cairo.lang.compiler.parser import (
 from starkware.cairo.lang.compiler.parser_test_utils import verify_exception
 from starkware.cairo.lang.compiler.parser_transformer import ParserContext, ParserError
 from starkware.python.utils import safe_zip
-
-
-def arg_list(args: List[ExprAssignment], **kwargs) -> ArgList:
-    default_notes = [Notes()] * (len(args) + 1)
-    return ArgList(args=args, notes=default_notes, has_trailing_comma=False, **kwargs)
 
 
 def test_int():
@@ -930,69 +928,7 @@ def test_pointer():
         assert get_location_marks(code, typ.location) == code + "\n" + mark
 
 
-def test_for():
-    source = """\
-for i in range(5):
-    f()
-end\
-"""
-    res = parse_code_element(source)
-    assert isinstance(res, CodeElementFor)
-    assert res.clause == ForClauseIn(
-        identifier=ExprIdentifier(name="i"),
-        generator=ForGeneratorRange(
-            args=arg_list([ExprAssignment(identifier=None, expr=ExprConst(val=5))])
-        ),
-    )
-    assert res.format(allowed_line_length=100) == source
-
-
-def test_for_range_start_stop():
-    source = """\
-for i in range(1, x):
-    f()
-end\
-"""
-    res = parse_code_element(source)
-    assert isinstance(res, CodeElementFor)
-    assert res.clause == ForClauseIn(
-        identifier=ExprIdentifier(name="i"),
-        generator=ForGeneratorRange(
-            args=arg_list(
-                [
-                    ExprAssignment(identifier=None, expr=ExprConst(val=1)),
-                    ExprAssignment(identifier=None, expr=ExprIdentifier(name="x")),
-                ]
-            )
-        ),
-    )
-    assert res.format(allowed_line_length=100) == source
-
-
-def test_for_range_start_stop_step():
-    source = """\
-for i in range(1, 5, 2):
-    f()
-end\
-"""
-    res = parse_code_element(source)
-    assert isinstance(res, CodeElementFor)
-    assert res.clause == ForClauseIn(
-        identifier=ExprIdentifier(name="i"),
-        generator=ForGeneratorRange(
-            args=arg_list(
-                [
-                    ExprAssignment(identifier=None, expr=ExprConst(val=1)),
-                    ExprAssignment(identifier=None, expr=ExprConst(val=5)),
-                    ExprAssignment(identifier=None, expr=ExprConst(val=2)),
-                ]
-            )
-        ),
-    )
-    assert res.format(allowed_line_length=100) == source
-
-
-def test_for_range_with_keywords():
+def test_for_range():
     source = """\
 for i in range(0, 10, step=2):
     f()
@@ -1000,27 +936,94 @@ end\
 """
     res = parse_code_element(source)
     assert isinstance(res, CodeElementFor)
-    assert res.clause == ForClauseIn(
-        identifier=ExprIdentifier(name="i"),
-        generator=ForGeneratorRange(
-            args=arg_list(
-                [
-                    ExprAssignment(identifier=None, expr=ExprConst(val=0)),
-                    ExprAssignment(identifier=None, expr=ExprConst(val=10)),
-                    ExprAssignment(identifier=ExprIdentifier(name="step"), expr=ExprConst(val=2)),
-                ]
+    assert res.clauses == ForClausesList.from_clauses(
+        [
+            ForClauseIn(
+                identifier=ExprIdentifier(name="i"),
+                generator=ForGeneratorRange.from_arguments(
+                    ArgList.from_args(
+                        [
+                            ExprAssignment(identifier=None, expr=ExprConst(val=0)),
+                            ExprAssignment(identifier=None, expr=ExprConst(val=10)),
+                            ExprAssignment(
+                                identifier=ExprIdentifier(name="step"), expr=ExprConst(val=2)
+                            ),
+                        ]
+                    )
+                ),
             )
-        ),
+        ]
     )
     assert res.format(allowed_line_length=100) == source
 
 
-def test_for_without_clauses():
+def test_range_is_contextual_keyword():
+    source = """\
+for _ in range(10):
+    local range = 5
+end\
+"""
+    res = parse_code_element(source)
+    assert isinstance(res, CodeElementFor)
+
+
+def test_for_with_unknown_generator():
     verify_exception(
-        "for:\n    f()\nend",
+        "for _ in foobar():\n    f()\nend",
         """
-file:?:?: Unexpected token Token('COLON', ':'). Expected: identifier.
-for:
-   ^
+file:?:?: Unknown for loop generator 'foobar'. Only 'range' is supported here.
+for _ in foobar():
+         ^****^
 """,
     )
+
+
+def test_for_without_clauses():
+    source = """\
+for:
+    f()
+end\
+"""
+    res = parse_code_element(source)
+    assert isinstance(res, CodeElementFor)
+    assert res.clauses == ForClausesList.from_clauses([])
+    assert res.format(allowed_line_length=100) == source
+
+
+def test_for_with_two_in_clauses():
+    source = """\
+for i in range(0, 10, 2), j in range(10, 20, 3):
+    f()
+end\
+"""
+    res = parse_code_element(source)
+    assert isinstance(res, CodeElementFor)
+    assert len(res.clauses.clauses) == 2
+    assert res.format(allowed_line_length=100) == source
+
+
+# TODO(mkaput, 28/04/2022): Always remove last comma in clauses list.
+#   We do not support this syntax in for loop stage, so this is low priority.
+#   Ideally, there should be an "keep_trailing_separator" flag in SeparatedParticlesList.
+def test_for_with_many_clauses():
+    source = """\
+for
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+:
+    f()
+end\
+"""
+    res = parse_code_element(source)
+    assert isinstance(res, CodeElementFor)
+    assert res.format(allowed_line_length=100) == source
