@@ -42,7 +42,6 @@ from starkware.cairo.lang.compiler.ast.instructions import (
     JumpToLabelInstruction,
     RetInstruction,
 )
-from starkware.cairo.lang.compiler.ast.notes import Notes
 from starkware.cairo.lang.compiler.ast.types import TypedIdentifier
 from starkware.cairo.lang.compiler.error_handling import Location, LocationError, get_location_marks
 from starkware.cairo.lang.compiler.expression_simplifier import ExpressionSimplifier
@@ -58,11 +57,6 @@ from starkware.cairo.lang.compiler.parser import (
 from starkware.cairo.lang.compiler.parser_test_utils import verify_exception
 from starkware.cairo.lang.compiler.parser_transformer import ParserContext, ParserError
 from starkware.python.utils import safe_zip
-
-
-def arg_list(args: List[ExprAssignment], **kwargs) -> ArgList:
-    default_notes = [Notes()] * (len(args) + 1)
-    return ArgList(args=args, notes=default_notes, has_trailing_comma=False, **kwargs)
 
 
 def test_int():
@@ -941,7 +935,7 @@ end\
     assert res.clause == ForClauseIn(
         identifier=ExprIdentifier(name="i"),
         generator=ForGeneratorRange.from_arguments(
-            arg_list(
+            ArgList.from_args(
                 [
                     ExprAssignment(identifier=None, expr=ExprConst(val=0)),
                     ExprAssignment(identifier=None, expr=ExprConst(val=10)),
