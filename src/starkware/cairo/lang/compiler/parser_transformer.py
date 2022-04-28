@@ -749,8 +749,8 @@ class ParserTransformer(Transformer):
         )
 
     @v_args(inline=True)
-    def for_clause_in(self, identifier, generator):
-        return ForClauseIn(identifier=identifier, generator=generator, location=identifier.location)
+    def for_clause_in(self, identifier: ExprIdentifier, generator: ForGeneratorRange):
+        return ForClauseIn(identifier=identifier, generator=generator)
 
     @v_args(inline=True, meta=True)
     def for_generator_range(self, meta, args: ArgList):

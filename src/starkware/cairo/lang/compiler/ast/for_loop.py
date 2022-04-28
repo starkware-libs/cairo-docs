@@ -33,7 +33,10 @@ class ForGeneratorRange(AstNode):
 class ForClauseIn(AstNode):
     identifier: ExprIdentifier
     generator: ForGeneratorRange
-    location: Optional[Location] = LocationField
+
+    @property
+    def location(self) -> Optional[Location]:
+        return self.identifier.location
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return [self.identifier, self.generator]
