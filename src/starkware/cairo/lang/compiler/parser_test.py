@@ -930,69 +930,7 @@ def test_pointer():
         assert get_location_marks(code, typ.location) == code + "\n" + mark
 
 
-def test_for():
-    source = """\
-for i in range(5):
-    f()
-end\
-"""
-    res = parse_code_element(source)
-    assert isinstance(res, CodeElementFor)
-    assert res.clause == ForClauseIn(
-        identifier=ExprIdentifier(name="i"),
-        generator=ForGeneratorRange(
-            args=arg_list([ExprAssignment(identifier=None, expr=ExprConst(val=5))])
-        ),
-    )
-    assert res.format(allowed_line_length=100) == source
-
-
-def test_for_range_start_stop():
-    source = """\
-for i in range(1, x):
-    f()
-end\
-"""
-    res = parse_code_element(source)
-    assert isinstance(res, CodeElementFor)
-    assert res.clause == ForClauseIn(
-        identifier=ExprIdentifier(name="i"),
-        generator=ForGeneratorRange(
-            args=arg_list(
-                [
-                    ExprAssignment(identifier=None, expr=ExprConst(val=1)),
-                    ExprAssignment(identifier=None, expr=ExprIdentifier(name="x")),
-                ]
-            )
-        ),
-    )
-    assert res.format(allowed_line_length=100) == source
-
-
-def test_for_range_start_stop_step():
-    source = """\
-for i in range(1, 5, 2):
-    f()
-end\
-"""
-    res = parse_code_element(source)
-    assert isinstance(res, CodeElementFor)
-    assert res.clause == ForClauseIn(
-        identifier=ExprIdentifier(name="i"),
-        generator=ForGeneratorRange(
-            args=arg_list(
-                [
-                    ExprAssignment(identifier=None, expr=ExprConst(val=1)),
-                    ExprAssignment(identifier=None, expr=ExprConst(val=5)),
-                    ExprAssignment(identifier=None, expr=ExprConst(val=2)),
-                ]
-            )
-        ),
-    )
-    assert res.format(allowed_line_length=100) == source
-
-
-def test_for_range_with_keywords():
+def test_for_range():
     source = """\
 for i in range(0, 10, step=2):
     f()
