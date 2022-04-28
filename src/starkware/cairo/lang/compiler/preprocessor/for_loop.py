@@ -94,7 +94,18 @@ def lower_for_loop(elm: CodeElementFor) -> Tuple[List[CodeElement], CodeElementF
         end
     """
 
-    gl = InRangeLowering(clause=elm.clause)
+    in_clauses = elm.clauses.in_clauses()
+    if not in_clauses:
+        raise ForLoopLoweringError("For loop requires one 'in' clause.", location=elm.location)
+
+    if len(in_clauses) > 1:
+        extra_clauses_location = in_clauses[1].location.span(in_clauses[-1].location)
+
+        raise ForLoopLoweringError("Multiple 'in' clauses in for loops are not supported.", location=extra_clauses_location)
+
+    in_clause = in_clauses[0]
+
+    gl = InRangeLowering(clause=in_clause)
     envelope = _build_envelope(elm, gl)
     iterator_function = _build_iterator_function(elm, gl)
     return envelope, iterator_function
@@ -117,7 +128,7 @@ class InRangeLowering:
         generator = clause.generator
         assert isinstance(generator, ForGeneratorRange)
 
-        args = generator.args.args
+        args = generator.arguments.args
 
         # Validate arguments.
         if len(args) == 0:
