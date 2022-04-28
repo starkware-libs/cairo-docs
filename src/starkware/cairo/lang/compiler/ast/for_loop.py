@@ -98,5 +98,5 @@ class ForClauseBind(ForClause):
 
     def get_particles(self):
         return SeparatedParticleList(
-            start="bind(", elements=self.identifiers.get_particles(), end=")"
+            start="local(", elements=self.identifiers.get_particles(), end=")"
         )

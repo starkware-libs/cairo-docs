@@ -959,9 +959,9 @@ end\
     assert res.format(allowed_line_length=100) == source
 
 
-def test_for_bind():
+def test_for_local():
     source = """\
-for bind(i, j, k):
+for local(i, j, k):
     f()
 end\
 """
@@ -987,18 +987,6 @@ def test_range_is_contextual_keyword():
     source = """\
 for _ in range(10):
     local range = 5
-end\
-"""
-    res = parse_code_element(source)
-    assert isinstance(res, CodeElementFor)
-
-
-# TODO(mkaput, 28/04/2022): Make "bind" contextual terminal in grammar.
-@pytest.mark.skip("Bind is global keyword at this moment.")
-def test_bind_is_contextual_keyword():
-    source = """\
-for _ in range(10), bind(i):
-    local bind = i
 end\
 """
     res = parse_code_element(source)
@@ -1070,12 +1058,12 @@ end\
 def test_for_clauses_are_sorted_on_format():
     # We expect sorting to be stable!
     source = """\
-for bind(y), i in range(1), bind(x), j in range(2):
+for local(y), i in range(1), local(x), j in range(2):
     f()
 end\
 """
     expected = """\
-for i in range(1), j in range(2), bind(y), bind(x):
+for i in range(1), j in range(2), local(y), local(x):
     f()
 end\
 """

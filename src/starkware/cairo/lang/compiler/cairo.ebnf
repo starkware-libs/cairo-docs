@@ -127,7 +127,7 @@ _if: "if" bool_expr ":" _NEWLINE code_block ("else" ":" _NEWLINE code_block)? "e
 
 // For loops
 for_generator: function_call
-for_clause: "bind" "(" identifier_list ")"      -> for_clause_bind
+for_clause: "local" "(" identifier_list ")"     -> for_clause_bind
           | identifier_def "in" for_generator   -> for_clause_in
 for_clauses_list: comma_separated_with_notes{for_clause}
 FOR: "for"

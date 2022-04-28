@@ -4575,7 +4575,7 @@ def test_for_range_reference_stop():
 func main():
     alloc_locals
     local stop = 5
-    for i in range(stop), bind(stop):
+    for i in range(stop), local(stop):
         [ap] = i * 456
     end
     ret
@@ -4608,7 +4608,7 @@ def test_for_range_reference_step():
 func main():
     alloc_locals
     local step = 5
-    for i in range(0, 150, step), bind(step):
+    for i in range(0, 150, step), local(step):
         [ap] = i * 456
     end
     ret
@@ -4642,7 +4642,7 @@ func main():
     alloc_locals
     local x = 10
     local y = 11
-    for i in range(5), bind(x, y):
+    for i in range(5), local(x, y):
         tempvar f = x * y + 456
     end
     ret
@@ -4740,7 +4740,7 @@ func main():
     alloc_locals
     local x = 5
     local y = 2
-    for i in range(10), bind(x, y):
+    for i in range(10), local(x, y):
         tempvar f = i * x + y
     end
     ret
@@ -4751,7 +4751,7 @@ func main():
     alloc_locals
     local x = 5
     local y = 2
-    for i in range(10), bind(x), bind(y):
+    for i in range(10), local(x), local(y):
         tempvar f = i * x + y
     end
     ret
