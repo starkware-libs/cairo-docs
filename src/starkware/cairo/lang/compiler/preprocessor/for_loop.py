@@ -1,4 +1,6 @@
-from typing import List, Tuple
+import operator
+from functools import reduce
+from typing import List, Tuple, Iterable
 
 from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
 from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr
@@ -94,20 +96,12 @@ def lower_for_loop(elm: CodeElementFor) -> Tuple[List[CodeElement], CodeElementF
         end
     """
 
-    in_clauses = elm.clauses.in_clauses()
-    if not in_clauses:
-        raise ForLoopLoweringError("For loop requires one 'in' clause.", location=elm.location)
-
-    if len(in_clauses) > 1:
-        extra_clauses_location = in_clauses[1].location.span(in_clauses[-1].location)
-
-        raise ForLoopLoweringError("Multiple 'in' clauses in for loops are not supported.", location=extra_clauses_location)
-
-    in_clause = in_clauses[0]
+    in_clause = _fetch_in_clause(elm)
+    bound_identifiers = _fetch_bound_identifiers(elm)
 
     gl = InRangeLowering(clause=in_clause)
-    envelope = _build_envelope(elm, gl)
-    iterator_function = _build_iterator_function(elm, gl)
+    envelope = _build_envelope(elm, gl, bound_identifiers)
+    iterator_function = _build_iterator_function(elm, gl, bound_identifiers)
     return envelope, iterator_function
 
 
@@ -207,10 +201,44 @@ def _iterator_function_identifier(elm: CodeElementFor) -> ExprIdentifier:
     return ExprIdentifier(name=elm.label_func, location=elm.location)
 
 
+def _expr_assignments_from_typed_identifiers(
+    identifiers: Iterable[TypedIdentifier],
+) -> List[ExprAssignment]:
+    return [
+        ExprAssignment(identifier=ident.identifier, expr=ident.identifier, location=ident.location)
+        for ident in identifiers
+    ]
+
+
+# Clauses processing.
+
+
+def _fetch_in_clause(elm: CodeElementFor) -> ForClauseIn:
+    in_clauses = elm.clauses.in_clauses()
+
+    if not in_clauses:
+        raise ForLoopLoweringError("For loop requires one 'in' clause.", location=elm.location)
+
+    if len(in_clauses) > 1:
+        extra_clauses_location = in_clauses[1].location.span(in_clauses[-1].location)
+        raise ForLoopLoweringError(
+            "Multiple 'in' clauses in for loops are not supported.", location=extra_clauses_location
+        )
+
+    return in_clauses[0]
+
+
+def _fetch_bound_identifiers(elm: CodeElementFor) -> List[TypedIdentifier]:
+    identifier_groups = (clause.identifiers.identifiers for clause in elm.clauses.bind_clauses())
+    return reduce(operator.add, identifier_groups, [])
+
+
 # Envelope generation.
 
 
-def _build_envelope(elm: CodeElementFor, gl: InRangeLowering) -> List[CodeElement]:
+def _build_envelope(
+    elm: CodeElementFor, gl: InRangeLowering, bound_identifiers: List[TypedIdentifier]
+) -> List[CodeElement]:
     iterator_init, iterator_expr = gl.init_envelope_iterator()
     return [
         *iterator_init,
@@ -223,7 +251,8 @@ def _build_envelope(elm: CodeElementFor, gl: InRangeLowering) -> List[CodeElemen
                             identifier=_iter_name_body(gl),
                             expr=iterator_expr,
                             location=gl.iterator_location,
-                        )
+                        ),
+                        *_expr_assignments_from_typed_identifiers(bound_identifiers),
                     ],
                     location=elm.location,
                 ),
@@ -237,7 +266,9 @@ def _build_envelope(elm: CodeElementFor, gl: InRangeLowering) -> List[CodeElemen
 # Iterator function generation.
 
 
-def _build_iterator_function(elm: CodeElementFor, gl: InRangeLowering) -> CodeElementFunction:
+def _build_iterator_function(
+    elm: CodeElementFor, gl: InRangeLowering, bound_identifiers: List[TypedIdentifier]
+) -> CodeElementFunction:
     assert elm.label_func is not None
     assert elm.label_if_neq is not None
     assert elm.label_if_end is not None
@@ -248,7 +279,8 @@ def _build_iterator_function(elm: CodeElementFor, gl: InRangeLowering) -> CodeEl
                 identifier=_iter_name_body(gl),
                 expr_type=gl.iterator_type(),
                 location=gl.iterator_location,
-            )
+            ),
+            *bound_identifiers,
         ],
         location=elm.location,
     )
@@ -264,7 +296,10 @@ def _build_iterator_function(elm: CodeElementFor, gl: InRangeLowering) -> CodeEl
                 main_code_block=(
                     elm.code_block
                     + CodeBlock.from_code_elements(
-                        [*next_init, _tail_call_iterator_function(elm, gl, next_expr)]
+                        [
+                            *next_init,
+                            _tail_call_iterator_function(elm, gl, next_expr, bound_identifiers),
+                        ]
                     )
                 ),
                 else_code_block=(
@@ -294,7 +329,10 @@ def _build_iterator_function(elm: CodeElementFor, gl: InRangeLowering) -> CodeEl
 
 
 def _tail_call_iterator_function(
-    elm: CodeElementFor, gl: InRangeLowering, next_expr: Expression
+    elm: CodeElementFor,
+    gl: InRangeLowering,
+    next_expr: Expression,
+    bound_identifiers: List[TypedIdentifier],
 ) -> CodeElementTailCall:
     return CodeElementTailCall(
         func_call=RvalueFuncCall(
@@ -305,7 +343,8 @@ def _tail_call_iterator_function(
                         identifier=_iter_name_body(gl),
                         expr=next_expr,
                         location=gl.iterator_location,
-                    )
+                    ),
+                    *_expr_assignments_from_typed_identifiers(bound_identifiers),
                 ],
                 location=elm.location,
             ),

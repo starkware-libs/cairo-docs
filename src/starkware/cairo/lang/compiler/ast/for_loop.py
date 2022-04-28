@@ -50,6 +50,9 @@ class ForClausesList(AstNode):
     def in_clauses(self) -> List["ForClauseIn"]:
         return [clause for clause in self.clauses if isinstance(clause, ForClauseIn)]
 
+    def bind_clauses(self) -> List["ForClauseBind"]:
+        return [clause for clause in self.clauses if isinstance(clause, ForClauseBind)]
+
     @classmethod
     def from_clauses(cls, clauses: List[ForClause], **kwargs) -> "ForClausesList":
         notes = [Notes() for _ in range(len(clauses) + 1)]

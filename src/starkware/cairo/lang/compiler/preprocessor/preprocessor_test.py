@@ -4570,5 +4570,194 @@ ret
     )
 
 
-# TODO(mkaput, 22/04/2022): Implement using references as range() arguments.
-# TODO(mkaput, 22/04/2022): Implement using references in loop body.
+def test_for_range_reference_stop():
+    code = """
+func main():
+    alloc_locals
+    local stop = 5
+    for i in range(stop), bind(stop):
+        [ap] = i * 456
+    end
+    ret
+end
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+        program.format()
+        == """\
+ap += 1
+[fp] = 5
+[ap] = 0; ap++
+[ap] = [fp]; ap++
+call rel 3
+ret
+[ap] = [fp + (-4)] - [fp + (-3)]; ap++
+jmp rel 10 if [ap + (-1)] != 0
+[ap] = [fp + (-4)] * 456
+[ap] = [fp + (-4)] + 1; ap++
+[ap] = [fp + (-3)]; ap++
+call rel -8
+ret
+ret
+"""
+    )
+
+
+def test_for_range_reference_step():
+    code = """
+func main():
+    alloc_locals
+    local step = 5
+    for i in range(0, 150, step), bind(step):
+        [ap] = i * 456
+    end
+    ret
+end
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+        program.format()
+        == """\
+ap += 1
+[fp] = 5
+[ap] = 0; ap++
+[ap] = [fp]; ap++
+call rel 3
+ret
+[ap] = [fp + (-4)] + (-150); ap++
+jmp rel 9 if [ap + (-1)] != 0
+[ap] = [fp + (-4)] * 456
+[ap] = [fp + (-4)] + [fp + (-3)]; ap++
+[ap] = [fp + (-3)]; ap++
+call rel -8
+ret
+ret
+"""
+    )
+
+
+def test_for_reference_body_vars():
+    code = """
+func main():
+    alloc_locals
+    local x = 10
+    local y = 11
+    for i in range(5), bind(x, y):
+        tempvar f = x * y + 456
+    end
+    ret
+end
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+            program.format()
+            == """\
+ap += 2
+[fp] = 10
+[fp + 1] = 11
+[ap] = 0; ap++
+[ap] = [fp]; ap++
+[ap] = [fp + 1]; ap++
+call rel 3
+ret
+[ap] = [fp + (-5)] + (-5); ap++
+jmp rel 12 if [ap + (-1)] != 0
+[ap] = [fp + (-4)] * [fp + (-3)]; ap++
+[ap] = [ap + (-1)] + 456; ap++
+[ap] = [fp + (-5)] + 1; ap++
+[ap] = [fp + (-4)]; ap++
+[ap] = [fp + (-3)]; ap++
+call rel -11
+ret
+ret
+"""
+    )
+
+
+def test_for_range_unbound_stop():
+    verify_exception(
+        """
+func main():
+    alloc_locals
+    local stop = 5
+    for i in range(stop):
+        [ap] = i * 456
+    end
+    ret
+end
+""",
+        """
+file:?:?: Unknown identifier 'stop'.
+    for i in range(stop):
+                   ^**^
+""",
+    )
+
+
+def test_for_range_unbound_step():
+    verify_exception(
+        """
+func main():
+    alloc_locals
+    local step = 2
+    for i in range(0, 5, step):
+        [ap] = i * 456
+    end
+    ret
+end
+""",
+        """
+file:?:?: Unknown identifier 'step'.
+    for i in range(0, 5, step):
+                         ^**^
+""",
+    )
+
+
+def test_for_unbound_body_var():
+    verify_exception(
+        """
+func main():
+    alloc_locals
+    local x = 2
+    for i in range(5):
+        [ap] = x; ap++
+    end
+    ret
+end
+""",
+        """
+file:?:?: Unknown identifier 'x'.
+        [ap] = x; ap++
+               ^
+""",
+    )
+
+
+def test_for_compiles_same_independent_of_binding_layout():
+    code_a = """
+func main():
+    alloc_locals
+    local x = 5
+    local y = 2
+    for i in range(10), bind(x, y):
+        tempvar f = i * x + y
+    end
+    ret
+end
+"""
+    code_b = """
+func main():
+    alloc_locals
+    local x = 5
+    local y = 2
+    for i in range(10), bind(x), bind(y):
+        tempvar f = i * x + y
+    end
+    ret
+end
+"""
+    assert (
+        preprocess_str(code=code_a, prime=PRIME).format()
+        == preprocess_str(code=code_b, prime=PRIME).format()
+    )
