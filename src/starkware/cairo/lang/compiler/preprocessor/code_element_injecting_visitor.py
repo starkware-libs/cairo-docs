@@ -1,5 +1,6 @@
 import dataclasses
 from abc import ABC
+from contextlib import contextmanager
 from typing import List, Iterable
 
 from starkware.cairo.lang.compiler.ast.code_elements import (
@@ -35,18 +36,22 @@ class CodeElementInjectingVisitor(ABC, Visitor):
     For example usage check out ``ForLoopLoweringVisitor.visit_CodeElementFor``.
     """
 
-    _inject_functions: List[CodeElementFunction]
+    _injection_scopes: List[List[CodeElementFunction]]
 
     def __init__(self):
         super().__init__()
-        self._inject_functions = []
+        self._injection_scopes = []
 
     def inject_function(self, func: CodeElementFunction):
         """
         Call from visitor method to register a new function to be added to current Cairo module
         as close as possible to source code location where this visitor has been called.
         """
-        self._inject_functions.append(func)
+        self._injection_scopes[-1].append(func)
+
+    def visit_CairoModule(self, module: CairoModule):
+        with self._injection_scope():
+            return super().visit_CairoModule(module)
 
     def visit_CodeBlock(self, elm: CodeBlock):
         can_inject_functions = isinstance(self.parents[-1], CairoModule)
@@ -65,7 +70,9 @@ class CodeElementInjectingVisitor(ABC, Visitor):
 
             # Inject any new functions if possible.
             if can_inject_functions:
-                for func in self._inject_functions:
+                current_injection_scope = self._injection_scopes[-1]
+
+                for func in current_injection_scope:
                     code_elements.append(
                         CommentedCodeElement(
                             code_elm=func,
@@ -74,6 +81,15 @@ class CodeElementInjectingVisitor(ABC, Visitor):
                         )
                     )
 
-                self._inject_functions.clear()
+                current_injection_scope.clear()
 
         return dataclasses.replace(elm, code_elements=code_elements)
+
+    @contextmanager
+    def _injection_scope(self):
+        self._injection_scopes.append([])
+        try:
+            yield
+        finally:
+            injected_functions = self._injection_scopes.pop()
+            assert not injected_functions, "There are leftover not injected functions!"
