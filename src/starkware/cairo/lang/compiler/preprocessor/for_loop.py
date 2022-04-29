@@ -1,10 +1,9 @@
-from typing import List, Tuple
+from typing import Tuple
 
 from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
 from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr
 from starkware.cairo.lang.compiler.ast.cairo_types import CairoType, TypeFelt
 from starkware.cairo.lang.compiler.ast.code_elements import (
-    CodeElement,
     CodeElementFor,
     CodeElementFunction,
     CodeBlock,
@@ -27,6 +26,7 @@ from starkware.cairo.lang.compiler.ast.types import TypedIdentifier
 from starkware.cairo.lang.compiler.error_handling import LocationError, Location
 from starkware.cairo.lang.compiler.preprocessor.code_element_injecting_visitor import (
     CodeElementInjectingVisitor,
+    CodeElementsInjection,
 )
 from starkware.cairo.lang.compiler.preprocessor.pass_manager import PassManagerContext, VisitorStage
 
@@ -57,10 +57,10 @@ class ForLoopLoweringVisitor(CodeElementInjectingVisitor):
     def visit_CodeElementFor(self, elm: CodeElementFor):
         envelope, iterator_function = lower_for_loop(elm)
         self.inject_function(iterator_function)
-        return envelope
+        return CodeElementsInjection.from_code_block(envelope)
 
 
-def lower_for_loop(elm: CodeElementFor) -> Tuple[List[CodeElement], CodeElementFunction]:
+def lower_for_loop(elm: CodeElementFor) -> Tuple[CodeBlock, CodeElementFunction]:
     """
     Lowers for loops into calls to recursive functions.
 
@@ -98,7 +98,6 @@ def lower_for_loop(elm: CodeElementFor) -> Tuple[List[CodeElement], CodeElementF
 
     gl = InRangeLowering(clause=in_clause)
     envelope = _build_envelope(elm, gl)
-    envelope = [c.code_elm for c in envelope.code_elements]
     iterator_function = _build_iterator_function(elm, gl)
     return envelope, iterator_function
 

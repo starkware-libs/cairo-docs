@@ -1,7 +1,6 @@
 import dataclasses
 from abc import ABC
-from collections.abc import Iterable
-from typing import List
+from typing import List, Iterable
 
 from starkware.cairo.lang.compiler.ast.code_elements import (
     CommentedCodeElement,
@@ -12,12 +11,21 @@ from starkware.cairo.lang.compiler.ast.module import CairoModule
 from starkware.cairo.lang.compiler.ast.visitor import Visitor
 
 
+@dataclasses.dataclass
+class CodeElementsInjection:
+    code_elements: Iterable[CommentedCodeElement]
+
+    @classmethod
+    def from_code_block(cls, code_block: CodeBlock) -> "CodeElementsInjection":
+        return cls(code_block.code_elements)
+
+
 class CodeElementInjectingVisitor(ABC, Visitor):
     """
     Extension of Visitor interface which allows to:
 
     * Return many code elements from visitor methods when processing code elements inside a
-      ``CodeBlock``.
+      ``CodeBlock``. For this, return ``CodeElementsInjection``.
 
     * Add new functions to generated Cairo code, by calling ``inject_function`` inside visitor
       methods. This visitor will try to put these new functions as close as possible to source
@@ -48,14 +56,12 @@ class CodeElementInjectingVisitor(ABC, Visitor):
             visited_elms = self.visit(commented_code_elm.code_elm)
 
             # Flatten lists of code elements if returned from visitor method.
-            if isinstance(visited_elms, Iterable):
+            if isinstance(visited_elms, CodeElementsInjection):
                 # This line forgets the comment assigned to commented_code_elm.
                 # This shouldn't matter in current use cases, but please be aware of this.
-                visited_elms = CodeBlock.from_code_elements(visited_elms).code_elements
+                code_elements.extend(visited_elms.code_elements)
             else:
-                visited_elms = [dataclasses.replace(commented_code_elm, code_elm=visited_elms)]
-
-            code_elements.extend(visited_elms)
+                code_elements.append(dataclasses.replace(commented_code_elm, code_elm=visited_elms))
 
             # Inject any new functions if possible.
             if can_inject_functions:
