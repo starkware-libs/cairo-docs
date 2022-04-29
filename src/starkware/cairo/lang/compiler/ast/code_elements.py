@@ -608,21 +608,21 @@ class CodeElementFor(CodeElement):
     def format(self, allowed_line_length: int) -> str:
         clauses_particles = self.clauses.get_particles()
 
-        clauses_particles.start = "for"
-
         # If there are any clauses, we need to separate "for" keyword from them with whitespace;
         # otherwise, we want to stick "for" with ":" together.
         if clauses_particles.elements:
-            clauses_particles.start += " "
+            elms = clauses_particles.elements
+            elms[0] = ParticleList(["for ", elms[0]])
+            elms[-1] = ParticleList([elms[-1], ":"])
 
-        clauses_particles.end = ":"
-
-        code = particles_in_lines(
-            particles=clauses_particles,
-            config=ParticleFormattingConfig(
-                allowed_line_length=allowed_line_length, line_indent=INDENTATION
-            ),
-        )
+            code = particles_in_lines(
+                particles=SeparatedParticleList(elements=elms, avoid_trailing_separator=True),
+                config=ParticleFormattingConfig(
+                    allowed_line_length=allowed_line_length, line_indent=INDENTATION
+                ),
+            )
+        else:
+            code = "for:"
 
         main_code = self.code_block.format(allowed_line_length=allowed_line_length - INDENTATION)
         main_code = indent(main_code, INDENTATION)
