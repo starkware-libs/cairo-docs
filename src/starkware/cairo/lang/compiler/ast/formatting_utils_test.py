@@ -278,3 +278,31 @@ func f(x, y, z) -> (
         expected=expected,
         expected_one_per_line=expected_one_per_line,
     )
+
+
+def test_separated_particle_list_avoid_trailing_separator():
+    particles = SeparatedParticleList(
+        elements=[str(10**6 + i) for i in range(3)],
+        start="(",
+        end=")",
+        avoid_trailing_separator=True,
+    )
+    expected = """\
+(
+    1000000,
+    1000001,
+    1000002)\
+"""
+    expected_one_per_line = """\
+(
+    1000000,
+    1000001,
+    1000002
+)\
+"""
+    run_test_particles_in_lines(
+        particles=particles,
+        config=ParticleFormattingConfig(allowed_line_length=5, line_indent=4),
+        expected=expected,
+        expected_one_per_line=expected_one_per_line,
+    )

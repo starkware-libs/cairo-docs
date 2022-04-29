@@ -228,6 +228,7 @@ class SeparatedParticleList(Particle):
         separator: str = ", ",
         start: str = "",
         end: str = "",
+        avoid_trailing_separator: bool = False,
     ):
         self.elements = []
         for elm in elements:
@@ -235,6 +236,7 @@ class SeparatedParticleList(Particle):
         self.separator = separator
         self.start = start
         self.end = end
+        self.avoid_trailing_separator = avoid_trailing_separator
 
     def __str__(self):
         return self.start + self.elements_to_string() + self.end
@@ -304,10 +306,16 @@ class SeparatedParticleList(Particle):
         if not builder.config.force_one_per_line and builder.can_fit_in_line(elements_string):
             builder.add_to_line(elements_string)
         else:
-            for particle in self.elements:
+            for i, particle in enumerate(self.elements):
                 builder.newline()
                 builder.push_indentation()
-                particle.add_to_builder(builder=builder, suffix=self.separator)
+
+                curr_suffix = self.separator
+                if self.avoid_trailing_separator and i == len(self.elements) - 1:
+                    curr_suffix = ""
+
+                particle.add_to_builder(builder=builder, suffix=curr_suffix)
+
                 builder.pop_indentation()
 
         builder.newline(indent=False)
