@@ -78,10 +78,10 @@ def lower_for_loop(elm: CodeElementFor) -> Tuple[List[CodeElement], CodeElementF
     into following Cairo code::
 
         {initialize iterator if necessary}
-        $F({starting iterator value})
+        $F({starting iterator value}, {bound references...})
 
         # separate code section
-        func $F($I: $Iterator):
+        func $F($I: $Iterator, {bound references...}):
             {alloc_locals if necessary}
 
             {initialize condition if necessary}
@@ -89,7 +89,7 @@ def lower_for_loop(elm: CodeElementFor) -> Tuple[List[CodeElement], CodeElementF
                 {instructions}
 
                 {initialize next($I) if necessary}
-                return $F({next($I)})
+                return $F({next($I)}, {bound references...})
             else
                 ret
             end
