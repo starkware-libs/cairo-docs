@@ -403,6 +403,13 @@ class CodeBlock(AstNode):
             ]
         )
 
+    @classmethod
+    def singleton(cls, code_element: CodeElement) -> "CodeBlock":
+        """
+        Shortcut for ``from_code_elements([code_element])``.
+        """
+        return cls.from_code_elements([code_element])
+
 
 @dataclasses.dataclass
 class CodeElementScoped(CodeElement):
