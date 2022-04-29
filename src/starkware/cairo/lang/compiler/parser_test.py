@@ -1002,28 +1002,15 @@ end\
     assert res.format(allowed_line_length=100) == source
 
 
-# TODO(mkaput, 28/04/2022): Always remove last comma in clauses list.
-#   We do not support this syntax in for loop stage, so this is low priority.
-#   Ideally, there should be an "keep_trailing_separator" flag in SeparatedParticlesList.
 def test_for_with_many_clauses():
     source = """\
-for
+for _ in range(10),
     _ in range(10),
     _ in range(10),
-    _ in range(10),
-    _ in range(10),
-    _ in range(10),
-    _ in range(10),
-    _ in range(10),
-    _ in range(10),
-    _ in range(10),
-    _ in range(10),
-    _ in range(10),
-    _ in range(10),
-:
+    _ in range(10):
     f()
 end\
 """
     res = parse_code_element(source)
     assert isinstance(res, CodeElementFor)
-    assert res.format(allowed_line_length=100) == source
+    assert res.format(allowed_line_length=40) == source
