@@ -94,19 +94,11 @@ def lower_for_loop(elm: CodeElementFor) -> Tuple[List[CodeElement], CodeElementF
         end
     """
 
-    in_clauses = elm.clauses.in_clauses()
-    if not in_clauses:
-        raise ForLoopLoweringError("For loop requires one 'in' clause.", location=elm.location)
-
-    if len(in_clauses) > 1:
-        extra_clauses_location = in_clauses[1].location.span(in_clauses[-1].location)
-
-        raise ForLoopLoweringError("Multiple 'in' clauses in for loops are not supported.", location=extra_clauses_location)
-
-    in_clause = in_clauses[0]
+    in_clause = _fetch_in_clause(elm)
 
     gl = InRangeLowering(clause=in_clause)
     envelope = _build_envelope(elm, gl)
+    envelope = [c.code_elm for c in envelope.code_elements]
     iterator_function = _build_iterator_function(elm, gl)
     return envelope, iterator_function
 
@@ -182,18 +174,16 @@ class InRangeLowering:
     def iterator_type(self) -> CairoType:
         return TypeFelt(location=self.generator_location)
 
-    def init_envelope_iterator(self) -> Tuple[List[CodeElement], Expression]:
-        return [], self.start
+    def init_envelope_iterator(self) -> Tuple[CodeBlock, Expression]:
+        return CodeBlock([]), self.start
 
-    def condition(self, iter_expr: ExprIdentifier) -> Tuple[List[CodeElement], BoolExpr]:
-        init = []
-        expr = BoolExpr(eq=True, a=iter_expr, b=self.stop, location=self.generator_location)
-        return init, expr
+    def condition(self, iter_expr: ExprIdentifier) -> Tuple[CodeBlock, BoolExpr]:
+        return CodeBlock([]), BoolExpr(
+            eq=True, a=iter_expr, b=self.stop, location=self.generator_location
+        )
 
-    def increment_iterator(self, iter_expr: ExprIdentifier) -> Tuple[List[CodeElement], Expression]:
-        init = []
-        expr = ExprOperator(op="+", a=iter_expr, b=self.step)
-        return init, expr
+    def increment_iterator(self, iter_expr: ExprIdentifier) -> Tuple[CodeBlock, Expression]:
+        return CodeBlock([]), ExprOperator(op="+", a=iter_expr, b=self.step)
 
 
 # Common codegen utilities.
@@ -207,13 +197,30 @@ def _iterator_function_identifier(elm: CodeElementFor) -> ExprIdentifier:
     return ExprIdentifier(name=elm.label_func, location=elm.location)
 
 
+# Clauses processing.
+
+
+def _fetch_in_clause(elm: CodeElementFor) -> ForClauseIn:
+    in_clauses = elm.clauses.in_clauses()
+
+    if not in_clauses:
+        raise ForLoopLoweringError("For loop requires one 'in' clause.", location=elm.location)
+
+    if len(in_clauses) > 1:
+        extra_clauses_location = in_clauses[1].location.span(in_clauses[-1].location)
+        raise ForLoopLoweringError(
+            "Multiple 'in' clauses in for loops are not supported.", location=extra_clauses_location
+        )
+
+    return in_clauses[0]
+
+
 # Envelope generation.
 
 
-def _build_envelope(elm: CodeElementFor, gl: InRangeLowering) -> List[CodeElement]:
+def _build_envelope(elm: CodeElementFor, gl: InRangeLowering) -> CodeBlock:
     iterator_init, iterator_expr = gl.init_envelope_iterator()
-    return [
-        *iterator_init,
+    return iterator_init + CodeBlock.singleton(
         CodeElementFuncCall(
             func_call=RvalueFuncCall(
                 func_ident=_iterator_function_identifier(elm),
@@ -230,8 +237,8 @@ def _build_envelope(elm: CodeElementFor, gl: InRangeLowering) -> List[CodeElemen
                 implicit_arguments=None,
                 location=elm.location,
             )
-        ),
-    ]
+        )
+    )
 
 
 # Iterator function generation.
@@ -255,30 +262,31 @@ def _build_iterator_function(elm: CodeElementFor, gl: InRangeLowering) -> CodeEl
 
     condition_init, condition_expr = gl.condition(iter_expr=_iter_name_body(gl))
     next_init, next_expr = gl.increment_iterator(iter_expr=_iter_name_body(gl))
+    body_block_init, body_block = _prepare_body(elm.code_block)
 
-    code_block = CodeBlock.from_code_elements(
-        [
-            *condition_init,
+    code_block = (
+        body_block_init
+        + condition_init
+        + CodeBlock.singleton(
             CodeElementIf(
                 condition=condition_expr,
                 main_code_block=(
-                    elm.code_block
-                    + CodeBlock.from_code_elements(
-                        [*next_init, _tail_call_iterator_function(elm, gl, next_expr)]
+                    body_block
+                    + next_init
+                    + CodeBlock.singleton(
+                        _tail_call_iterator_function(elm, gl, next_expr),
                     )
                 ),
                 else_code_block=(
-                    CodeBlock.from_code_elements(
-                        [
-                            CodeElementReturn(exprs=[], location=elm.location),
-                        ]
+                    CodeBlock.singleton(
+                        CodeElementReturn(exprs=[], location=elm.location),
                     )
                 ),
                 label_neq=elm.label_if_neq,
                 label_end=elm.label_if_end,
                 location=elm.location,
             ),
-        ]
+        )
     )
 
     return CodeElementFunction(
@@ -291,6 +299,10 @@ def _build_iterator_function(elm: CodeElementFor, gl: InRangeLowering) -> CodeEl
         code_block=code_block,
         decorators=[],
     )
+
+
+def _prepare_body(code_block: CodeBlock) -> Tuple[CodeBlock, CodeBlock]:
+    return CodeBlock.from_code_elements([]), code_block
 
 
 def _tail_call_iterator_function(
