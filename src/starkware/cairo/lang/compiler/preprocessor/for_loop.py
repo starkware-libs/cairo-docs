@@ -1,12 +1,11 @@
 import operator
 from functools import reduce
-from typing import List, Tuple, Iterable
+from typing import Tuple, Iterable, List
 
 from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
 from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr
 from starkware.cairo.lang.compiler.ast.cairo_types import CairoType, TypeFelt
 from starkware.cairo.lang.compiler.ast.code_elements import (
-    CodeElement,
     CodeElementFor,
     CodeElementFunction,
     CodeBlock,
@@ -29,6 +28,7 @@ from starkware.cairo.lang.compiler.ast.types import TypedIdentifier
 from starkware.cairo.lang.compiler.error_handling import LocationError, Location
 from starkware.cairo.lang.compiler.preprocessor.code_element_injecting_visitor import (
     CodeElementInjectingVisitor,
+    CodeElementsInjection,
 )
 from starkware.cairo.lang.compiler.preprocessor.pass_manager import PassManagerContext, VisitorStage
 
@@ -59,10 +59,10 @@ class ForLoopLoweringVisitor(CodeElementInjectingVisitor):
     def visit_CodeElementFor(self, elm: CodeElementFor):
         envelope, iterator_function = lower_for_loop(elm)
         self.inject_function(iterator_function)
-        return envelope
+        return CodeElementsInjection.from_code_block(envelope)
 
 
-def lower_for_loop(elm: CodeElementFor) -> Tuple[List[CodeElement], CodeElementFunction]:
+def lower_for_loop(elm: CodeElementFor) -> Tuple[CodeBlock, CodeElementFunction]:
     """
     Lowers for loops into calls to recursive functions.
 
@@ -176,18 +176,16 @@ class InRangeLowering:
     def iterator_type(self) -> CairoType:
         return TypeFelt(location=self.generator_location)
 
-    def init_envelope_iterator(self) -> Tuple[List[CodeElement], Expression]:
-        return [], self.start
+    def init_envelope_iterator(self) -> Tuple[CodeBlock, Expression]:
+        return CodeBlock([]), self.start
 
-    def condition(self, iter_expr: ExprIdentifier) -> Tuple[List[CodeElement], BoolExpr]:
-        init = []
-        expr = BoolExpr(eq=True, a=iter_expr, b=self.stop, location=self.generator_location)
-        return init, expr
+    def condition(self, iter_expr: ExprIdentifier) -> Tuple[CodeBlock, BoolExpr]:
+        return CodeBlock([]), BoolExpr(
+            eq=True, a=iter_expr, b=self.stop, location=self.generator_location
+        )
 
-    def increment_iterator(self, iter_expr: ExprIdentifier) -> Tuple[List[CodeElement], Expression]:
-        init = []
-        expr = ExprOperator(op="+", a=iter_expr, b=self.step)
-        return init, expr
+    def increment_iterator(self, iter_expr: ExprIdentifier) -> Tuple[CodeBlock, Expression]:
+        return CodeBlock([]), ExprOperator(op="+", a=iter_expr, b=self.step)
 
 
 # Common codegen utilities.
@@ -238,10 +236,9 @@ def _fetch_bound_identifiers(elm: CodeElementFor) -> List[TypedIdentifier]:
 
 def _build_envelope(
     elm: CodeElementFor, gl: InRangeLowering, bound_identifiers: List[TypedIdentifier]
-) -> List[CodeElement]:
+) -> CodeBlock:
     iterator_init, iterator_expr = gl.init_envelope_iterator()
-    return [
-        *iterator_init,
+    return iterator_init + CodeBlock.singleton(
         CodeElementFuncCall(
             func_call=RvalueFuncCall(
                 func_ident=_iterator_function_identifier(elm),
@@ -259,8 +256,8 @@ def _build_envelope(
                 implicit_arguments=None,
                 location=elm.location,
             )
-        ),
-    ]
+        )
+    )
 
 
 # Iterator function generation.
@@ -287,33 +284,31 @@ def _build_iterator_function(
 
     condition_init, condition_expr = gl.condition(iter_expr=_iter_name_body(gl))
     next_init, next_expr = gl.increment_iterator(iter_expr=_iter_name_body(gl))
+    body_block_init, body_block = _prepare_body(elm.code_block)
 
-    code_block = CodeBlock.from_code_elements(
-        [
-            *condition_init,
+    code_block = (
+        body_block_init
+        + condition_init
+        + CodeBlock.singleton(
             CodeElementIf(
                 condition=condition_expr,
                 main_code_block=(
-                    elm.code_block
-                    + CodeBlock.from_code_elements(
-                        [
-                            *next_init,
-                            _tail_call_iterator_function(elm, gl, next_expr, bound_identifiers),
-                        ]
+                    body_block
+                    + next_init
+                    + CodeBlock.singleton(
+                        _tail_call_iterator_function(elm, gl, next_expr, bound_identifiers),
                     )
                 ),
                 else_code_block=(
-                    CodeBlock.from_code_elements(
-                        [
-                            CodeElementReturn(exprs=[], location=elm.location),
-                        ]
+                    CodeBlock.singleton(
+                        CodeElementReturn(exprs=[], location=elm.location),
                     )
                 ),
                 label_neq=elm.label_if_neq,
                 label_end=elm.label_if_end,
                 location=elm.location,
             ),
-        ]
+        )
     )
 
     return CodeElementFunction(
@@ -326,6 +321,10 @@ def _build_iterator_function(
         code_block=code_block,
         decorators=[],
     )
+
+
+def _prepare_body(code_block: CodeBlock) -> Tuple[CodeBlock, CodeBlock]:
+    return CodeBlock.from_code_elements([]), code_block
 
 
 def _tail_call_iterator_function(
