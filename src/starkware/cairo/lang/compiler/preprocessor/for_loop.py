@@ -11,6 +11,7 @@ from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeElementFuncCall,
     CodeElementIf,
     CodeElementTailCall,
+    CodeElementAllocLocals,
 )
 from starkware.cairo.lang.compiler.ast.expr import (
     ExprIdentifier,
@@ -301,7 +302,21 @@ def _build_iterator_function(elm: CodeElementFor, gl: InRangeLowering) -> CodeEl
 
 
 def _prepare_body(code_block: CodeBlock) -> Tuple[CodeBlock, CodeBlock]:
-    return CodeBlock.from_code_elements([]), code_block
+    init_block = CodeBlock.from_code_elements([])
+    return _pull_alloc_locals_to_init(init_block, code_block)
+
+
+def _pull_alloc_locals_to_init(
+    init_block: CodeBlock, code_block: CodeBlock
+) -> Tuple[CodeBlock, CodeBlock]:
+    if not code_block.code_elements:
+        return init_block, code_block
+
+    if isinstance(code_block.code_elements[0].code_elm, CodeElementAllocLocals):
+        [alloc, *rest] = code_block.code_elements
+        return CodeBlock([alloc]) + init_block, CodeBlock(rest)
+    else:
+        return init_block, code_block
 
 
 def _tail_call_iterator_function(

@@ -4572,3 +4572,32 @@ ret
 
 # TODO(mkaput, 22/04/2022): Implement using references as range() arguments.
 # TODO(mkaput, 22/04/2022): Implement using references in loop body.
+
+
+def test_alloc_locals_in_for_loop_body():
+    code = """
+func main():
+    for i in range(5):
+        alloc_locals
+        local f = i
+    end
+    ret
+end
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+        program.format()
+        == """\
+[ap] = 0; ap++
+call rel 3
+ret
+ap += 1
+[ap] = [fp + (-3)] + (-5); ap++
+jmp rel 8 if [ap + (-1)] != 0
+[fp] = [fp + (-3)]
+[ap] = [fp + (-3)] + 1; ap++
+call rel -9
+ret
+ret
+"""
+    )
