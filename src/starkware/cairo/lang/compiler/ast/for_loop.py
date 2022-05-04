@@ -21,7 +21,7 @@ class ForClause(AstNode, ABC):
     @abstractmethod
     def get_particles(self) -> Particles:
         """
-        Return formatting particles for this clause.
+        Returns formatting particles for this clause.
         """
 
 
