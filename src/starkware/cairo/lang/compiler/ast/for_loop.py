@@ -19,7 +19,9 @@ class ForClause(AstNode, ABC):
 
     @abstractmethod
     def get_particles(self):
-        ...
+        """
+        Return formatting particles for this clause.
+        """
 
 
 @dataclasses.dataclass
