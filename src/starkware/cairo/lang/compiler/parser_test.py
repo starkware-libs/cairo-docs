@@ -1012,5 +1012,5 @@ for _ in range(10),
 end\
 """
     res = parse_code_element(source)
-    assert isinstance(res, CodeElementFor)
+    assert isinstance(res, CodeElementFor) and len(res.clauses.clauses) == 4
     assert res.format(allowed_line_length=40) == source
