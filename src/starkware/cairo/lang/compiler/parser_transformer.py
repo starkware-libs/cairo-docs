@@ -772,7 +772,7 @@ class ParserTransformer(Transformer):
             return ForGeneratorRange(
                 func_ident=function_call.func_ident,
                 arguments=function_call.arguments,
-                implicit_arguments=function_call.implicit_arguments,
+                implicit_arguments=None,
                 location=function_call.location,
             )
         else:
