@@ -12,7 +12,8 @@ from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeElementReturn,
     CodeElementFuncCall,
     CodeElementIf,
-    CodeElementTailCall, CodeElement,
+    CodeElementTailCall,
+    CodeElement,
 )
 from starkware.cairo.lang.compiler.ast.expr import (
     ExprIdentifier,
