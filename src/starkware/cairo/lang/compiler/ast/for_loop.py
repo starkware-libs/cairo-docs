@@ -7,6 +7,7 @@ from starkware.cairo.lang.compiler.ast.formatting_utils import (
     LocationField,
     SeparatedParticleList,
     ParticleList,
+    Particles,
 )
 from starkware.cairo.lang.compiler.ast.node import AstNode
 from starkware.cairo.lang.compiler.ast.notes import Notes, NoteListField
@@ -18,7 +19,7 @@ class ForClause(AstNode, ABC):
     location: Optional[Location]
 
     @abstractmethod
-    def get_particles(self):
+    def get_particles(self) -> Particles:
         """
         Return formatting particles for this clause.
         """
