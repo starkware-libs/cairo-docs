@@ -171,6 +171,9 @@ class Particle(ABC):
         """
 
 
+Particles = List[Union[Particle, str]]
+
+
 @dataclasses.dataclass()
 class SingleParticle(Particle):
     """
@@ -187,9 +190,6 @@ class SingleParticle(Particle):
 
     def add_to_builder(self, builder: ParticleLineBuilder, suffix: str = ""):
         builder.add_to_line(f"{self.text}{suffix}")
-
-
-Particles = List[Union[Particle, str]]
 
 
 @dataclasses.dataclass()
