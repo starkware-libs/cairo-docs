@@ -4808,3 +4808,43 @@ end
         preprocess_str(code=code_a, prime=PRIME).format()
         == preprocess_str(code=code_b, prime=PRIME).format()
     )
+
+
+def test_for_access_implicit_arguments():
+    code = """
+func write{implicit_ptr : felt*}(value):
+    let implicit = implicit_ptr
+    let implicit_ptr = implicit_ptr + 1
+    implicit = value
+    ret
+end
+
+func foo{implicit_ptr : felt*}():
+    for i in range(5):
+        write(i)
+    end
+    ret
+end
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+        program.format()
+        == """\
+[fp + (-4)] = [fp + (-3)]
+ret
+[ap] = [fp + (-3)]; ap++
+[ap] = 0; ap++
+call rel 3
+ret
+[ap] = [fp + (-3)] + (-5); ap++
+jmp rel 11 if [ap + (-1)] != 0
+[ap] = [fp + (-4)]; ap++
+[ap] = [fp + (-3)]; ap++
+call rel -14
+[ap] = [fp + (-3)] + 1; ap++
+call rel -10
+ret
+[ap] = [fp + (-4)]; ap++
+ret
+"""
+    )

@@ -1,6 +1,6 @@
 import operator
 from functools import reduce
-from typing import Tuple, Iterable, List
+from typing import Tuple, Iterable, List, Optional
 
 from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
 from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr
@@ -13,6 +13,7 @@ from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeElementFuncCall,
     CodeElementIf,
     CodeElementTailCall,
+    CodeElement,
     CodeElementReference,
 )
 from starkware.cairo.lang.compiler.ast.expr import (
@@ -60,12 +61,27 @@ class ForLoopLoweringVisitor(CodeElementInjectingVisitor):
         return elm
 
     def visit_CodeElementFor(self, elm: CodeElementFor):
-        envelope, iterator_function = lower_for_loop(elm)
+        envelope, iterator_function = lower_for_loop(
+            elm, implicit_arguments=self._borrow_current_implicit_args()
+        )
         self.inject_function(iterator_function)
         return CodeElementsInjection.from_code_block(envelope)
 
+    def _borrow_current_implicit_args(self) -> Optional[IdentifierList]:
+        for parent in reversed(self.parents):
+            if isinstance(parent, CodeElementFunction):
+                return parent.implicit_arguments
+            elif not isinstance(parent, CodeElement):
+                # Try our best to avoid jumping to irrelevant function which somehow
+                # was put in parents stack.
+                break
 
-def lower_for_loop(elm: CodeElementFor) -> Tuple[CodeBlock, CodeElementFunction]:
+        return None
+
+
+def lower_for_loop(
+    elm: CodeElementFor, implicit_arguments: Optional[IdentifierList] = None
+) -> Tuple[CodeBlock, CodeElementFunction]:
     """
     Lowers for loops into calls to recursive functions.
 
@@ -105,8 +121,10 @@ def lower_for_loop(elm: CodeElementFor) -> Tuple[CodeBlock, CodeElementFunction]
     bound_identifiers = _fetch_bound_identifiers(elm)
 
     gl = InRangeLowering(clause=in_clause)
-    envelope = _build_envelope(elm, gl, bound_identifiers)
-    iterator_function = _build_iterator_function(elm, gl, bound_identifiers)
+    envelope = _build_envelope(elm, gl, bound_identifiers=bound_identifiers)
+    iterator_function = _build_iterator_function(
+        elm, gl, bound_identifiers=bound_identifiers, implicit_arguments=implicit_arguments
+    )
     return envelope, iterator_function
 
 
@@ -271,7 +289,10 @@ def _build_envelope(
 
 
 def _build_iterator_function(
-    elm: CodeElementFor, gl: InRangeLowering, bound_identifiers: List[TypedIdentifier]
+    elm: CodeElementFor,
+    gl: InRangeLowering,
+    bound_identifiers: List[TypedIdentifier],
+    implicit_arguments: Optional[IdentifierList] = None,
 ) -> CodeElementFunction:
     assert elm.label_func is not None
     assert elm.label_if_neq is not None
@@ -324,8 +345,7 @@ def _build_iterator_function(
         element_type="func",
         identifier=_iterator_function_identifier(elm),
         arguments=arguments,
-        # TODO(mkaput, 22/04/2022): Implement implicit arguments in for loops.
-        implicit_arguments=None,
+        implicit_arguments=implicit_arguments,
         returns=None,
         code_block=code_block,
         decorators=[],
