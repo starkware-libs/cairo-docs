@@ -4650,8 +4650,8 @@ end
 """
     program = preprocess_str(code=code, prime=PRIME)
     assert (
-            program.format()
-            == """\
+        program.format()
+        == """\
 ap += 2
 [fp] = 10
 [fp + 1] = 11
