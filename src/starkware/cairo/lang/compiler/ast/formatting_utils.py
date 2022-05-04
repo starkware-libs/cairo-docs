@@ -189,16 +189,16 @@ class SingleParticle(Particle):
         builder.add_to_line(f"{self.text}{suffix}")
 
 
+Particles = List[Union[Particle, str]]
+
+
 @dataclasses.dataclass()
 class ParticleList(Particle):
     """
     A list of particles, that should be concatenated one after the other.
     """
 
-    def __init__(
-        self,
-        elements: List[Union[Particle, str]],
-    ):
+    def __init__(self, elements: Particles):
         self.elements = []
         for elm in elements:
             self.elements.append(SingleParticle(text=elm) if isinstance(elm, str) else elm)
@@ -224,7 +224,7 @@ class SeparatedParticleList(Particle):
 
     def __init__(
         self,
-        elements: List[Union[Particle, str]],
+        elements: Particles,
         separator: str = ", ",
         start: str = "",
         end: str = "",
