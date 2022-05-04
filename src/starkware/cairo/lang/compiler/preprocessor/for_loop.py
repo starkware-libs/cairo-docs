@@ -309,14 +309,14 @@ def _prepare_body(code_block: CodeBlock) -> Tuple[CodeBlock, CodeBlock]:
 def _pull_alloc_locals_to_init(
     init_block: CodeBlock, code_block: CodeBlock
 ) -> Tuple[CodeBlock, CodeBlock]:
-    if not code_block.code_elements:
+    if len(code_block.code_elements) == 0:
         return init_block, code_block
 
-    if isinstance(code_block.code_elements[0].code_elm, CodeElementAllocLocals):
-        [alloc, *rest] = code_block.code_elements
-        return CodeBlock([alloc]) + init_block, CodeBlock(rest)
-    else:
+    if not isinstance(code_block.code_elements[0].code_elm, CodeElementAllocLocals):
         return init_block, code_block
+
+    [alloc, *rest] = code_block.code_elements
+    return CodeBlock([alloc]) + init_block, CodeBlock(rest)
 
 
 def _tail_call_iterator_function(
