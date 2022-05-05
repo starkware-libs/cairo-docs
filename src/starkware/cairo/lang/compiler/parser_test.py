@@ -1002,12 +1002,14 @@ end\
     assert res.format(allowed_line_length=100) == source
 
 
-def test_for_with_many_clauses():
+def test_for_with_many_clauses_parenthesized():
     source = """\
-for _ in range(10),
+for (
     _ in range(10),
     _ in range(10),
-    _ in range(10):
+    _ in range(10),
+    _ in range(10),
+):
     f()
 end\
 """

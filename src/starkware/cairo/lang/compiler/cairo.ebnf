@@ -20,6 +20,12 @@ COMMA: ","
 _expr_sep: (COMMA | nonempty_notes)+
 comma_separated_with_notes{item}: notes item? (_expr_sep item)* _expr_sep?
 
+// Optionally parenthesized syntax subtrees.
+//
+// This isn't materialized in resulting AST as the only designed purpose is to wrap multiline
+// subtrees in parentheses, when formatting code.
+_maybe_parenthesized{item}: "(" item ")" | item
+
 // Types.
 named_type: identifier (":" type)? | non_identifier_type
 non_identifier_type: "felt"                                         -> type_felt
@@ -128,7 +134,7 @@ _if: "if" bool_expr ":" _NEWLINE code_block ("else" ":" _NEWLINE code_block)? "e
 // For loops
 for_generator: function_call
 for_clause: identifier_def "in" for_generator -> for_clause_in
-for_clauses_list: comma_separated_with_notes{for_clause}
+for_clauses_list: _maybe_parenthesized{comma_separated_with_notes{for_clause}}
 FOR: "for"
 _for: FOR for_clauses_list ":" _NEWLINE code_block "end"
 

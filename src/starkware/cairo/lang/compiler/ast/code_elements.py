@@ -611,16 +611,21 @@ class CodeElementFor(CodeElement):
         # If there are any clauses, we need to separate "for" keyword from them with whitespace;
         # otherwise, we want to stick "for" with ":" together.
         if len(clauses_particles.elements) > 0:
-            elms = clauses_particles.elements
-            elms[0] = ParticleList(["for ", elms[0]])
-            elms[-1] = ParticleList([elms[-1], ":"])
-
-            code = particles_in_lines(
-                particles=SeparatedParticleList(elements=elms, avoid_trailing_separator=True),
-                config=ParticleFormattingConfig(
-                    allowed_line_length=allowed_line_length, line_indent=INDENTATION
-                ),
+            config = ParticleFormattingConfig(
+                allowed_line_length=allowed_line_length, line_indent=INDENTATION
             )
+
+            single_line_particles = SeparatedParticleList(
+                elements=clauses_particles.elements, start="for ", end=":"
+            )
+            code = particles_in_lines(single_line_particles, config)
+
+            # If resulting code is multiline, we want to wrap clauses in parentheses.
+            if "\n" in code:
+                multi_line_particles = SeparatedParticleList(
+                    elements=clauses_particles.elements, start="for (", end="):"
+                )
+                code = particles_in_lines(multi_line_particles, config)
         else:
             code = "for:"
 
