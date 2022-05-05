@@ -610,7 +610,7 @@ class CodeElementFor(CodeElement):
 
         # If there are any clauses, we need to separate "for" keyword from them with whitespace;
         # otherwise, we want to stick "for" with ":" together.
-        if clauses_particles.elements:
+        if len(clauses_particles.elements) > 0:
             elms = clauses_particles.elements
             elms[0] = ParticleList(["for ", elms[0]])
             elms[-1] = ParticleList([elms[-1], ":"])
