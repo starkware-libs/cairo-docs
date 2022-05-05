@@ -13,6 +13,7 @@ from starkware.cairo.lang.compiler.ast.formatting_utils import (
 from starkware.cairo.lang.compiler.ast.node import AstNode
 from starkware.cairo.lang.compiler.ast.notes import Notes, NoteListField
 from starkware.cairo.lang.compiler.ast.rvalue import RvalueFuncCall
+from starkware.cairo.lang.compiler.ast.types import TypedIdentifier
 from starkware.cairo.lang.compiler.error_handling import Location
 
 
@@ -80,9 +81,10 @@ class ForGeneratorRange(RvalueFuncCall):
 
 @dataclasses.dataclass
 class ForClauseIn(ForClause):
-    identifier: ExprIdentifier
+    identifier: TypedIdentifier
     generator: ForGeneratorRange
     location: Optional[Location] = LocationField
+    label_iter: Optional[str] = None
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return [self.identifier, self.generator]

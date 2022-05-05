@@ -932,7 +932,7 @@ def test_pointer():
 
 def test_for_range():
     source = """\
-for i in range(0, 10, step=2):
+for i : felt in range(0, 10, step=2):
     f()
 end\
 """
@@ -941,7 +941,9 @@ end\
     assert res.clauses == ForClausesList.from_clauses(
         [
             ForClauseIn(
-                identifier=ExprIdentifier(name="i"),
+                identifier=TypedIdentifier(
+                    identifier=ExprIdentifier(name="i"), expr_type=TypeFelt()
+                ),
                 generator=ForGeneratorRange.from_arguments(
                     ArgList.from_args(
                         [

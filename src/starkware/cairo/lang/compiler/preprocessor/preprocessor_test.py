@@ -4539,6 +4539,53 @@ ret
     )
 
 
+def test_for_typed_iterator():
+    code = """
+func main():
+    for i : felt* in range(5):
+        assert [i] = 456
+    end
+    ret
+end
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+        program.format()
+        == """\
+[ap] = 0; ap++
+call rel 3
+ret
+[ap] = [fp + (-3)] + (-5); ap++
+jmp rel 10 if [ap + (-1)] != 0
+[ap] = 456; ap++
+[[fp + (-3)]] = [ap + (-1)]
+[ap] = [fp + (-3)] + 1; ap++
+call rel -9
+ret
+ret
+"""
+    )
+
+
+def test_for_typed_iterator_invalid_cast():
+    verify_exception(
+        """
+func main():
+    for i : (felt, felt) in range(1, 7, 2):
+        let x = i[0]
+    end
+    ret
+end
+""",
+        """
+file:?:?: Cannot cast 'felt' to '(felt, felt)'.
+    for i : (felt, felt) in range(1, 7, 2):
+        ^**************^
+""",
+        exc_type=CairoTypeError,
+    )
+
+
 def test_for_range_reference_start():
     code = """
 func main():

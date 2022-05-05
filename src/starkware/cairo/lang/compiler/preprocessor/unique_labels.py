@@ -1,10 +1,10 @@
 import dataclasses
 
 from starkware.cairo.lang.compiler.ast.code_elements import (
-    CodeElement,
     CodeElementIf,
     CodeElementFor,
 )
+from starkware.cairo.lang.compiler.ast.for_loop import ForClauseIn
 from starkware.cairo.lang.compiler.ast.node import AstNode
 from starkware.cairo.lang.compiler.ast.visitor import Visitor
 
@@ -49,7 +49,6 @@ class UniqueLabelCreator(Visitor):
         self.anon_label_gen = AnonymousLabelGenerator()
 
     def _visit_default(self, elm: AstNode):
-        assert elm is None or isinstance(elm, CodeElement)
         return elm
 
     def visit_CodeElementIf(self, elm: CodeElementIf):
@@ -71,7 +70,12 @@ class UniqueLabelCreator(Visitor):
         elm = dataclasses.replace(
             elm,
             label_func=self.anon_label_gen.get(),
+            clauses=self.visit(elm.clauses),
             label_if_neq=self.anon_label_gen.get(),
             label_if_end=self.anon_label_gen.get(),
         )
         return super().visit_CodeElementFor(elm)
+
+    def visit_ForClauseIn(self, obj: ForClauseIn):
+        assert obj.label_iter is None
+        return dataclasses.replace(obj, label_iter=self.anon_label_gen.get())

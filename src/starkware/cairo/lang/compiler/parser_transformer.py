@@ -762,7 +762,7 @@ class ParserTransformer(Transformer):
         return ForClauseBind(identifiers=identifiers, location=self.meta2loc(meta))
 
     @v_args(inline=True, meta=True)
-    def for_clause_in(self, meta, identifier: ExprIdentifier, generator: ForGeneratorRange):
+    def for_clause_in(self, meta, identifier: TypedIdentifier, generator: ForGeneratorRange):
         return ForClauseIn(identifier=identifier, generator=generator, location=self.meta2loc(meta))
 
     @v_args(inline=True)
