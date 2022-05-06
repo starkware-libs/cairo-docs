@@ -17,13 +17,13 @@ from starkware.cairo.lang.compiler.preprocessor.for_loop.generators import Gener
 
 
 class RangeGeneratorLowering(GeneratorLowering):
-    generator_location: Location
+    location: Location
     start: Expression
     stop: Expression
     step: Expression
 
     def __init__(self, generator: ForGeneratorRange):
-        self.generator_location = generator.location
+        self.location = generator.location
 
         args = generator.arguments.args
 
@@ -77,7 +77,7 @@ class RangeGeneratorLowering(GeneratorLowering):
             self.step = step.expr
 
     def declare_iterator(self) -> List[CairoType]:
-        return [TypeFelt(location=self.generator_location)]
+        return [TypeFelt(location=self.location)]
 
     def init_envelope_iterator(self):
         return CodeBlock(), [
@@ -85,9 +85,7 @@ class RangeGeneratorLowering(GeneratorLowering):
         ]
 
     def condition(self, iterator: ExprIdentifier):
-        return CodeBlock([]), BoolExpr(
-            eq=True, a=iterator, b=self.stop, location=self.generator_location
-        )
+        return CodeBlock([]), BoolExpr(eq=True, a=iterator, b=self.stop, location=self.location)
 
     def bind_iterator(self, iterator: ExprIdentifier) -> Expression:
         return iterator
