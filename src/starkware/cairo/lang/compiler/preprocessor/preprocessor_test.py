@@ -4586,6 +4586,74 @@ file:?:?: Cannot cast 'felt' to '(felt, felt)'.
     )
 
 
+def test_for_slice_over_felts():
+    code = """
+func alloc() -> (ptr : felt*):
+    %{ memory[ap] = segments.add() %}
+    ap += 1
+    return (ptr=cast([ap - 1], felt*))
+end
+
+func main():
+    let array : felt* = alloc()
+    for i : felt* in slice(array, 5):
+        assert [i] = 456
+    end
+    ret
+end
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+        program.format()
+        == """\
+%{ memory[ap] = segments.add() %}
+ap += 1
+ret
+call rel -3
+[ap] = [[ap + (-1)]]; ap++
+call rel 3
+ret
+"""
+    )
+
+
+def test_for_slice_over_structs():
+    code = """
+func alloc() -> (ptr : felt*):
+    %{ memory[ap] = segments.add() %}
+    ap += 1
+    return (ptr=cast([ap - 1], felt*))
+end
+
+struct Point:
+    member x : felt
+    member y : felt
+end
+
+func main():
+    let array : Point* = alloc()
+    for i : Point* in slice(array, 5, Point.SIZE):
+        assert i.x = 456
+        assert i.y = 567
+    end
+    ret
+end
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+        program.format()
+        == """\
+%{ memory[ap] = segments.add() %}
+ap += 1
+ret
+call rel -3
+[ap] = [[ap + (-1)]]; ap++
+call rel 3
+ret
+"""
+    )
+
+
 def test_for_range_reference_start():
     code = """
 func main():
