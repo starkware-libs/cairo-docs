@@ -1,5 +1,6 @@
+import dataclasses
 from abc import ABC, abstractmethod
-from typing import Tuple
+from typing import Tuple, List
 
 from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr
 from starkware.cairo.lang.compiler.ast.cairo_types import CairoType
@@ -14,27 +15,33 @@ from starkware.cairo.lang.compiler.ast.for_loop import (
 
 class GeneratorLowering(ABC):
     @abstractmethod
-    def iterator_type(self) -> CairoType:
+    def declare_iterator(self) -> List[CairoType]:
         """
-        Provide Cairo type of iterator values returned by this generator.
-        """
-
-    @abstractmethod
-    def init_envelope_iterator(self) -> Tuple[CodeBlock, Expression]:
-        """
-        Provide Cairo code which initializes the iterator variable.
+        Provide Cairo types of all iterator variables.
         """
 
     @abstractmethod
-    def condition(self, iter_expr: ExprIdentifier) -> Tuple[CodeBlock, BoolExpr]:
+    def init_envelope_iterator(self) -> Tuple[CodeBlock, List[Expression]]:
+        """
+        Provide Cairo code which initializes iterator variables.
+        """
+
+    @abstractmethod
+    def condition(self, *iters: ExprIdentifier) -> Tuple[CodeBlock, BoolExpr]:
         """
         Provide Cairo code which checks if iteration reaches end.
         """
 
     @abstractmethod
-    def increment_iterator(self, iter_expr: ExprIdentifier) -> Tuple[CodeBlock, Expression]:
+    def bind_iterator(self, *iters: ExprIdentifier) -> Expression:
         """
-        Provide Cairo code which increments iterator variable.
+        Return Cairo expression which will bind source code surfacing iterator reference.
+        """
+
+    @abstractmethod
+    def increment_iterator(self, *iters: ExprIdentifier) -> Tuple[CodeBlock, List[Expression]]:
+        """
+        Provide Cairo code which increments iterator variables.
         """
 
     @staticmethod

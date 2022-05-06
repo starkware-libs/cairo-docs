@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import List
 
 from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr
 from starkware.cairo.lang.compiler.ast.cairo_types import CairoType, TypeFelt
@@ -12,8 +12,8 @@ from starkware.cairo.lang.compiler.ast.expr import (
 )
 from starkware.cairo.lang.compiler.ast.for_loop import ForGeneratorRange
 from starkware.cairo.lang.compiler.error_handling import Location
-from starkware.cairo.lang.compiler.preprocessor.for_loop.generators import GeneratorLowering
 from starkware.cairo.lang.compiler.preprocessor.for_loop.errors import ForLoopLoweringError
+from starkware.cairo.lang.compiler.preprocessor.for_loop.generators import GeneratorLowering
 
 
 class RangeGeneratorLowering(GeneratorLowering):
@@ -76,16 +76,23 @@ class RangeGeneratorLowering(GeneratorLowering):
             assert isinstance(step, ExprAssignment)
             self.step = step.expr
 
-    def iterator_type(self) -> CairoType:
-        return TypeFelt(location=self.generator_location)
+    def declare_iterator(self) -> List[CairoType]:
+        return [TypeFelt(location=self.generator_location)]
 
-    def init_envelope_iterator(self) -> Tuple[CodeBlock, Expression]:
-        return CodeBlock([]), self.start
+    def init_envelope_iterator(self):
+        return CodeBlock(), [
+            self.start,
+        ]
 
-    def condition(self, iter_expr: ExprIdentifier) -> Tuple[CodeBlock, BoolExpr]:
+    def condition(self, iterator: ExprIdentifier):
         return CodeBlock([]), BoolExpr(
-            eq=True, a=iter_expr, b=self.stop, location=self.generator_location
+            eq=True, a=iterator, b=self.stop, location=self.generator_location
         )
 
-    def increment_iterator(self, iter_expr: ExprIdentifier) -> Tuple[CodeBlock, Expression]:
-        return CodeBlock([]), ExprOperator(op="+", a=iter_expr, b=self.step)
+    def bind_iterator(self, iterator: ExprIdentifier) -> Expression:
+        return iterator
+
+    def increment_iterator(self, iterator: ExprIdentifier):
+        return CodeBlock(), [
+            ExprOperator(op="+", a=iterator, b=self.step),
+        ]

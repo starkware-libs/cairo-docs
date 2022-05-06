@@ -1,6 +1,7 @@
 from typing import Tuple, Iterable, List, Optional
 
 from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
+from starkware.cairo.lang.compiler.ast.cairo_types import CairoType
 from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeElementFor,
     CodeElementFunction,
@@ -14,7 +15,6 @@ from starkware.cairo.lang.compiler.ast.code_elements import (
 )
 from starkware.cairo.lang.compiler.ast.expr import (
     ExprIdentifier,
-    Expression,
     ExprAssignment,
     ArgList,
     ExprCast,
@@ -111,21 +111,31 @@ def lower_for_loop(
         end
     """
 
-    iterator_function_identifier = ExprIdentifier(name=new_unique_label(), location=elm.location)
     in_clause = fetch_in_clause(elm)
     bound_identifiers = fetch_bound_identifiers(elm)
 
     low = InClauseLowering(in_clause)
+
+    iterator_function_identifier = ExprIdentifier(name=new_unique_label(), location=elm.location)
+    iterator_types = low.generator.declare_iterator()
+    iterator_variables = [
+        ExprIdentifier(name=new_unique_label(), location=low.generator_location)
+        for _ in iterator_types
+    ]
+
     envelope = _build_envelope(
         elm,
         low,
         iterator_function_identifier=iterator_function_identifier,
+        iterator_variables=iterator_variables,
         bound_identifiers=bound_identifiers,
     )
     iterator_function = _build_iterator_function(
         elm,
         low,
         iterator_function_identifier=iterator_function_identifier,
+        iterator_variables=iterator_variables,
+        iterator_types=iterator_types,
         bound_identifiers=bound_identifiers,
         implicit_arguments=implicit_arguments,
     )
@@ -133,10 +143,6 @@ def lower_for_loop(
 
 
 # Common codegen utilities.
-
-
-def _priv_iter_name_body(low: InClauseLowering) -> ExprIdentifier:
-    return ExprIdentifier(name=low.priv_iter_name, location=low.iter_identifier.location)
 
 
 def _expr_assignments_from_typed_identifiers(
@@ -155,22 +161,25 @@ def _build_envelope(
     elm: CodeElementFor,
     low: InClauseLowering,
     iterator_function_identifier: ExprIdentifier,
+    iterator_variables: List[ExprIdentifier],
     bound_identifiers: List[TypedIdentifier],
 ) -> CodeBlock:
-    iterator_init, iterator_expr = low.generator.init_envelope_iterator()
+    iterator_init, iterator_exprs = low.generator.init_envelope_iterator()
+    iterator_args = [
+        ExprAssignment(
+            identifier=identifier,
+            expr=expr,
+            location=low.iter_identifier.location,
+        )
+        for identifier, expr in zip(iterator_variables, iterator_exprs)
+    ]
+    bound_args = _expr_assignments_from_typed_identifiers(bound_identifiers)
     return iterator_init + CodeBlock.singleton(
         CodeElementFuncCall(
             func_call=RvalueFuncCall(
                 func_ident=iterator_function_identifier,
                 arguments=ArgList.from_args(
-                    args=[
-                        ExprAssignment(
-                            identifier=_priv_iter_name_body(low),
-                            expr=iterator_expr,
-                            location=low.iter_identifier.location,
-                        ),
-                        *_expr_assignments_from_typed_identifiers(bound_identifiers),
-                    ],
+                    args=iterator_args + bound_args,
                     location=elm.location,
                 ),
                 implicit_arguments=None,
@@ -187,25 +196,52 @@ def _build_iterator_function(
     elm: CodeElementFor,
     low: InClauseLowering,
     iterator_function_identifier: ExprIdentifier,
+    iterator_variables: List[ExprIdentifier],
+    iterator_types: List[CairoType],
     bound_identifiers: List[TypedIdentifier],
     implicit_arguments: Optional[IdentifierList] = None,
 ) -> CodeElementFunction:
+    iterator_args = [
+        TypedIdentifier(
+            identifier=identifier,
+            expr_type=type,
+            location=low.iter_identifier.location,
+        )
+        for identifier, type in zip(iterator_variables, iterator_types)
+    ]
     arguments = IdentifierList(
-        identifiers=[
-            TypedIdentifier(
-                identifier=_priv_iter_name_body(low),
-                expr_type=low.generator.iterator_type(),
-                location=low.iter_identifier.location,
-            ),
-            *bound_identifiers,
-        ],
+        identifiers=iterator_args + bound_identifiers,
         location=elm.location,
     )
 
-    condition_init, condition_expr = low.generator.condition(iter_expr=_priv_iter_name_body(low))
-    next_init, next_expr = low.generator.increment_iterator(iter_expr=_priv_iter_name_body(low))
-    bind_iter_block = _bind_iter(low)
+    condition_init, condition_expr = low.generator.condition(*iterator_variables)
+    next_init, next_exprs = low.generator.increment_iterator(*iterator_variables)
+    bind_iter_block = _bind_iter(low, iterator_variables)
     body_block_init, body_block = _prepare_body(elm.code_block)
+
+    iterator_call_args = [
+        ExprAssignment(
+            identifier=identifier,
+            expr=expr,
+            location=low.iter_identifier.location,
+        )
+        for identifier, expr in zip(iterator_variables, next_exprs)
+    ]
+    tail_call_block = CodeBlock.singleton(
+        CodeElementTailCall(
+            func_call=RvalueFuncCall(
+                func_ident=iterator_function_identifier,
+                arguments=ArgList.from_args(
+                    args=iterator_call_args
+                    + _expr_assignments_from_typed_identifiers(bound_identifiers),
+                    location=elm.location,
+                ),
+                implicit_arguments=None,
+                location=elm.location,
+            ),
+            location=elm.location,
+        ),
+    )
 
     code_block = (
         body_block_init
@@ -213,16 +249,7 @@ def _build_iterator_function(
         + CodeBlock.singleton(
             CodeElementIf(
                 condition=condition_expr,
-                main_code_block=(
-                    bind_iter_block
-                    + body_block
-                    + next_init
-                    + CodeBlock.singleton(
-                        _tail_call_iterator_function(
-                            elm, low, next_expr, iterator_function_identifier, bound_identifiers
-                        ),
-                    )
-                ),
+                main_code_block=(bind_iter_block + body_block + next_init + tail_call_block),
                 else_code_block=(
                     CodeBlock.singleton(
                         CodeElementReturn(exprs=[], location=elm.location),
@@ -244,19 +271,19 @@ def _build_iterator_function(
     )
 
 
-def _bind_iter(low: InClauseLowering) -> CodeBlock:
-    priv_iter_expr = _priv_iter_name_body(low)
+def _bind_iter(low: InClauseLowering, iterator_variables: List[ExprIdentifier]) -> CodeBlock:
+    bound_expr = low.generator.bind_iterator(*iterator_variables)
 
     # We only have to cast if user explicitly provided iterator type
     if low.iter_identifier.expr_type is not None:
         cast_expr = ExprCast(
-            expr=priv_iter_expr,
+            expr=bound_expr,
             dest_type=low.iter_identifier.expr_type,
             notes=Notes(),
             location=low.iter_identifier.location,
         )
     else:
-        cast_expr = priv_iter_expr
+        cast_expr = bound_expr
 
     return CodeBlock.from_code_elements(
         [
@@ -270,31 +297,3 @@ def _bind_iter(low: InClauseLowering) -> CodeBlock:
 
 def _prepare_body(code_block: CodeBlock) -> Tuple[CodeBlock, CodeBlock]:
     return CodeBlock.from_code_elements([]), code_block
-
-
-def _tail_call_iterator_function(
-    elm: CodeElementFor,
-    low: InClauseLowering,
-    next_expr: Expression,
-    iterator_function_identifier: ExprIdentifier,
-    bound_identifiers: List[TypedIdentifier],
-) -> CodeElementTailCall:
-    return CodeElementTailCall(
-        func_call=RvalueFuncCall(
-            func_ident=iterator_function_identifier,
-            arguments=ArgList.from_args(
-                args=[
-                    ExprAssignment(
-                        identifier=_priv_iter_name_body(low),
-                        expr=next_expr,
-                        location=low.iter_identifier.location,
-                    ),
-                    *_expr_assignments_from_typed_identifiers(bound_identifiers),
-                ],
-                location=elm.location,
-            ),
-            implicit_arguments=None,
-            location=elm.location,
-        ),
-        location=elm.location,
-    )

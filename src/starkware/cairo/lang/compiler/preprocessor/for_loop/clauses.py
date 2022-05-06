@@ -8,17 +8,14 @@ from starkware.cairo.lang.compiler.ast.types import TypedIdentifier
 from starkware.cairo.lang.compiler.error_handling import Location
 from starkware.cairo.lang.compiler.preprocessor.for_loop.errors import ForLoopLoweringError
 from starkware.cairo.lang.compiler.preprocessor.for_loop.generators import GeneratorLowering
-from starkware.cairo.lang.compiler.unique_labels import new_unique_label
 
 
 class InClauseLowering:
-    priv_iter_name: str
     iter_identifier: TypedIdentifier
     generator_location: Location
     generator: GeneratorLowering
 
     def __init__(self, clause: ForClauseIn):
-        self.priv_iter_name = new_unique_label()
         self.iter_identifier = clause.identifier
         self.generator_location = clause.generator.location
         self.generator = GeneratorLowering.from_in_clause(clause)
