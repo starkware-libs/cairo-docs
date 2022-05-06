@@ -6,7 +6,7 @@ def test_range_without_arguments():
     verify_exception(
         "for i in range():\n    [ap] = 2; ap++\nend",
         """
-file:?:?: Range generator excepts at least the stop argument.
+file:?:?: Range generator expects at least the stop argument.
 for i in range():
          ^*****^
 """,

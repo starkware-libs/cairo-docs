@@ -30,7 +30,7 @@ class RangeGeneratorLowering(GeneratorLowering):
         # Validate arguments.
         if len(args) == 0:
             raise ForLoopLoweringError(
-                "Range generator excepts at least the stop argument.",
+                "Range generator expects at least the stop argument.",
                 location=generator.location,
             )
 
