@@ -4810,3 +4810,51 @@ ret
 ret
 """
     )
+
+
+def test_nested_for():
+    code = """
+func main():
+    for i in range(100):
+        let z = i
+        for j in range(101):
+            let y = j
+            for k in range(102):
+                let x = k
+            end
+        end
+    end
+    ret
+end
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+        program.format()
+        == """\
+[ap] = 0; ap++
+call rel 3
+ret
+[ap] = [fp + (-3)] + (-100); ap++
+jmp rel 11 if [ap + (-1)] != 0
+[ap] = 0; ap++
+call rel 8
+[ap] = [fp + (-3)] + 1; ap++
+call rel -10
+ret
+ret
+[ap] = [fp + (-3)] + (-101); ap++
+jmp rel 11 if [ap + (-1)] != 0
+[ap] = 0; ap++
+call rel 8
+[ap] = [fp + (-3)] + 1; ap++
+call rel -10
+ret
+ret
+[ap] = [fp + (-3)] + (-102); ap++
+jmp rel 7 if [ap + (-1)] != 0
+[ap] = [fp + (-3)] + 1; ap++
+call rel -6
+ret
+ret
+"""
+    )
