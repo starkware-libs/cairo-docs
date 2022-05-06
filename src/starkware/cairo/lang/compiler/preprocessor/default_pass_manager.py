@@ -17,7 +17,6 @@ from starkware.cairo.lang.compiler.preprocessor.pass_manager import (
 )
 from starkware.cairo.lang.compiler.preprocessor.preprocessor import Preprocessor
 from starkware.cairo.lang.compiler.preprocessor.struct_collector import StructCollector
-from starkware.cairo.lang.compiler.preprocessor.unique_labels import UniqueLabelCreator
 from starkware.cairo.lang.compiler.scoped_name import ScopedName
 
 
@@ -39,9 +38,6 @@ def default_pass_manager(
                 "starkware.cairo.lang.compiler.lib.registers",
             ],
         ),
-    )
-    manager.add_stage(
-        "unique_label_creator", VisitorStage(lambda context: UniqueLabelCreator(), modify_ast=True)
     )
     manager.add_stage("for_loops_lowering", ForLoopLoweringStage())
     manager.add_stage(

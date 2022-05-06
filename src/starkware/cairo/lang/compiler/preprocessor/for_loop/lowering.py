@@ -32,6 +32,7 @@ from starkware.cairo.lang.compiler.preprocessor.for_loop.clauses import (
     fetch_bound_identifiers,
 )
 from starkware.cairo.lang.compiler.preprocessor.pass_manager import PassManagerContext, VisitorStage
+from starkware.cairo.lang.compiler.unique_labels import new_unique_label
 
 
 class ForLoopLoweringStage(VisitorStage):
@@ -110,13 +111,23 @@ def lower_for_loop(
         end
     """
 
+    iterator_function_identifier = ExprIdentifier(name=new_unique_label(), location=elm.location)
     in_clause = fetch_in_clause(elm)
     bound_identifiers = fetch_bound_identifiers(elm)
 
     low = InClauseLowering(in_clause)
-    envelope = _build_envelope(elm, low, bound_identifiers=bound_identifiers)
+    envelope = _build_envelope(
+        elm,
+        low,
+        iterator_function_identifier=iterator_function_identifier,
+        bound_identifiers=bound_identifiers,
+    )
     iterator_function = _build_iterator_function(
-        elm, low, bound_identifiers=bound_identifiers, implicit_arguments=implicit_arguments
+        elm,
+        low,
+        iterator_function_identifier=iterator_function_identifier,
+        bound_identifiers=bound_identifiers,
+        implicit_arguments=implicit_arguments,
     )
     return envelope, iterator_function
 
@@ -126,10 +137,6 @@ def lower_for_loop(
 
 def _priv_iter_name_body(low: InClauseLowering) -> ExprIdentifier:
     return ExprIdentifier(name=low.priv_iter_name, location=low.iter_identifier.location)
-
-
-def _iterator_function_identifier(elm: CodeElementFor) -> ExprIdentifier:
-    return ExprIdentifier(name=elm.label_func, location=elm.location)
 
 
 def _expr_assignments_from_typed_identifiers(
@@ -145,13 +152,16 @@ def _expr_assignments_from_typed_identifiers(
 
 
 def _build_envelope(
-    elm: CodeElementFor, low: InClauseLowering, bound_identifiers: List[TypedIdentifier]
+    elm: CodeElementFor,
+    low: InClauseLowering,
+    iterator_function_identifier: ExprIdentifier,
+    bound_identifiers: List[TypedIdentifier],
 ) -> CodeBlock:
     iterator_init, iterator_expr = low.generator.init_envelope_iterator()
     return iterator_init + CodeBlock.singleton(
         CodeElementFuncCall(
             func_call=RvalueFuncCall(
-                func_ident=_iterator_function_identifier(elm),
+                func_ident=iterator_function_identifier,
                 arguments=ArgList.from_args(
                     args=[
                         ExprAssignment(
@@ -176,13 +186,10 @@ def _build_envelope(
 def _build_iterator_function(
     elm: CodeElementFor,
     low: InClauseLowering,
+    iterator_function_identifier: ExprIdentifier,
     bound_identifiers: List[TypedIdentifier],
     implicit_arguments: Optional[IdentifierList] = None,
 ) -> CodeElementFunction:
-    assert elm.label_func is not None
-    assert elm.label_if_neq is not None
-    assert elm.label_if_end is not None
-
     arguments = IdentifierList(
         identifiers=[
             TypedIdentifier(
@@ -211,7 +218,9 @@ def _build_iterator_function(
                     + body_block
                     + next_init
                     + CodeBlock.singleton(
-                        _tail_call_iterator_function(elm, low, next_expr, bound_identifiers),
+                        _tail_call_iterator_function(
+                            elm, low, next_expr, iterator_function_identifier, bound_identifiers
+                        ),
                     )
                 ),
                 else_code_block=(
@@ -219,8 +228,6 @@ def _build_iterator_function(
                         CodeElementReturn(exprs=[], location=elm.location),
                     )
                 ),
-                label_neq=elm.label_if_neq,
-                label_end=elm.label_if_end,
                 location=elm.location,
             ),
         )
@@ -228,7 +235,7 @@ def _build_iterator_function(
 
     return CodeElementFunction(
         element_type="func",
-        identifier=_iterator_function_identifier(elm),
+        identifier=iterator_function_identifier,
         arguments=arguments,
         implicit_arguments=implicit_arguments,
         returns=None,
@@ -269,11 +276,12 @@ def _tail_call_iterator_function(
     elm: CodeElementFor,
     low: InClauseLowering,
     next_expr: Expression,
+    iterator_function_identifier: ExprIdentifier,
     bound_identifiers: List[TypedIdentifier],
 ) -> CodeElementTailCall:
     return CodeElementTailCall(
         func_call=RvalueFuncCall(
-            func_ident=_iterator_function_identifier(elm),
+            func_ident=iterator_function_identifier,
             arguments=ArgList.from_args(
                 args=[
                     ExprAssignment(

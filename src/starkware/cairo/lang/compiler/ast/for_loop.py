@@ -105,7 +105,6 @@ class ForClauseIn(ForClause):
     identifier: TypedIdentifier
     generator: ForGenerator
     location: Optional[Location] = LocationField
-    label_iter: Optional[str] = None
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return [self.identifier, self.generator]
