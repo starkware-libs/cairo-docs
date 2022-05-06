@@ -1,11 +1,6 @@
-import operator
-from abc import ABC, abstractmethod
-from functools import reduce
 from typing import Tuple, Iterable, List, Optional
 
 from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
-from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr
-from starkware.cairo.lang.compiler.ast.cairo_types import CairoType, TypeFelt
 from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeElementFor,
     CodeElementFunction,
@@ -21,25 +16,22 @@ from starkware.cairo.lang.compiler.ast.expr import (
     ExprIdentifier,
     Expression,
     ExprAssignment,
-    ExprConst,
     ArgList,
-    ExprOperator,
     ExprCast,
 )
-from starkware.cairo.lang.compiler.ast.for_loop import ForClauseIn, ForGeneratorRange
 from starkware.cairo.lang.compiler.ast.notes import Notes
 from starkware.cairo.lang.compiler.ast.rvalue import RvalueFuncCall
 from starkware.cairo.lang.compiler.ast.types import TypedIdentifier
-from starkware.cairo.lang.compiler.error_handling import LocationError, Location
 from starkware.cairo.lang.compiler.preprocessor.code_element_injecting_visitor import (
     CodeElementInjectingVisitor,
     CodeElementsInjection,
 )
+from starkware.cairo.lang.compiler.preprocessor.for_loop.clauses import (
+    InClauseLowering,
+    fetch_in_clause,
+    fetch_bound_identifiers,
+)
 from starkware.cairo.lang.compiler.preprocessor.pass_manager import PassManagerContext, VisitorStage
-
-
-class ForLoopLoweringError(LocationError):
-    pass
 
 
 class ForLoopLoweringStage(VisitorStage):
@@ -118,8 +110,8 @@ def lower_for_loop(
         end
     """
 
-    in_clause = _fetch_in_clause(elm)
-    bound_identifiers = _fetch_bound_identifiers(elm)
+    in_clause = fetch_in_clause(elm)
+    bound_identifiers = fetch_bound_identifiers(elm)
 
     low = InClauseLowering(in_clause)
     envelope = _build_envelope(elm, low, bound_identifiers=bound_identifiers)
@@ -127,131 +119,6 @@ def lower_for_loop(
         elm, low, bound_identifiers=bound_identifiers, implicit_arguments=implicit_arguments
     )
     return envelope, iterator_function
-
-
-class InClauseLowering:
-    priv_iter_name: str
-    iter_identifier: TypedIdentifier
-    generator_location: Location
-    generator: "GeneratorLowering"
-
-    def __init__(self, clause: ForClauseIn):
-        assert clause.label_iter is not None
-        self.priv_iter_name = clause.label_iter
-        self.iter_identifier = clause.identifier
-        self.generator_location = clause.generator.location
-        self.generator = GeneratorLowering.from_in_clause(clause)
-
-
-class GeneratorLowering(ABC):
-    @abstractmethod
-    def iterator_type(self) -> CairoType:
-        """
-        Provide Cairo type of iterator values returned by this generator.
-        """
-
-    @abstractmethod
-    def init_envelope_iterator(self) -> Tuple[CodeBlock, Expression]:
-        """
-        Provide Cairo code which initializes the iterator variable.
-        """
-
-    @abstractmethod
-    def condition(self, iter_expr: ExprIdentifier) -> Tuple[CodeBlock, BoolExpr]:
-        """
-        Provide Cairo code which checks if iteration reaches end.
-        """
-
-    @abstractmethod
-    def increment_iterator(self, iter_expr: ExprIdentifier) -> Tuple[CodeBlock, Expression]:
-        """
-        Provide Cairo code which increments iterator variable.
-        """
-
-    @staticmethod
-    def from_in_clause(clause: ForClauseIn) -> "GeneratorLowering":
-        generator = clause.generator
-        if isinstance(generator, ForGeneratorRange):
-            return RangeGeneratorLowering(generator)
-        else:
-            raise NotImplementedError(
-                f"Lowering '{generator.func_ident.name}' generator is not implemented yet."
-            )
-
-
-class RangeGeneratorLowering(GeneratorLowering):
-    generator_location: Location
-    start: Expression
-    stop: Expression
-    step: Expression
-
-    def __init__(self, generator: ForGeneratorRange):
-        self.generator_location = generator.location
-
-        args = generator.arguments.args
-
-        # Validate arguments.
-        if len(args) == 0:
-            raise ForLoopLoweringError(
-                "Range generator excepts at least the stop argument.",
-                location=generator.location,
-            )
-
-        if len(args) > 3:
-            assert args[3].location is not None and args[-1].location is not None
-            excessive_args_location = args[3].location.span(args[-1].location)
-
-            raise ForLoopLoweringError(
-                "Too many arguments passed to range generator.", location=excessive_args_location
-            )
-
-        # TODO(mkaput, 21/04/2022): Support keyword arguments here.
-        #   There is a refactoring opportunity here, as this functionality
-        #   is implemented in process_expr_assignment_list in Preprocessor.
-        #   As for now, we just error proactively.
-        for arg in args:
-            if arg.identifier is not None:
-                raise ForLoopLoweringError(
-                    "Keyword arguments are not supported here yet.", location=arg.location
-                )
-
-        # Pad arguments to 3 element list with None as filling. This will simplify further code.
-        if len(args) < 2:
-            args = [None, *args]
-        if len(args) < 3:
-            args = [*args, None]
-
-        # Extract arguments and set defaults
-        [start, stop, step] = args
-
-        if start is None:
-            self.start = ExprConst(val=0)
-        else:
-            assert isinstance(start, ExprAssignment)
-            self.start = start.expr
-
-        assert isinstance(stop, ExprAssignment)
-        self.stop = stop.expr
-
-        if step is None:
-            self.step = ExprConst(val=1)
-        else:
-            assert isinstance(step, ExprAssignment)
-            self.step = step.expr
-
-    def iterator_type(self) -> CairoType:
-        return TypeFelt(location=self.generator_location)
-
-    def init_envelope_iterator(self) -> Tuple[CodeBlock, Expression]:
-        return CodeBlock([]), self.start
-
-    def condition(self, iter_expr: ExprIdentifier) -> Tuple[CodeBlock, BoolExpr]:
-        return CodeBlock([]), BoolExpr(
-            eq=True, a=iter_expr, b=self.stop, location=self.generator_location
-        )
-
-    def increment_iterator(self, iter_expr: ExprIdentifier) -> Tuple[CodeBlock, Expression]:
-        return CodeBlock([]), ExprOperator(op="+", a=iter_expr, b=self.step)
 
 
 # Common codegen utilities.
@@ -272,29 +139,6 @@ def _expr_assignments_from_typed_identifiers(
         ExprAssignment(identifier=ident.identifier, expr=ident.identifier, location=ident.location)
         for ident in identifiers
     ]
-
-
-# Clauses processing.
-
-
-def _fetch_in_clause(elm: CodeElementFor) -> ForClauseIn:
-    in_clauses = elm.clauses.in_clauses()
-
-    if not in_clauses:
-        raise ForLoopLoweringError("For loop requires one 'in' clause.", location=elm.location)
-
-    if len(in_clauses) > 1:
-        extra_clauses_location = in_clauses[1].location.span(in_clauses[-1].location)
-        raise ForLoopLoweringError(
-            "Multiple 'in' clauses in for loops are not supported.", location=extra_clauses_location
-        )
-
-    return in_clauses[0]
-
-
-def _fetch_bound_identifiers(elm: CodeElementFor) -> List[TypedIdentifier]:
-    identifier_groups = (clause.identifiers.identifiers for clause in elm.clauses.bind_clauses())
-    return reduce(operator.add, identifier_groups, [])
 
 
 # Envelope generation.

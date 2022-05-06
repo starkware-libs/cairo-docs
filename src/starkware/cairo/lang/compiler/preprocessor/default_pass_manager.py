@@ -7,7 +7,7 @@ from starkware.cairo.lang.compiler.preprocessor.auxiliary_info_collector import 
 )
 from starkware.cairo.lang.compiler.preprocessor.dependency_graph import DependencyGraphStage
 from starkware.cairo.lang.compiler.preprocessor.directives import DirectivesCollectorStage
-from starkware.cairo.lang.compiler.preprocessor.for_loop import ForLoopLoweringStage
+from starkware.cairo.lang.compiler.preprocessor.for_loop.lowering import ForLoopLoweringStage
 from starkware.cairo.lang.compiler.preprocessor.identifier_collector import IdentifierCollector
 from starkware.cairo.lang.compiler.preprocessor.pass_manager import (
     PassManager,
