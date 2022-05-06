@@ -4452,64 +4452,6 @@ file:?:?: Hints before "using" statements are not allowed.
     )
 
 
-def test_for_unused_iterator():
-    code = """
-func main():
-    for _i in range(7, 24, 2):
-        [ap] = 42; ap++
-        [ap] = 43; ap++
-    end
-    [ap] = 1234; ap++
-    ret
-end
-"""
-    program = preprocess_str(code=code, prime=PRIME)
-    assert (
-        program.format()
-        == """\
-[ap] = 7; ap++
-call rel 5
-[ap] = 1234; ap++
-ret
-[ap] = [fp + (-3)] + (-24); ap++
-jmp rel 11 if [ap + (-1)] != 0
-[ap] = 42; ap++
-[ap] = 43; ap++
-[ap] = [fp + (-3)] + 2; ap++
-call rel -10
-ret
-ret
-"""
-    )
-
-
-def test_for_range_backward():
-    code = """
-func main():
-    for _i in range(24, -7, -2):
-        [ap] = 42; ap++
-    end
-    ret
-end
-"""
-    program = preprocess_str(code=code, prime=PRIME)
-    assert (
-        program.format()
-        == """\
-[ap] = 24; ap++
-call rel 3
-ret
-[ap] = [fp + (-3)] + 7; ap++
-jmp rel 9 if [ap + (-1)] != 0
-[ap] = 42; ap++
-[ap] = [fp + (-3)] + (-2); ap++
-call rel -8
-ret
-ret
-"""
-    )
-
-
 def test_for_const():
     code = """
 func main():
@@ -4539,34 +4481,6 @@ ret
     )
 
 
-def test_for_typed_iterator():
-    code = """
-func main():
-    for i : felt* in range(5):
-        assert [i] = 456
-    end
-    ret
-end
-"""
-    program = preprocess_str(code=code, prime=PRIME)
-    assert (
-        program.format()
-        == """\
-[ap] = 0; ap++
-call rel 3
-ret
-[ap] = [fp + (-3)] + (-5); ap++
-jmp rel 10 if [ap + (-1)] != 0
-[ap] = 456; ap++
-[[fp + (-3)]] = [ap + (-1)]
-[ap] = [fp + (-3)] + 1; ap++
-call rel -9
-ret
-ret
-"""
-    )
-
-
 def test_for_typed_iterator_invalid_cast():
     verify_exception(
         """
@@ -4586,47 +4500,7 @@ file:?:?: Cannot cast 'felt' to '(felt, felt)'.
     )
 
 
-def test_for_slice_over_felts():
-    code = """
-func alloc() -> (ptr : felt*):
-    %{ memory[ap] = segments.add() %}
-    ap += 1
-    return (ptr=cast([ap - 1], felt*))
-end
-
-func main():
-    let array : felt* = alloc()
-    for i : felt* in slice(array, 123):
-        assert [i] = 456
-    end
-    ret
-end
-"""
-    program = preprocess_str(code=code, prime=PRIME)
-    assert (
-        program.format()
-        == """\
-%{ memory[ap] = segments.add() %}
-ap += 1
-ret
-call rel -3
-[ap] = [ap + (-1)] + 123; ap++
-call rel 3
-ret
-[ap] = [fp + (-4)] - [fp + (-3)]; ap++
-jmp rel 11 if [ap + (-1)] != 0
-[ap] = 456; ap++
-[[fp + (-4)]] = [ap + (-1)]
-[ap] = [fp + (-4)] + 1; ap++
-[ap] = [fp + (-3)]; ap++
-call rel -9
-ret
-ret
-"""
-    )
-
-
-def test_for_slice_over_structs():
+def test_for_slice():
     code = """
 func alloc() -> (ptr : felt*):
     %{ memory[ap] = segments.add() %}
