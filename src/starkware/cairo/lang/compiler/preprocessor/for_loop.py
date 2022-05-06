@@ -1,4 +1,5 @@
 import operator
+from abc import ABC, abstractmethod
 from functools import reduce
 from typing import Tuple, Iterable, List, Optional
 
@@ -120,32 +121,72 @@ def lower_for_loop(
     in_clause = _fetch_in_clause(elm)
     bound_identifiers = _fetch_bound_identifiers(elm)
 
-    gl = InRangeLowering(clause=in_clause)
-    envelope = _build_envelope(elm, gl, bound_identifiers=bound_identifiers)
+    low = InClauseLowering(in_clause)
+    envelope = _build_envelope(elm, low, bound_identifiers=bound_identifiers)
     iterator_function = _build_iterator_function(
-        elm, gl, bound_identifiers=bound_identifiers, implicit_arguments=implicit_arguments
+        elm, low, bound_identifiers=bound_identifiers, implicit_arguments=implicit_arguments
     )
     return envelope, iterator_function
 
 
-class InRangeLowering:
+class InClauseLowering:
     priv_iter_name: str
     iter_identifier: TypedIdentifier
+    generator_location: Location
+    generator: "GeneratorLowering"
+
+    def __init__(self, clause: ForClauseIn):
+        assert clause.label_iter is not None
+        self.priv_iter_name = clause.label_iter
+        self.iter_identifier = clause.identifier
+        self.generator_location = clause.generator.location
+        self.generator = GeneratorLowering.from_in_clause(clause)
+
+
+class GeneratorLowering(ABC):
+    @abstractmethod
+    def iterator_type(self) -> CairoType:
+        """
+        Provide Cairo type of iterator values returned by this generator.
+        """
+
+    @abstractmethod
+    def init_envelope_iterator(self) -> Tuple[CodeBlock, Expression]:
+        """
+        Provide Cairo code which initializes the iterator variable.
+        """
+
+    @abstractmethod
+    def condition(self, iter_expr: ExprIdentifier) -> Tuple[CodeBlock, BoolExpr]:
+        """
+        Provide Cairo code which checks if iteration reaches end.
+        """
+
+    @abstractmethod
+    def increment_iterator(self, iter_expr: ExprIdentifier) -> Tuple[CodeBlock, Expression]:
+        """
+        Provide Cairo code which increments iterator variable.
+        """
+
+    @staticmethod
+    def from_in_clause(clause: ForClauseIn) -> "GeneratorLowering":
+        generator = clause.generator
+        if isinstance(generator, ForGeneratorRange):
+            return RangeGeneratorLowering(generator)
+        else:
+            raise NotImplementedError(
+                f"Lowering '{generator.func_ident.name}' generator is not implemented yet."
+            )
+
+
+class RangeGeneratorLowering(GeneratorLowering):
     generator_location: Location
     start: Expression
     stop: Expression
     step: Expression
 
-    def __init__(self, clause: ForClauseIn):
-        assert clause.label_iter is not None
-        self.priv_iter_name = clause.label_iter
-
-        self.iter_identifier = clause.identifier
-
-        self.generator_location = clause.generator.location
-
-        generator = clause.generator
-        assert isinstance(generator, ForGeneratorRange)
+    def __init__(self, generator: ForGeneratorRange):
+        self.generator_location = generator.location
 
         args = generator.arguments.args
 
@@ -216,8 +257,8 @@ class InRangeLowering:
 # Common codegen utilities.
 
 
-def _priv_iter_name_body(gl: InRangeLowering) -> ExprIdentifier:
-    return ExprIdentifier(name=gl.priv_iter_name, location=gl.iter_identifier.location)
+def _priv_iter_name_body(low: InClauseLowering) -> ExprIdentifier:
+    return ExprIdentifier(name=low.priv_iter_name, location=low.iter_identifier.location)
 
 
 def _iterator_function_identifier(elm: CodeElementFor) -> ExprIdentifier:
@@ -260,9 +301,9 @@ def _fetch_bound_identifiers(elm: CodeElementFor) -> List[TypedIdentifier]:
 
 
 def _build_envelope(
-    elm: CodeElementFor, gl: InRangeLowering, bound_identifiers: List[TypedIdentifier]
+    elm: CodeElementFor, low: InClauseLowering, bound_identifiers: List[TypedIdentifier]
 ) -> CodeBlock:
-    iterator_init, iterator_expr = gl.init_envelope_iterator()
+    iterator_init, iterator_expr = low.generator.init_envelope_iterator()
     return iterator_init + CodeBlock.singleton(
         CodeElementFuncCall(
             func_call=RvalueFuncCall(
@@ -270,9 +311,9 @@ def _build_envelope(
                 arguments=ArgList.from_args(
                     args=[
                         ExprAssignment(
-                            identifier=_priv_iter_name_body(gl),
+                            identifier=_priv_iter_name_body(low),
                             expr=iterator_expr,
-                            location=gl.iter_identifier.location,
+                            location=low.iter_identifier.location,
                         ),
                         *_expr_assignments_from_typed_identifiers(bound_identifiers),
                     ],
@@ -290,7 +331,7 @@ def _build_envelope(
 
 def _build_iterator_function(
     elm: CodeElementFor,
-    gl: InRangeLowering,
+    low: InClauseLowering,
     bound_identifiers: List[TypedIdentifier],
     implicit_arguments: Optional[IdentifierList] = None,
 ) -> CodeElementFunction:
@@ -301,18 +342,18 @@ def _build_iterator_function(
     arguments = IdentifierList(
         identifiers=[
             TypedIdentifier(
-                identifier=_priv_iter_name_body(gl),
-                expr_type=gl.iterator_type(),
-                location=gl.iter_identifier.location,
+                identifier=_priv_iter_name_body(low),
+                expr_type=low.generator.iterator_type(),
+                location=low.iter_identifier.location,
             ),
             *bound_identifiers,
         ],
         location=elm.location,
     )
 
-    condition_init, condition_expr = gl.condition(iter_expr=_priv_iter_name_body(gl))
-    next_init, next_expr = gl.increment_iterator(iter_expr=_priv_iter_name_body(gl))
-    bind_iter_block = _bind_iter(gl)
+    condition_init, condition_expr = low.generator.condition(iter_expr=_priv_iter_name_body(low))
+    next_init, next_expr = low.generator.increment_iterator(iter_expr=_priv_iter_name_body(low))
+    bind_iter_block = _bind_iter(low)
     body_block_init, body_block = _prepare_body(elm.code_block)
 
     code_block = (
@@ -326,7 +367,7 @@ def _build_iterator_function(
                     + body_block
                     + next_init
                     + CodeBlock.singleton(
-                        _tail_call_iterator_function(elm, gl, next_expr, bound_identifiers),
+                        _tail_call_iterator_function(elm, low, next_expr, bound_identifiers),
                     )
                 ),
                 else_code_block=(
@@ -352,16 +393,16 @@ def _build_iterator_function(
     )
 
 
-def _bind_iter(gl: InRangeLowering) -> CodeBlock:
-    priv_iter_expr = _priv_iter_name_body(gl)
+def _bind_iter(low: InClauseLowering) -> CodeBlock:
+    priv_iter_expr = _priv_iter_name_body(low)
 
     # We only have to cast if user explicitly provided iterator type
-    if gl.iter_identifier.expr_type is not None:
+    if low.iter_identifier.expr_type is not None:
         cast_expr = ExprCast(
             expr=priv_iter_expr,
-            dest_type=gl.iter_identifier.expr_type,
+            dest_type=low.iter_identifier.expr_type,
             notes=Notes(),
-            location=gl.iter_identifier.location,
+            location=low.iter_identifier.location,
         )
     else:
         cast_expr = priv_iter_expr
@@ -369,7 +410,7 @@ def _bind_iter(gl: InRangeLowering) -> CodeBlock:
     return CodeBlock.from_code_elements(
         [
             CodeElementReference(
-                typed_identifier=gl.iter_identifier,
+                typed_identifier=low.iter_identifier,
                 expr=cast_expr,
             )
         ]
@@ -382,7 +423,7 @@ def _prepare_body(code_block: CodeBlock) -> Tuple[CodeBlock, CodeBlock]:
 
 def _tail_call_iterator_function(
     elm: CodeElementFor,
-    gl: InRangeLowering,
+    low: InClauseLowering,
     next_expr: Expression,
     bound_identifiers: List[TypedIdentifier],
 ) -> CodeElementTailCall:
@@ -392,9 +433,9 @@ def _tail_call_iterator_function(
             arguments=ArgList.from_args(
                 args=[
                     ExprAssignment(
-                        identifier=_priv_iter_name_body(gl),
+                        identifier=_priv_iter_name_body(low),
                         expr=next_expr,
-                        location=gl.iter_identifier.location,
+                        location=low.iter_identifier.location,
                     ),
                     *_expr_assignments_from_typed_identifiers(bound_identifiers),
                 ],
