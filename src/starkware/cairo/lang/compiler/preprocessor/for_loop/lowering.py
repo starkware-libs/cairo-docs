@@ -55,9 +55,41 @@ class ForLoopLoweringVisitor(CodeElementInjectingVisitor):
         return elm
 
     def visit_CodeElementFor(self, elm: CodeElementFor):
-        envelope, iterator_function = lower_for_loop(
-            elm, implicit_arguments=self._borrow_current_implicit_args()
+        implicit_arguments = self._borrow_current_implicit_args()
+
+        in_clause = fetch_in_clause(elm)
+        bound_identifiers = fetch_bound_identifiers(elm)
+
+        low = InClauseLowering(in_clause)
+
+        iterator_function_identifier = ExprIdentifier(
+            name=new_unique_label(), location=elm.location
         )
+
+        iterator_types = low.generator.declare_iterator()
+        iterator_variables = [
+            ExprIdentifier(name=new_unique_label(), location=low.generator_location)
+            for _ in iterator_types
+        ]
+
+        envelope = _build_envelope(
+            elm,
+            low,
+            iterator_function_identifier=iterator_function_identifier,
+            iterator_variables=iterator_variables,
+            bound_identifiers=bound_identifiers,
+        )
+
+        iterator_function = _build_iterator_function(
+            elm,
+            low,
+            iterator_function_identifier=iterator_function_identifier,
+            iterator_variables=iterator_variables,
+            iterator_types=iterator_types,
+            bound_identifiers=bound_identifiers,
+            implicit_arguments=implicit_arguments,
+        )
+
         self.inject_function(iterator_function)
         return CodeElementsInjection.from_code_block(envelope)
 
@@ -73,78 +105,6 @@ class ForLoopLoweringVisitor(CodeElementInjectingVisitor):
         return None
 
 
-def lower_for_loop(
-    elm: CodeElementFor, implicit_arguments: Optional[IdentifierList] = None
-) -> Tuple[CodeBlock, CodeElementFunction]:
-    """
-    Lowers for loops into calls to recursive functions.
-
-    Lowering algorithm
-    ==================
-
-    The general rule, expressed in Cairo pseudocode would transform this::
-
-        for $I : $T in {generator}:
-            {instructions}
-        END
-
-    into following Cairo code::
-
-        {initialize iterator if necessary}
-        $F({starting iterator value}, {bound references...})
-
-        # separate code section
-        func $F($Iterator: {generator iterator type}, {bound references...}):
-            {alloc_locals if necessary}
-
-            {initialize condition if necessary}
-            if {condition}:
-                let $I = cast($Iterator, $T)  # or just $Iterator if $T was not specified
-
-                {instructions}
-
-                {initialize next($I) if necessary}
-                return $F({next($I)}, {bound references...})
-            else
-                ret
-            end
-        end
-    """
-
-    in_clause = fetch_in_clause(elm)
-    bound_identifiers = fetch_bound_identifiers(elm)
-
-    low = InClauseLowering(in_clause)
-
-    iterator_function_identifier = ExprIdentifier(name=new_unique_label(), location=elm.location)
-    iterator_types = low.generator.declare_iterator()
-    iterator_variables = [
-        ExprIdentifier(name=new_unique_label(), location=low.generator_location)
-        for _ in iterator_types
-    ]
-
-    envelope = _build_envelope(
-        elm,
-        low,
-        iterator_function_identifier=iterator_function_identifier,
-        iterator_variables=iterator_variables,
-        bound_identifiers=bound_identifiers,
-    )
-    iterator_function = _build_iterator_function(
-        elm,
-        low,
-        iterator_function_identifier=iterator_function_identifier,
-        iterator_variables=iterator_variables,
-        iterator_types=iterator_types,
-        bound_identifiers=bound_identifiers,
-        implicit_arguments=implicit_arguments,
-    )
-    return envelope, iterator_function
-
-
-# Common codegen utilities.
-
-
 def _expr_assignments_from_typed_identifiers(
     identifiers: Iterable[TypedIdentifier],
 ) -> List[ExprAssignment]:
@@ -152,9 +112,6 @@ def _expr_assignments_from_typed_identifiers(
         ExprAssignment(identifier=ident.identifier, expr=ident.identifier, location=ident.location)
         for ident in identifiers
     ]
-
-
-# Envelope generation.
 
 
 def _build_envelope(
@@ -187,9 +144,6 @@ def _build_envelope(
             )
         )
     )
-
-
-# Iterator function generation.
 
 
 def _build_iterator_function(
