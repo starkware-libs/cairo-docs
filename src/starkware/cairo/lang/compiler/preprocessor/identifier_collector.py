@@ -210,8 +210,6 @@ class IdentifierCollector(Visitor):
             )
 
     def visit_CodeElementIf(self, obj: CodeElementIf):
-        assert obj.label_neq is not None
-        assert obj.label_end is not None
         self.add_future_identifier(
             name=self.current_scope + obj.label_neq,
             identifier_type=LabelDefinition,
