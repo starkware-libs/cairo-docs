@@ -183,3 +183,58 @@ func $0{implicit_ptr : felt*}($1 : felt):
 end
 """
     )
+
+
+def test_nested_for():
+    code = """
+func main():
+    for i in range(100):
+        let z = i
+        for j in range(101):
+            let y = j
+            for k in range(102):
+                let x = k
+            end
+        end
+    end
+    ret
+end
+"""
+    assert (
+        lower_and_format(code)
+        == """\
+func main():
+    $0($1=0)
+    ret
+end
+func $0($1 : felt):
+    if $1 == 100:
+        let i = $1
+        let z = i
+        $4($5=0)
+        return $0($1=$1 + 1)
+    else:
+        return ()
+    end
+end
+func $4($5 : felt):
+    if $5 == 101:
+        let j = $5
+        let y = j
+        $8($9=0)
+        return $4($5=$5 + 1)
+    else:
+        return ()
+    end
+end
+func $8($9 : felt):
+    if $9 == 102:
+        let k = $9
+        let x = k
+        return $8($9=$9 + 1)
+    else:
+        return ()
+    end
+end
+"""
+    )
