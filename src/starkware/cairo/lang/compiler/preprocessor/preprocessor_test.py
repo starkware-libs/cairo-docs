@@ -4596,7 +4596,7 @@ end
 
 func main():
     let array : felt* = alloc()
-    for i : felt* in slice(array, 5):
+    for i : felt* in slice(array, 123):
         assert [i] = 456
     end
     ret
@@ -4610,8 +4610,17 @@ end
 ap += 1
 ret
 call rel -3
-[ap] = [[ap + (-1)]]; ap++
+[ap] = [ap + (-1)] + 123; ap++
 call rel 3
+ret
+[ap] = [fp + (-4)] - [fp + (-3)]; ap++
+jmp rel 11 if [ap + (-1)] != 0
+[ap] = 456; ap++
+[[fp + (-4)]] = [ap + (-1)]
+[ap] = [fp + (-4)] + 1; ap++
+[ap] = [fp + (-3)]; ap++
+call rel -9
+ret
 ret
 """
     )
@@ -4632,7 +4641,7 @@ end
 
 func main():
     let array : Point* = alloc()
-    for i : Point* in slice(array, 5, Point.SIZE):
+    for i : Point* in slice(array, 123, Point.SIZE):
         assert i.x = 456
         assert i.y = 567
     end
@@ -4647,8 +4656,19 @@ end
 ap += 1
 ret
 call rel -3
-[ap] = [[ap + (-1)]]; ap++
+[ap] = [ap + (-1)] + 246; ap++
 call rel 3
+ret
+[ap] = [fp + (-4)] - [fp + (-3)]; ap++
+jmp rel 14 if [ap + (-1)] != 0
+[ap] = 456; ap++
+[[fp + (-4)]] = [ap + (-1)]
+[ap] = 567; ap++
+[[fp + (-4)] + 1] = [ap + (-1)]
+[ap] = [fp + (-4)] + 2; ap++
+[ap] = [fp + (-3)]; ap++
+call rel -12
+ret
 ret
 """
     )

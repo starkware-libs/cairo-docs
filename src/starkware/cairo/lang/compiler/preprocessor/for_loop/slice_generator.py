@@ -1,7 +1,5 @@
-from typing import Tuple
-
 from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr
-from starkware.cairo.lang.compiler.ast.cairo_types import CairoType, TypeFelt, TypePointer
+from starkware.cairo.lang.compiler.ast.cairo_types import TypeFelt, TypePointer
 from starkware.cairo.lang.compiler.ast.code_elements import CodeBlock
 from starkware.cairo.lang.compiler.ast.expr import (
     Expression,
@@ -17,13 +15,13 @@ from starkware.cairo.lang.compiler.preprocessor.for_loop.generators import Gener
 
 
 class SliceGeneratorLowering(GeneratorLowering):
-    generator_location: Location
+    location: Location
     array: Expression
     number: Expression
     size: Expression
 
     def __init__(self, generator: ForGeneratorSlice):
-        self.generator_location = generator.location
+        self.location = generator.location
 
         args = generator.arguments.args
 
@@ -71,21 +69,32 @@ class SliceGeneratorLowering(GeneratorLowering):
             assert isinstance(size, ExprAssignment)
             self.size = size.expr
 
-    def iterator_type(self) -> CairoType:
-        return TypePointer(
-            TypeFelt(location=self.generator_location), location=self.generator_location
-        )
+    def declare_iterator(self):
+        return [
+            # current
+            TypePointer(TypeFelt(location=self.location), location=self.location),
+            # end
+            TypePointer(TypeFelt(location=self.location), location=self.location),
+        ]
 
-    def init_envelope_iterator(self) -> Tuple[CodeBlock, Expression]:
-        # return CodeBlock([]), self.array
-        raise NotImplementedError
+    def init_envelope_iterator(self):
+        return CodeBlock(), [
+            # current
+            self.array,
+            # end
+            ExprOperator(
+                op="+",
+                a=self.array,
+                b=ExprOperator(op="*", a=self.number, b=self.size, location=self.location),
+                location=self.location,
+            ),
+        ]
 
-    def condition(self, iter_expr: ExprIdentifier) -> Tuple[CodeBlock, BoolExpr]:
-        # return CodeBlock([]), BoolExpr(
-        #     eq=True, a=iter_expr, b=self.number, location=self.generator_location
-        # )
-        raise NotImplementedError
+    def condition(self, current: ExprIdentifier, end: ExprIdentifier):
+        return CodeBlock([]), BoolExpr(eq=True, a=current, b=end, location=self.location)
 
-    def increment_iterator(self, iter_expr: ExprIdentifier) -> Tuple[CodeBlock, Expression]:
-        # return CodeBlock([]), ExprOperator(op="+", a=iter_expr, b=self.size)
-        raise NotImplementedError
+    def bind_iterator(self, current: ExprIdentifier, _end: ExprIdentifier):
+        return current
+
+    def increment_iterator(self, current: ExprIdentifier, end: ExprIdentifier):
+        return CodeBlock(), [ExprOperator(op="+", a=current, b=self.size), end]
