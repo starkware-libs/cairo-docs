@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import field
 
 
@@ -5,7 +7,18 @@ from dataclasses import field
 # nobody will try to create colliding identifiers in source code.
 ANONYMOUS_LABEL_PREFIX = "$"
 
-global_counter = 0
+# It would be great if we could ensure resetting this on each run, but we happen to have many tests
+# which are parsing or doing other affecting computations and are not using PassManager.
+counter_ctx_var: ContextVar[int] = ContextVar("counter", default=0)
+
+
+@contextmanager
+def unique_labelling_context():
+    token = counter_ctx_var.set(0)
+    try:
+        yield
+    finally:
+        counter_ctx_var.reset(token)
 
 
 def new_unique_label() -> str:
@@ -13,9 +26,9 @@ def new_unique_label() -> str:
     Returns new compilation-unique label name which is guaranteed to be impossible to declare
     by source code.
     """
-    global global_counter
-    global_counter += 1
-    return f"{ANONYMOUS_LABEL_PREFIX}{global_counter}"
+    counter = counter_ctx_var.get()
+    counter_ctx_var.set(counter + 1)
+    return f"{ANONYMOUS_LABEL_PREFIX}{counter}"
 
 
 def is_anonymous_label(label_name: str) -> bool:
