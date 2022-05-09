@@ -211,27 +211,27 @@ func $0($1 : felt):
     if $1 == 100:
         let i = $1
         let z = i
-        $4($5=0)
+        $2($3=0)
         return $0($1=$1 + 1)
     else:
         return ()
     end
 end
-func $4($5 : felt):
-    if $5 == 101:
-        let j = $5
+func $2($3 : felt):
+    if $3 == 101:
+        let j = $3
         let y = j
-        $8($9=0)
-        return $4($5=$5 + 1)
+        $4($5=0)
+        return $2($3=$3 + 1)
     else:
         return ()
     end
 end
-func $8($9 : felt):
-    if $9 == 102:
-        let k = $9
+func $4($5 : felt):
+    if $5 == 102:
+        let k = $5
         let x = k
-        return $8($9=$9 + 1)
+        return $4($5=$5 + 1)
     else:
         return ()
     end
