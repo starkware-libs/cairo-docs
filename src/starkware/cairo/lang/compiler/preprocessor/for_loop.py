@@ -55,14 +55,16 @@ class ForLoopLoweringVisitor(CodeElementInjectingVisitor):
         return elm
 
     def visit_CodeElementFor(self, elm: CodeElementFor):
-        envelope, iterator_function = lower_for_loop(elm)
+        envelope, iterator_function = _lower_for_loop(elm)
         self.inject_function(iterator_function)
         return CodeElementsInjection.from_code_block(envelope)
 
 
-def lower_for_loop(elm: CodeElementFor) -> Tuple[CodeBlock, CodeElementFunction]:
+def _lower_for_loop(elm: CodeElementFor) -> Tuple[CodeBlock, CodeElementFunction]:
     """
     Lowers for loops into calls to recursive functions.
+
+    Returns loop envelope and function code element which performs recursive iteration.
 
     Lowering algorithm
     ==================
