@@ -877,6 +877,8 @@ Expected 'elm.element_type' to be a 'namespace'. Found: '{elm.element_type}'."""
         )
 
         # Prepare labels.
+        assert elm.label_neq is not None
+        assert elm.label_end is not None
         label_neq = ExprIdentifier(name=elm.label_neq, location=elm.location)
         label_end = ExprIdentifier(name=elm.label_end, location=elm.location)
 
