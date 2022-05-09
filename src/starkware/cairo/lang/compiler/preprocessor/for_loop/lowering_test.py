@@ -22,12 +22,12 @@ func main():
 end
 func $0($1 : felt):
     if $1 == 24:
+        return ()
+    else:
         let _i = $1
         [ap] = 42; ap++
         [ap] = 43; ap++
         return $0($1=$1 + 2)
-    else:
-        return ()
     end
 end
 """
@@ -52,11 +52,11 @@ func main():
 end
 func $0($1 : felt):
     if $1 == -7:
+        return ()
+    else:
         let _i = $1
         [ap] = 42; ap++
         return $0($1=$1 + (-2))
-    else:
-        return ()
     end
 end
 """
@@ -81,11 +81,11 @@ func main():
 end
 func $0($1 : felt):
     if $1 == 5:
+        return ()
+    else:
         let i : felt* = cast($1, felt*)
         assert [i] = 456
         return $0($1=$1 + 1)
-    else:
-        return ()
     end
 end
 """
@@ -112,11 +112,11 @@ func main():
 end
 func $0($1 : felt*, $2 : felt*):
     if $1 == $2:
+        return ()
+    else:
         let i : felt* = cast($1, felt*)
         assert [i] = 456
         return $0($1=$1 + 1, $2=$2)
-    else:
-        return ()
     end
 end
 """
@@ -144,12 +144,12 @@ func main():
 end
 func $0($1 : felt*, $2 : felt*):
     if $1 == $2:
+        return ()
+    else:
         let i : Point* = cast($1, Point*)
         assert i.x = 456
         assert i.y = 567
         return $0($1=$1 + Point.SIZE, $2=$2)
-    else:
-        return ()
     end
 end
 """
@@ -174,11 +174,11 @@ func foo{implicit_ptr : felt*}():
 end
 func $0{implicit_ptr : felt*}($1 : felt):
     if $1 == 5:
+        return ()
+    else:
         let i = $1
         write(i)
         return $0($1=$1 + 1)
-    else:
-        return ()
     end
 end
 """
@@ -209,31 +209,31 @@ func main():
 end
 func $0($1 : felt):
     if $1 == 100:
+        return ()
+    else:
         let i = $1
         let z = i
         $2($3=0)
         return $0($1=$1 + 1)
-    else:
-        return ()
     end
 end
 func $2($3 : felt):
     if $3 == 101:
+        return ()
+    else:
         let j = $3
         let y = j
         $4($5=0)
         return $2($3=$3 + 1)
-    else:
-        return ()
     end
 end
 func $4($5 : felt):
     if $5 == 102:
+        return ()
+    else:
         let k = $5
         let x = k
         return $4($5=$5 + 1)
-    else:
-        return ()
     end
 end
 """

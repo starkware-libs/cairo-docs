@@ -203,12 +203,12 @@ def _build_iterator_function(
         + CodeBlock.singleton(
             CodeElementIf(
                 condition=condition_expr,
-                main_code_block=(bind_iter_block + body_block + next_init + tail_call_block),
-                else_code_block=(
+                main_code_block=(
                     CodeBlock.singleton(
                         CodeElementReturn(exprs=[], location=elm.location),
                     )
                 ),
+                else_code_block=(bind_iter_block + body_block + next_init + tail_call_block),
                 location=elm.location,
             ),
         )

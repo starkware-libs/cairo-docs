@@ -4471,11 +4471,11 @@ call rel 5
 [ap] = 1234; ap++
 ret
 [ap] = [fp + (-3)] + (-5); ap++
-jmp rel 9 if [ap + (-1)] != 0
+jmp rel 3 if [ap + (-1)] != 0
+ret
 [ap] = [fp + (-3)] * 456
 [ap] = [fp + (-3)] + 1; ap++
-call rel -8
-ret
+call rel -9
 ret
 """
     )
@@ -4534,15 +4534,15 @@ call rel -3
 call rel 3
 ret
 [ap] = [fp + (-4)] - [fp + (-3)]; ap++
-jmp rel 14 if [ap + (-1)] != 0
+jmp rel 3 if [ap + (-1)] != 0
+ret
 [ap] = 456; ap++
 [[fp + (-4)]] = [ap + (-1)]
 [ap] = 567; ap++
 [[fp + (-4)] + 1] = [ap + (-1)]
 [ap] = [fp + (-4)] + 2; ap++
 [ap] = [fp + (-3)]; ap++
-call rel -12
-ret
+call rel -13
 ret
 """
     )
@@ -4569,11 +4569,11 @@ ap += 1
 call rel 3
 ret
 [ap] = [fp + (-3)] + (-5); ap++
-jmp rel 9 if [ap + (-1)] != 0
+jmp rel 3 if [ap + (-1)] != 0
+ret
 [ap] = [fp + (-3)] * 456
 [ap] = [fp + (-3)] + 1; ap++
-call rel -8
-ret
+call rel -9
 ret
 """
     )
@@ -4601,12 +4601,12 @@ ap += 1
 call rel 3
 ret
 [ap] = [fp + (-4)] - [fp + (-3)]; ap++
-jmp rel 10 if [ap + (-1)] != 0
+jmp rel 3 if [ap + (-1)] != 0
+ret
 [ap] = [fp + (-4)] * 456
 [ap] = [fp + (-4)] + 1; ap++
 [ap] = [fp + (-3)]; ap++
-call rel -8
-ret
+call rel -9
 ret
 """
     )
@@ -4634,12 +4634,12 @@ ap += 1
 call rel 3
 ret
 [ap] = [fp + (-4)] + (-150); ap++
-jmp rel 9 if [ap + (-1)] != 0
+jmp rel 3 if [ap + (-1)] != 0
+ret
 [ap] = [fp + (-4)] * 456
 [ap] = [fp + (-4)] + [fp + (-3)]; ap++
 [ap] = [fp + (-3)]; ap++
-call rel -8
-ret
+call rel -9
 ret
 """
     )
@@ -4670,14 +4670,14 @@ ap += 2
 call rel 3
 ret
 [ap] = [fp + (-5)] + (-5); ap++
-jmp rel 12 if [ap + (-1)] != 0
+jmp rel 3 if [ap + (-1)] != 0
+ret
 [ap] = [fp + (-4)] * [fp + (-3)]; ap++
 [ap] = [ap + (-1)] + 456; ap++
 [ap] = [fp + (-5)] + 1; ap++
 [ap] = [fp + (-4)]; ap++
 [ap] = [fp + (-3)]; ap++
-call rel -11
-ret
+call rel -12
 ret
 """
     )
@@ -4799,14 +4799,14 @@ ret
 call rel 3
 ret
 [ap] = [fp + (-3)] + (-5); ap++
-jmp rel 11 if [ap + (-1)] != 0
+jmp rel 4 if [ap + (-1)] != 0
 [ap] = [fp + (-4)]; ap++
-[ap] = [fp + (-3)]; ap++
-call rel -14
-[ap] = [fp + (-3)] + 1; ap++
-call rel -10
 ret
 [ap] = [fp + (-4)]; ap++
+[ap] = [fp + (-3)]; ap++
+call rel -16
+[ap] = [fp + (-3)] + 1; ap++
+call rel -12
 ret
 """
     )
