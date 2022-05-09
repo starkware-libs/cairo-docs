@@ -11,6 +11,7 @@ from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeElementWithAttr,
     CommentedCodeElement,
     LangDirective,
+    CodeElementFor,
 )
 from starkware.cairo.lang.compiler.ast.module import CairoFile, CairoModule
 from starkware.cairo.lang.compiler.ast.node import AstNode
@@ -95,6 +96,9 @@ class Visitor:
             label_end=elm.label_end,
             location=elm.location,
         )
+
+    def visit_CodeElementFor(self, elm: CodeElementFor):
+        raise VisitorError("For loops are not supported yet.", location=elm.location)
 
     def visit_CodeElementWithAttr(self, elm: CodeElementWithAttr):
         return CodeElementWithAttr(

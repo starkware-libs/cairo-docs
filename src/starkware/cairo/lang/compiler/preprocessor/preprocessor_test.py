@@ -2,6 +2,7 @@ import pytest
 
 from starkware.cairo.lang.cairo_constants import DEFAULT_PRIME
 from starkware.cairo.lang.compiler.ast.code_elements import CodeElementFunction
+from starkware.cairo.lang.compiler.ast.visitor import VisitorError
 from starkware.cairo.lang.compiler.cairo_compile import compile_cairo
 from starkware.cairo.lang.compiler.error_handling import LocationError
 from starkware.cairo.lang.compiler.identifier_definition import (
@@ -4448,4 +4449,22 @@ file:?:?: Hints before "using" statements are not allowed.
 %{ %}
 ^***^
 """,
+    )
+
+
+def test_for_unsupported():
+    verify_exception(
+        """
+func main():
+    for i in range(5):
+        f()
+    end
+end
+""",
+        """
+file:?:?: For loops are not supported yet.
+    for i in range(5):
+    ^*^
+""",
+        exc_type=VisitorError,
     )

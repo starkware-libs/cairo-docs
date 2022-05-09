@@ -11,6 +11,7 @@ from starkware.cairo.lang.compiler.ast.cairo_types import (
     TypeTuple,
 )
 from starkware.cairo.lang.compiler.ast.code_elements import (
+    CodeElementFor,
     CodeElementImport,
     CodeElementReference,
     CodeElementReturnValueReference,
@@ -25,6 +26,13 @@ from starkware.cairo.lang.compiler.ast.expr import (
     ExprParentheses,
     ExprReg,
     ExprSubscript,
+    ArgList,
+    ExprAssignment,
+)
+from starkware.cairo.lang.compiler.ast.for_loop import (
+    ForClauseIn,
+    ForGeneratorRange,
+    ForClausesList,
 )
 from starkware.cairo.lang.compiler.ast.formatting_utils import FormattingError
 from starkware.cairo.lang.compiler.ast.instructions import (
@@ -275,7 +283,7 @@ def test_operator_precedence():
     assert expr.format() == code
 
     # Compute the value of expr from the tree and compare it with the correct value.
-    PRIME = 3 * 2 ** 30 + 1
+    PRIME = 3 * 2**30 + 1
     simplified_expr = ExpressionSimplifier(PRIME).visit(expr)
     assert isinstance(simplified_expr, ExprConst)
     assert simplified_expr.val == eval(code)
@@ -292,7 +300,7 @@ def test_div_expr():
     code = "120 / 2 / 3 / 4"
     expr = parse_expr(code)
     # Compute the value of expr from the tree and compare it with the correct value.
-    PRIME = 3 * 2 ** 30 + 1
+    PRIME = 3 * 2**30 + 1
     simplified_expr = ExpressionSimplifier(PRIME).visit(expr)
     assert isinstance(simplified_expr, ExprConst)
     assert simplified_expr.val == 5
@@ -918,3 +926,104 @@ def test_pointer():
     for typ, mark in safe_zip(types, marks):
         assert typ.location is not None
         assert get_location_marks(code, typ.location) == code + "\n" + mark
+
+
+def test_for_range():
+    source = """\
+for i in range(0, 10, step=2):
+    f()
+end\
+"""
+    res = parse_code_element(source)
+    assert isinstance(res, CodeElementFor)
+    assert res.clauses == ForClausesList.from_clauses(
+        [
+            ForClauseIn(
+                identifier=ExprIdentifier(name="i"),
+                generator=ForGeneratorRange.from_arguments(
+                    ArgList.from_args(
+                        [
+                            ExprAssignment(identifier=None, expr=ExprConst(val=0)),
+                            ExprAssignment(identifier=None, expr=ExprConst(val=10)),
+                            ExprAssignment(
+                                identifier=ExprIdentifier(name="step"), expr=ExprConst(val=2)
+                            ),
+                        ]
+                    )
+                ),
+            )
+        ]
+    )
+    assert res.format(allowed_line_length=100) == source
+
+
+def test_range_is_contextual_keyword():
+    source = """\
+for _ in range(10):
+    local range = 5
+end\
+"""
+    res = parse_code_element(source)
+    assert isinstance(res, CodeElementFor)
+
+
+def test_for_with_unknown_generator():
+    verify_exception(
+        "for _ in foobar():\n    f()\nend",
+        """
+file:?:?: Unknown for loop generator 'foobar'. Only 'range' is supported here.
+for _ in foobar():
+         ^****^
+""",
+    )
+
+
+def test_for_without_clauses():
+    source = """\
+for:
+    f()
+end\
+"""
+    res = parse_code_element(source)
+    assert isinstance(res, CodeElementFor)
+    assert res.clauses == ForClausesList.from_clauses([])
+    assert res.format(allowed_line_length=100) == source
+
+
+def test_for_with_two_in_clauses():
+    source = """\
+for i in range(0, 10, 2), j in range(10, 20, 3):
+    f()
+end\
+"""
+    res = parse_code_element(source)
+    assert isinstance(res, CodeElementFor)
+    assert len(res.clauses.clauses) == 2
+    assert res.format(allowed_line_length=100) == source
+
+
+# TODO(mkaput, 28/04/2022): Always remove last comma in clauses list.
+#   We do not support this syntax in for loop stage, so this is low priority.
+#   Ideally, there should be an "keep_trailing_separator" flag in SeparatedParticlesList.
+def test_for_with_many_clauses():
+    source = """\
+for
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+    _ in range(10),
+:
+    f()
+end\
+"""
+    res = parse_code_element(source)
+    assert isinstance(res, CodeElementFor)
+    assert res.format(allowed_line_length=100) == source

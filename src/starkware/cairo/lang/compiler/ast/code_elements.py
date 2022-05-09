@@ -12,6 +12,7 @@ from starkware.cairo.lang.compiler.ast.expr import (
     ExprHint,
     ExprIdentifier,
 )
+from starkware.cairo.lang.compiler.ast.for_loop import ForClausesList
 from starkware.cairo.lang.compiler.ast.formatting_utils import (
     INDENTATION,
     LocationField,
@@ -593,6 +594,40 @@ class CodeElementIf(CodeElement):
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return [self.condition, self.main_code_block, self.else_code_block]
+
+
+@dataclasses.dataclass
+class CodeElementFor(CodeElement):
+    clauses: ForClausesList
+    code_block: CodeBlock
+    location: Optional[Location] = LocationField
+
+    def get_children(self) -> Sequence[Optional[AstNode]]:
+        return [self.clauses, self.code_block]
+
+    def format(self, allowed_line_length: int) -> str:
+        clauses_particles = self.clauses.get_particles()
+
+        clauses_particles.start = "for"
+
+        # If there are any clauses, we need to separate "for" keyword from them with whitespace;
+        # otherwise, we want to stick "for" with ":" together.
+        if clauses_particles.elements:
+            clauses_particles.start += " "
+
+        clauses_particles.end = ":"
+
+        code = particles_in_lines(
+            particles=clauses_particles,
+            config=ParticleFormattingConfig(
+                allowed_line_length=allowed_line_length, line_indent=INDENTATION
+            ),
+        )
+
+        main_code = self.code_block.format(allowed_line_length=allowed_line_length - INDENTATION)
+        main_code = indent(main_code, INDENTATION)
+
+        return f"{code}\n{main_code}end"
 
 
 class Directive(AstNode):

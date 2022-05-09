@@ -24,6 +24,7 @@ from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeElementConst,
     CodeElementDirective,
     CodeElementEmptyLine,
+    CodeElementFor,
     CodeElementFuncCall,
     CodeElementFunction,
     CodeElementHint,
@@ -66,6 +67,11 @@ from starkware.cairo.lang.compiler.ast.expr import (
     ExprTuple,
 )
 from starkware.cairo.lang.compiler.ast.expr_func_call import ExprFuncCall
+from starkware.cairo.lang.compiler.ast.for_loop import (
+    ForClauseIn,
+    ForGeneratorRange,
+    ForClausesList,
+)
 from starkware.cairo.lang.compiler.ast.instructions import (
     AddApInstruction,
     AssertEqInstruction,
@@ -735,6 +741,47 @@ class ParserTransformer(Transformer):
             location=location,
         )
 
+    @v_args(inline=True)
+    def code_element_for(self, kw_for, clauses: ForClausesList, code_block: CodeBlock):
+        # Create a location for the "for" keyword.
+        location = self.token2loc(kw_for)
+
+        return CodeElementFor(
+            clauses=clauses,
+            code_block=code_block,
+            location=location,
+        )
+
+    @v_args(inline=True, meta=True)
+    def for_clauses_list(self, meta, nodes: CommaSeparatedWithNotes):
+        return ForClausesList(clauses=nodes.args, notes=nodes.notes, location=self.meta2loc(meta))
+
+    @v_args(inline=True, meta=True)
+    def for_clause_in(self, meta, identifier: ExprIdentifier, generator: ForGeneratorRange):
+        return ForClauseIn(identifier=identifier, generator=generator, location=self.meta2loc(meta))
+
+    @v_args(inline=True)
+    def for_generator(self, function_call: RvalueFuncCall):
+        if function_call.implicit_arguments is not None:
+            raise ParserError(
+                "Implicit arguments are not allowed in this context.",
+                location=function_call.implicit_arguments.location,
+            )
+
+        if function_call.func_ident.name == "range":
+            return ForGeneratorRange(
+                func_ident=function_call.func_ident,
+                arguments=function_call.arguments,
+                implicit_arguments=None,
+                location=function_call.location,
+            )
+        else:
+            raise ParserError(
+                f"Unknown for loop generator '{function_call.func_ident.name}'. "
+                "Only 'range' is supported here.",
+                location=function_call.func_ident.location,
+            )
+
     @v_args(meta=True)
     def code_element_directive(self, value, meta):
         return CodeElementDirective(directive=value[0], location=self.meta2loc(meta))
@@ -847,6 +894,6 @@ def backslash_to_hex(value: bytes) -> bytes:
     r"""
     Replaces substrings of the form '\x**' with the corresponding byte.
     """
-    pattern = br"\\x([0-9a-fA-F]{2})"
+    pattern = rb"\\x([0-9a-fA-F]{2})"
     replacer = lambda m: bytes.fromhex(m.group(1).decode("ascii"))
     return re.sub(pattern, replacer, value)

@@ -176,6 +176,11 @@ class ArgList(AstNode):
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return self.args
 
+    @classmethod
+    def from_args(cls, args: List[ExprAssignment], **kwargs) -> "ArgList":
+        notes = [Notes() for _ in range(len(args) + 1)]
+        return cls(args=args, notes=notes, has_trailing_comma=False, **kwargs)
+
 
 @dataclasses.dataclass
 class ExprReg(Expression):
