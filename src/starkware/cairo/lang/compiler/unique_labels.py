@@ -1,15 +1,14 @@
 from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import field
+from typing import Optional
 
 
 # Dollar is not a valid identifier character in Cairo, thus we can be sure,
 # nobody will try to create colliding identifiers in source code.
 ANONYMOUS_LABEL_PREFIX = "$"
 
-# It would be great if we could ensure resetting this on each run, but we happen to have many tests
-# which are parsing or doing other affecting computations and are not using PassManager.
-counter_ctx_var: ContextVar[int] = ContextVar("counter", default=0)
+counter_ctx_var: ContextVar[Optional[int]] = ContextVar("counter", default=None)
 
 
 @contextmanager
@@ -27,6 +26,8 @@ def new_unique_label() -> str:
     by source code.
     """
     counter = counter_ctx_var.get()
+    assert counter is not None, "Unique labelling context has not been set up."
+    assert counter >= 0
     counter_ctx_var.set(counter + 1)
     return f"{ANONYMOUS_LABEL_PREFIX}{counter}"
 
