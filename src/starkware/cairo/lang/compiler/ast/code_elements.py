@@ -29,7 +29,6 @@ from starkware.cairo.lang.compiler.ast.rvalue import Rvalue, RvalueCall, RvalueF
 from starkware.cairo.lang.compiler.ast.types import TypedIdentifier
 from starkware.cairo.lang.compiler.error_handling import Location
 from starkware.cairo.lang.compiler.scoped_name import ScopedName
-from starkware.cairo.lang.compiler.unique_labels import unique_label_field
 from starkware.python.utils import indent
 
 
@@ -589,8 +588,8 @@ class CodeElementIf(CodeElement):
     condition: BoolExpr
     main_code_block: CodeBlock
     else_code_block: Optional[CodeBlock]
-    label_neq: str = unique_label_field()
-    label_end: str = unique_label_field()
+    label_neq: Optional[str] = None
+    label_end: Optional[str] = None
     location: Optional[Location] = LocationField
 
     def format(self, allowed_line_length):
