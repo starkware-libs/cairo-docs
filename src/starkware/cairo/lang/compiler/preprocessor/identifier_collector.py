@@ -35,7 +35,7 @@ from starkware.cairo.lang.compiler.identifier_manager import IdentifierError, Id
 from starkware.cairo.lang.compiler.preprocessor.local_variables import N_LOCALS_CONSTANT
 from starkware.cairo.lang.compiler.preprocessor.preprocessor_error import PreprocessorError
 from starkware.cairo.lang.compiler.scoped_name import ScopedName
-from starkware.cairo.lang.compiler.unique_labels import unique_name
+from starkware.cairo.lang.compiler.unique_labels import UniqueNameProvider, UniqueNameKind
 
 
 def _get_identifier(obj):
@@ -69,9 +69,14 @@ class IdentifierCollector(Visitor):
         CodeElementTypeDef: TypeDefinition,
     }
 
-    def __init__(self, identifiers: Optional[IdentifierManager] = None):
+    def __init__(
+        self,
+        identifiers: Optional[IdentifierManager] = None,
+        unique_names: Optional[UniqueNameProvider] = None,
+    ):
         super().__init__()
         self.identifiers = IdentifierManager() if identifiers is None else identifiers
+        self.unique_names = UniqueNameProvider() if unique_names is None else unique_names
 
     def add_identifier(
         self,
@@ -213,8 +218,8 @@ class IdentifierCollector(Visitor):
     def visit_CodeElementIf(self, obj: CodeElementIf):
         assert obj.label_neq is None
         assert obj.label_end is None
-        obj.label_neq = unique_name()
-        obj.label_end = unique_name()
+        obj.label_neq = self.unique_names.next(UniqueNameKind.Label)
+        obj.label_end = self.unique_names.next(UniqueNameKind.Label)
 
         self.add_future_identifier(
             name=self.current_scope + obj.label_neq,

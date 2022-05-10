@@ -1,38 +1,46 @@
-from contextlib import contextmanager
-from contextvars import ContextVar
-from typing import Optional
+import enum
+from enum import Enum
 
 
-# Dollar is not a valid identifier character in Cairo, thus we can be sure,
-# nobody will try to create colliding identifiers in source code.
-ANONYMOUS_LABEL_PREFIX = "$"
-
-counter_ctx_var: ContextVar[Optional[int]] = ContextVar("counter", default=None)
-
-
-@contextmanager
-def unique_labelling_context():
-    token = counter_ctx_var.set(0)
-    try:
-        yield
-    finally:
-        counter_ctx_var.reset(token)
+@enum.unique
+class UniqueNameKind(Enum):
+    Label = "Lbl"
+    Func = "Func"
+    Var = "Var"
 
 
-def unique_name() -> str:
+class UniqueNameProvider:
     """
-    Returns new compilation-unique name which is guaranteed to be impossible to declare
-    by source code.
-    """
-    counter = counter_ctx_var.get()
-    assert counter is not None, "Unique labelling context has not been set up."
-    assert counter >= 0
-    counter_ctx_var.set(counter + 1)
-    return f"{ANONYMOUS_LABEL_PREFIX}{counter}"
+    Provides new compilation-unique names.
 
+    The only instance of this class should be maintained by ``PassManagerContext`` and use this
+    object to obtain names for any anonymous code elements like labels, variables or functions.
+    """
 
-def is_anonymous_name(name: str) -> bool:
-    """
-    Returns ``True`` if the given label seems to have been generated.
-    """
-    return name.startswith(ANONYMOUS_LABEL_PREFIX)
+    # Dollar is not a valid identifier character in Cairo, thus we can be sure,
+    # nobody will try to create colliding identifiers in source code.
+    PREFIX = "$"
+
+    counter: int
+
+    def __init__(self):
+        self.counter = 0
+
+    def next(self, kind: UniqueNameKind) -> str:
+        """
+        Returns new compilation-unique name which is guaranteed to be impossible to declare
+        by source code.
+
+        The ``kind`` enum is only used to denote purpose of generated names when debugging.
+        All unique names, no matter what kind, use one shared global counter.
+        """
+        counter = self.counter
+        self.counter += 1
+        return f"{self.PREFIX}{kind.value}{counter}"
+
+    @classmethod
+    def is_name_unique(cls, name: str) -> bool:
+        """
+        Returns ``True`` if the given label seems to have been generated.
+        """
+        return name.startswith(cls.PREFIX)

@@ -7,7 +7,7 @@ from starkware.cairo.lang.compiler.error_handling import Location
 from starkware.cairo.lang.compiler.identifier_manager import IdentifierManager
 from starkware.cairo.lang.compiler.preprocessor.preprocessor import PreprocessedProgram
 from starkware.cairo.lang.compiler.scoped_name import ScopedName
-from starkware.cairo.lang.compiler.unique_labels import unique_labelling_context
+from starkware.cairo.lang.compiler.unique_labels import UniqueNameProvider
 
 
 @dataclasses.dataclass
@@ -26,6 +26,7 @@ class PassManagerContext:
     # A set of functions to compile (None means all functions will be compiled).
     # If the unused function optimization is enabled, only reachable functions will be compiled.
     functions_to_compile: Optional[Set[ScopedName]] = None
+    unique_names: UniqueNameProvider = dataclasses.field(default_factory=UniqueNameProvider)
 
 
 class Stage(ABC):
@@ -52,9 +53,8 @@ class PassManager:
         self.stage_names: Set[str] = set()
 
     def run(self, context: PassManagerContext):
-        with unique_labelling_context():
-            for _, stage in self.stages:
-                stage.run(context)
+        for _, stage in self.stages:
+            stage.run(context)
 
     def get_stage_index(self, name: str):
         assert name in self.stage_names

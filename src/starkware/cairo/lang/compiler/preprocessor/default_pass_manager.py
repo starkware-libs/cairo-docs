@@ -40,7 +40,11 @@ def default_pass_manager(
     )
     manager.add_stage(
         "identifier_collector",
-        VisitorStage(lambda context: IdentifierCollector(identifiers=context.identifiers)),
+        VisitorStage(
+            lambda context: IdentifierCollector(
+                identifiers=context.identifiers, unique_names=context.unique_names
+            )
+        ),
     )
     manager.add_stage("directives_collector", DirectivesCollectorStage())
     manager.add_stage(

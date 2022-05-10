@@ -1,7 +1,19 @@
 from starkware.cairo.lang.compiler.preprocessor.preprocessor_test_utils import PRIME, preprocess_str
+from starkware.cairo.lang.compiler.unique_labels import UniqueNameProvider, UniqueNameKind
 
 
-def test_unique_label_creator():
+def test_next():
+    provider = UniqueNameProvider()
+    assert provider.next(UniqueNameKind.Label) == "$Lbl0"
+    assert provider.next(UniqueNameKind.Var) == "$Var1"
+
+
+def test_is_name_unique():
+    name = UniqueNameProvider().next(UniqueNameKind.Func)
+    assert UniqueNameProvider.is_name_unique(name)
+
+
+def test_code_which_uses_unique_labels_compiles():
     program = preprocess_str(
         code="""
 namespace B:
