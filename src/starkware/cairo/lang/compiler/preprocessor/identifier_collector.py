@@ -35,7 +35,7 @@ from starkware.cairo.lang.compiler.identifier_manager import IdentifierError, Id
 from starkware.cairo.lang.compiler.preprocessor.local_variables import N_LOCALS_CONSTANT
 from starkware.cairo.lang.compiler.preprocessor.preprocessor_error import PreprocessorError
 from starkware.cairo.lang.compiler.scoped_name import ScopedName
-from starkware.cairo.lang.compiler.unique_labels import new_unique_label
+from starkware.cairo.lang.compiler.unique_labels import unique_name
 
 
 def _get_identifier(obj):
@@ -213,8 +213,8 @@ class IdentifierCollector(Visitor):
     def visit_CodeElementIf(self, obj: CodeElementIf):
         assert obj.label_neq is None
         assert obj.label_end is None
-        obj.label_neq = new_unique_label()
-        obj.label_end = new_unique_label()
+        obj.label_neq = unique_name()
+        obj.label_end = unique_name()
 
         self.add_future_identifier(
             name=self.current_scope + obj.label_neq,
