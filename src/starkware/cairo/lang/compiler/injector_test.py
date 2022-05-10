@@ -1,5 +1,3 @@
-import pytest
-
 from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeBlock,
     CodeElementFunction,
