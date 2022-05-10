@@ -35,7 +35,7 @@ from starkware.cairo.lang.compiler.identifier_manager import IdentifierError, Id
 from starkware.cairo.lang.compiler.preprocessor.local_variables import N_LOCALS_CONSTANT
 from starkware.cairo.lang.compiler.preprocessor.preprocessor_error import PreprocessorError
 from starkware.cairo.lang.compiler.scoped_name import ScopedName
-from starkware.cairo.lang.compiler.unique_labels import UniqueNameProvider, UniqueNameKind
+from starkware.cairo.lang.compiler.unique_name_provider import UniqueNameProvider, UniqueNameKind
 
 
 def _get_identifier(obj):

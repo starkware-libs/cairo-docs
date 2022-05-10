@@ -1,5 +1,5 @@
 from starkware.cairo.lang.compiler.preprocessor.preprocessor_test_utils import PRIME, preprocess_str
-from starkware.cairo.lang.compiler.unique_labels import UniqueNameProvider, UniqueNameKind
+from starkware.cairo.lang.compiler.unique_name_provider import UniqueNameProvider, UniqueNameKind
 
 
 def test_next():

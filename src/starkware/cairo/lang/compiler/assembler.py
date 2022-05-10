@@ -7,7 +7,7 @@ from starkware.cairo.lang.compiler.instruction_builder import build_instruction
 from starkware.cairo.lang.compiler.preprocessor.preprocessor import PreprocessedProgram
 from starkware.cairo.lang.compiler.program import CairoHint, Program
 from starkware.cairo.lang.compiler.scoped_name import ScopedName
-from starkware.cairo.lang.compiler.unique_labels import UniqueNameProvider
+from starkware.cairo.lang.compiler.unique_name_provider import UniqueNameProvider
 
 
 def assemble(

@@ -7,7 +7,7 @@ from starkware.cairo.lang.compiler.error_handling import Location
 from starkware.cairo.lang.compiler.identifier_manager import IdentifierManager
 from starkware.cairo.lang.compiler.preprocessor.preprocessor import PreprocessedProgram
 from starkware.cairo.lang.compiler.scoped_name import ScopedName
-from starkware.cairo.lang.compiler.unique_labels import UniqueNameProvider
+from starkware.cairo.lang.compiler.unique_name_provider import UniqueNameProvider
 
 
 @dataclasses.dataclass
