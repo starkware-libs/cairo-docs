@@ -2,18 +2,22 @@ from starkware.cairo.lang.compiler.preprocessor.preprocessor_test_utils import P
 from starkware.cairo.lang.compiler.unique_name_provider import UniqueNameProvider, UniqueNameKind
 
 
-def test_next():
+def test_unique_name_provider_next():
     provider = UniqueNameProvider()
-    assert provider.next(UniqueNameKind.Label) == "$Lbl0"
-    assert provider.next(UniqueNameKind.Var) == "$Var1"
+    assert provider.next(UniqueNameKind.Label) == "$lbl0"
+    assert provider.next(UniqueNameKind.Var) == "$var1"
+    assert provider.next(UniqueNameKind.Var) == "$var2"
 
 
 def test_is_name_unique():
-    name = UniqueNameProvider().next(UniqueNameKind.Func)
-    assert UniqueNameProvider.is_name_unique(name)
+    assert UniqueNameProvider.is_name_unique("$lbl1")
+    assert not UniqueNameProvider.is_name_unique("x")
+
+    # This is false positive, but we are okay to live with it.
+    assert UniqueNameProvider.is_name_unique("$Hello")
 
 
-def test_code_which_uses_unique_labels_compiles():
+def test_code_that_uses_unique_name_provider_compiles():
     program = preprocess_str(
         code="""
 namespace B:

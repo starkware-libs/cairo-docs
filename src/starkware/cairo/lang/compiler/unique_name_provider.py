@@ -4,34 +4,32 @@ from enum import Enum
 
 @enum.unique
 class UniqueNameKind(Enum):
-    Label = "Lbl"
-    Func = "Func"
-    Var = "Var"
+    Label = "lbl"
+    Func = "func"
+    Var = "var"
 
 
 class UniqueNameProvider:
     """
     Provides new compilation-unique names.
 
-    The only instance of this class should be maintained by ``PassManagerContext`` and use this
-    object to obtain names for any anonymous code elements like labels, variables or functions.
+    The only instance of this class should be maintained by ``PassManagerContext``.
+    It can be used to obtain names for anonymous code elements like labels, variables and functions.
     """
 
-    # Dollar is not a valid identifier character in Cairo, thus we can be sure,
-    # nobody will try to create colliding identifiers in source code.
+    # Dollar is not a valid identifier character in Cairo, thus we can be sure that
+    # the name won't collide with identifiers in source code.
     PREFIX = "$"
 
-    counter: int
-
     def __init__(self):
-        self.counter = 0
+        self.counter: int = 0
 
     def next(self, kind: UniqueNameKind) -> str:
         """
-        Returns new compilation-unique name which is guaranteed to be impossible to declare
+        Returns a new compilation-unique name that is guaranteed to be impossible to declare
         by source code.
 
-        The ``kind`` enum is only used to denote purpose of generated names when debugging.
+        The ``kind`` enum is only used to denote the purpose of generated names.
         All unique names, no matter what kind, use one shared global counter.
         """
         counter = self.counter
