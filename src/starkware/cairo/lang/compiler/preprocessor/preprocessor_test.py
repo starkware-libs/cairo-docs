@@ -4452,64 +4452,6 @@ file:?:?: Hints before "using" statements are not allowed.
     )
 
 
-def test_for_unused_iterator():
-    code = """
-func main():
-    for _i in range(7, 24, 2):
-        [ap] = 42; ap++
-        [ap] = 43; ap++
-    end
-    [ap] = 1234; ap++
-    ret
-end
-"""
-    program = preprocess_str(code=code, prime=PRIME)
-    assert (
-        program.format()
-        == """\
-[ap] = 7; ap++
-call rel 5
-[ap] = 1234; ap++
-ret
-[ap] = [fp + (-3)] + (-24); ap++
-jmp rel 11 if [ap + (-1)] != 0
-[ap] = 42; ap++
-[ap] = 43; ap++
-[ap] = [fp + (-3)] + 2; ap++
-call rel -10
-ret
-ret
-"""
-    )
-
-
-def test_for_range_backward():
-    code = """
-func main():
-    for _i in range(24, -7, -2):
-        [ap] = 42; ap++
-    end
-    ret
-end
-"""
-    program = preprocess_str(code=code, prime=PRIME)
-    assert (
-        program.format()
-        == """\
-[ap] = 24; ap++
-call rel 3
-ret
-[ap] = [fp + (-3)] + 7; ap++
-jmp rel 9 if [ap + (-1)] != 0
-[ap] = 42; ap++
-[ap] = [fp + (-3)] + (-2); ap++
-call rel -8
-ret
-ret
-"""
-    )
-
-
 def test_for_const():
     code = """
 func main():
@@ -4529,11 +4471,78 @@ call rel 5
 [ap] = 1234; ap++
 ret
 [ap] = [fp + (-3)] + (-5); ap++
-jmp rel 9 if [ap + (-1)] != 0
+jmp rel 3 if [ap + (-1)] != 0
+ret
 [ap] = [fp + (-3)] * 456
 [ap] = [fp + (-3)] + 1; ap++
-call rel -8
+call rel -9
 ret
+"""
+    )
+
+
+def test_for_typed_iterator_invalid_cast():
+    verify_exception(
+        """
+func main():
+    for i : (felt, felt) in range(1, 7, 2):
+        let x = i[0]
+    end
+    ret
+end
+""",
+        """
+file:?:?: Cannot cast 'felt' to '(felt, felt)'.
+    for i : (felt, felt) in range(1, 7, 2):
+        ^**************^
+""",
+        exc_type=CairoTypeError,
+    )
+
+
+def test_for_slice():
+    code = """
+func alloc() -> (ptr : felt*):
+    %{ memory[ap] = segments.add() %}
+    ap += 1
+    return (ptr=cast([ap - 1], felt*))
+end
+
+struct Point:
+    member x : felt
+    member y : felt
+end
+
+func main():
+    let array : Point* = alloc()
+    for i : Point* in slice(array, 123, Point.SIZE):
+        assert i.x = 456
+        assert i.y = 567
+    end
+    ret
+end
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+        program.format()
+        == """\
+%{ memory[ap] = segments.add() %}
+ap += 1
+ret
+call rel -3
+[ap] = [ap + (-1)] + 246; ap++
+call rel 3
+ret
+[ap] = [fp + (-4)] - [fp + (-3)]; ap++
+jmp rel 3 if [ap + (-1)] != 0
+ret
+[ap] = 456; ap++
+[[fp + (-4)]] = [ap + (-1)]
+[ap] = 567; ap++
+[[fp + (-4)] + 1] = [ap + (-1)]
+[ap] = [fp + (-4)] + 2; ap++
+[ap] = [fp + (-3)]; ap++
+call rel -13
 ret
 """
     )
@@ -4560,31 +4569,23 @@ ap += 1
 call rel 3
 ret
 [ap] = [fp + (-3)] + (-5); ap++
-jmp rel 9 if [ap + (-1)] != 0
+jmp rel 3 if [ap + (-1)] != 0
+ret
 [ap] = [fp + (-3)] * 456
 [ap] = [fp + (-3)] + 1; ap++
-call rel -8
-ret
+call rel -9
 ret
 """
     )
 
 
-# TODO(mkaput, 22/04/2022): Implement using references as range() arguments.
-# TODO(mkaput, 22/04/2022): Implement using references in loop body.
-
-
-def test_nested_for():
+def test_for_range_reference_stop():
     code = """
 func main():
-    for i in range(100):
-        let z = i
-        for j in range(101):
-            let y = j
-            for k in range(102):
-                let x = k
-            end
-        end
+    alloc_locals
+    local stop = 5
+    for i in range(stop), local(stop):
+        [ap] = i * 456
     end
     ret
 end
@@ -4593,30 +4594,219 @@ end
     assert (
         program.format()
         == """\
+ap += 1
+[fp] = 5
+[ap] = 0; ap++
+[ap] = [fp]; ap++
+call rel 3
+ret
+[ap] = [fp + (-4)] - [fp + (-3)]; ap++
+jmp rel 3 if [ap + (-1)] != 0
+ret
+[ap] = [fp + (-4)] * 456
+[ap] = [fp + (-4)] + 1; ap++
+[ap] = [fp + (-3)]; ap++
+call rel -9
+ret
+"""
+    )
+
+
+def test_for_range_reference_step():
+    code = """
+func main():
+    alloc_locals
+    local step = 5
+    for i in range(0, 150, step), local(step):
+        [ap] = i * 456
+    end
+    ret
+end
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+        program.format()
+        == """\
+ap += 1
+[fp] = 5
+[ap] = 0; ap++
+[ap] = [fp]; ap++
+call rel 3
+ret
+[ap] = [fp + (-4)] + (-150); ap++
+jmp rel 3 if [ap + (-1)] != 0
+ret
+[ap] = [fp + (-4)] * 456
+[ap] = [fp + (-4)] + [fp + (-3)]; ap++
+[ap] = [fp + (-3)]; ap++
+call rel -9
+ret
+"""
+    )
+
+
+def test_for_reference_body_vars():
+    code = """
+func main():
+    alloc_locals
+    local x = 10
+    local y = 11
+    for i in range(5), local(x, y):
+        tempvar f = x * y + 456
+    end
+    ret
+end
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+        program.format()
+        == """\
+ap += 2
+[fp] = 10
+[fp + 1] = 11
+[ap] = 0; ap++
+[ap] = [fp]; ap++
+[ap] = [fp + 1]; ap++
+call rel 3
+ret
+[ap] = [fp + (-5)] + (-5); ap++
+jmp rel 3 if [ap + (-1)] != 0
+ret
+[ap] = [fp + (-4)] * [fp + (-3)]; ap++
+[ap] = [ap + (-1)] + 456; ap++
+[ap] = [fp + (-5)] + 1; ap++
+[ap] = [fp + (-4)]; ap++
+[ap] = [fp + (-3)]; ap++
+call rel -12
+ret
+"""
+    )
+
+
+def test_for_range_unbound_stop():
+    verify_exception(
+        """
+func main():
+    alloc_locals
+    local stop = 5
+    for i in range(stop):
+        [ap] = i * 456
+    end
+    ret
+end
+""",
+        """
+file:?:?: Unknown identifier 'stop'.
+    for i in range(stop):
+                   ^**^
+""",
+    )
+
+
+def test_for_range_unbound_step():
+    verify_exception(
+        """
+func main():
+    alloc_locals
+    local step = 2
+    for i in range(0, 5, step):
+        [ap] = i * 456
+    end
+    ret
+end
+""",
+        """
+file:?:?: Unknown identifier 'step'.
+    for i in range(0, 5, step):
+                         ^**^
+""",
+    )
+
+
+def test_for_unbound_body_var():
+    verify_exception(
+        """
+func main():
+    alloc_locals
+    local x = 2
+    for i in range(5):
+        [ap] = x; ap++
+    end
+    ret
+end
+""",
+        """
+file:?:?: Unknown identifier 'x'.
+        [ap] = x; ap++
+               ^
+""",
+    )
+
+
+def test_for_compiles_same_independent_of_binding_layout():
+    code_a = """
+func main():
+    alloc_locals
+    local x = 5
+    local y = 2
+    for i in range(10), local(x, y):
+        tempvar f = i * x + y
+    end
+    ret
+end
+"""
+    code_b = """
+func main():
+    alloc_locals
+    local x = 5
+    local y = 2
+    for i in range(10), local(x), local(y):
+        tempvar f = i * x + y
+    end
+    ret
+end
+"""
+    assert (
+        preprocess_str(code=code_a, prime=PRIME).format()
+        == preprocess_str(code=code_b, prime=PRIME).format()
+    )
+
+
+def test_for_access_implicit_arguments():
+    code = """
+func write{implicit_ptr : felt*}(value):
+    let implicit = implicit_ptr
+    let implicit_ptr = implicit_ptr + 1
+    implicit = value
+    ret
+end
+
+func foo{implicit_ptr : felt*}():
+    for i in range(5):
+        write(i)
+    end
+    ret
+end
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+        program.format()
+        == """\
+[fp + (-4)] = [fp + (-3)]
+ret
+[ap] = [fp + (-3)]; ap++
 [ap] = 0; ap++
 call rel 3
 ret
-[ap] = [fp + (-3)] + (-100); ap++
-jmp rel 11 if [ap + (-1)] != 0
-[ap] = 0; ap++
-call rel 8
+[ap] = [fp + (-3)] + (-5); ap++
+jmp rel 4 if [ap + (-1)] != 0
+[ap] = [fp + (-4)]; ap++
+ret
+[ap] = [fp + (-4)]; ap++
+[ap] = [fp + (-3)]; ap++
+call rel -16
 [ap] = [fp + (-3)] + 1; ap++
-call rel -10
-ret
-ret
-[ap] = [fp + (-3)] + (-101); ap++
-jmp rel 11 if [ap + (-1)] != 0
-[ap] = 0; ap++
-call rel 8
-[ap] = [fp + (-3)] + 1; ap++
-call rel -10
-ret
-ret
-[ap] = [fp + (-3)] + (-102); ap++
-jmp rel 7 if [ap + (-1)] != 0
-[ap] = [fp + (-3)] + 1; ap++
-call rel -6
-ret
+call rel -12
 ret
 """
     )
@@ -4641,11 +4831,11 @@ call rel 3
 ret
 ap += 1
 [ap] = [fp + (-3)] + (-5); ap++
-jmp rel 8 if [ap + (-1)] != 0
+jmp rel 3 if [ap + (-1)] != 0
+ret
 [fp] = [fp + (-3)]
 [ap] = [fp + (-3)] + 1; ap++
-call rel -9
-ret
+call rel -10
 ret
 """
     )

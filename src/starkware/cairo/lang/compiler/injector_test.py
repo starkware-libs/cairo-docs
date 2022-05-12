@@ -1,3 +1,5 @@
+import pytest
+
 from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeBlock,
     CodeElementFunction,
@@ -7,6 +9,13 @@ from starkware.cairo.lang.compiler.ast.code_elements import (
 from starkware.cairo.lang.compiler.injector import inject_code_elements
 from starkware.cairo.lang.compiler.parser import parse
 from starkware.cairo.lang.compiler.scoped_name import ScopedName
+from starkware.cairo.lang.compiler.unique_labels import unique_labelling_context
+
+
+@pytest.fixture(autouse=True)
+def reset_unique_labels_context():
+    with unique_labelling_context():
+        yield
 
 
 def test_injector():
