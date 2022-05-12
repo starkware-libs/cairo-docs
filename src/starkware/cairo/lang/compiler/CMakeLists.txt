@@ -45,6 +45,7 @@ python_lib(cairo_compile_lib
     offset_reference.py
     parser_transformer.py
     parser.py
+    preprocessor/__init__.py
     preprocessor/auxiliary_info_collector.py
     preprocessor/compound_expressions.py
     preprocessor/default_pass_manager.py
@@ -53,6 +54,7 @@ python_lib(cairo_compile_lib
     preprocessor/flow.py
     preprocessor/identifier_aware_visitor.py
     preprocessor/identifier_collector.py
+    preprocessor/if_labels.py
     preprocessor/local_variables.py
     preprocessor/memento.py
     preprocessor/pass_manager.py
@@ -62,7 +64,6 @@ python_lib(cairo_compile_lib
     preprocessor/preprocessor.py
     preprocessor/reg_tracking.py
     preprocessor/struct_collector.py
-    preprocessor/unique_labels.py
     program.py
     proxy_identifier_manager.py
     references.py
@@ -73,6 +74,7 @@ python_lib(cairo_compile_lib
     type_system_visitor.py
     type_system.py
     type_utils.py
+    unique_name_provider.py
 
     LIBS
     cairo_constants_lib
