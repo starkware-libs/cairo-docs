@@ -60,29 +60,29 @@ class ForLoopLoweringVisitor(CodeElementInjectingVisitor):
         in_clause = fetch_in_clause(elm)
         bound_identifiers = fetch_bound_identifiers(elm)
 
-        low = InClauseLowering(in_clause)
+        lowering = InClauseLowering(in_clause)
 
         iterator_function_identifier = ExprIdentifier(
             name=new_unique_label(), location=elm.location
         )
 
-        iterator_types = low.generator.declare_iterator()
+        iterator_types = lowering.generator.declare_iterator()
         iterator_variables = [
-            ExprIdentifier(name=new_unique_label(), location=low.generator_location)
+            ExprIdentifier(name=new_unique_label(), location=lowering.generator_location)
             for _ in iterator_types
         ]
 
         envelope = _build_envelope(
-            elm,
-            low,
+            elm=elm,
+            lowering=lowering,
             iterator_function_identifier=iterator_function_identifier,
             iterator_variables=iterator_variables,
             bound_identifiers=bound_identifiers,
         )
 
         iterator_function = _build_iterator_function(
-            elm,
-            low,
+            elm=elm,
+            lowering=lowering,
             iterator_function_identifier=iterator_function_identifier,
             iterator_variables=iterator_variables,
             iterator_types=iterator_types,
@@ -116,17 +116,17 @@ def _expr_assignments_from_typed_identifiers(
 
 def _build_envelope(
     elm: CodeElementFor,
-    low: InClauseLowering,
+    lowering: InClauseLowering,
     iterator_function_identifier: ExprIdentifier,
     iterator_variables: List[ExprIdentifier],
     bound_identifiers: List[TypedIdentifier],
 ) -> CodeBlock:
-    iterator_init, iterator_exprs = low.generator.init_envelope_iterator()
+    iterator_init, iterator_exprs = lowering.generator.init_envelope_iterator()
     iterator_args = [
         ExprAssignment(
             identifier=identifier,
             expr=expr,
-            location=low.iter_identifier.location,
+            location=lowering.iter_identifier.location,
         )
         for identifier, expr in zip(iterator_variables, iterator_exprs)
     ]
@@ -148,7 +148,7 @@ def _build_envelope(
 
 def _build_iterator_function(
     elm: CodeElementFor,
-    low: InClauseLowering,
+    lowering: InClauseLowering,
     iterator_function_identifier: ExprIdentifier,
     iterator_variables: List[ExprIdentifier],
     iterator_types: List[CairoType],
@@ -159,7 +159,7 @@ def _build_iterator_function(
         TypedIdentifier(
             identifier=identifier,
             expr_type=type,
-            location=low.iter_identifier.location,
+            location=lowering.iter_identifier.location,
         )
         for identifier, type in zip(iterator_variables, iterator_types)
     ]
@@ -168,16 +168,16 @@ def _build_iterator_function(
         location=elm.location,
     )
 
-    condition_init, condition_expr = low.generator.condition(*iterator_variables)
-    next_init, next_exprs = low.generator.increment_iterator(*iterator_variables)
-    bind_iter_block = _bind_iter(low, iterator_variables)
+    condition_init, condition_expr = lowering.generator.condition(*iterator_variables)
+    next_init, next_exprs = lowering.generator.increment_iterator(*iterator_variables)
+    bind_iter_block = _bind_iter(lowering, iterator_variables)
     body_block_init, body_block = _prepare_body(elm.code_block)
 
     iterator_call_args = [
         ExprAssignment(
             identifier=identifier,
             expr=expr,
-            location=low.iter_identifier.location,
+            location=lowering.iter_identifier.location,
         )
         for identifier, expr in zip(iterator_variables, next_exprs)
     ]
@@ -203,12 +203,12 @@ def _build_iterator_function(
         + CodeBlock.singleton(
             CodeElementIf(
                 condition=condition_expr,
-                main_code_block=(bind_iter_block + body_block + next_init + tail_call_block),
-                else_code_block=(
+                main_code_block=(
                     CodeBlock.singleton(
                         CodeElementReturn(exprs=[], location=elm.location),
                     )
                 ),
+                else_code_block=(bind_iter_block + body_block + next_init + tail_call_block),
                 location=elm.location,
             ),
         )
@@ -225,16 +225,16 @@ def _build_iterator_function(
     )
 
 
-def _bind_iter(low: InClauseLowering, iterator_variables: List[ExprIdentifier]) -> CodeBlock:
-    bound_expr = low.generator.bind_iterator(*iterator_variables)
+def _bind_iter(lowering: InClauseLowering, iterator_variables: List[ExprIdentifier]) -> CodeBlock:
+    bound_expr = lowering.generator.bind_iterator(*iterator_variables)
 
     # We only have to cast if user explicitly provided iterator type
-    if low.iter_identifier.expr_type is not None:
+    if lowering.iter_identifier.expr_type is not None:
         cast_expr = ExprCast(
             expr=bound_expr,
-            dest_type=low.iter_identifier.expr_type,
+            dest_type=lowering.iter_identifier.expr_type,
             notes=Notes(),
-            location=low.iter_identifier.location,
+            location=lowering.iter_identifier.location,
         )
     else:
         cast_expr = bound_expr
@@ -242,7 +242,7 @@ def _bind_iter(low: InClauseLowering, iterator_variables: List[ExprIdentifier]) 
     return CodeBlock.from_code_elements(
         [
             CodeElementReference(
-                typed_identifier=low.iter_identifier,
+                typed_identifier=lowering.iter_identifier,
                 expr=cast_expr,
             )
         ]

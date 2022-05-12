@@ -73,13 +73,8 @@ class CodeElementInjectingVisitor(ABC, Visitor):
                 current_injection_scope = self._injection_scopes[-1]
 
                 for func in current_injection_scope:
-                    code_elements.append(
-                        CommentedCodeElement(
-                            code_elm=func,
-                            comment=None,
-                            location=getattr(elm, "location", None),
-                        )
-                    )
+                    visited_func = self.visit(func)
+                    code_elements.append(CommentedCodeElement(code_elm=visited_func, comment=None))
 
                 current_injection_scope.clear()
 
