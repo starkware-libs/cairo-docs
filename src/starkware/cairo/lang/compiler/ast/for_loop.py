@@ -13,6 +13,7 @@ from starkware.cairo.lang.compiler.ast.formatting_utils import (
 from starkware.cairo.lang.compiler.ast.node import AstNode
 from starkware.cairo.lang.compiler.ast.notes import Notes, NoteListField
 from starkware.cairo.lang.compiler.ast.rvalue import RvalueFuncCall
+from starkware.cairo.lang.compiler.ast.types import TypedIdentifier
 from starkware.cairo.lang.compiler.error_handling import Location
 
 
@@ -63,7 +64,12 @@ class ForClausesList(AstNode):
 
 
 @dataclasses.dataclass
-class ForGeneratorRange(RvalueFuncCall):
+class ForGenerator(RvalueFuncCall, ABC):
+    pass
+
+
+@dataclasses.dataclass
+class ForGeneratorRange(ForGenerator):
     def __post_init__(self):
         assert self.func_ident.name == "range"
         assert self.implicit_arguments is None
@@ -79,9 +85,25 @@ class ForGeneratorRange(RvalueFuncCall):
 
 
 @dataclasses.dataclass
+class ForGeneratorSlice(ForGenerator):
+    def __post_init__(self):
+        assert self.func_ident.name == "slice"
+        assert self.implicit_arguments is None
+
+    @classmethod
+    def from_arguments(cls, arguments: ArgList, **kwargs) -> "ForGeneratorSlice":
+        return cls(
+            func_ident=ExprIdentifier(name="slice"),
+            arguments=arguments,
+            implicit_arguments=None,
+            **kwargs,
+        )
+
+
+@dataclasses.dataclass
 class ForClauseIn(ForClause):
-    identifier: ExprIdentifier
-    generator: ForGeneratorRange
+    identifier: TypedIdentifier
+    generator: ForGenerator
     location: Optional[Location] = LocationField
 
     def get_children(self) -> Sequence[Optional[AstNode]]:

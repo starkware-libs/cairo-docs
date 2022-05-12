@@ -72,6 +72,7 @@ from starkware.cairo.lang.compiler.ast.for_loop import (
     ForGeneratorRange,
     ForClausesList,
     ForClauseBind,
+    ForGeneratorSlice,
 )
 from starkware.cairo.lang.compiler.ast.instructions import (
     AddApInstruction,
@@ -762,28 +763,34 @@ class ParserTransformer(Transformer):
         return ForClauseBind(identifiers=identifiers, location=self.meta2loc(meta))
 
     @v_args(inline=True, meta=True)
-    def for_clause_in(self, meta, identifier: ExprIdentifier, generator: ForGeneratorRange):
+    def for_clause_in(self, meta, identifier: TypedIdentifier, generator: ForGeneratorRange):
         return ForClauseIn(identifier=identifier, generator=generator, location=self.meta2loc(meta))
 
     @v_args(inline=True)
     def for_generator(self, function_call: RvalueFuncCall):
-        if function_call.implicit_arguments is not None:
-            raise ParserError(
-                "Implicit arguments are not allowed in this context.",
-                location=function_call.implicit_arguments.location,
-            )
+        known_generators = {
+            "range": ForGeneratorRange,
+            "slice": ForGeneratorSlice,
+        }
 
-        if function_call.func_ident.name == "range":
-            return ForGeneratorRange(
+        if function_call.func_ident.name in known_generators:
+            if function_call.implicit_arguments is not None:
+                raise ParserError(
+                    "Implicit arguments are not allowed in this context.",
+                    location=function_call.implicit_arguments.location,
+                )
+
+            return known_generators[function_call.func_ident.name](
                 func_ident=function_call.func_ident,
                 arguments=function_call.arguments,
                 implicit_arguments=None,
                 location=function_call.location,
             )
         else:
+            known_generators_names = ", ".join(f"'{g}'" for g in known_generators.keys())
             raise ParserError(
                 f"Unknown for loop generator '{function_call.func_ident.name}'. "
-                "Only 'range' is supported here.",
+                f"Only {known_generators_names} are supported here.",
                 location=function_call.func_ident.location,
             )
 

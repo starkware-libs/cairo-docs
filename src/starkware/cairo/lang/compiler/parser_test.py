@@ -10,6 +10,7 @@ from starkware.cairo.lang.compiler.ast.cairo_types import (
     TypeFelt,
     TypePointer,
     TypeTuple,
+    TypeStruct,
 )
 from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeElementFor,
@@ -35,6 +36,7 @@ from starkware.cairo.lang.compiler.ast.for_loop import (
     ForGeneratorRange,
     ForClausesList,
     ForClauseBind,
+    ForGeneratorSlice,
 )
 from starkware.cairo.lang.compiler.ast.formatting_utils import FormattingError
 from starkware.cairo.lang.compiler.ast.instructions import (
@@ -62,6 +64,7 @@ from starkware.cairo.lang.compiler.parser import (
 )
 from starkware.cairo.lang.compiler.parser_test_utils import verify_exception
 from starkware.cairo.lang.compiler.parser_transformer import ParserContext, ParserError
+from starkware.cairo.lang.compiler.scoped_name import ScopedName
 from starkware.python.utils import safe_zip
 
 
@@ -932,7 +935,7 @@ def test_pointer():
 
 def test_for_range():
     source = """\
-for i in range(0, 10, step=2):
+for i : felt in range(0, 10, step=2):
     f()
 end\
 """
@@ -941,7 +944,9 @@ end\
     assert res.clauses == ForClausesList.from_clauses(
         [
             ForClauseIn(
-                identifier=ExprIdentifier(name="i"),
+                identifier=TypedIdentifier(
+                    identifier=ExprIdentifier(name="i"), expr_type=TypeFelt()
+                ),
                 generator=ForGeneratorRange.from_arguments(
                     ArgList.from_args(
                         [
@@ -949,6 +954,42 @@ end\
                             ExprAssignment(identifier=None, expr=ExprConst(val=10)),
                             ExprAssignment(
                                 identifier=ExprIdentifier(name="step"), expr=ExprConst(val=2)
+                            ),
+                        ]
+                    )
+                ),
+            )
+        ]
+    )
+    assert res.format(allowed_line_length=100) == source
+
+
+def test_for_slice():
+    source = """\
+for i : MyStruct* in slice(arr, 10, MyStruct.SIZE):
+    f()
+end\
+"""
+    res = parse_code_element(source)
+    assert isinstance(res, CodeElementFor)
+    assert res.clauses == ForClausesList.from_clauses(
+        [
+            ForClauseIn(
+                identifier=TypedIdentifier(
+                    identifier=ExprIdentifier(name="i"),
+                    expr_type=TypePointer(
+                        pointee=TypeStruct(
+                            scope=ScopedName(path=("MyStruct",)), is_fully_resolved=False
+                        )
+                    ),
+                ),
+                generator=ForGeneratorSlice.from_arguments(
+                    ArgList.from_args(
+                        [
+                            ExprAssignment(identifier=None, expr=ExprIdentifier(name="arr")),
+                            ExprAssignment(identifier=None, expr=ExprConst(val=10)),
+                            ExprAssignment(
+                                identifier=None, expr=ExprIdentifier(name="MyStruct.SIZE")
                             ),
                         ]
                     )
@@ -997,7 +1038,7 @@ def test_for_with_unknown_generator():
     verify_exception(
         "for _ in foobar():\n    f()\nend",
         """
-file:?:?: Unknown for loop generator 'foobar'. Only 'range' is supported here.
+file:?:?: Unknown for loop generator 'foobar'. Only 'range', 'slice' are supported here.
 for _ in foobar():
          ^****^
 """,
