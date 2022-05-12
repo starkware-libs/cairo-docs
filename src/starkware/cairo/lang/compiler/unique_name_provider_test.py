@@ -12,5 +12,5 @@ def test_is_name_unique():
     assert UniqueNameProvider.is_name_unique("$lbl1")
     assert not UniqueNameProvider.is_name_unique("x")
 
-    # This is false positive, but we are okay to live with it.
+    # This is an (acceptable) false positive.
     assert UniqueNameProvider.is_name_unique("$Hello")
