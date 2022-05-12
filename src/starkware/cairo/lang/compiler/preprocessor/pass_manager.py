@@ -7,6 +7,7 @@ from starkware.cairo.lang.compiler.error_handling import Location
 from starkware.cairo.lang.compiler.identifier_manager import IdentifierManager
 from starkware.cairo.lang.compiler.preprocessor.preprocessor import PreprocessedProgram
 from starkware.cairo.lang.compiler.scoped_name import ScopedName
+from starkware.cairo.lang.compiler.unique_labels import unique_labelling_context
 
 
 @dataclasses.dataclass
@@ -51,8 +52,9 @@ class PassManager:
         self.stage_names: Set[str] = set()
 
     def run(self, context: PassManagerContext):
-        for _, stage in self.stages:
-            stage.run(context)
+        with unique_labelling_context():
+            for _, stage in self.stages:
+                stage.run(context)
 
     def get_stage_index(self, name: str):
         assert name in self.stage_names

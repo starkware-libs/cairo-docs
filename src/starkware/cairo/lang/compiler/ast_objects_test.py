@@ -7,6 +7,13 @@ from starkware.cairo.lang.compiler.ast.formatting_utils import (
     set_one_item_per_line,
 )
 from starkware.cairo.lang.compiler.parser import parse_code_element, parse_expr, parse_file
+from starkware.cairo.lang.compiler.unique_labels import unique_labelling_context
+
+
+@pytest.fixture(autouse=True)
+def reset_unique_labels_context():
+    with unique_labelling_context():
+        yield
 
 
 def test_format_parentheses():

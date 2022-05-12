@@ -4452,64 +4452,6 @@ file:?:?: Hints before "using" statements are not allowed.
     )
 
 
-def test_for_unused_iterator():
-    code = """
-func main():
-    for _i in range(7, 24, 2):
-        [ap] = 42; ap++
-        [ap] = 43; ap++
-    end
-    [ap] = 1234; ap++
-    ret
-end
-"""
-    program = preprocess_str(code=code, prime=PRIME)
-    assert (
-        program.format()
-        == """\
-[ap] = 7; ap++
-call rel 5
-[ap] = 1234; ap++
-ret
-[ap] = [fp + (-3)] + (-24); ap++
-jmp rel 11 if [ap + (-1)] != 0
-[ap] = 42; ap++
-[ap] = 43; ap++
-[ap] = [fp + (-3)] + 2; ap++
-call rel -10
-ret
-ret
-"""
-    )
-
-
-def test_for_range_backward():
-    code = """
-func main():
-    for _i in range(24, -7, -2):
-        [ap] = 42; ap++
-    end
-    ret
-end
-"""
-    program = preprocess_str(code=code, prime=PRIME)
-    assert (
-        program.format()
-        == """\
-[ap] = 24; ap++
-call rel 3
-ret
-[ap] = [fp + (-3)] + 7; ap++
-jmp rel 9 if [ap + (-1)] != 0
-[ap] = 42; ap++
-[ap] = [fp + (-3)] + (-2); ap++
-call rel -8
-ret
-ret
-"""
-    )
-
-
 def test_for_const():
     code = """
 func main():
@@ -4529,39 +4471,11 @@ call rel 5
 [ap] = 1234; ap++
 ret
 [ap] = [fp + (-3)] + (-5); ap++
-jmp rel 9 if [ap + (-1)] != 0
+jmp rel 3 if [ap + (-1)] != 0
+ret
 [ap] = [fp + (-3)] * 456
 [ap] = [fp + (-3)] + 1; ap++
-call rel -8
-ret
-ret
-"""
-    )
-
-
-def test_for_typed_iterator():
-    code = """
-func main():
-    for i : felt* in range(5):
-        assert [i] = 456
-    end
-    ret
-end
-"""
-    program = preprocess_str(code=code, prime=PRIME)
-    assert (
-        program.format()
-        == """\
-[ap] = 0; ap++
-call rel 3
-ret
-[ap] = [fp + (-3)] + (-5); ap++
-jmp rel 10 if [ap + (-1)] != 0
-[ap] = 456; ap++
-[[fp + (-3)]] = [ap + (-1)]
-[ap] = [fp + (-3)] + 1; ap++
 call rel -9
-ret
 ret
 """
     )
@@ -4586,6 +4500,54 @@ file:?:?: Cannot cast 'felt' to '(felt, felt)'.
     )
 
 
+def test_for_slice():
+    code = """
+func alloc() -> (ptr : felt*):
+    %{ memory[ap] = segments.add() %}
+    ap += 1
+    return (ptr=cast([ap - 1], felt*))
+end
+
+struct Point:
+    member x : felt
+    member y : felt
+end
+
+func main():
+    let array : Point* = alloc()
+    for i : Point* in slice(array, 123, Point.SIZE):
+        assert i.x = 456
+        assert i.y = 567
+    end
+    ret
+end
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+        program.format()
+        == """\
+%{ memory[ap] = segments.add() %}
+ap += 1
+ret
+call rel -3
+[ap] = [ap + (-1)] + 246; ap++
+call rel 3
+ret
+[ap] = [fp + (-4)] - [fp + (-3)]; ap++
+jmp rel 3 if [ap + (-1)] != 0
+ret
+[ap] = 456; ap++
+[[fp + (-4)]] = [ap + (-1)]
+[ap] = 567; ap++
+[[fp + (-4)] + 1] = [ap + (-1)]
+[ap] = [fp + (-4)] + 2; ap++
+[ap] = [fp + (-3)]; ap++
+call rel -13
+ret
+"""
+    )
+
+
 def test_for_range_reference_start():
     code = """
 func main():
@@ -4607,11 +4569,11 @@ ap += 1
 call rel 3
 ret
 [ap] = [fp + (-3)] + (-5); ap++
-jmp rel 9 if [ap + (-1)] != 0
+jmp rel 3 if [ap + (-1)] != 0
+ret
 [ap] = [fp + (-3)] * 456
 [ap] = [fp + (-3)] + 1; ap++
-call rel -8
-ret
+call rel -9
 ret
 """
     )
@@ -4639,12 +4601,12 @@ ap += 1
 call rel 3
 ret
 [ap] = [fp + (-4)] - [fp + (-3)]; ap++
-jmp rel 10 if [ap + (-1)] != 0
+jmp rel 3 if [ap + (-1)] != 0
+ret
 [ap] = [fp + (-4)] * 456
 [ap] = [fp + (-4)] + 1; ap++
 [ap] = [fp + (-3)]; ap++
-call rel -8
-ret
+call rel -9
 ret
 """
     )
@@ -4672,12 +4634,12 @@ ap += 1
 call rel 3
 ret
 [ap] = [fp + (-4)] + (-150); ap++
-jmp rel 9 if [ap + (-1)] != 0
+jmp rel 3 if [ap + (-1)] != 0
+ret
 [ap] = [fp + (-4)] * 456
 [ap] = [fp + (-4)] + [fp + (-3)]; ap++
 [ap] = [fp + (-3)]; ap++
-call rel -8
-ret
+call rel -9
 ret
 """
     )
@@ -4708,14 +4670,14 @@ ap += 2
 call rel 3
 ret
 [ap] = [fp + (-5)] + (-5); ap++
-jmp rel 12 if [ap + (-1)] != 0
+jmp rel 3 if [ap + (-1)] != 0
+ret
 [ap] = [fp + (-4)] * [fp + (-3)]; ap++
 [ap] = [ap + (-1)] + 456; ap++
 [ap] = [fp + (-5)] + 1; ap++
 [ap] = [fp + (-4)]; ap++
 [ap] = [fp + (-3)]; ap++
-call rel -11
-ret
+call rel -12
 ret
 """
     )
@@ -4837,14 +4799,14 @@ ret
 call rel 3
 ret
 [ap] = [fp + (-3)] + (-5); ap++
-jmp rel 11 if [ap + (-1)] != 0
+jmp rel 4 if [ap + (-1)] != 0
 [ap] = [fp + (-4)]; ap++
-[ap] = [fp + (-3)]; ap++
-call rel -14
-[ap] = [fp + (-3)] + 1; ap++
-call rel -10
 ret
 [ap] = [fp + (-4)]; ap++
+[ap] = [fp + (-3)]; ap++
+call rel -16
+[ap] = [fp + (-3)] + 1; ap++
+call rel -12
 ret
 """
     )

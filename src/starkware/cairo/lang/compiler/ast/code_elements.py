@@ -374,7 +374,7 @@ class CommentedCodeElement(AstNode):
 
 @dataclasses.dataclass
 class CodeBlock(AstNode):
-    code_elements: List[CommentedCodeElement]
+    code_elements: List[CommentedCodeElement] = dataclasses.field(default_factory=list)
 
     def format(self, allowed_line_length):
         code_elements = remove_redundant_empty_lines(self.code_elements)
@@ -624,9 +624,6 @@ class CodeElementIf(CodeElement):
 class CodeElementFor(CodeElement):
     clauses: ForClausesList
     code_block: CodeBlock
-    label_func: Optional[str] = None
-    label_if_neq: Optional[str] = None
-    label_if_end: Optional[str] = None
     location: Optional[Location] = LocationField
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
