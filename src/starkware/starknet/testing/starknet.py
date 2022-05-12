@@ -25,7 +25,7 @@ class Starknet:
 
         # l1_to_l2_nonce starts from 2**128 to avoid nonce collisions with
         # messages that were sent using starkware.starknet.testing.postman.Postman.
-        self.l1_to_l2_nonce = 2 ** 128
+        self.l1_to_l2_nonce = 2**128
 
     @classmethod
     async def empty(cls, general_config: Optional[StarknetGeneralConfig] = None) -> "Starknet":
@@ -38,13 +38,17 @@ class Starknet:
         contract_address_salt: Optional[CastableToAddressSalt] = None,
         cairo_path: Optional[List[str]] = None,
         constructor_calldata: Optional[List[int]] = None,
+        disable_hint_validation: bool = False,
     ) -> StarknetContract:
         assert (source is None) != (
             contract_def is None
         ), "Exactly one of source, contract_def should be supplied."
         if contract_def is None:
             contract_def = compile_starknet_files(
-                files=[source], debug_info=True, cairo_path=cairo_path
+                files=[source],
+                debug_info=True,
+                cairo_path=cairo_path,
+                disable_hint_validation=disable_hint_validation,
             )
             source = None
             cairo_path = None
