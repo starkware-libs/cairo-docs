@@ -1,0 +1,35 @@
+name: cairo-lang
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: python:3.7-slim-buster
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v2
+      - name: install dependencies
+        run: |
+          apt update && apt install -y make libgmp3-dev g++ python3-pip python3.7-dev python3.7-venv npm curl
+          pip install cmake==3.22
+          curl https://binaries.soliditylang.org/linux-amd64/solc-linux-amd64-v0.6.12+commit.27d51765 -o /usr/local/bin/solc-0.6.12
+          echo 'f6cb519b01dabc61cab4c184a3db11aa591d18151e362fcae850e42cffdfb09a /usr/local/bin/solc-0.6.12' | sha256sum --check
+          chmod +x /usr/local/bin/solc-0.6.12
+          npm install -g --unsafe-perm ganache-cli@6.12.2
+      - name: Build
+        run: ./build.sh
+      - name: Make all
+        working-directory: build/Release
+        run: make all -j8
+      - name: Unit test
+        run: ctest -V -j8
+      - name: Last tests
+        working-directory: ./
+        run: ./src/starkware/cairo/lang/package_test/run_test.sh
