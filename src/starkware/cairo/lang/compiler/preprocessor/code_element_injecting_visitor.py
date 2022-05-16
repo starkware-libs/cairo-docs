@@ -97,4 +97,4 @@ class CodeElementInjectingVisitor(ABC, Visitor):
             yield
         finally:
             injected_functions = self._injection_scopes.pop()
-            assert len(injected_functions) > 0, "Function injection failed to run completely."
+            assert len(injected_functions) == 0, "Function injection failed to run completely."
