@@ -1,6 +1,6 @@
 import dataclasses
 from abc import abstractmethod
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import Any, Dict, List, Optional, Sequence, Union, Iterable
 
 from starkware.cairo.lang.compiler.ast.aliased_identifier import AliasedIdentifier
 from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
@@ -374,7 +374,7 @@ class CommentedCodeElement(AstNode):
 
 @dataclasses.dataclass
 class CodeBlock(AstNode):
-    code_elements: List[CommentedCodeElement]
+    code_elements: List[CommentedCodeElement] = dataclasses.field(default_factory=list)
 
     def format(self, allowed_line_length):
         code_elements = remove_redundant_empty_lines(self.code_elements)
@@ -385,6 +385,30 @@ class CodeBlock(AstNode):
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return self.code_elements
+
+    def __add__(self, other: "CodeBlock") -> "CodeBlock":
+        assert isinstance(other, self.__class__)
+        return CodeBlock(code_elements=self.code_elements + other.code_elements)
+
+    @classmethod
+    def from_code_elements(cls, code_elements: Iterable[CodeElement]) -> "CodeBlock":
+        return cls(
+            code_elements=[
+                CommentedCodeElement(
+                    code_elm=elm,
+                    comment=None,
+                    location=getattr(elm, "location", None),
+                )
+                for elm in code_elements
+            ]
+        )
+
+    @classmethod
+    def singleton(cls, code_element: CodeElement) -> "CodeBlock":
+        """
+        Shortcut for ``from_code_elements([code_element])``.
+        """
+        return cls.from_code_elements([code_element])
 
 
 @dataclasses.dataclass
