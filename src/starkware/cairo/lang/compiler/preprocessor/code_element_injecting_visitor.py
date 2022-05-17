@@ -46,7 +46,7 @@ class CodeElementInjectingVisitor(ABC, Visitor):
         # An injection scope is a list of functions to be added to the AST upon finishing visiting
         # a Cairo module or any other meaningful elements.
         #
-        # We support nested Cairo module here, so we store injection scopes in a stack.
+        # We support nested Cairo modules here, so we store injection scopes in a stack.
         self._injection_scopes: List[List[CodeElementFunction]] = []
 
     def inject_function(self, func: CodeElementFunction):
