@@ -4449,3 +4449,20 @@ file:?:?: Hints before "using" statements are not allowed.
 ^***^
 """,
     )
+
+
+def test_if_with_complex_boolean_expressions_is_not_implemented():
+    verify_exception(
+        """
+let a = 0
+let b = 0
+if a == 0 and b == 0:
+    let c = a + b
+end
+""",
+        """
+file:?:?: Complex boolean expressions are not implemented yet.
+if a == 0 and b == 0:
+   ^***************^
+""",
+    )

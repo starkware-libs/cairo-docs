@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Sequence, Union
 
 from starkware.cairo.lang.compiler.ast.aliased_identifier import AliasedIdentifier
 from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
-from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr
+from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr, BoolProductExpr
 from starkware.cairo.lang.compiler.ast.cairo_types import CairoType
 from starkware.cairo.lang.compiler.ast.expr import (
     ExprAssignment,
@@ -560,7 +560,7 @@ class CodeElementWith(CodeElement):
 
 @dataclasses.dataclass
 class CodeElementIf(CodeElement):
-    condition: BoolExpr
+    condition: Union[BoolExpr, BoolProductExpr]
     main_code_block: CodeBlock
     else_code_block: Optional[CodeBlock]
     label_neq: Optional[str] = None
@@ -568,8 +568,7 @@ class CodeElementIf(CodeElement):
     location: Optional[Location] = LocationField
 
     def format(self, allowed_line_length):
-        cond_particles = ["if ", *self.condition.get_particles()]
-        cond_particles[-1] = cond_particles[-1] + ":"
+        cond_particles = ["if ", self.condition.get_particles(), ":"]
         code = particles_in_lines(
             particles=ParticleList(elements=cond_particles),
             config=ParticleFormattingConfig(

@@ -3,6 +3,7 @@ from typing import List
 import pytest
 
 from starkware.cairo.lang.compiler.ast.aliased_identifier import AliasedIdentifier
+from starkware.cairo.lang.compiler.ast.bool_expr import BoolProductExpr, BoolProductOp, BoolExpr
 from starkware.cairo.lang.compiler.ast.cairo_types import (
     CairoType,
     TypeCodeoffset,
@@ -14,6 +15,7 @@ from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeElementImport,
     CodeElementReference,
     CodeElementReturnValueReference,
+    CodeElementIf,
 )
 from starkware.cairo.lang.compiler.ast.expr import (
     ExprConst,
@@ -275,7 +277,7 @@ def test_operator_precedence():
     assert expr.format() == code
 
     # Compute the value of expr from the tree and compare it with the correct value.
-    PRIME = 3 * 2 ** 30 + 1
+    PRIME = 3 * 2**30 + 1
     simplified_expr = ExpressionSimplifier(PRIME).visit(expr)
     assert isinstance(simplified_expr, ExprConst)
     assert simplified_expr.val == eval(code)
@@ -292,7 +294,7 @@ def test_div_expr():
     code = "120 / 2 / 3 / 4"
     expr = parse_expr(code)
     # Compute the value of expr from the tree and compare it with the correct value.
-    PRIME = 3 * 2 ** 30 + 1
+    PRIME = 3 * 2**30 + 1
     simplified_expr = ExpressionSimplifier(PRIME).visit(expr)
     assert isinstance(simplified_expr, ExprConst)
     assert simplified_expr.val == 5
@@ -918,3 +920,104 @@ def test_pointer():
     for typ, mark in safe_zip(types, marks):
         assert typ.location is not None
         assert get_location_marks(code, typ.location) == code + "\n" + mark
+
+
+def test_if_and():
+    code = """\
+if a == 0 and b == 0:
+    alloc_locals
+end\
+"""
+    ret = parse_code_element(code)
+    assert isinstance(ret, CodeElementIf)
+    assert ret.condition == BoolProductExpr(
+        op=BoolProductOp.AND,
+        a=BoolExpr(
+            a=ExprIdentifier(name="a"),
+            b=ExprConst(val=0),
+            eq=True,
+        ),
+        b=BoolExpr(
+            a=ExprIdentifier(name="b"),
+            b=ExprConst(val=0),
+            eq=True,
+        ),
+    )
+    assert ret.format(allowed_line_length=100) == code
+
+
+def test_if_or():
+    code = """\
+if a != 0 or b != 0:
+    alloc_locals
+end\
+"""
+    ret = parse_code_element(code)
+    assert isinstance(ret, CodeElementIf)
+    assert ret.condition == BoolProductExpr(
+        op=BoolProductOp.OR,
+        a=BoolExpr(
+            a=ExprIdentifier(name="a"),
+            b=ExprConst(val=0),
+            eq=False,
+        ),
+        b=BoolExpr(
+            a=ExprIdentifier(name="b"),
+            b=ExprConst(val=0),
+            eq=False,
+        ),
+    )
+    assert ret.format(allowed_line_length=100) == code
+
+
+def test_if_nested_and_or():
+    code = """\
+if a == 0 and b == 0 or c == 0 and d == 0:
+    alloc_locals
+end\
+"""
+    ret = parse_code_element(code)
+    assert isinstance(ret, CodeElementIf)
+    assert ret.condition == BoolProductExpr(
+        op=BoolProductOp.AND,
+        a=BoolExpr(
+            a=ExprIdentifier(name="a"),
+            b=ExprConst(val=0),
+            eq=True,
+        ),
+        b=BoolProductExpr(
+            op=BoolProductOp.OR,
+            a=BoolExpr(
+                a=ExprIdentifier(name="b"),
+                b=ExprConst(val=0),
+                eq=True,
+            ),
+            b=BoolProductExpr(
+                op=BoolProductOp.AND,
+                a=BoolExpr(
+                    a=ExprIdentifier(name="c"),
+                    b=ExprConst(val=0),
+                    eq=True,
+                ),
+                b=BoolExpr(
+                    a=ExprIdentifier(name="d"),
+                    b=ExprConst(val=0),
+                    eq=True,
+                ),
+            ),
+        ),
+    )
+    assert ret.format(allowed_line_length=100) == code
+
+
+def test_if_multiline_and_or():
+    # TODO(mkaput, 18/05/2022): This formatting is not ideal, but we cannot use parentheses here
+    #   due to ambiguity conflict with regular expressions.
+    code = """\
+if a == 0 and b == 0 or c == 0 and
+    d == 0 and e == 0:
+    alloc_locals
+end\
+"""
+    ret = parse_code_element(code)
+    assert ret.format(allowed_line_length=40) == code

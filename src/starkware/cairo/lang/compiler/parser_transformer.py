@@ -1,13 +1,13 @@
 import dataclasses
 import re
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 import lark
 from lark import Token, Transformer, v_args
 
 from starkware.cairo.lang.compiler.ast.aliased_identifier import AliasedIdentifier
 from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
-from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr
+from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr, BoolProductExpr, BoolProductOp
 from starkware.cairo.lang.compiler.ast.cairo_types import (
     CairoType,
     TypeCodeoffset,
@@ -405,6 +405,14 @@ class ParserTransformer(Transformer):
     @v_args(meta=True)
     def bool_expr_neq(self, value, meta):
         return BoolExpr(a=value[0], b=value[1], eq=False, location=self.meta2loc(meta))
+
+    @v_args(inline=True, meta=True)
+    def bool_expr_and(self, meta, a: BoolExpr, b: Union[BoolExpr, BoolProductExpr]):
+        return BoolProductExpr(a=a, b=b, op=BoolProductOp.AND, location=self.meta2loc(meta))
+
+    @v_args(inline=True, meta=True)
+    def bool_expr_or(self, meta, a: BoolExpr, b: Union[BoolExpr, BoolProductExpr]):
+        return BoolProductExpr(a=a, b=b, op=BoolProductOp.OR, location=self.meta2loc(meta))
 
     # Types.
 
@@ -847,6 +855,6 @@ def backslash_to_hex(value: bytes) -> bytes:
     r"""
     Replaces substrings of the form '\x**' with the corresponding byte.
     """
-    pattern = br"\\x([0-9a-fA-F]{2})"
+    pattern = rb"\\x([0-9a-fA-F]{2})"
     replacer = lambda m: bytes.fromhex(m.group(1).decode("ascii"))
     return re.sub(pattern, replacer, value)

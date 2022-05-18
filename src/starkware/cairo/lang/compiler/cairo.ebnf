@@ -67,8 +67,14 @@ identifier_def: IDENTIFIER
 !reg: "ap" -> reg_ap
     | "fp" -> reg_fp
 
-bool_expr: expr _DBL_EQ expr   -> bool_expr_eq
-         | expr _NEQ expr      -> bool_expr_neq
+// TODO(mkaput, 18/05/2022): Support parentheses in bool_expr in such a way that it does not
+//   conflict with parentheses in expr.
+?bool_expr: bool_product
+?bool_product: bool_atom "and" _NEWLINE* bool_product     -> bool_expr_and
+             | bool_atom "or"  _NEWLINE* bool_product     -> bool_expr_or
+             | bool_atom
+?bool_atom: expr _DBL_EQ expr                             -> bool_expr_eq
+          | expr _NEQ expr                                -> bool_expr_neq
 
 !modifier: "local" -> modifier_local
 
