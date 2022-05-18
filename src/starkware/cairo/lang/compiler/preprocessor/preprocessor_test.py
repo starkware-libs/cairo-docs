@@ -4461,7 +4461,7 @@ if a == 0 and b == 0:
 end
 """,
         """
-file:?:?: Complex boolean expressions are not implemented yet.
+file:?:?: Internal compiler error: complex boolean expression must be simplified at this point.
 if a == 0 and b == 0:
    ^***************^
 """,
