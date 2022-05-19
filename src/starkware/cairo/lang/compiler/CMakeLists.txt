@@ -47,6 +47,7 @@ python_lib(cairo_compile_lib
     parser.py
     preprocessor/__init__.py
     preprocessor/auxiliary_info_collector.py
+    preprocessor/code_element_injecting_visitor.py
     preprocessor/compound_expressions.py
     preprocessor/default_pass_manager.py
     preprocessor/dependency_graph.py
