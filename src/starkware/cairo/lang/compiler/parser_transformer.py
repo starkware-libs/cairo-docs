@@ -7,7 +7,7 @@ from lark import Token, Transformer, v_args
 
 from starkware.cairo.lang.compiler.ast.aliased_identifier import AliasedIdentifier
 from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
-from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr, BoolProductExpr, BoolProductOp
+from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr, BoolAndExpr
 from starkware.cairo.lang.compiler.ast.cairo_types import (
     CairoType,
     TypeCodeoffset,
@@ -407,12 +407,8 @@ class ParserTransformer(Transformer):
         return BoolExpr(a=value[0], b=value[1], eq=False, location=self.meta2loc(meta))
 
     @v_args(inline=True, meta=True)
-    def bool_expr_and(self, meta, a: BoolExpr, b: Union[BoolExpr, BoolProductExpr]):
-        return BoolProductExpr(a=a, b=b, op=BoolProductOp.AND, location=self.meta2loc(meta))
-
-    @v_args(inline=True, meta=True)
-    def bool_expr_or(self, meta, a: BoolExpr, b: Union[BoolExpr, BoolProductExpr]):
-        return BoolProductExpr(a=a, b=b, op=BoolProductOp.OR, location=self.meta2loc(meta))
+    def bool_and_expr(self, meta, a: Union[BoolExpr, BoolAndExpr], b: BoolExpr):
+        return BoolAndExpr(a=a, b=b, location=self.meta2loc(meta))
 
     # Types.
 

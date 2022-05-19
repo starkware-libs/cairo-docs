@@ -3,7 +3,7 @@ from typing import List
 import pytest
 
 from starkware.cairo.lang.compiler.ast.aliased_identifier import AliasedIdentifier
-from starkware.cairo.lang.compiler.ast.bool_expr import BoolProductExpr, BoolProductOp, BoolExpr
+from starkware.cairo.lang.compiler.ast.bool_expr import BoolAndExpr, BoolExpr
 from starkware.cairo.lang.compiler.ast.cairo_types import (
     CairoType,
     TypeCodeoffset,
@@ -930,8 +930,7 @@ end\
 """
     ret = parse_code_element(code)
     assert isinstance(ret, CodeElementIf)
-    assert ret.condition == BoolProductExpr(
-        op=BoolProductOp.AND,
+    assert ret.condition == BoolAndExpr(
         a=BoolExpr(
             a=ExprIdentifier(name="a"),
             b=ExprConst(val=0),
@@ -946,75 +945,41 @@ end\
     assert ret.format(allowed_line_length=100) == code
 
 
-def test_if_or():
+def test_if_and_is_left_to_right_associative():
     code = """\
-if a != 0 or b != 0:
+if a == 0 and b == 0 and c == 0:
     alloc_locals
 end\
 """
     ret = parse_code_element(code)
     assert isinstance(ret, CodeElementIf)
-    assert ret.condition == BoolProductExpr(
-        op=BoolProductOp.OR,
-        a=BoolExpr(
-            a=ExprIdentifier(name="a"),
-            b=ExprConst(val=0),
-            eq=False,
-        ),
-        b=BoolExpr(
-            a=ExprIdentifier(name="b"),
-            b=ExprConst(val=0),
-            eq=False,
-        ),
-    )
-    assert ret.format(allowed_line_length=100) == code
-
-
-def test_if_nested_and_or():
-    code = """\
-if a == 0 and b == 0 or c == 0 and d == 0:
-    alloc_locals
-end\
-"""
-    ret = parse_code_element(code)
-    assert isinstance(ret, CodeElementIf)
-    assert ret.condition == BoolProductExpr(
-        op=BoolProductOp.AND,
-        a=BoolExpr(
-            a=ExprIdentifier(name="a"),
-            b=ExprConst(val=0),
-            eq=True,
-        ),
-        b=BoolProductExpr(
-            op=BoolProductOp.OR,
+    assert ret.condition == BoolAndExpr(
+        a=BoolAndExpr(
             a=BoolExpr(
+                a=ExprIdentifier(name="a"),
+                b=ExprConst(val=0),
+                eq=True,
+            ),
+            b=BoolExpr(
                 a=ExprIdentifier(name="b"),
                 b=ExprConst(val=0),
                 eq=True,
             ),
-            b=BoolProductExpr(
-                op=BoolProductOp.AND,
-                a=BoolExpr(
-                    a=ExprIdentifier(name="c"),
-                    b=ExprConst(val=0),
-                    eq=True,
-                ),
-                b=BoolExpr(
-                    a=ExprIdentifier(name="d"),
-                    b=ExprConst(val=0),
-                    eq=True,
-                ),
-            ),
+        ),
+        b=BoolExpr(
+            a=ExprIdentifier(name="c"),
+            b=ExprConst(val=0),
+            eq=True,
         ),
     )
     assert ret.format(allowed_line_length=100) == code
 
 
-def test_if_multiline_and_or():
+def test_if_multiline_and():
     # TODO(mkaput, 18/05/2022): This formatting is not ideal, but we cannot use parentheses here
     #   due to ambiguity conflict with regular expressions.
     code = """\
-if a == 0 and b == 0 or c == 0 and
+if a == 0 and b == 0 and c == 0 and
     d == 0 and e == 0:
     alloc_locals
 end\

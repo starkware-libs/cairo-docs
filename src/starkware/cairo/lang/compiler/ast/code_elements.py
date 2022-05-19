@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Sequence, Union
 
 from starkware.cairo.lang.compiler.ast.aliased_identifier import AliasedIdentifier
 from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
-from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr, BoolProductExpr
+from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr, BoolAndExpr
 from starkware.cairo.lang.compiler.ast.cairo_types import CairoType
 from starkware.cairo.lang.compiler.ast.expr import (
     ExprAssignment,
@@ -560,7 +560,7 @@ class CodeElementWith(CodeElement):
 
 @dataclasses.dataclass
 class CodeElementIf(CodeElement):
-    condition: Union[BoolExpr, BoolProductExpr]
+    condition: Union[BoolExpr, BoolAndExpr]
     main_code_block: CodeBlock
     else_code_block: Optional[CodeBlock]
     label_neq: Optional[str] = None

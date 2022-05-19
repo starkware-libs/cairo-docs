@@ -23,20 +23,14 @@ class BoolExpr(AstNode):
         return [self.a, self.b]
 
 
-class BoolProductOp(Enum):
-    AND = "and"
-    OR = "or"
-
-
 @dataclasses.dataclass
-class BoolProductExpr(AstNode):
-    a: BoolExpr
-    b: Union[BoolExpr, "BoolProductExpr"]
-    op: BoolProductOp
+class BoolAndExpr(AstNode):
+    a: Union[BoolExpr, "BoolAndExpr"]
+    b: BoolExpr
     location: Optional[Location] = LocationField
 
     def get_particles(self):
-        return ParticleList([self.a.get_particles(), f" {self.op.value} ", self.b.get_particles()])
+        return ParticleList([self.a.get_particles(), " and ", self.b.get_particles()])
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return [self.a, self.b]
