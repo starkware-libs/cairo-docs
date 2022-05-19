@@ -50,6 +50,7 @@ python_lib(cairo_compile_lib
     preprocessor/bool_expr/__init__.py
     preprocessor/bool_expr/errors.py
     preprocessor/bool_expr/lowering.py
+    preprocessor/code_element_injecting_visitor.py
     preprocessor/compound_expressions.py
     preprocessor/default_pass_manager.py
     preprocessor/dependency_graph.py
