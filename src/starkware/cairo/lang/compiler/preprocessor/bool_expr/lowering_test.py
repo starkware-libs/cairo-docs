@@ -17,7 +17,7 @@ end
 """
     assert (
         lower_and_format(code)
-        == """
+        == """\
 func main():
     let a = 10
     let b = 12
