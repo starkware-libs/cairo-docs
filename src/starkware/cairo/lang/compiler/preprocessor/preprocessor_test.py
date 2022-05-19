@@ -4451,18 +4451,28 @@ file:?:?: Hints before "using" statements are not allowed.
     )
 
 
-def test_if_with_complex_boolean_expressions_is_not_implemented():
-    verify_exception(
-        """
-let a = 0
-let b = 0
-if a == 0 and b == 0:
-    let c = a + b
+def test_if_with_single_and():
+    code = """
+func main():
+    tempvar a = 10
+    tempvar b = 12
+    if a == 10 and b == 12:
+        tempvar x = a + b
+    end
+    ret
 end
-""",
-        """
-file:?:?: Internal compiler error: complex boolean expression must be simplified at this point.
-if a == 0 and b == 0:
-   ^***************^
-""",
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+        program.format()
+        == """\
+[ap] = 10; ap++
+[ap] = 12; ap++
+[ap] = [ap + (-2)] + (-10); ap++
+jmp rel 7 if [ap + (-1)] != 0
+[ap] = [ap + (-2)] + (-12); ap++
+jmp rel 3 if [ap + (-1)] != 0
+[ap] = [ap + (-4)] + [ap + (-3)]; ap++
+ret
+"""
     )
