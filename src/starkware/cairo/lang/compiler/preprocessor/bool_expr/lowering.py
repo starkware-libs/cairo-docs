@@ -1,6 +1,6 @@
 import dataclasses
 
-from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr, BoolAndExpr
+from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr, BoolAndExpr, BoolEqExpr
 from starkware.cairo.lang.compiler.ast.code_elements import CodeElementIf, CodeBlock
 from starkware.cairo.lang.compiler.ast.visitor import Visitor
 from starkware.cairo.lang.compiler.preprocessor.bool_expr.errors import BoolExprLoweringError
@@ -36,9 +36,10 @@ class ConditionLowering(Visitor):
         self.source_elm = source_elm
 
     def _visit_default(self, obj):
+        assert isinstance(obj, BoolExpr)
         return obj
 
-    def visit_BoolExpr(self, condition: BoolExpr) -> CodeElementIf:
+    def visit_BoolEqExpr(self, condition: BoolEqExpr) -> CodeElementIf:
         return dataclasses.replace(self.source_elm, condition=condition)
 
     def visit_BoolAndExpr(self, condition: BoolAndExpr) -> CodeElementIf:
@@ -50,7 +51,7 @@ class ConditionLowering(Visitor):
             )
 
         # TODO(mkaput, 19/05/2022): Support more complex chains.
-        if not isinstance(condition.a, BoolExpr):
+        if not isinstance(condition.a, BoolEqExpr):
             raise BoolExprLoweringError(
                 "Nested and expressions are not supported yet.", location=condition.a.location
             )
