@@ -3,7 +3,7 @@ from typing import List
 import pytest
 
 from starkware.cairo.lang.compiler.ast.aliased_identifier import AliasedIdentifier
-from starkware.cairo.lang.compiler.ast.bool_expr import BoolAndExpr, BoolExpr
+from starkware.cairo.lang.compiler.ast.bool_expr import BoolAndExpr, BoolEqExpr
 from starkware.cairo.lang.compiler.ast.cairo_types import (
     CairoType,
     TypeCodeoffset,
@@ -931,12 +931,12 @@ end\
     ret = parse_code_element(code)
     assert isinstance(ret, CodeElementIf)
     assert ret.condition == BoolAndExpr(
-        a=BoolExpr(
+        a=BoolEqExpr(
             a=ExprIdentifier(name="a"),
             b=ExprConst(val=0),
             eq=True,
         ),
-        b=BoolExpr(
+        b=BoolEqExpr(
             a=ExprIdentifier(name="b"),
             b=ExprConst(val=0),
             eq=True,
@@ -955,18 +955,18 @@ end\
     assert isinstance(ret, CodeElementIf)
     assert ret.condition == BoolAndExpr(
         a=BoolAndExpr(
-            a=BoolExpr(
+            a=BoolEqExpr(
                 a=ExprIdentifier(name="a"),
                 b=ExprConst(val=0),
                 eq=True,
             ),
-            b=BoolExpr(
+            b=BoolEqExpr(
                 a=ExprIdentifier(name="b"),
                 b=ExprConst(val=0),
                 eq=True,
             ),
         ),
-        b=BoolExpr(
+        b=BoolEqExpr(
             a=ExprIdentifier(name="c"),
             b=ExprConst(val=0),
             eq=True,

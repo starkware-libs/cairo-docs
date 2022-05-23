@@ -9,7 +9,7 @@ from starkware.cairo.lang.compiler.error_handling import Location
 
 
 @dataclasses.dataclass
-class BoolExpr(AstNode):
+class BoolEqExpr(AstNode):
     a: Expression
     b: Expression
     eq: bool
@@ -25,8 +25,8 @@ class BoolExpr(AstNode):
 
 @dataclasses.dataclass
 class BoolAndExpr(AstNode):
-    a: Union[BoolExpr, "BoolAndExpr"]
-    b: BoolExpr
+    a: Union[BoolEqExpr, "BoolAndExpr"]
+    b: BoolEqExpr
     location: Optional[Location] = LocationField
 
     def get_particles(self):
