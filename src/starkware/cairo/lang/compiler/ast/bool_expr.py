@@ -1,15 +1,29 @@
 import dataclasses
-from enum import Enum
-from typing import Optional, Sequence, Union
+from abc import ABC, abstractmethod
+from typing import Optional, Sequence
 
 from starkware.cairo.lang.compiler.ast.expr import Expression
-from starkware.cairo.lang.compiler.ast.formatting_utils import LocationField, ParticleList
+from starkware.cairo.lang.compiler.ast.formatting_utils import (
+    LocationField,
+    ParticleList,
+    Particles,
+)
 from starkware.cairo.lang.compiler.ast.node import AstNode
 from starkware.cairo.lang.compiler.error_handling import Location
 
 
+class BoolExpr(AstNode, ABC):
+    location: Optional[Location] = LocationField
+
+    @abstractmethod
+    def get_particles(self) -> Particles:
+        """
+        Get formatting particles for this expression.
+        """
+
+
 @dataclasses.dataclass
-class BoolEqExpr(AstNode):
+class BoolEqExpr(BoolExpr):
     a: Expression
     b: Expression
     eq: bool
@@ -24,8 +38,8 @@ class BoolEqExpr(AstNode):
 
 
 @dataclasses.dataclass
-class BoolAndExpr(AstNode):
-    a: Union[BoolEqExpr, "BoolAndExpr"]
+class BoolAndExpr(BoolExpr):
+    a: BoolExpr
     b: BoolEqExpr
     location: Optional[Location] = LocationField
 
