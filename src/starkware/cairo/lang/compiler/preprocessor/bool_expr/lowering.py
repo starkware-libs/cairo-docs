@@ -56,6 +56,19 @@ class ConditionLowering(Visitor):
                 "Nested and expressions are not supported yet.", location=condition.a.location
             )
 
+        # Substitute:
+        #
+        #     if a and b:
+        #         main_code_block
+        #     end
+        #
+        # with:
+        #
+        #     if a:
+        #         if b:
+        #             main_code_block
+        #         end
+        #     end
         elm = self.visit(condition.b)
         return dataclasses.replace(
             self.source_elm,
