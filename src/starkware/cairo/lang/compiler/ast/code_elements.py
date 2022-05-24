@@ -601,9 +601,11 @@ class CodeElementIf(CodeElement):
     location: Optional[Location] = LocationField
 
     def format(self, allowed_line_length):
-        cond_particles = ["if ", self.condition.get_particles(), ":"]
+        cond_particle = self.condition.to_particle()
+        cond_particle.add_prefix("if ")
+        cond_particle.add_suffix(":")
         code = particles_in_lines(
-            particles=ParticleList(elements=cond_particles),
+            particles=cond_particle,
             config=ParticleFormattingConfig(
                 allowed_line_length=allowed_line_length, line_indent=INDENTATION
             ),
