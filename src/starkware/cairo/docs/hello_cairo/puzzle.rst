@@ -259,7 +259,9 @@ main function):
     func main():
         alloc_locals
 
-        local loc_tuple : (Location, Location, Location, Location, Location) = (
+        local loc_tuple : (
+            Location, Location, Location, Location, Location
+        ) = (
             Location(row=0, col=2),
             Location(row=1, col=2),
             Location(row=1, col=3),

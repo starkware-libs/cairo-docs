@@ -318,7 +318,9 @@ and use ``--layout=small`` to ``cairo-run`` due to the usage of builtins):
     func main{output_ptr : felt*, range_check_ptr}():
         alloc_locals
 
-        local loc_tuple : (Location, Location, Location, Location, Location) = (
+        local loc_tuple : (
+            Location, Location, Location, Location, Location
+        ) = (
             Location(row=0, col=2),
             Location(row=1, col=2),
             Location(row=1, col=3),

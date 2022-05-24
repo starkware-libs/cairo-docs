@@ -98,7 +98,7 @@ def preprocess_invoke_function_fields(
 
 
 def get_invoke_tx_total_resources(
-    state: CarriedState, call_info: CallInfo, l1_handler_payload_size: Optional[int]
+    state: CarriedState, call_info: CallInfo
 ) -> Tuple[int, Mapping[str, int]]:
     """
     Returns the total resources needed to include the most recent InvokeFunction transaction in
@@ -107,6 +107,8 @@ def get_invoke_tx_total_resources(
     Used for transaction fee; calculation is made as if the transaction is the first in batch, for
     consistency.
     """
+    assert state.parent_state is not None, "State is expected to be a child of another state."
+
     # Number of modified contracts by the most recently applied-on-state transaction.
     n_modified_contracts_by_tx = len(state.modified_contracts.maps[0].keys())
 
@@ -115,7 +117,8 @@ def get_invoke_tx_total_resources(
         l2_to_l1_messages=call_info.get_sorted_l2_to_l1_messages(),
         n_modified_contracts=n_modified_contracts_by_tx,
         n_storage_writes=tx_syscall_counter.get("storage_write", 0),
-        l1_handler_payload_size=l1_handler_payload_size,
+        # L1 handlers cannot be called.
+        l1_handler_payload_size=None,
         constructor_calldata_length=None,  # Not relevant for InvokeFunction transaction.
     )
 
