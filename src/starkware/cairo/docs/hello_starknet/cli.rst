@@ -279,7 +279,9 @@ The output should resemble:
     {
         "block_hash": "0x39a53f921b51af73e95ecf13ffe1542da069f680531e8a36b2f6b656e45a162",
         "block_number": 0,
+        "gas_price": "0x174876e800",
         "parent_block_hash": "0x0",
+        "sequencer_address": "0x310959e4d55cfe4712291a5f9787893fb392d1ffb96905aba549b21e91e9fc9",
         "state_root": "079354de0075c5c1f2a6af40c7dd70a92dc93c68b54ecc327b61c8426fea177c",
         "status": "ACCEPTED_ON_L2",
         "timestamp": 105,

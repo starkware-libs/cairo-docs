@@ -335,10 +335,9 @@ Example
         # dict_update{dict_ptr=my_dict}(key=1, prev_value=8, new_value=9)
 
         # Finalize fails for the malicious prover with extra update.
-        let (finalized_dict_start,
-            finalized_dict_end) = default_dict_finalize(
-            my_dict_start, my_dict, 7
-        )
+        let (
+            finalized_dict_start, finalized_dict_end
+        ) = default_dict_finalize(my_dict_start, my_dict, 7)
         return ()
     end
 

@@ -375,7 +375,7 @@ def f():
         VirtualMachine(program, context, {})
     expected_error = f"""\
 {cairo_file.name}:4:1: Error at pc=10:
-Got an exception while executing a hint.
+Got an exception while compiling a hint.
 %{{
 ^^
 Traceback (most recent call last):
@@ -389,7 +389,8 @@ IndentationError: unexpected indent\
 
 def test_hint_syntax_error():
     code = """
-# Some comment.
+# Make sure the hint is not located at the start of the program.
+[ap] = 1
 
 %{
 def f():
@@ -422,12 +423,12 @@ def f():
     with pytest.raises(VmException) as excinfo:
         VirtualMachine(program, context, {})
     expected_error = f"""\
-{cairo_file.name}:4:1: Error at pc=10:
-Got an exception while executing a hint.
+{cairo_file.name}:5:1: Error at pc=12:
+Got an exception while compiling a hint.
 %{{
 ^^
 Traceback (most recent call last):
-  File "{cairo_file.name}", line 6
+  File "{cairo_file.name}", line 7
     b = # Wrong syntax.
                       ^
 SyntaxError: invalid syntax\
@@ -798,7 +799,8 @@ def test_traceback_with_attr():
 
     func bar(x):
         tempvar y = x + 2
-        with_attr error_message("Error in bar (x={x}, y={y})."):
+        # y and x.y evaluation should fail (y is ap-based and x.y doesn't exist).
+        with_attr error_message("Error in bar (x={x}, y={y}, {x.y})."):
             foo(y * y * y)
         end
         return ()
@@ -834,11 +836,12 @@ Cairo traceback (most recent call last):
     ^*******^
 Error message: Running bar(x=0).
 Error message: Error in main.
-:31:17: (pc=0:32)
+:32:17: (pc=0:32)
                 bar(x=-1)  # This line will cause an error.
                 ^*******^
-Error message: Error in bar (x=-1, y={y}). (Cannot evaluate ap-based or complex references: ['y'])
-:20:13: (pc=0:23)
+Error message: Error in bar (x=-1, y={y}, {x.y}). (Cannot evaluate ap-based or complex references: \
+['y', 'x.y'])
+:21:13: (pc=0:23)
             foo(y * y * y)
             ^************^
 

@@ -31,11 +31,11 @@ Installation
 
         pip3 install cairo-lang
 
-    Alternatively, you can download the package (``cairo-lang-0.8.1.zip``) from
-    https://github.com/starkware-libs/cairo-lang/releases/tag/v0.8.1,
+    Alternatively, you can download the package (``cairo-lang-0.8.2.zip``) from
+    https://github.com/starkware-libs/cairo-lang/releases/tag/v0.8.2,
     and install it using::
 
-        pip3 install cairo-lang-0.8.1.zip
+        pip3 install cairo-lang-0.8.2.zip
 
     Cairo was tested with python3.7.
     To make it work with python3.6, you will have to install ``contextvars``::
@@ -119,11 +119,11 @@ Visual Studio Code setup
 
 .. only:: not internal
 
-    Download the Cairo Visual Studio Code extension (``cairo-0.8.1.vsix``) from
-    https://github.com/starkware-libs/cairo-lang/releases/tag/v0.8.1,
+    Download the Cairo Visual Studio Code extension (``cairo-0.8.2.vsix``) from
+    https://github.com/starkware-libs/cairo-lang/releases/tag/v0.8.2,
     and install it using::
 
-        code --install-extension cairo-0.8.1.vsix
+        code --install-extension cairo-0.8.2.vsix
 
     Configure Visual Studio Code settings::
 

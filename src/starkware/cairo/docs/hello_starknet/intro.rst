@@ -7,7 +7,7 @@ In order to follow this tutorial you should have basic familiarity with writing
 Cairo code. For example, you can read the first few pages of the
 ":ref:`Hello, Cairo <hello_cairo>`" tutorial.
 You should also :ref:`set up your environment <quickstart>` and make sure your
-installed Cairo version is at least ``0.8.1``
+installed Cairo version is at least ``0.8.2``
 (you can check your version by running ``cairo-compile --version``).
 
 .. _first_contract:
