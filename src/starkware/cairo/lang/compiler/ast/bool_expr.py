@@ -32,7 +32,7 @@ class BoolEqExpr(BoolExpr):
     notes: Notes = NotesField
     location: Optional[Location] = LocationField
 
-    def to_particle(self):
+    def to_particle(self) -> Particle:
         self.notes.assert_no_comments()
         relation = "==" if self.eq else "!="
         return SingleParticle(f"{self.a.format()} {relation} {self.b.format()}")
@@ -48,7 +48,7 @@ class BoolAndExpr(BoolExpr):
     notes: Notes = NotesField
     location: Optional[Location] = LocationField
 
-    def to_particle(self):
+    def to_particle(self) -> Particle:
         self.notes.assert_no_comments()
         return ParticleList([self.a.to_particle(), " and ", self.b.to_particle()])
 
