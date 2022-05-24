@@ -865,7 +865,7 @@ Expected 'elm.element_type' to be a 'namespace'. Found: '{elm.element_type}'."""
         # We expect complex boolean expressions to be simplified in earlier stages.
         assert isinstance(
             elm.condition, BoolEqExpr
-        ), "Complex boolean expressions are not supported yet."
+        ), "Complex boolean expressions must be simplified at this point."
 
         # Prepare branch compound expression.
         cond_expr = self.simplify_expr_as_felt(
