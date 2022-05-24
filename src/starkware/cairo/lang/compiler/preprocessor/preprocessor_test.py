@@ -2,7 +2,6 @@ import pytest
 
 from starkware.cairo.lang.cairo_constants import DEFAULT_PRIME
 from starkware.cairo.lang.compiler.ast.code_elements import CodeElementFunction
-from starkware.cairo.lang.compiler.ast.visitor import VisitorError
 from starkware.cairo.lang.compiler.cairo_compile import compile_cairo
 from starkware.cairo.lang.compiler.error_handling import LocationError
 from starkware.cairo.lang.compiler.identifier_definition import (
@@ -17,6 +16,7 @@ from starkware.cairo.lang.compiler.instruction_builder import InstructionBuilder
 from starkware.cairo.lang.compiler.parser import parse_type
 from starkware.cairo.lang.compiler.preprocessor.default_pass_manager import default_pass_manager
 from starkware.cairo.lang.compiler.preprocessor.flow import FlowTrackingDataActual
+from starkware.cairo.lang.compiler.preprocessor.for_loop.errors import ForLoopLoweringError
 from starkware.cairo.lang.compiler.preprocessor.preprocess_codes import preprocess_codes
 from starkware.cairo.lang.compiler.preprocessor.preprocessor import AttributeScope
 from starkware.cairo.lang.compiler.preprocessor.preprocessor_test_utils import (
@@ -4480,5 +4480,5 @@ file:?:?: For loops are not supported yet.
     for i in range(5):
     ^*^
 """,
-        exc_type=VisitorError,
+        exc_type=ForLoopLoweringError,
     )

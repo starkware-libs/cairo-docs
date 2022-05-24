@@ -3,6 +3,7 @@ from starkware.cairo.lang.compiler.preprocessor.code_element_injecting_visitor i
 )
 
 from starkware.cairo.lang.compiler.ast.code_elements import CodeElementFor
+from starkware.cairo.lang.compiler.preprocessor.for_loop.errors import ForLoopLoweringError
 from starkware.cairo.lang.compiler.preprocessor.pass_manager import PassManagerContext, VisitorStage
 
 
@@ -26,4 +27,4 @@ class ForLoopLoweringVisitor(CodeElementInjectingVisitor):
         return elm
 
     def visit_CodeElementFor(self, elm: CodeElementFor):
-        raise NotImplemented
+        raise ForLoopLoweringError("For loops are not supported yet.", location=elm.location)

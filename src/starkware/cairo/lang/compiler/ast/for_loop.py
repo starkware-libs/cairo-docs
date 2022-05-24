@@ -7,7 +7,7 @@ from starkware.cairo.lang.compiler.ast.formatting_utils import (
     LocationField,
     SeparatedParticleList,
     ParticleList,
-    Particles,
+    Particle,
 )
 from starkware.cairo.lang.compiler.ast.node import AstNode
 from starkware.cairo.lang.compiler.ast.notes import Notes, NoteListField
@@ -19,9 +19,9 @@ class ForClause(AstNode, ABC):
     location: Optional[Location]
 
     @abstractmethod
-    def get_particles(self) -> Particles:
+    def to_particle(self) -> Particle:
         """
-        Returns formatting particles for this clause.
+        Returns a representation of the clause as a Particle.
         """
 
 
@@ -37,9 +37,7 @@ class ForClausesList(AstNode):
 
     def get_particles(self) -> SeparatedParticleList:
         self.assert_no_comments()
-        return SeparatedParticleList(
-            elements=[ParticleList(clause.get_particles()) for clause in self.clauses]
-        )
+        return SeparatedParticleList(elements=[clause.to_particle() for clause in self.clauses])
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return self.clauses
@@ -75,5 +73,5 @@ class ForClauseIn(ForClause):
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return [self.identifier, self.generator]
 
-    def get_particles(self):
-        return [f"{self.identifier.format()} in ", *self.generator.get_particles()]
+    def to_particle(self):
+        return ParticleList([f"{self.identifier.format()} in ", *self.generator.get_particles()])
