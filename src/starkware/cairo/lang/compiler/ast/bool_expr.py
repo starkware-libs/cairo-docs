@@ -10,6 +10,7 @@ from starkware.cairo.lang.compiler.ast.formatting_utils import (
     SingleParticle,
 )
 from starkware.cairo.lang.compiler.ast.node import AstNode
+from starkware.cairo.lang.compiler.ast.notes import NotesField, Notes
 from starkware.cairo.lang.compiler.error_handling import Location
 
 
@@ -28,9 +29,11 @@ class BoolEqExpr(BoolExpr):
     a: Expression
     b: Expression
     eq: bool
+    notes: Notes = NotesField
     location: Optional[Location] = LocationField
 
     def to_particle(self):
+        self.notes.assert_no_comments()
         relation = "==" if self.eq else "!="
         return SingleParticle(f"{self.a.format()} {relation} {self.b.format()}")
 
@@ -42,9 +45,11 @@ class BoolEqExpr(BoolExpr):
 class BoolAndExpr(BoolExpr):
     a: BoolExpr
     b: BoolEqExpr
+    notes: Notes = NotesField
     location: Optional[Location] = LocationField
 
     def to_particle(self):
+        self.notes.assert_no_comments()
         return ParticleList([self.a.to_particle(), " and ", self.b.to_particle()])
 
     def get_children(self) -> Sequence[Optional[AstNode]]:

@@ -1,6 +1,6 @@
 import dataclasses
 import re
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple
 
 import lark
 from lark import Token, Transformer, v_args
@@ -64,6 +64,7 @@ from starkware.cairo.lang.compiler.ast.expr import (
     ExprReg,
     ExprSubscript,
     ExprTuple,
+    Expression,
 )
 from starkware.cairo.lang.compiler.ast.expr_func_call import ExprFuncCall
 from starkware.cairo.lang.compiler.ast.instructions import (
@@ -396,19 +397,19 @@ class ParserTransformer(Transformer):
     def reg_fp(self, value):
         return Register.FP
 
-    # Boolean expresions.
-
-    @v_args(meta=True)
-    def bool_expr_eq(self, value, meta):
-        return BoolEqExpr(a=value[0], b=value[1], eq=True, location=self.meta2loc(meta))
-
-    @v_args(meta=True)
-    def bool_expr_neq(self, value, meta):
-        return BoolEqExpr(a=value[0], b=value[1], eq=False, location=self.meta2loc(meta))
+    # Boolean expressions.
 
     @v_args(inline=True, meta=True)
-    def bool_and_expr(self, meta, a: BoolExpr, b: BoolEqExpr):
-        return BoolAndExpr(a=a, b=b, location=self.meta2loc(meta))
+    def bool_expr_eq(self, meta, a: Expression, notes: Notes, b: Expression):
+        return BoolEqExpr(a=a, b=b, eq=True, notes=notes, location=self.meta2loc(meta))
+
+    @v_args(inline=True, meta=True)
+    def bool_expr_neq(self, meta, a: Expression, notes: Notes, b: Expression):
+        return BoolEqExpr(a=a, b=b, eq=False, notes=notes, location=self.meta2loc(meta))
+
+    @v_args(inline=True, meta=True)
+    def bool_and_expr(self, meta, a: BoolExpr, notes: Notes, b: BoolEqExpr):
+        return BoolAndExpr(a=a, b=b, notes=notes, location=self.meta2loc(meta))
 
     # Types.
 
