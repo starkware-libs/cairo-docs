@@ -6,9 +6,11 @@ from starkware.cairo.lang.compiler.ast.expr import Expression
 from starkware.cairo.lang.compiler.ast.formatting_utils import (
     LocationField,
     ParticleList,
-    Particles,
+    Particle,
+    SingleParticle,
 )
 from starkware.cairo.lang.compiler.ast.node import AstNode
+from starkware.cairo.lang.compiler.ast.notes import NotesField, Notes
 from starkware.cairo.lang.compiler.error_handling import Location
 
 
@@ -16,9 +18,9 @@ class BoolExpr(AstNode, ABC):
     location: Optional[Location] = LocationField
 
     @abstractmethod
-    def get_particles(self) -> Particles:
+    def to_particle(self) -> Particle:
         """
-        Get formatting particles for this expression.
+        Get formatting particle for this expression.
         """
 
 
@@ -27,11 +29,13 @@ class BoolEqExpr(BoolExpr):
     a: Expression
     b: Expression
     eq: bool
+    notes: Notes = NotesField
     location: Optional[Location] = LocationField
 
-    def get_particles(self):
+    def to_particle(self) -> Particle:
+        self.notes.assert_no_comments()
         relation = "==" if self.eq else "!="
-        return f"{self.a.format()} {relation} {self.b.format()}"
+        return SingleParticle(f"{self.a.format()} {relation} {self.b.format()}")
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return [self.a, self.b]
@@ -41,10 +45,12 @@ class BoolEqExpr(BoolExpr):
 class BoolAndExpr(BoolExpr):
     a: BoolExpr
     b: BoolEqExpr
+    notes: Notes = NotesField
     location: Optional[Location] = LocationField
 
-    def get_particles(self):
-        return ParticleList([self.a.get_particles(), " and ", self.b.get_particles()])
+    def to_particle(self) -> Particle:
+        self.notes.assert_no_comments()
+        return ParticleList([self.a.to_particle(), " and ", self.b.to_particle()])
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return [self.a, self.b]

@@ -337,8 +337,9 @@ nested tuple elements as shown below.
     local tuple2 : (a : felt) = (a=5)
     # Tuple contains another tuple.
     local tuple3 : (felt, (felt, felt, felt), felt) = (1, tuple0, 5)
-    local tuple4 : ((felt, (felt, felt, felt), felt), felt, felt) = (
-        tuple3, 2, 11)
+    local tuple4 : (
+        (felt, (felt, felt, felt), felt), felt, felt
+    ) = (tuple3, 2, 11)
     let a = tuple0[2]  # let a = 13.
     let b = tuple4[0][1][2]  # let b = 13.
 
