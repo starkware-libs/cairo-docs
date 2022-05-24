@@ -4474,9 +4474,6 @@ if a == 0 and b == 0:
     let c = a + b
 end
 """,
-        """
-file:?:?: Internal compiler error: complex boolean expression must be simplified at this point.
-if a == 0 and b == 0:
-   ^***************^
-""",
+        "Complex boolean expressions are not supported yet.",
+        exc_type=AssertionError,
     )

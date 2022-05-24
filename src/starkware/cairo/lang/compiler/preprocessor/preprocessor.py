@@ -863,12 +863,9 @@ Expected 'elm.element_type' to be a 'namespace'. Found: '{elm.element_type}'."""
 
     def visit_CodeElementIf(self, elm: CodeElementIf):
         # We expect complex boolean expressions to be simplified in earlier stages.
-        if not isinstance(elm.condition, BoolEqExpr):
-            raise PreprocessorError(
-                "Internal compiler error: complex boolean expression must be simplified at this "
-                "point.",
-                location=elm.condition.location,
-            )
+        assert isinstance(
+            elm.condition, BoolEqExpr
+        ), "Complex boolean expressions are not supported yet."
 
         # Prepare branch compound expression.
         cond_expr = self.simplify_expr_as_felt(
