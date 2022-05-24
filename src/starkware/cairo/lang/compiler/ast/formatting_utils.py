@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import field
-from typing import List, Union
+from typing import List, Sequence, Union
 
 import marshmallow
 
@@ -164,14 +164,25 @@ class Particle(ABC):
         """
 
     @abstractmethod
+    def add_prefix(self, prefix: str):
+        """
+        Adds a prefix to the beginning of the particle.
+        The prefix is glued to the particle (not splittable).
+        """
+
+    @abstractmethod
+    def add_suffix(self, suffix: str):
+        """
+        Appends a suffix to the end of the particle.
+        The suffix is glued to the particle (not splittable).
+        """
+
+    @abstractmethod
     def add_to_builder(self, builder: ParticleLineBuilder, suffix: str = ""):
         """
         Adds the particle to a builder, according to the formatting configuration of the builder.
         suffix is concatanated to the end of the particle.
         """
-
-
-Particles = List[Union[Particle, str]]
 
 
 @dataclasses.dataclass()
@@ -188,6 +199,12 @@ class SingleParticle(Particle):
     def is_splitable(self) -> bool:
         return False
 
+    def add_prefix(self, prefix: str):
+        self.text = prefix + self.text
+
+    def add_suffix(self, suffix: str):
+        self.text += suffix
+
     def add_to_builder(self, builder: ParticleLineBuilder, suffix: str = ""):
         builder.add_to_line(f"{self.text}{suffix}")
 
@@ -198,7 +215,10 @@ class ParticleList(Particle):
     A list of particles, that should be concatenated one after the other.
     """
 
-    def __init__(self, elements: Particles):
+    def __init__(
+        self,
+        elements: Sequence[Union[Particle, str]],
+    ):
         self.elements = []
         for elm in elements:
             self.elements.append(SingleParticle(text=elm) if isinstance(elm, str) else elm)
@@ -208,6 +228,14 @@ class ParticleList(Particle):
 
     def is_splitable(self) -> bool:
         return len(self.elements) > 0
+
+    def add_prefix(self, prefix: str):
+        assert len(self.elements) > 0
+        self.elements[0].add_prefix(prefix)
+
+    def add_suffix(self, suffix: str):
+        assert len(self.elements) > 0
+        self.elements[-1].add_suffix(suffix)
 
     def add_to_builder(self, builder: ParticleLineBuilder, suffix: str = ""):
         for i, particle in enumerate(self.elements):
@@ -224,7 +252,7 @@ class SeparatedParticleList(Particle):
 
     def __init__(
         self,
-        elements: Particles,
+        elements: Sequence[Union[Particle, str]],
         separator: str = ", ",
         start: str = "",
         end: str = "",
@@ -242,14 +270,11 @@ class SeparatedParticleList(Particle):
     def is_splitable(self) -> bool:
         return len(self.elements) > 0
 
-    def to_strings(self) -> List[str]:
-        if len(self.elements) == 0:
-            # If the list is empty, return the single element 'end'.
-            return [self.end]
-        # Concatenate the 'separator' to all elements and 'end' to the last one.
-        return [str(elm) + self.separator for elm in self.elements[:-1]] + [
-            str(self.elements[-1]) + self.end
-        ]
+    def add_prefix(self, prefix: str):
+        self.start = prefix + self.start
+
+    def add_suffix(self, suffix: str):
+        self.end += suffix
 
     def elements_to_string(self) -> str:
         """

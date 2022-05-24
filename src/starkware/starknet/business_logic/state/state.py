@@ -18,7 +18,11 @@ from starkware.python.utils import gather_in_chunks, safe_zip
 from starkware.starknet.business_logic.state.objects import ContractCarriedState, ContractState
 from starkware.starknet.definitions import fields
 from starkware.starknet.definitions.error_codes import StarknetErrorCode
-from starkware.starknet.definitions.general_config import DEFAULT_GAS_PRICE, StarknetGeneralConfig
+from starkware.starknet.definitions.general_config import (
+    DEFAULT_GAS_PRICE,
+    DEFAULT_SEQUENCER_ADDRESS,
+    StarknetGeneralConfig,
+)
 from starkware.starknet.services.api.contract_definition import ContractDefinition
 from starkware.starknet.storage.starknet_storage import StorageLeaf
 from starkware.starkware_utils.commitment_tree.binary_fact_tree import BinaryFactDict
@@ -46,12 +50,17 @@ class BlockInfo(ValidatedMarshmallowDataclass):
     # L1 gas price (in Wei) measured at the beginning of the last block creation attempt.
     gas_price: int = field(metadata=fields.gas_price_metadata)
 
+    # The sequencer address of this block.
+    sequencer_address: Optional[int] = field(metadata=fields.optional_sequencer_address_metadata)
+
     @classmethod
-    def empty(cls) -> "BlockInfo":
+    def empty(cls, sequencer_address: Optional[int]) -> "BlockInfo":
         """
         Returns an empty BlockInfo object; i.e., the one before the first in the chain.
         """
-        return cls(block_number=-1, block_timestamp=0, gas_price=0)
+        return cls(
+            block_number=-1, block_timestamp=0, gas_price=0, sequencer_address=sequencer_address
+        )
 
     @classmethod
     def create_for_testing(cls, block_number: int, block_timestamp: int) -> "BlockInfo":
@@ -62,6 +71,7 @@ class BlockInfo(ValidatedMarshmallowDataclass):
             block_number=block_number,
             block_timestamp=block_timestamp,
             gas_price=DEFAULT_GAS_PRICE,
+            sequencer_address=DEFAULT_SEQUENCER_ADDRESS,
         )
 
     def validate_legal_progress(self, next_block_info: "BlockInfo"):
@@ -169,19 +179,21 @@ class CarriedState(CarriedStateBase):
         """
         Instantiates a CarriedState object that acts as proxy to given parent_state.
         """
-        carried_state = cls(
+        return cls(
+            # Parent state - must not be modified.
             parent_state=parent_state,
+            # Immutable objects.
             shared_state=parent_state.shared_state,
             ffc=parent_state.ffc,
+            cairo_usage=parent_state.cairo_usage,
+            block_info=parent_state.block_info,
+            # Chain maps - changes are inserted to the first map (at index 0); parent maps must not
+            # be modified.
             contract_definitions=parent_state.contract_definitions.new_child(),
             contract_states=parent_state.contract_states.new_child(),
-            cairo_usage=parent_state.cairo_usage,
             modified_contracts=(parent_state.modified_contracts.new_child()),
-            block_info=parent_state.block_info,
             syscall_counter=parent_state.syscall_counter.new_child(),
         )
-
-        return carried_state
 
     @classmethod
     def create_unfilled(
@@ -265,6 +277,16 @@ class CarriedState(CarriedStateBase):
         serve as the commitment tree leaf IDs of the full StarkNet state commitment tree.
         """
         return StateSelector(contract_addresses=set(self.contract_states.keys()))
+
+    def create_child_state_for_querying(self) -> "CarriedState":
+        """
+        Creates a lazy copy of self.
+        Used for transaction queries, where we want to have a separation from the parent state
+        (e.g., using the chain map mechanism to extract the most recent transaction's affect on the
+        state) and do not need to apply the changes.
+        Must not be used on regular flow.
+        """
+        return CarriedState._create_from_parent_state(parent_state=self)
 
     def select(self, state_selector: StateSelectorBase) -> "CarriedState":
         raise NotImplementedError("select() is not implemented on StarkNet CarriedState.")
@@ -370,7 +392,7 @@ class SharedState(SharedStateBase):
 
         return cls(
             contract_states=empty_contract_states,
-            block_info=BlockInfo.empty(),
+            block_info=BlockInfo.empty(sequencer_address=general_config.sequencer_address),
         )
 
     def to_carried_state(self, ffc: FactFetchingContext) -> CarriedState:

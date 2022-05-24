@@ -1,10 +1,10 @@
 Program input and hints
 =======================
 
-So far programming in Cairo was very similar to programming in normal programming languages.
+So far programming in Cairo was very similar to programming in conventional programming languages.
 In this section we will see one of the main differences:
 The Cairo proof system is used to prove that a certain program runs successfully.
-Thus, unlike normal programming language where you have only one party that runs the program,
+Thus, unlike conventional programming languages where you have only one party that runs the program,
 here you have two parties -- the prover and the verifier. The **prover** tries to prove
 that a certain computation was performed, and the **verifier** wants to verify the correctness
 of the proof.
@@ -81,7 +81,7 @@ but the hint in ``bar`` is ignored and thus ``bar`` looks to the verifier as fol
 
 This may look weird at a first glance, since x is uninitialized and then we assert that
 ``x * x = 25`` and returned the uninitialized value. But in Cairo when you have an
-uninitialized value, it simply means that the prover decide on its value (due to immutability,
+uninitialized value, it simply means that the prover decides on its value (due to immutability,
 the value of ``x`` cannot change during the run).
 Let's analyze the code of ``bar()`` from the point of view of the verifier
 (so we must ignore the hint).
