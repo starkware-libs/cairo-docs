@@ -50,7 +50,10 @@ class BoolAndExpr(BoolExpr):
 
     def to_particle(self) -> Particle:
         self.notes.assert_no_comments()
-        return ParticleList([self.a.to_particle(), " and ", self.b.to_particle()])
+        a = self.a.to_particle()
+        a.add_suffix(" and ")
+        b = self.b.to_particle()
+        return ParticleList([a, b])
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return [self.a, self.b]
