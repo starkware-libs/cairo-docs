@@ -663,24 +663,24 @@ class CodeElementFor(CodeElement):
         return [self.clauses, self.code_block]
 
     def format(self, allowed_line_length: int) -> str:
-        clauses_particles = self.clauses.get_particles()
+        clauses = self.clauses.to_particle()
 
         # If there are any clauses, we need to separate "for" keyword from them with whitespace;
         # otherwise, we want to stick "for" with ":" together.
-        if len(clauses_particles.elements) > 0:
+        if len(clauses.elements) > 0:
             config = ParticleFormattingConfig(
                 allowed_line_length=allowed_line_length, line_indent=INDENTATION
             )
 
             single_line_particles = SeparatedParticleList(
-                elements=clauses_particles.elements, start="for ", end=":"
+                elements=clauses.elements, start="for ", end=":"
             )
             code = particles_in_lines(single_line_particles, config)
 
             # If resulting code is multiline, we want to wrap clauses in parentheses.
             if "\n" in code:
                 multi_line_particles = SeparatedParticleList(
-                    elements=clauses_particles.elements, start="for (", end="):"
+                    elements=clauses.elements, start="for (", end="):"
                 )
                 code = particles_in_lines(multi_line_particles, config)
         else:

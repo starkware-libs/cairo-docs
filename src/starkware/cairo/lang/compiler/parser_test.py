@@ -3,6 +3,7 @@ from typing import List
 import pytest
 
 from starkware.cairo.lang.compiler.ast.aliased_identifier import AliasedIdentifier
+from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
 from starkware.cairo.lang.compiler.ast.cairo_types import (
     CairoType,
     TypeCodeoffset,
@@ -33,6 +34,7 @@ from starkware.cairo.lang.compiler.ast.for_loop import (
     ForClauseIn,
     ForGeneratorRange,
     ForClausesList,
+    ForClauseWith,
 )
 from starkware.cairo.lang.compiler.ast.formatting_utils import FormattingError
 from starkware.cairo.lang.compiler.ast.instructions import (
@@ -930,7 +932,7 @@ def test_pointer():
 
 def test_for_range():
     source = """\
-for i in range(0, 10, step=2):
+for i : felt in range(0, 10, step=2):
     f()
 end\
 """
@@ -939,7 +941,9 @@ end\
     assert res.clauses == ForClausesList.from_clauses(
         [
             ForClauseIn(
-                identifier=ExprIdentifier(name="i"),
+                identifier=TypedIdentifier(
+                    identifier=ExprIdentifier(name="i"), expr_type=TypeFelt()
+                ),
                 generator=ForGeneratorRange.from_arguments(
                     ArgList.from_args(
                         [
@@ -951,6 +955,30 @@ end\
                         ]
                     )
                 ),
+            )
+        ]
+    )
+    assert res.format(allowed_line_length=100) == source
+
+
+def test_for_with():
+    source = """\
+for with(i, j, k):
+    f()
+end\
+"""
+    res = parse_code_element(source)
+    assert isinstance(res, CodeElementFor)
+    assert res.clauses == ForClausesList.from_clauses(
+        [
+            ForClauseWith(
+                identifiers=IdentifierList.from_identifiers(
+                    [
+                        TypedIdentifier(identifier=ExprIdentifier(name="i"), expr_type=None),
+                        TypedIdentifier(identifier=ExprIdentifier(name="j"), expr_type=None),
+                        TypedIdentifier(identifier=ExprIdentifier(name="k"), expr_type=None),
+                    ],
+                )
             )
         ]
     )
@@ -1005,10 +1033,10 @@ end\
 def test_for_with_many_clauses_parenthesized():
     source = """\
 for (
-    _ in range(10),
-    _ in range(10),
-    _ in range(10),
-    _ in range(10),
+    i in range(10),
+    j in range(10),
+    k in range(10),
+    with(x, y, z),
 ):
     f()
 end\
@@ -1016,3 +1044,19 @@ end\
     res = parse_code_element(source)
     assert isinstance(res, CodeElementFor) and len(res.clauses.clauses) == 4
     assert res.format(allowed_line_length=40) == source
+
+
+def test_for_clauses_are_sorted_on_format():
+    # We expect sorting to be stable!
+    source = """\
+for with(y), i in range(1), with(x), j in range(2):
+    f()
+end\
+"""
+    expected = """\
+for i in range(1), j in range(2), with(y), with(x):
+    f()
+end\
+"""
+    res = parse_code_element(source)
+    assert res.format(allowed_line_length=100) == expected
