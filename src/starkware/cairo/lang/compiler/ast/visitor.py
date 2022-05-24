@@ -1,3 +1,4 @@
+import dataclasses
 from contextlib import contextmanager
 from typing import List, Optional
 
@@ -13,6 +14,7 @@ from starkware.cairo.lang.compiler.ast.code_elements import (
     LangDirective,
     CodeElementFor,
 )
+from starkware.cairo.lang.compiler.ast.for_loop import ForClausesList
 from starkware.cairo.lang.compiler.ast.module import CairoFile, CairoModule
 from starkware.cairo.lang.compiler.ast.node import AstNode
 from starkware.cairo.lang.compiler.error_handling import LocationError
@@ -98,7 +100,10 @@ class Visitor:
         )
 
     def visit_CodeElementFor(self, elm: CodeElementFor):
-        raise VisitorError("For loops are not supported yet.", location=elm.location)
+        return dataclasses.replace(elm, code_block=self.visit(elm.code_block))
+
+    def visit_ForClausesList(self, obj: ForClausesList):
+        return dataclasses.replace(obj, clauses=[self.visit(clause) for clause in obj.clauses])
 
     def visit_CodeElementWithAttr(self, elm: CodeElementWithAttr):
         return CodeElementWithAttr(
