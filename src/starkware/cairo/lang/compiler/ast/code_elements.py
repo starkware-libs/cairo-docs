@@ -406,7 +406,7 @@ class CommentedCodeElement(AstNode):
 
 @dataclasses.dataclass
 class CodeBlock(AstNode):
-    code_elements: List[CommentedCodeElement] = dataclasses.field(default_factory=list)
+    code_elements: List[CommentedCodeElement]
 
     def format(self, allowed_line_length):
         code_elements = remove_redundant_empty_lines(self.code_elements)
