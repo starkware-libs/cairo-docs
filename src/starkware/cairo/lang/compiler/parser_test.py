@@ -977,7 +977,7 @@ end\
 
 def test_if_multiline_and():
     # TODO(mkaput, 18/05/2022): This formatting is not ideal, but we cannot use parentheses here
-    #   due to ambiguity conflict with regular expressions.
+    #   due to ambiguity conflict with arithmetic expressions.
     code = """\
 if a == 0 and b == 0 and c == 0 and
     d == 0 and e == 0:

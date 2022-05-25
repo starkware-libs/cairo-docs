@@ -15,6 +15,10 @@ from starkware.cairo.lang.compiler.error_handling import Location
 
 
 class BoolExpr(AstNode, ABC):
+    """
+    Base class for all boolean expressions.
+    """
+
     location: Optional[Location] = LocationField
 
     @abstractmethod
@@ -26,6 +30,12 @@ class BoolExpr(AstNode, ABC):
 
 @dataclasses.dataclass
 class BoolEqExpr(BoolExpr):
+    """
+    Represents a trivial (in)equality comparison between two expressions.
+
+    This is the most primitive building block of conditions in ``if`` code element.
+    """
+
     a: Expression
     b: Expression
     eq: bool
@@ -43,6 +53,10 @@ class BoolEqExpr(BoolExpr):
 
 @dataclasses.dataclass
 class BoolAndExpr(BoolExpr):
+    """
+    Represents logical conjunction of two ``BoolExpr``s (``and`` operator).
+    """
+
     a: BoolExpr
     b: BoolEqExpr
     notes: Notes = NotesField
@@ -50,7 +64,10 @@ class BoolAndExpr(BoolExpr):
 
     def to_particle(self) -> Particle:
         self.notes.assert_no_comments()
-        return ParticleList([self.a.to_particle(), " and ", self.b.to_particle()])
+        a = self.a.to_particle()
+        a.add_suffix(" and ")
+        b = self.b.to_particle()
+        return ParticleList([a, b])
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return [self.a, self.b]
