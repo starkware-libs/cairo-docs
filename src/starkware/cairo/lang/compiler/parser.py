@@ -112,6 +112,7 @@ def wrap_lark_error(err: LarkError, input_file: InputFile) -> Exception:
             "HINT": "hint",
             "IDENTIFIER": "identifier",
             "IF": '"if"',
+            "IN": '"in"',
             "INT": "integer",
             "JMP": '"jmp"',
             "LANG": '"%lang"',

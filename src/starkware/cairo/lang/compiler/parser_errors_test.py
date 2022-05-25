@@ -232,3 +232,57 @@ new A() new
         ^*^
 """,
     )
+
+
+def test_for_loop_only_keyword():
+    verify_exception(
+        """
+for
+""",
+        """
+file:?:?: Unexpected end of input. Expected one of: ",", ":", "with", identifier.
+for
+   ^
+""",
+    )
+
+
+def test_for_loop_missing_in_without_iterator_type():
+    # Parser will look up for `i` type here.
+    verify_exception(
+        """
+for i:
+""",
+        """
+file:?:?: Unexpected token Token('_NEWLINE', '\\n'). Expected one of: "(", CODEOFFSET, FELT, \
+identifier.
+for i:
+      ^
+""",
+    )
+
+
+def test_for_loop_missing_in_with_iterator_type():
+    verify_exception(
+        """
+for i: felt:
+""",
+        """
+file:?:?: Unexpected token Token('COLON', ':'). Expected one of: "*", "in".
+for i: felt:
+           ^
+""",
+    )
+
+
+def test_for_loop_missing_generator():
+    verify_exception(
+        """
+for i in:
+""",
+        """
+file:?:?: Unexpected token Token('COLON', ':'). Expected: identifier.
+for i in:
+        ^
+""",
+    )
