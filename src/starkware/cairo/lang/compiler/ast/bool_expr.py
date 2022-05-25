@@ -33,7 +33,7 @@ class BoolEqExpr(BoolExpr):
     """
     Represents a trivial (in)equality comparison between two expressions.
 
-    This is the most primitive building block of conditions in if code element.
+    This is the most primitive building block of conditions in ``if`` code element.
     """
 
     a: Expression
