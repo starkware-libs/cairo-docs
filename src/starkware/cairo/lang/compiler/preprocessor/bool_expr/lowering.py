@@ -27,33 +27,22 @@ class BoolExprLoweringVisitor(Visitor):
         return elm
 
     def visit_CodeElementIf(self, elm: CodeElementIf) -> CodeElementIf:
-        return ConditionLowering(elm).visit(elm.condition)
+        if isinstance(elm.condition, BoolEqExpr):
+            return elm
 
+        assert isinstance(elm.condition, BoolAndExpr)
 
-class ConditionLowering(Visitor):
-    def __init__(self, source_elm: CodeElementIf):
-        super().__init__()
-        self.source_elm = source_elm
-
-    def _visit_default(self, obj):
-        assert isinstance(obj, BoolExpr)
-        return obj
-
-    def visit_BoolEqExpr(self, condition: BoolEqExpr) -> CodeElementIf:
-        return dataclasses.replace(self.source_elm, condition=condition)
-
-    def visit_BoolAndExpr(self, condition: BoolAndExpr) -> CodeElementIf:
         # TODO(mkaput, 19/05/2022): Support else blocks
-        if self.source_elm.else_code_block is not None:
+        if elm.else_code_block is not None:
             raise BoolExprLoweringError(
                 "Else blocks are not supported with boolean logic expressions yet.",
-                location=self.source_elm.location,
+                location=elm.location,
             )
 
         # TODO(mkaput, 19/05/2022): Support more complex chains.
-        if not isinstance(condition.a, BoolEqExpr):
+        if not isinstance(elm.condition.a, BoolEqExpr):
             raise BoolExprLoweringError(
-                "Nested and expressions are not supported yet.", location=condition.a.location
+                "Nested and expressions are not supported yet.", location=elm.condition.a.location
             )
 
         # Substitute:
@@ -69,10 +58,16 @@ class ConditionLowering(Visitor):
         #             main_code_block
         #         end
         #     end
-        elm = self.visit(condition.b)
-        return dataclasses.replace(
-            self.source_elm,
-            condition=condition.a,
-            main_code_block=CodeBlock.singleton(elm),
+        return CodeElementIf(
+            condition=elm.condition.a,
+            main_code_block=CodeBlock.singleton(
+                CodeElementIf(
+                    condition=elm.condition.b,
+                    main_code_block=elm.main_code_block,
+                    else_code_block=None,
+                    location=elm.location,
+                )
+            ),
             else_code_block=None,
+            location=elm.location,
         )
