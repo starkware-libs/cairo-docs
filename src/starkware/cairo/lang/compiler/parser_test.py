@@ -1047,7 +1047,7 @@ end\
 
 
 def test_for_clauses_are_sorted_on_format():
-    # We expect sorting to be stable!
+    # Clauses are expected to be stable sorted.
     source = """\
 for with(y), i in range(1), with(x), j in range(2):
     f()
