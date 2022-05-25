@@ -286,3 +286,17 @@ for i in:
         ^
 """,
     )
+
+
+def test_for_loop_with_iterator_modifier():
+    verify_exception(
+        """
+for local i: felt in range(5):
+""",
+        """
+file:?:?: Unexpected token Token('LOCAL', 'local'). Expected one of: "(", ",", ":", "with", \
+identifier.
+for local i: felt in range(5):
+    ^***^
+""",
+    )
