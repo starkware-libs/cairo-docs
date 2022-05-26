@@ -663,7 +663,7 @@ class CodeElementFor(CodeElement):
         return [self.clauses, self.code_block]
 
     def format(self, allowed_line_length: int) -> str:
-        clauses = self.clauses.to_particle()
+        clauses: SeparatedParticleList = self.clauses.to_particle()
 
         # If there are any clauses, we need to separate "for" keyword from them with whitespace;
         # otherwise, we want to stick "for" with ":" together.
