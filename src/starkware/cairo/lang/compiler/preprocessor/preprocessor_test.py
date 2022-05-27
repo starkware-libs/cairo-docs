@@ -4490,3 +4490,42 @@ jmp rel 3 if [ap + (-1)] != 0
 ret
 """
     )
+
+
+def test_if_with_nested_and_and_else():
+    code = """
+func main():
+    tempvar a = 10
+    tempvar b = 12
+    tempvar c = 14
+    if a == 10 and b == 12 and c == 14:
+        tempvar x = a + b
+    else:
+        tempvar x = a - b
+    end
+    ret
+end
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+        program.format()
+        == """\
+[ap] = 10; ap++
+[ap] = 12; ap++
+[ap] = 14; ap++
+[ap] = [ap + (-3)] + (-10); ap++
+jmp rel 20 if [ap + (-1)] != 0
+[ap] = [ap + (-3)] + (-12); ap++
+jmp rel 12 if [ap + (-1)] != 0
+[ap] = [ap + (-3)] + (-14); ap++
+jmp rel 5 if [ap + (-1)] != 0
+[ap] = [ap + (-6)] + [ap + (-5)]; ap++
+jmp rel 3
+[ap] = [ap + (-6)] - [ap + (-5)]; ap++
+jmp rel 4
+jmp rel -3
+jmp rel 4
+jmp rel -7
+ret
+"""
+    )
