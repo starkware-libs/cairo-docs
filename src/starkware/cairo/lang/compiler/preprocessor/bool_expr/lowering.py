@@ -1,10 +1,18 @@
-import dataclasses
-
 from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr, BoolAndExpr, BoolEqExpr
-from starkware.cairo.lang.compiler.ast.code_elements import CodeElementIf, CodeBlock
+from starkware.cairo.lang.compiler.ast.code_elements import (
+    CodeElementIf,
+    CodeBlock,
+    CodeElementLabel,
+    CodeElementInstruction,
+)
+from starkware.cairo.lang.compiler.ast.expr import ExprIdentifier
+from starkware.cairo.lang.compiler.ast.instructions import (
+    InstructionAst,
+    JumpToLabelInstruction,
+)
 from starkware.cairo.lang.compiler.ast.visitor import Visitor
-from starkware.cairo.lang.compiler.preprocessor.bool_expr.errors import BoolExprLoweringError
 from starkware.cairo.lang.compiler.preprocessor.pass_manager import VisitorStage, PassManagerContext
+from starkware.cairo.lang.compiler.unique_name_provider import UniqueNameKind
 
 
 class BoolExprLoweringStage(VisitorStage):
@@ -30,14 +38,31 @@ class BoolExprLoweringVisitor(Visitor):
         if isinstance(elm.condition, BoolEqExpr):
             return elm
 
-        # TODO(mkaput, 19/05/2022): Support else blocks
         if elm.else_code_block is not None:
-            raise BoolExprLoweringError(
-                "Else blocks are not supported with boolean logic expressions yet.",
-                location=elm.location,
+            label = ExprIdentifier(
+                name=self.context.unique_names.next(UniqueNameKind.Label), location=elm.location
             )
+            real_else_code_block = (
+                CodeBlock.singleton(CodeElementLabel(identifier=label)) + elm.else_code_block
+            )
+            jump_to_else_code_block = CodeBlock.singleton(
+                CodeElementInstruction(
+                    InstructionAst(
+                        body=JumpToLabelInstruction(
+                            label=label, condition=None, location=elm.location
+                        ),
+                        inc_ap=False,
+                        location=elm.location,
+                    )
+                )
+            )
+        else:
+            real_else_code_block = None
+            jump_to_else_code_block = None
 
-        def lower_conjunction_chain(lhs: BoolExpr, main_code_block: CodeBlock) -> CodeElementIf:
+        def lower_conjunction_chain(
+            lhs: BoolExpr, main_code_block: CodeBlock, else_code_block: CodeBlock
+        ) -> CodeElementIf:
             """
             Substitutes::
 
@@ -63,7 +88,7 @@ class BoolExprLoweringVisitor(Visitor):
                 return CodeElementIf(
                     condition=lhs,
                     main_code_block=main_code_block,
-                    else_code_block=None,
+                    else_code_block=else_code_block,
                     location=elm.location,
                 )
 
@@ -75,10 +100,11 @@ class BoolExprLoweringVisitor(Visitor):
                     CodeElementIf(
                         condition=lhs.b,
                         main_code_block=main_code_block,
-                        else_code_block=None,
+                        else_code_block=else_code_block,
                         location=elm.location,
                     )
                 ),
+                else_code_block=jump_to_else_code_block,
             )
 
-        return lower_conjunction_chain(elm.condition, elm.main_code_block)
+        return lower_conjunction_chain(elm.condition, elm.main_code_block, real_else_code_block)
