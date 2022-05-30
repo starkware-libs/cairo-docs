@@ -70,7 +70,7 @@ func main():
     let a = 10
     let b = 12
     let c = 14
-    if a == 10 and b == 12 and c == 14:
+    if a == 10 and b != 12 and c == 14:
         let x = a + b + c
     else:
         let x = a - b - c
@@ -86,7 +86,7 @@ func main():
     let b = 12
     let c = 14
     if a == 10:
-        if b == 12:
+        if b != 12:
             if c == 14:
                 let x = a + b + c
             else:

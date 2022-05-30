@@ -4498,7 +4498,7 @@ func main():
     tempvar a = 10
     tempvar b = 12
     tempvar c = 14
-    if a == 10 and b == 12 and c == 14:
+    if a == 10 and b != 12 and c == 14:
         tempvar x = a + b
     else:
         tempvar x = a - b
