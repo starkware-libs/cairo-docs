@@ -2,6 +2,7 @@ import dataclasses
 from abc import ABC, abstractmethod
 from typing import Sequence, Optional, List
 
+from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
 from starkware.cairo.lang.compiler.ast.expr import ExprIdentifier, ArgList
 from starkware.cairo.lang.compiler.ast.formatting_utils import (
     LocationField,
@@ -12,6 +13,7 @@ from starkware.cairo.lang.compiler.ast.formatting_utils import (
 from starkware.cairo.lang.compiler.ast.node import AstNode
 from starkware.cairo.lang.compiler.ast.notes import Notes, NoteListField
 from starkware.cairo.lang.compiler.ast.rvalue import RvalueFuncCall
+from starkware.cairo.lang.compiler.ast.types import TypedIdentifier
 from starkware.cairo.lang.compiler.error_handling import Location
 
 
@@ -35,12 +37,25 @@ class ForClausesList(AstNode):
         for note in self.notes:
             note.assert_no_comments()
 
-    def get_particles(self) -> SeparatedParticleList:
+    def to_particle(self) -> SeparatedParticleList:
         self.assert_no_comments()
-        return SeparatedParticleList(elements=[clause.to_particle() for clause in self.clauses])
+
+        def clause_order(clause: ForClause):
+            order = [ForClauseIn, ForClauseWith]
+            return order.index(type(clause))
+
+        return SeparatedParticleList(
+            elements=[clause.to_particle() for clause in (sorted(self.clauses, key=clause_order))]
+        )
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return self.clauses
+
+    def in_clauses(self) -> List["ForClauseIn"]:
+        return [clause for clause in self.clauses if isinstance(clause, ForClauseIn)]
+
+    def with_clauses(self) -> List["ForClauseWith"]:
+        return [clause for clause in self.clauses if isinstance(clause, ForClauseWith)]
 
     @classmethod
     def from_clauses(cls, clauses: List[ForClause], **kwargs) -> "ForClausesList":
@@ -66,12 +81,26 @@ class ForGeneratorRange(RvalueFuncCall):
 
 @dataclasses.dataclass
 class ForClauseIn(ForClause):
-    identifier: ExprIdentifier
+    identifier: TypedIdentifier
     generator: ForGeneratorRange
     location: Optional[Location] = LocationField
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return [self.identifier, self.generator]
 
-    def to_particle(self):
+    def to_particle(self) -> Particle:
         return ParticleList([f"{self.identifier.format()} in ", *self.generator.get_particles()])
+
+
+@dataclasses.dataclass
+class ForClauseWith(ForClause):
+    identifiers: IdentifierList
+    location: Optional[Location] = LocationField
+
+    def get_children(self) -> Sequence[Optional[AstNode]]:
+        return [self.identifiers]
+
+    def to_particle(self) -> Particle:
+        return SeparatedParticleList(
+            start="with(", elements=self.identifiers.get_particles(), end=")"
+        )

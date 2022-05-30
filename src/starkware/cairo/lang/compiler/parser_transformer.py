@@ -71,6 +71,7 @@ from starkware.cairo.lang.compiler.ast.for_loop import (
     ForClauseIn,
     ForGeneratorRange,
     ForClausesList,
+    ForClauseWith,
 )
 from starkware.cairo.lang.compiler.ast.instructions import (
     AddApInstruction,
@@ -757,7 +758,11 @@ class ParserTransformer(Transformer):
         return ForClausesList(clauses=nodes.args, notes=nodes.notes, location=self.meta2loc(meta))
 
     @v_args(inline=True, meta=True)
-    def for_clause_in(self, meta, identifier: ExprIdentifier, generator: ForGeneratorRange):
+    def for_clause_with(self, meta, identifiers: IdentifierList):
+        return ForClauseWith(identifiers=identifiers, location=self.meta2loc(meta))
+
+    @v_args(inline=True, meta=True)
+    def for_clause_in(self, meta, identifier: TypedIdentifier, generator: ForGeneratorRange):
         return ForClauseIn(identifier=identifier, generator=generator, location=self.meta2loc(meta))
 
     @v_args(inline=True)
