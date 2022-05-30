@@ -79,6 +79,7 @@ bool_expr: expr _DBL_EQ expr   -> bool_expr_eq
 !modifier: "local" -> modifier_local
 
 typed_identifier: (modifier)? identifier_def (":" type)?
+typed_identifier_without_modifier: identifier_def (":" type)? -> typed_identifier
 
 _ref_binding: typed_identifier | "(" identifier_list ")"
 
@@ -133,8 +134,8 @@ _if: "if" bool_expr ":" _NEWLINE code_block ("else" ":" _NEWLINE code_block)? "e
 
 // For loops
 for_generator: function_call
-for_clause: "with" "(" identifier_list ")"      -> for_clause_with
-          | typed_identifier "in" for_generator -> for_clause_in
+for_clause: "with" "(" identifier_list ")"                       -> for_clause_with
+          | typed_identifier_without_modifier "in" for_generator -> for_clause_in
 for_clauses_list: _maybe_parenthesized{comma_separated_with_notes{for_clause}}
 FOR: "for"
 _for: FOR for_clauses_list ":" _NEWLINE code_block "end"
