@@ -10,6 +10,7 @@ from starkware.cairo.lang.compiler.ast.cairo_types import (
     TypeFelt,
     TypePointer,
     TypeTuple,
+    TypeStruct,
 )
 from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeElementFor,
@@ -35,6 +36,7 @@ from starkware.cairo.lang.compiler.ast.for_loop import (
     ForGeneratorRange,
     ForClausesList,
     ForClauseWith,
+    ForGeneratorSlice,
 )
 from starkware.cairo.lang.compiler.ast.formatting_utils import FormattingError
 from starkware.cairo.lang.compiler.ast.instructions import (
@@ -62,6 +64,7 @@ from starkware.cairo.lang.compiler.parser import (
 )
 from starkware.cairo.lang.compiler.parser_test_utils import verify_exception
 from starkware.cairo.lang.compiler.parser_transformer import ParserContext, ParserError
+from starkware.cairo.lang.compiler.scoped_name import ScopedName
 from starkware.python.utils import safe_zip
 
 
@@ -985,6 +988,42 @@ end\
     assert res.format(allowed_line_length=100) == source
 
 
+def test_for_slice():
+    source = """\
+for i : MyStruct* in slice(arr, 10, MyStruct.SIZE):
+    f()
+end\
+"""
+    res = parse_code_element(source)
+    assert isinstance(res, CodeElementFor)
+    assert res.clauses == ForClausesList.from_clauses(
+        [
+            ForClauseIn(
+                identifier=TypedIdentifier(
+                    identifier=ExprIdentifier(name="i"),
+                    expr_type=TypePointer(
+                        pointee=TypeStruct(
+                            scope=ScopedName(path=("MyStruct",)), is_fully_resolved=False
+                        )
+                    ),
+                ),
+                generator=ForGeneratorSlice.from_arguments(
+                    ArgList.from_args(
+                        [
+                            ExprAssignment(identifier=None, expr=ExprIdentifier(name="arr")),
+                            ExprAssignment(identifier=None, expr=ExprConst(val=10)),
+                            ExprAssignment(
+                                identifier=None, expr=ExprIdentifier(name="MyStruct.SIZE")
+                            ),
+                        ]
+                    )
+                ),
+            )
+        ]
+    )
+    assert res.format(allowed_line_length=100) == source
+
+
 def test_range_is_contextual_keyword():
     source = """\
 for _ in range(10):
@@ -999,7 +1038,7 @@ def test_for_with_unknown_generator():
     verify_exception(
         "for _ in foobar():\n    f()\nend",
         """
-file:?:?: Unknown for loop generator 'foobar'. Only 'range' is supported here.
+file:?:?: Unknown for loop generator 'foobar'. Only 'range', 'slice' are supported here.
 for _ in foobar():
          ^****^
 """,
