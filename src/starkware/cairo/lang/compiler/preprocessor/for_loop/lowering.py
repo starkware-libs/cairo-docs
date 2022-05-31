@@ -67,6 +67,6 @@ def _check_body_has_no_alloc_locals(code_block: CodeBlock):
     elms = code_block.code_elements
     if len(elms) > 0 and isinstance(elms[0].code_elm, CodeElementAllocLocals):
         raise ForLoopLoweringError(
-            "alloc_locals is not needed in for loop body.",
+            "alloc_locals is not allowed in the body of a for loop.",
             location=elms[0].location,
         )
