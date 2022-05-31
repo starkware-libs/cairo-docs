@@ -1,8 +1,7 @@
-import dataclasses
-
 from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr, BoolAndExpr, BoolEqExpr
 from starkware.cairo.lang.compiler.ast.code_elements import CodeElementIf, CodeBlock
 from starkware.cairo.lang.compiler.ast.visitor import Visitor
+from starkware.cairo.lang.compiler.error_handling import Location
 from starkware.cairo.lang.compiler.preprocessor.bool_expr.errors import BoolExprLoweringError
 from starkware.cairo.lang.compiler.preprocessor.pass_manager import VisitorStage, PassManagerContext
 
@@ -37,48 +36,54 @@ class BoolExprLoweringVisitor(Visitor):
                 location=elm.location,
             )
 
-        def lower_conjunction_chain(lhs: BoolExpr, main_code_block: CodeBlock) -> CodeElementIf:
-            """
-            Substitutes::
+        return _lower_conjunction_chain(
+            lhs=elm.condition, main_code_block=elm.main_code_block, location=elm.location
+        )
 
-                if a and b:
-                    main_code_block
-                end
 
-            with::
+def _lower_conjunction_chain(
+    lhs: BoolExpr, main_code_block: CodeBlock, location: Location
+) -> CodeElementIf:
+    """
+    Substitutes::
 
-                if a:
-                    if b:
-                        main_code_block
-                    end
-                end
+        if a and b:
+            main_code_block
+        end
 
-            Recursively for whole `and` chains.
+    with::
 
-            Python's recursion limit guards against getting into infinite loops, which may happen if
-            the compiler has a bug and makes a loop in conditions tree.
-            """
-            if isinstance(lhs, BoolEqExpr):
-                # We have reached innermost/first equation to check.
-                return CodeElementIf(
-                    condition=lhs,
-                    main_code_block=main_code_block,
-                    else_code_block=None,
-                    location=elm.location,
-                )
+        if a:
+            if b:
+                main_code_block
+            end
+        end
 
-            assert isinstance(lhs, BoolAndExpr)
+    Recursively for whole `and` chains.
 
-            return lower_conjunction_chain(
-                lhs=lhs.a,
-                main_code_block=CodeBlock.singleton(
-                    CodeElementIf(
-                        condition=lhs.b,
-                        main_code_block=main_code_block,
-                        else_code_block=None,
-                        location=elm.location,
-                    )
-                ),
+    Python's recursion limit guards against getting into infinite loops, which may happen if
+    the compiler has a bug and makes a loop in conditions tree.
+    """
+    if isinstance(lhs, BoolEqExpr):
+        # We have reached innermost/first equation to check.
+        return CodeElementIf(
+            condition=lhs,
+            main_code_block=main_code_block,
+            else_code_block=None,
+            location=location,
+        )
+
+    assert isinstance(lhs, BoolAndExpr)
+
+    return _lower_conjunction_chain(
+        lhs=lhs.a,
+        main_code_block=CodeBlock.singleton(
+            CodeElementIf(
+                condition=lhs.b,
+                main_code_block=main_code_block,
+                else_code_block=None,
+                location=location,
             )
-
-        return lower_conjunction_chain(elm.condition, elm.main_code_block)
+        ),
+        location=location,
+    )
