@@ -13,7 +13,7 @@ func main():
 end
 """,
         """
-file:?:?: alloc_locals is not needed in for loop body.
+file:?:?: alloc_locals is not allowed in the body of a for loop.
         alloc_locals
         ^**********^
 """,

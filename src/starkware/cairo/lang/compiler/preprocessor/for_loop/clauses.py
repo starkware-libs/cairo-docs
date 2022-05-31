@@ -25,7 +25,7 @@ class InClauseLowering:
 def fetch_in_clause(elm: CodeElementFor) -> ForClauseIn:
     in_clauses = elm.clauses.in_clauses()
 
-    if not in_clauses:
+    if len(in_clauses) == 0:
         raise ForLoopLoweringError("For loop requires one 'in' clause.", location=elm.location)
 
     if len(in_clauses) > 1:
