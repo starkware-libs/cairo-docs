@@ -27,6 +27,12 @@ class BoolExpr(AstNode, ABC):
         Get formatting particle for this expression.
         """
 
+    @abstractmethod
+    def first_bool_leaf(self) -> "BoolEqExpr":
+        """
+        Get the first leaf ``BoolEqExpr`` in this boolean expression which will be evaluated.
+        """
+
 
 @dataclasses.dataclass
 class BoolEqExpr(BoolExpr):
@@ -50,6 +56,9 @@ class BoolEqExpr(BoolExpr):
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return [self.a, self.b]
 
+    def first_bool_leaf(self) -> "BoolEqExpr":
+        return self
+
 
 @dataclasses.dataclass
 class BoolAndExpr(BoolExpr):
@@ -58,7 +67,7 @@ class BoolAndExpr(BoolExpr):
     """
 
     a: BoolExpr
-    b: BoolEqExpr
+    b: BoolExpr
     notes: Notes = NotesField
     location: Optional[Location] = LocationField
 
@@ -71,3 +80,31 @@ class BoolAndExpr(BoolExpr):
 
     def get_children(self) -> Sequence[Optional[AstNode]]:
         return [self.a, self.b]
+
+    def first_bool_leaf(self) -> "BoolEqExpr":
+        return self.a.first_bool_leaf()
+
+
+@dataclasses.dataclass
+class BoolOrExpr(BoolExpr):
+    """
+    Represents logical alternative of two ``BoolExpr``s (``or`` operator).
+    """
+
+    a: BoolExpr
+    b: BoolExpr
+    notes: Notes = NotesField
+    location: Optional[Location] = LocationField
+
+    def to_particle(self) -> Particle:
+        self.notes.assert_no_comments()
+        a = self.a.to_particle()
+        a.add_suffix(" or ")
+        b = self.b.to_particle()
+        return ParticleList([a, b])
+
+    def get_children(self) -> Sequence[Optional[AstNode]]:
+        return [self.a, self.b]
+
+    def first_bool_leaf(self) -> "BoolEqExpr":
+        return self.a.first_bool_leaf()
