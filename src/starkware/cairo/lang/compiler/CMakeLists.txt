@@ -49,6 +49,7 @@ python_lib(cairo_compile_lib
     preprocessor/auxiliary_info_collector.py
     preprocessor/bool_expr/__init__.py
     preprocessor/bool_expr/errors.py
+    preprocessor/bool_expr/jumps.py
     preprocessor/bool_expr/lowering.py
     preprocessor/code_element_injecting_visitor.py
     preprocessor/compound_expressions.py
