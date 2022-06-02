@@ -645,8 +645,6 @@ class CodeElementIf(CodeElement):
     condition: BoolExpr
     main_code_block: CodeBlock
     else_code_block: Optional[CodeBlock]
-    label_neq: Optional[str] = None
-    label_end: Optional[str] = None
     location: Optional[Location] = LocationField
 
     def format(self, allowed_line_length):

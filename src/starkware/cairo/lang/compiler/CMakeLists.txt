@@ -55,7 +55,6 @@ python_lib(cairo_compile_lib
     preprocessor/flow.py
     preprocessor/identifier_aware_visitor.py
     preprocessor/identifier_collector.py
-    preprocessor/if_labels.py
     preprocessor/if_statements/__init__.py
     preprocessor/if_statements/errors.py
     preprocessor/if_statements/jumps.py

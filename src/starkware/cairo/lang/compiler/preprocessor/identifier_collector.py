@@ -209,23 +209,6 @@ class IdentifierCollector(Visitor):
                 self.current_scope + identifier.name, ReferenceDefinition, identifier.location
             )
 
-    def visit_CodeElementIf(self, obj: CodeElementIf):
-        assert obj.label_neq is not None
-        assert obj.label_end is not None
-        self.add_future_identifier(
-            name=self.current_scope + obj.label_neq,
-            identifier_type=LabelDefinition,
-            location=obj.location,
-        )
-        self.add_future_identifier(
-            name=self.current_scope + obj.label_end,
-            identifier_type=LabelDefinition,
-            location=obj.location,
-        )
-        self.visit(obj.main_code_block)
-        if obj.else_code_block is not None:
-            self.visit(obj.else_code_block)
-
     def visit_CodeBlock(self, code_block: CodeBlock):
         """
         Collects all identifiers in a code block.

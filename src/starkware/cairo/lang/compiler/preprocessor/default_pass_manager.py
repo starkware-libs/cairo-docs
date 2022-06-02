@@ -9,7 +9,6 @@ from starkware.cairo.lang.compiler.preprocessor.if_statements.lowering import If
 from starkware.cairo.lang.compiler.preprocessor.dependency_graph import DependencyGraphStage
 from starkware.cairo.lang.compiler.preprocessor.directives import DirectivesCollectorStage
 from starkware.cairo.lang.compiler.preprocessor.identifier_collector import IdentifierCollector
-from starkware.cairo.lang.compiler.preprocessor.if_labels import IfLabelAssigner
 from starkware.cairo.lang.compiler.preprocessor.pass_manager import (
     PassManager,
     PassManagerContext,
@@ -41,12 +40,6 @@ def default_pass_manager(
         ),
     )
     manager.add_stage("if_lowering", IfLoweringStage())
-    manager.add_stage(
-        "if_label_assigner",
-        VisitorStage(
-            lambda context: IfLabelAssigner(unique_names=context.unique_names), modify_ast=True
-        ),
-    )
     manager.add_stage(
         "identifier_collector",
         VisitorStage(lambda context: IdentifierCollector(identifiers=context.identifiers)),

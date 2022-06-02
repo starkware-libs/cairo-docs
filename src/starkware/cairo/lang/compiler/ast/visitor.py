@@ -87,15 +87,12 @@ class Visitor:
         )
 
     def visit_CodeElementIf(self, elm: CodeElementIf):
-        return CodeElementIf(
-            condition=elm.condition,
+        return dataclasses.replace(
+            elm,
             main_code_block=self.visit(elm.main_code_block),
             else_code_block=(
                 self.visit(elm.else_code_block) if elm.else_code_block is not None else None
             ),
-            label_neq=elm.label_neq,
-            label_end=elm.label_end,
-            location=elm.location,
         )
 
     def visit_CodeElementWithAttr(self, elm: CodeElementWithAttr):
