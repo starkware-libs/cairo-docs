@@ -423,6 +423,10 @@ class CodeBlock(AstNode):
         return CodeBlock(code_elements=self.code_elements + other.code_elements)
 
     @classmethod
+    def empty(cls):
+        return cls([])
+
+    @classmethod
     def from_code_elements(cls, code_elements: Iterable[CodeElement]) -> "CodeBlock":
         return cls(
             code_elements=[
