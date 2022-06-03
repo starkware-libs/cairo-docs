@@ -20,17 +20,11 @@ end
 func main():
     let a = 10
     let b = 12
-
-    $lbl0:
-    jmp $lbl3 if a - 10 != 0
-
-    $lbl1:
-    jmp $lbl3 if b - 12 != 0
-
-    $lbl2:
+    jmp $lbl0 if a - 10 != 0
+    jmp $lbl0 if b - 12 != 0
     let x = a + b
 
-    $lbl3:
+    $lbl0:
     ret
 end
 """
@@ -56,20 +50,12 @@ func main():
     let a = 10
     let b = 12
     let c = 14
-
-    $lbl0:
-    jmp $lbl4 if a - 10 != 0
-
-    $lbl1:
-    jmp $lbl4 if b - 12 != 0
-
-    $lbl2:
-    jmp $lbl4 if c - 14 != 0
-
-    $lbl3:
+    jmp $lbl0 if a - 10 != 0
+    jmp $lbl0 if b - 12 != 0
+    jmp $lbl0 if c - 14 != 0
     let x = a + b + c
 
-    $lbl4:
+    $lbl0:
     ret
 end
 """
@@ -95,21 +81,17 @@ end
 func main():
     let a = 10
     let b = 12
+    jmp $lbl0 if a - 10 != 0
+    jmp $lbl1 if b - 12 != 0
 
     $lbl0:
-    jmp $lbl2 if a - 10 != 0
+    let x = a - b
+    jmp $lbl2
 
     $lbl1:
-    jmp $lbl3 if b - 12 != 0
-
-    $lbl2:
-    let x = a - b
-    jmp $lbl4
-
-    $lbl3:
     let x = a + b
 
-    $lbl4:
+    $lbl2:
     ret
 end
 """
@@ -143,50 +125,38 @@ end
 func main():
     let a = 10
     let b = 12
+    jmp $lbl0 if a - 10 != 0
+    jmp $lbl1 if b - 12 != 0
 
     $lbl0:
-    jmp $lbl2 if a - 10 != 0
+    jmp $lbl6 if b - 31 != 0
+    jmp $lbl7 if a - 32 != 0
 
-    $lbl1:
-    jmp $lbl3 if b - 12 != 0
-
-    $lbl2:
-
-    $lbl10:
-    jmp $lbl12 if b - 31 != 0
-
-    $lbl11:
-    jmp $lbl13 if a - 32 != 0
-
-    $lbl12:
+    $lbl6:
     let x = 2 * b
-    jmp $lbl14
+    jmp $lbl8
 
-    $lbl13:
+    $lbl7:
     let x = a - b
 
-    $lbl14:
+    $lbl8:
+    jmp $lbl2
+
+    $lbl1:
+    jmp $lbl3 if a - 20 != 0
     jmp $lbl4
 
     $lbl3:
-
-    $lbl5:
-    jmp $lbl6 if a - 20 != 0
-    jmp $lbl8
-
-    $lbl6:
-    jmp $lbl8 if b - 21 != 0
-
-    $lbl7:
+    jmp $lbl4 if b - 21 != 0
     let x = a + b
-    jmp $lbl9
-
-    $lbl8:
-    let x = 2 * a
-
-    $lbl9:
+    jmp $lbl5
 
     $lbl4:
+    let x = 2 * a
+
+    $lbl5:
+
+    $lbl2:
     ret
 end
 """

@@ -4538,3 +4538,35 @@ jmp rel 4 if [ap + (-1)] != 0
 ret
 """
     )
+
+
+def test_allow_hints_before_if():
+    code = """
+func assert_not_zero(value):
+    %{
+        from starkware.cairo.common.math_utils import assert_integer
+        assert_integer(ids.value)
+        assert ids.value % PRIME != 0, f'assert_not_zero failed: {ids.value} = 0.'
+    %}
+    if value == 0:
+        # If value == 0, add an unsatisfiable requirement.
+        value = 1
+    end
+
+    return ()
+end
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+        program.format()
+        == """\
+%{
+    from starkware.cairo.common.math_utils import assert_integer
+    assert_integer(ids.value)
+    assert ids.value % PRIME != 0, f'assert_not_zero failed: {ids.value} = 0.'
+%}
+jmp rel 4 if [fp + (-3)] != 0
+[fp + (-3)] = 1
+ret
+"""
+    )

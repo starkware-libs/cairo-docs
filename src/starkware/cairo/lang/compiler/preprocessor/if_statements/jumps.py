@@ -1,6 +1,6 @@
 import dataclasses
-from abc import ABC
-from typing import NewType, Optional, Union, Dict, OrderedDict
+from abc import ABC, abstractmethod
+from typing import NewType, Optional, Union, Dict, OrderedDict, List
 
 from starkware.cairo.lang.compiler.ast.bool_expr import (
     BoolAndExpr,
@@ -19,7 +19,11 @@ EXIT_ID = BoolExprId("X")
 
 @dataclasses.dataclass
 class JumpTableItem(ABC):
-    pass
+    @abstractmethod
+    def get_outputs(self) -> List[BoolExprId]:
+        """
+        Get IDs of other jump table's items which this item may jump to.
+        """
 
 
 @dataclasses.dataclass
@@ -33,6 +37,16 @@ class JumpToLabelDescriptor(JumpTableItem):
     on_true: Optional[BoolExprId]
     on_false: BoolExprId
 
+    def get_outputs(self) -> List[BoolExprId]:
+        outputs = []
+
+        if self.on_true:
+            outputs.append(self.on_true)
+
+        outputs.append(self.on_false)
+
+        return outputs
+
 
 @dataclasses.dataclass
 class Terminal(JumpTableItem):
@@ -44,6 +58,12 @@ class Terminal(JumpTableItem):
     case: bool
     exit: Optional[BoolExprId]
 
+    def get_outputs(self) -> List[BoolExprId]:
+        if self.exit:
+            return [self.exit]
+        else:
+            return []
+
 
 @dataclasses.dataclass
 class Exit(JumpTableItem):
@@ -53,39 +73,56 @@ class Exit(JumpTableItem):
     It should compile to a label after code generated in lowering.
     """
 
+    def get_outputs(self) -> List[BoolExprId]:
+        return []
 
-JumpTable = OrderedDict[BoolExprId, JumpTableItem]
-"""
-A single conditional jump instruction can be treated as following graph node, with one input
-and two outputs::
 
-                              ┌──► [ on_true ]
-    [ input ] ──► condition ──┤
-                              └──► [ on_false ]
+class JumpTable(OrderedDict[BoolExprId, JumpTableItem]):
+    """
+    A single conditional jump instruction can be treated as following graph node, with one input
+    and two outputs::
 
-Compiled, this would build a following Cairo pseudocode::
+                                  ┌──► [ on_true ]
+        [ input ] ──► condition ──┤
+                                  └──► [ on_false ]
 
-    input:
-        jmp on_false if condition != 0
-    on_true:
+    Compiled, this would build a following Cairo pseudocode::
 
-A ``JumpTable`` is a graph of such nodes, layout out as an ordered dictionary, where edges
-are represented as keys of the dictionary.
+        input:
+            jmp on_false if condition != 0
+        on_true:
 
-Jump table also includes two extra nodes, called ``Terminal``s. They represent the ``main``
-and ``else`` code blocks of processed ``CodeElementIf``, and their purpose is to denote the
-order in which these code blocks should be emitted. In negations usually, some jumps can be
-avoided if the ``else`` block is before the ``main`` one.
+    A ``JumpTable`` is a graph of such nodes, layout out as an ordered dictionary, where edges
+    are represented as keys of the dictionary.
 
-Finally, always at the end, there should be an ``Exit`` node which represents end of the
-statement. All terminals should lead to exit.
+    Jump table also includes two extra nodes, called ``Terminal``s. They represent the ``main``
+    and ``else`` code blocks of processed ``CodeElementIf``, and their purpose is to denote the
+    order in which these code blocks should be emitted. In negations usually, some jumps can be
+    avoided if the ``else`` block is before the ``main`` one.
 
-Order of keys reflects order of execution.
+    Finally, always at the end, there should be an ``Exit`` node which represents end of the
+    statement. All terminals should lead to exit.
 
-Keys are opaque and are guaranteed to be stable for many evaluations of same boolean expression,
-in order to allow jump tables to be compared for equality.
-Keys are not guaranteed to be sequential nor consecutive nor start/end with defined value.
-"""
+    Order of keys reflects order of execution.
+
+    Keys are opaque and are guaranteed to be stable for many evaluations of same boolean expression,
+    in order to allow jump tables to be compared for equality.
+    Keys are not guaranteed to be sequential nor consecutive nor start/end with defined value.
+    """
+
+    def reachable_items_ids(self) -> List[BoolExprId]:
+        """
+        Returns IDs of this jump table's items which can be jumped into and thus need a label
+        to be allocated.
+
+        Original order of IDs is preserved, so that generated labels can be sequential.
+        """
+
+        reached = set()
+        for item in self.values():
+            reached.update(item.get_outputs())
+
+        return [k for k in self.keys() if k in reached]
 
 
 def convert_bool_expr_to_jumps(expr: BoolExpr, has_false_case: bool) -> JumpTable:

@@ -53,8 +53,13 @@ class IfLoweringVisitor(CodeElementInjectingVisitor):
         )
 
         labels = {
-            k: self.context.unique_names.next(UniqueNameKind.Label) for k in jump_table.keys()
+            k: self.context.unique_names.next(UniqueNameKind.Label)
+            for k in jump_table.reachable_items_ids()
         }
+
+        assert (
+            list(jump_table.keys())[0] not in labels.keys()
+        ), "First jump must not need a label generated in order to enable attaching a hint to it."
 
         # Visit into if's code blocks.
         elm = dataclasses.replace(
@@ -66,9 +71,12 @@ class IfLoweringVisitor(CodeElementInjectingVisitor):
         code_block = CodeBlock.empty()
 
         for key, item in jump_table.items():
-            code_block += CodeBlock.singleton(
-                CodeElementLabel(identifier=ExprIdentifier(name=labels[key], location=elm.location))
-            )
+            if key in labels:
+                code_block += CodeBlock.singleton(
+                    CodeElementLabel(
+                        identifier=ExprIdentifier(name=labels[key], location=elm.location)
+                    )
+                )
 
             if isinstance(item, JumpToLabelDescriptor):
                 code_block = _lower_jump_to_label_descriptor(
