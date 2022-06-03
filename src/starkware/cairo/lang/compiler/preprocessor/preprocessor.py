@@ -24,6 +24,7 @@ from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeElement,
     CodeElementAllocLocals,
     CodeElementCompoundAssertEq,
+    CodeElementConditionalJump,
     CodeElementConst,
     CodeElementDirective,
     CodeElementEmptyLine,
@@ -980,6 +981,28 @@ Expected 'elm.element_type' to be a 'namespace'. Found: '{elm.element_type}'."""
             preprocessed_instruction.instruction, allow_auto_deduction=True
         )
         self.instructions.append(preprocessed_instruction)
+
+    def visit_CodeElementConditionalJump(self, elm: CodeElementConditionalJump):
+        if elm.condition is not None:
+            cond_expr = self.simplify_expr_as_felt(elm.condition)
+
+            (res_cond_expr,) = process_compound_expressions(
+                [cond_expr], [SimplicityLevel.DEREF], context=self._compound_expression_context
+            )
+        else:
+            res_cond_expr = None
+
+        self.visit(
+            CodeElementInstruction(
+                InstructionAst(
+                    body=JumpToLabelInstruction(
+                        label=elm.label, condition=res_cond_expr, location=elm.location
+                    ),
+                    inc_ap=False,
+                    location=elm.location,
+                )
+            )
+        )
 
     def visit_CodeElementConst(self, elm: CodeElementConst):
         if self.inside_a_struct():
