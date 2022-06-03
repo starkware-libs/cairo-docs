@@ -744,6 +744,17 @@ class CodeElementAllocLocals(CodeElement):
         return []
 
 
+@dataclasses.dataclass
+class CodeElementEraseIfUnreachable(CodeElement):
+    code_element: CodeElement
+
+    def format(self, allowed_line_length):
+        return self.code_element.format(allowed_line_length)
+
+    def get_children(self) -> Sequence[Optional[AstNode]]:
+        return [self.code_element]
+
+
 def is_empty_line(code_element: CommentedCodeElement):
     return isinstance(code_element.code_elm, CodeElementEmptyLine) and code_element.comment is None
 

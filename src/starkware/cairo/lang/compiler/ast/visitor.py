@@ -1,9 +1,11 @@
+import dataclasses
 from contextlib import contextmanager
 from typing import List, Optional
 
 from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeBlock,
     CodeElementDirective,
+    CodeElementEraseIfUnreachable,
     CodeElementFunction,
     CodeElementIf,
     CodeElementScoped,
@@ -105,6 +107,9 @@ class Visitor:
 
     def visit_CodeElementWith(self, elm: CodeElementWith):
         return CodeElementWith(identifiers=elm.identifiers, code_block=self.visit(elm.code_block))
+
+    def visit_CodeElementEraseIfUnreachable(self, elm: CodeElementEraseIfUnreachable):
+        return dataclasses.replace(elm, code_element=self.visit(elm.code_element))
 
     def _visit_default(self, obj):
         """
