@@ -85,6 +85,7 @@ class BoolAndExpr(BoolExpr):
         return self.a.first_bool_leaf()
 
 
+# TODO(mkaput, 03/06/2022): Add grammar support for or expressions.
 @dataclasses.dataclass
 class BoolOrExpr(BoolExpr):
     """
