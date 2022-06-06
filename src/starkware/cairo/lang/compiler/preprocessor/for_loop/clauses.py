@@ -1,3 +1,4 @@
+import dataclasses
 import operator
 from functools import reduce
 from typing import List
@@ -9,13 +10,15 @@ from starkware.cairo.lang.compiler.error_handling import Location
 from starkware.cairo.lang.compiler.preprocessor.for_loop.errors import ForLoopLoweringError
 
 
+@dataclasses.dataclass
 class InClauseLowering:
     iter_identifier: TypedIdentifier
     generator_location: Location
     # TODO(mkaput, 30/05/2022): Implement this.
     generator: NotImplemented
 
-    def __init__(self, clause: ForClauseIn):
+    @classmethod
+    def from_clause(self, clause: ForClauseIn):
         self.iter_identifier = clause.identifier
         self.generator_location = clause.generator.location
         # TODO(mkaput, 30/05/2022): Implement this.
