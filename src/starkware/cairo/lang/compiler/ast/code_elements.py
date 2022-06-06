@@ -54,6 +54,27 @@ class CodeElementInstruction(CodeElement):
 
 
 @dataclasses.dataclass
+class CodeElementConditionalJump(CodeElement):
+    """
+    Represents the instruction "jmp <label>" or "jmp <label> if <condition> != 0", where condition
+    is arbitrary expression.
+
+    Only constructible manually within compiler.
+    """
+
+    label: ExprIdentifier
+    condition: Optional[Expression]
+    location: Optional[Location] = LocationField
+
+    def format(self, allowed_line_length):
+        condition_str = "" if self.condition is None else f" if {self.condition.format()} != 0"
+        return f"jmp {self.label.format()}{condition_str}"
+
+    def get_children(self) -> Sequence[Optional[AstNode]]:
+        return [self.label, self.condition]
+
+
+@dataclasses.dataclass
 class CodeElementConst(CodeElement):
     identifier: ExprIdentifier
     expr: Expression
