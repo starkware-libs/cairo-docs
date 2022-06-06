@@ -42,12 +42,12 @@ class ForLoopLoweringVisitor(CodeElementInjectingVisitor):
     def visit_CodeElementFor(self, elm: CodeElementFor):
         implicit_arguments = self._borrow_current_implicit_args()
 
-        in_clause = fetch_in_clause(elm)
-        bound_identifiers = fetch_bound_identifiers(elm)
+        in_clause = fetch_in_clause(elm=elm)
+        bound_identifiers = fetch_bound_identifiers(elm=elm)
 
-        lowering = InClauseLowering(in_clause)
+        lowering = InClauseLowering(clause=in_clause)
 
-        _check_body_has_no_alloc_locals(elm.code_block)
+        _check_body_has_no_alloc_locals(code_block=elm.code_block)
 
         raise ForLoopLoweringError("For loops are not supported yet.", location=elm.location)
 
