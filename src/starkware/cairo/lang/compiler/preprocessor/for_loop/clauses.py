@@ -1,6 +1,5 @@
 import dataclasses
-import operator
-from functools import reduce
+import itertools
 from typing import List
 
 from starkware.cairo.lang.compiler.ast.code_elements import CodeElementFor
@@ -14,15 +13,11 @@ from starkware.cairo.lang.compiler.preprocessor.for_loop.errors import ForLoopLo
 class InClauseLowering:
     iter_identifier: TypedIdentifier
     generator_location: Location
-    # TODO(mkaput, 30/05/2022): Implement this.
-    generator: NotImplemented
 
     @classmethod
     def from_clause(self, clause: ForClauseIn):
         self.iter_identifier = clause.identifier
         self.generator_location = clause.generator.location
-        # TODO(mkaput, 30/05/2022): Implement this.
-        self.generator = NotImplemented
 
 
 def fetch_in_clause(elm: CodeElementFor) -> ForClauseIn:
@@ -42,4 +37,4 @@ def fetch_in_clause(elm: CodeElementFor) -> ForClauseIn:
 
 def fetch_bound_identifiers(elm: CodeElementFor) -> List[TypedIdentifier]:
     identifier_groups = (clause.identifiers.identifiers for clause in elm.clauses.with_clauses())
-    return reduce(operator.add, identifier_groups, [])
+    return list(itertools.chain.from_iterable(identifier_groups))
