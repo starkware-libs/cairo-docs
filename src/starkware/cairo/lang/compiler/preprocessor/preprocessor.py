@@ -8,6 +8,7 @@ from typing import DefaultDict, Dict, List, Optional, Set, Tuple, Type, Union, c
 import marshmallow.fields as mfields
 
 from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
+from starkware.cairo.lang.compiler.ast.bool_expr import BoolAndExpr, BoolEqExpr
 from starkware.cairo.lang.compiler.ast.cairo_types import (
     CairoType,
     CastType,
@@ -862,6 +863,11 @@ Expected 'elm.element_type' to be a 'namespace'. Found: '{elm.element_type}'."""
             self.reference_states = old_reference_states
 
     def visit_CodeElementIf(self, elm: CodeElementIf):
+        # We expect complex boolean expressions to be simplified in earlier stages.
+        assert isinstance(
+            elm.condition, BoolEqExpr
+        ), "Complex boolean expressions must be simplified at this point."
+
         # Prepare branch compound expression.
         cond_expr = self.simplify_expr_as_felt(
             ExprOperator(

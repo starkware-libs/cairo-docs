@@ -4,6 +4,7 @@ import pytest
 
 from starkware.cairo.lang.compiler.ast.aliased_identifier import AliasedIdentifier
 from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
+from starkware.cairo.lang.compiler.ast.bool_expr import BoolAndExpr, BoolEqExpr
 from starkware.cairo.lang.compiler.ast.cairo_types import (
     CairoType,
     TypeCodeoffset,
@@ -16,6 +17,7 @@ from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeElementImport,
     CodeElementReference,
     CodeElementReturnValueReference,
+    CodeElementIf,
 )
 from starkware.cairo.lang.compiler.ast.expr import (
     ExprConst,
@@ -928,6 +930,72 @@ def test_pointer():
     for typ, mark in safe_zip(types, marks):
         assert typ.location is not None
         assert get_location_marks(code, typ.location) == code + "\n" + mark
+
+
+def test_if_and():
+    code = """\
+if a == 0 and b == 0:
+    alloc_locals
+end\
+"""
+    ret = parse_code_element(code)
+    assert isinstance(ret, CodeElementIf)
+    assert ret.condition == BoolAndExpr(
+        a=BoolEqExpr(
+            a=ExprIdentifier(name="a"),
+            b=ExprConst(val=0),
+            eq=True,
+        ),
+        b=BoolEqExpr(
+            a=ExprIdentifier(name="b"),
+            b=ExprConst(val=0),
+            eq=True,
+        ),
+    )
+    assert ret.format(allowed_line_length=100) == code
+
+
+def test_if_and_is_left_to_right_associative():
+    code = """\
+if a == 0 and b == 0 and c == 0:
+    alloc_locals
+end\
+"""
+    ret = parse_code_element(code)
+    assert isinstance(ret, CodeElementIf)
+    assert ret.condition == BoolAndExpr(
+        a=BoolAndExpr(
+            a=BoolEqExpr(
+                a=ExprIdentifier(name="a"),
+                b=ExprConst(val=0),
+                eq=True,
+            ),
+            b=BoolEqExpr(
+                a=ExprIdentifier(name="b"),
+                b=ExprConst(val=0),
+                eq=True,
+            ),
+        ),
+        b=BoolEqExpr(
+            a=ExprIdentifier(name="c"),
+            b=ExprConst(val=0),
+            eq=True,
+        ),
+    )
+    assert ret.format(allowed_line_length=100) == code
+
+
+def test_if_multiline_and():
+    # TODO(mkaput, 18/05/2022): This formatting is not ideal, but we cannot use parentheses here
+    #   due to ambiguity conflict with arithmetic expressions.
+    code = """\
+if a == 0 and b == 0 and c == 0 and
+    d == 0 and e == 0:
+    alloc_locals
+end\
+"""
+    ret = parse_code_element(code)
+    assert ret.format(allowed_line_length=40) == code
 
 
 def test_for_range():

@@ -5,6 +5,7 @@ from starkware.cairo.lang.compiler.import_loader import collect_imports
 from starkware.cairo.lang.compiler.preprocessor.auxiliary_info_collector import (
     AuxiliaryInfoCollector,
 )
+from starkware.cairo.lang.compiler.preprocessor.bool_expr.lowering import BoolExprLoweringStage
 from starkware.cairo.lang.compiler.preprocessor.dependency_graph import DependencyGraphStage
 from starkware.cairo.lang.compiler.preprocessor.directives import DirectivesCollectorStage
 from starkware.cairo.lang.compiler.preprocessor.for_loop.lowering import ForLoopLoweringStage
@@ -41,6 +42,7 @@ def default_pass_manager(
         ),
     )
     manager.add_stage("for_loops_lowering", ForLoopLoweringStage())
+    manager.add_stage("bool_expr_lowering", BoolExprLoweringStage())
     manager.add_stage(
         "if_label_assigner",
         VisitorStage(
