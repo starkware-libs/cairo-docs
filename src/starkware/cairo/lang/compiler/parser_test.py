@@ -990,7 +990,7 @@ end\
 
 def test_for_slice():
     source = """\
-for i : MyStruct* in slice(arr, 10, MyStruct.SIZE):
+for i : MyStruct* in slice(arr, 10, size=MyStruct.SIZE):
     f()
 end\
 """
@@ -1013,7 +1013,8 @@ end\
                             ExprAssignment(identifier=None, expr=ExprIdentifier(name="arr")),
                             ExprAssignment(identifier=None, expr=ExprConst(val=10)),
                             ExprAssignment(
-                                identifier=None, expr=ExprIdentifier(name="MyStruct.SIZE")
+                                identifier=ExprIdentifier(name="size"),
+                                expr=ExprIdentifier(name="MyStruct.SIZE"),
                             ),
                         ]
                     )
