@@ -7,7 +7,7 @@ from lark import Token, Transformer, v_args
 
 from starkware.cairo.lang.compiler.ast.aliased_identifier import AliasedIdentifier
 from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
-from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr
+from starkware.cairo.lang.compiler.ast.bool_expr import BoolEqExpr, BoolAndExpr, BoolExpr
 from starkware.cairo.lang.compiler.ast.cairo_types import (
     CairoType,
     TypeCodeoffset,
@@ -64,6 +64,7 @@ from starkware.cairo.lang.compiler.ast.expr import (
     ExprReg,
     ExprSubscript,
     ExprTuple,
+    Expression,
 )
 from starkware.cairo.lang.compiler.ast.expr_func_call import ExprFuncCall
 from starkware.cairo.lang.compiler.ast.instructions import (
@@ -396,15 +397,19 @@ class ParserTransformer(Transformer):
     def reg_fp(self, value):
         return Register.FP
 
-    # Boolean expresions.
+    # Boolean expressions.
 
-    @v_args(meta=True)
-    def bool_expr_eq(self, value, meta):
-        return BoolExpr(a=value[0], b=value[1], eq=True, location=self.meta2loc(meta))
+    @v_args(inline=True, meta=True)
+    def bool_expr_eq(self, meta, a: Expression, notes: Notes, b: Expression):
+        return BoolEqExpr(a=a, b=b, eq=True, notes=notes, location=self.meta2loc(meta))
 
-    @v_args(meta=True)
-    def bool_expr_neq(self, value, meta):
-        return BoolExpr(a=value[0], b=value[1], eq=False, location=self.meta2loc(meta))
+    @v_args(inline=True, meta=True)
+    def bool_expr_neq(self, meta, a: Expression, notes: Notes, b: Expression):
+        return BoolEqExpr(a=a, b=b, eq=False, notes=notes, location=self.meta2loc(meta))
+
+    @v_args(inline=True, meta=True)
+    def bool_and_expr(self, meta, a: BoolExpr, notes: Notes, b: BoolEqExpr):
+        return BoolAndExpr(a=a, b=b, notes=notes, location=self.meta2loc(meta))
 
     # Types.
 
@@ -847,6 +852,6 @@ def backslash_to_hex(value: bytes) -> bytes:
     r"""
     Replaces substrings of the form '\x**' with the corresponding byte.
     """
-    pattern = br"\\x([0-9a-fA-F]{2})"
+    pattern = rb"\\x([0-9a-fA-F]{2})"
     replacer = lambda m: bytes.fromhex(m.group(1).decode("ascii"))
     return re.sub(pattern, replacer, value)

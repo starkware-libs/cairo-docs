@@ -94,6 +94,7 @@ def wrap_lark_error(err: LarkError, input_file: InputFile) -> Exception:
             "_NEQ": '"!="',
             "ALLOC_LOCALS": '"alloc_locals"',
             "AMPERSAND": '"&"',
+            "AND": '"and"',
             "AS": '"as"',
             "ASSERT": '"assert"',
             "BUILTINS": '"%builtins"',
