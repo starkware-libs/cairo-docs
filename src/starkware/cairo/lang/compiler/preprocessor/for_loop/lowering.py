@@ -45,7 +45,7 @@ class ForLoopLoweringVisitor(CodeElementInjectingVisitor):
         in_clause = fetch_in_clause(elm=elm)
         bound_identifiers = fetch_bound_identifiers(elm=elm)
 
-        lowering = InClauseLowering(clause=in_clause)
+        lowering = InClauseLowering.from_clause(clause=in_clause)
 
         _check_body_has_no_alloc_locals(code_block=elm.code_block)
 
