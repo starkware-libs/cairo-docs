@@ -54,38 +54,38 @@ class Exit(JumpTableItem):
     """
 
 
-JumpTable = OrderedDict[BoolExprId, JumpTableItem]
-"""
-A single conditional jump instruction can be treated as following graph node, with one input
-and two outputs::
+class JumpTable(OrderedDict[BoolExprId, JumpTableItem]):
+    """
+    A single conditional jump instruction can be treated as following graph node, with one input
+    and two outputs::
 
-                              ┌──► [ on_true ]
-    [ input ] ──► condition ──┤
-                              └──► [ on_false ]
+                                  ┌──► [ on_true ]
+        [ input ] ──► condition ──┤
+                                  └──► [ on_false ]
 
-Compiled, this would build a following Cairo pseudocode::
+    Compiled, this would build a following Cairo pseudocode::
 
-    input:
-        jmp on_false if condition != 0
-    on_true:
+        input:
+            jmp on_false if condition != 0
+        on_true:
 
-A ``JumpTable`` is a graph of such nodes, layout out as an ordered dictionary, where edges
-are represented as keys of the dictionary.
+    A ``JumpTable`` is a graph of such nodes, layout out as an ordered dictionary, where edges
+    are represented as keys of the dictionary.
 
-Jump table also includes two extra nodes, called ``Terminal``s. They represent the ``main``
-and ``else`` code blocks of processed ``CodeElementIf``, and their purpose is to denote the
-order in which these code blocks should be emitted. In negations usually, some jumps can be
-avoided if the ``else`` block is before the ``main`` one.
+    Jump table also includes two extra nodes, called ``Terminal``s. They represent the ``main``
+    and ``else`` code blocks of processed ``CodeElementIf``, and their purpose is to denote the
+    order in which these code blocks should be emitted. In negations usually, some jumps can be
+    avoided if the ``else`` block is before the ``main`` one.
 
-Finally, always at the end, there should be an ``Exit`` node which represents end of the
-statement. All terminals should lead to exit.
+    Finally, always at the end, there should be an ``Exit`` node which represents end of the
+    statement. All terminals should lead to exit.
 
-Order of keys reflects order of execution.
+    Order of keys reflects order of execution.
 
-Keys are opaque and are guaranteed to be stable for many evaluations of same boolean expression,
-in order to allow jump tables to be compared for equality.
-Keys are not guaranteed to be sequential nor consecutive nor start/end with defined value.
-"""
+    Keys are opaque and are guaranteed to be stable for many evaluations of same boolean expression,
+    in order to allow jump tables to be compared for equality.
+    Keys are not guaranteed to be sequential nor consecutive nor start/end with defined value.
+    """
 
 
 def convert_bool_expr_to_jumps(expr: BoolExpr, has_false_case: bool) -> JumpTable:
