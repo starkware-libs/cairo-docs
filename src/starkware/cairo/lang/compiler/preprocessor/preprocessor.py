@@ -28,6 +28,7 @@ from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeElementConst,
     CodeElementDirective,
     CodeElementEmptyLine,
+    CodeElementEraseIfUnreachable,
     CodeElementFuncCall,
     CodeElementFunction,
     CodeElementHint,
@@ -1276,6 +1277,10 @@ Expected 'elm.element_type' to be a 'namespace'. Found: '{elm.element_type}'."""
             raise PreprocessorError(
                 f"Static assert failed: {a.format()} != {b.format()}.", location=elm.location
             )
+
+    def visit_CodeElementEraseIfUnreachable(self, elm: CodeElementEraseIfUnreachable):
+        if self.flow_tracking.data != FlowTrackingDataUnreachable():
+            self.visit(elm.code_element)
 
     def optimize_expressions_for_push(self, exprs: List[Expression]) -> List[Expression]:
         """
