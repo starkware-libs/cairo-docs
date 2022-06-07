@@ -33,6 +33,7 @@ from starkware.cairo.lang.compiler.preprocessor.for_loop.clauses import (
     fetch_bound_identifiers,
 )
 from starkware.cairo.lang.compiler.preprocessor.for_loop.errors import ForLoopLoweringError
+from starkware.cairo.lang.compiler.preprocessor.for_loop.linter import lint_for_loop
 from starkware.cairo.lang.compiler.preprocessor.pass_manager import PassManagerContext, VisitorStage
 from starkware.cairo.lang.compiler.unique_name_provider import UniqueNameKind
 
@@ -57,6 +58,8 @@ class ForLoopLoweringVisitor(CodeElementInjectingVisitor):
         return elm
 
     def visit_CodeElementFor(self, elm: CodeElementFor):
+        lint_for_loop(elm)
+
         current_function = self._get_current_function(elm)
 
         # Borrow implicit arguments of for loop body from current function.
@@ -66,8 +69,6 @@ class ForLoopLoweringVisitor(CodeElementInjectingVisitor):
         bound_identifiers = fetch_bound_identifiers(elm=elm)
 
         lowering = InClauseLowering.from_clause(clause=in_clause)
-
-        _check_body_has_no_alloc_locals(code_block=elm.code_block)
 
         iterator_function_identifier = ExprIdentifier(
             name=self.context.unique_names.next(UniqueNameKind.Func), location=elm.location
@@ -256,12 +257,3 @@ def _bind_iter(lowering: InClauseLowering, iterator_variables: List[ExprIdentifi
             )
         ]
     )
-
-
-def _check_body_has_no_alloc_locals(code_block: CodeBlock):
-    elms = code_block.code_elements
-    if len(elms) > 0 and isinstance(elms[0].code_elm, CodeElementAllocLocals):
-        raise ForLoopLoweringError(
-            "alloc_locals is not allowed in the body of a for loop.",
-            location=elms[0].location,
-        )
