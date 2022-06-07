@@ -1,6 +1,24 @@
 from starkware.cairo.lang.compiler.preprocessor.for_loop.lowering_test_utils import verify_exception
 
 
+def test_for_outside_function():
+    verify_exception(
+        """
+for i in range(10):
+    let x = 5
+end
+func main():
+    ret
+end
+""",
+        """
+file:?:?: For loops are unsupported outside functions.
+for i in range(10):
+^*^
+""",
+    )
+
+
 def test_alloc_locals_in_for_loop_body():
     verify_exception(
         """
