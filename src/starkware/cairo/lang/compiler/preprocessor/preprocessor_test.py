@@ -2003,10 +2003,10 @@ end
         == """\
 ap += 3
 jmp rel 8 if [ap] != 0
-[fp + 2] = 6
+[fp + 1] = 6
 [fp] = 3
 jmp rel 6
-[fp + 1] = 7
+[fp + 2] = 7
 [fp] = 5
 [fp] = [fp]
 ret
@@ -4487,6 +4487,54 @@ jmp rel 7 if [ap + (-1)] != 0
 [ap] = [ap + (-2)] + (-12); ap++
 jmp rel 3 if [ap + (-1)] != 0
 [ap] = [ap + (-4)] + [ap + (-3)]; ap++
+ret
+"""
+    )
+
+
+def test_if_with_single_and_and_else():
+    code = """
+func main():
+    let a = 10
+    let b = 12
+    if a == 10 and b != 12:
+        let x = a + b
+    else:
+        let x = a - b
+    end
+    ret
+end
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+        program.format()
+        == """\
+[ap] = 0; ap++
+jmp rel 6 if [ap + (-1)] != 0
+[ap] = 0; ap++
+jmp rel 4 if [ap + (-1)] != 0
+jmp rel 2
+ret
+"""
+    )
+
+
+def test_if_with_cast_to_codeoffset():
+    code = """
+func main():
+    if cast(0, codeoffset) == main:
+        tempvar x = 100
+    end
+    ret
+end
+"""
+    program = preprocess_str(code=code, prime=PRIME)
+    assert (
+        program.format()
+        == """\
+[ap] = 0; ap++
+jmp rel 4 if [ap + (-1)] != 0
+[ap] = 100; ap++
 ret
 """
     )
