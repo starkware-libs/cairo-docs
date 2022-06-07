@@ -8,6 +8,7 @@ from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeElement,
     CodeElementAllocLocals,
 )
+from starkware.cairo.lang.compiler.ast.module import CairoModule
 from starkware.cairo.lang.compiler.preprocessor.code_element_injecting_visitor import (
     CodeElementInjectingVisitor,
 )
@@ -40,6 +41,8 @@ class ForLoopLoweringVisitor(CodeElementInjectingVisitor):
         return elm
 
     def visit_CodeElementFor(self, elm: CodeElementFor):
+        self._check_loop_inside_function(elm)
+
         implicit_arguments = self._borrow_current_implicit_args()
 
         in_clause = fetch_in_clause(elm=elm)
@@ -51,10 +54,19 @@ class ForLoopLoweringVisitor(CodeElementInjectingVisitor):
 
         raise ForLoopLoweringError("For loops are not supported yet.", location=elm.location)
 
+    def _check_loop_inside_function(self, elm: CodeElementFor):
+        for parent in reversed(self.parents):
+            if isinstance(parent, CodeElementFunction):
+                return
+            if isinstance(parent, CairoModule):
+                break
+
+        raise ForLoopLoweringError(
+            "For loops are unsupported outside functions.", location=elm.location
+        )
+
     def _borrow_current_implicit_args(self) -> Optional[IdentifierList]:
         for parent in reversed(self.parents):
-            assert isinstance(parent, CodeElement), "Unexpected non-code element parent."
-
             if isinstance(parent, CodeElementFunction):
                 return parent.implicit_arguments
 
