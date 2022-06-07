@@ -1,4 +1,4 @@
-from starkware.cairo.lang.compiler.preprocessor.bool_expr.lowering_test_utils import (
+from starkware.cairo.lang.compiler.preprocessor.if_statements.lowering_test_utils import (
     lower_and_format,
     verify_exception,
 )

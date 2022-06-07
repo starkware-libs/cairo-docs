@@ -2,11 +2,11 @@ from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr, BoolAndExpr, B
 from starkware.cairo.lang.compiler.ast.code_elements import CodeElementIf, CodeBlock
 from starkware.cairo.lang.compiler.ast.visitor import Visitor
 from starkware.cairo.lang.compiler.error_handling import Location
-from starkware.cairo.lang.compiler.preprocessor.bool_expr.errors import BoolExprLoweringError
+from starkware.cairo.lang.compiler.preprocessor.if_statements.errors import IfLoweringError
 from starkware.cairo.lang.compiler.preprocessor.pass_manager import VisitorStage, PassManagerContext
 
 
-class BoolExprLoweringStage(VisitorStage):
+class IfLoweringStage(VisitorStage):
     """
     Lowers boolean logic expressions in if conditions to nested if statements.
 
@@ -14,10 +14,10 @@ class BoolExprLoweringStage(VisitorStage):
     """
 
     def __init__(self):
-        super().__init__(visitor_factory=BoolExprLoweringVisitor, modify_ast=True)
+        super().__init__(visitor_factory=IfLoweringVisitor, modify_ast=True)
 
 
-class BoolExprLoweringVisitor(Visitor):
+class IfLoweringVisitor(Visitor):
     def __init__(self, context: PassManagerContext):
         super().__init__()
         self.context = context
@@ -31,7 +31,7 @@ class BoolExprLoweringVisitor(Visitor):
 
         # TODO(mkaput, 19/05/2022): Support else blocks
         if elm.else_code_block is not None:
-            raise BoolExprLoweringError(
+            raise IfLoweringError(
                 "Else blocks are not supported with boolean logic expressions yet.",
                 location=elm.location,
             )

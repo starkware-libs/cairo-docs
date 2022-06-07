@@ -47,10 +47,6 @@ python_lib(cairo_compile_lib
     parser.py
     preprocessor/__init__.py
     preprocessor/auxiliary_info_collector.py
-    preprocessor/bool_expr/__init__.py
-    preprocessor/bool_expr/errors.py
-    preprocessor/bool_expr/jumps.py
-    preprocessor/bool_expr/lowering.py
     preprocessor/code_element_injecting_visitor.py
     preprocessor/compound_expressions.py
     preprocessor/default_pass_manager.py
@@ -60,6 +56,10 @@ python_lib(cairo_compile_lib
     preprocessor/identifier_aware_visitor.py
     preprocessor/identifier_collector.py
     preprocessor/if_labels.py
+    preprocessor/if_statements/__init__.py
+    preprocessor/if_statements/errors.py
+    preprocessor/if_statements/jumps.py
+    preprocessor/if_statements/lowering.py
     preprocessor/local_variables.py
     preprocessor/memento.py
     preprocessor/pass_manager.py

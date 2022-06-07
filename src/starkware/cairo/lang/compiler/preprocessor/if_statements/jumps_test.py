@@ -1,5 +1,5 @@
 from starkware.cairo.lang.compiler.ast.bool_expr import BoolAndExpr, BoolEqExpr, BoolOrExpr
-from starkware.cairo.lang.compiler.preprocessor.bool_expr.jumps import (
+from starkware.cairo.lang.compiler.preprocessor.if_statements.jumps import (
     BoolExprId,
     EXIT_ID,
     Exit,

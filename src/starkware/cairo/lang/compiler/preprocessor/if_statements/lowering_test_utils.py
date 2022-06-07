@@ -1,8 +1,8 @@
 import starkware.cairo.lang.compiler.preprocessor.preprocessor_test_utils as utils
 from starkware.cairo.lang.compiler.identifier_manager import IdentifierManager
-from starkware.cairo.lang.compiler.preprocessor.bool_expr.errors import BoolExprLoweringError
-from starkware.cairo.lang.compiler.preprocessor.bool_expr.lowering import BoolExprLoweringStage
 from starkware.cairo.lang.compiler.preprocessor.default_pass_manager import ModuleCollector
+from starkware.cairo.lang.compiler.preprocessor.if_statements.errors import IfLoweringError
+from starkware.cairo.lang.compiler.preprocessor.if_statements.lowering import IfLoweringStage
 from starkware.cairo.lang.compiler.preprocessor.pass_manager import PassManager, PassManagerContext
 from starkware.cairo.lang.compiler.test_utils import read_file_from_dict
 
@@ -18,7 +18,7 @@ def lower_and_format(code: str) -> str:
             ],
         ),
     )
-    manager.add_stage("bool_expr_lowering", BoolExprLoweringStage())
+    manager.add_stage("if_lowering", IfLoweringStage())
 
     context = PassManagerContext(
         codes=[(code, "")],
@@ -35,4 +35,4 @@ def lower_and_format(code: str) -> str:
 
 
 def verify_exception(*args, **kwargs):
-    utils.verify_exception(*args, **kwargs, exc_type=BoolExprLoweringError)
+    utils.verify_exception(*args, **kwargs, exc_type=IfLoweringError)
