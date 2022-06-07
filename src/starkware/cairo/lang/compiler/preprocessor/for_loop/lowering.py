@@ -53,12 +53,10 @@ class ForLoopLoweringVisitor(CodeElementInjectingVisitor):
 
     def _borrow_current_implicit_args(self) -> Optional[IdentifierList]:
         for parent in reversed(self.parents):
+            assert isinstance(parent, CodeElement), "Unexpected non-code element parent."
+
             if isinstance(parent, CodeElementFunction):
                 return parent.implicit_arguments
-            elif not isinstance(parent, CodeElement):
-                # Try our best to avoid jumping to irrelevant function which somehow
-                # was put in parents stack.
-                break
 
         return None
 
