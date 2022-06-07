@@ -15,9 +15,8 @@ class InClauseLowering:
     generator_location: Location
 
     @classmethod
-    def from_clause(self, clause: ForClauseIn):
-        self.iter_identifier = clause.identifier
-        self.generator_location = clause.generator.location
+    def from_clause(cls, clause: ForClauseIn) -> "InClauseLowering":
+        return cls(iter_identifier=clause.identifier, generator_location=clause.generator.location)
 
 
 def fetch_in_clause(elm: CodeElementFor) -> ForClauseIn:

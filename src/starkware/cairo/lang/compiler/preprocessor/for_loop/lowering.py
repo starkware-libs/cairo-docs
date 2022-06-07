@@ -41,9 +41,10 @@ class ForLoopLoweringVisitor(CodeElementInjectingVisitor):
         return elm
 
     def visit_CodeElementFor(self, elm: CodeElementFor):
-        self._check_loop_inside_function(elm)
+        current_function = self._get_current_function(elm)
 
-        implicit_arguments = self._borrow_current_implicit_args()
+        # Borrow implicit arguments of for loop body from current function.
+        implicit_arguments = current_function.implicit_arguments
 
         in_clause = fetch_in_clause(elm=elm)
         bound_identifiers = fetch_bound_identifiers(elm=elm)
@@ -54,23 +55,16 @@ class ForLoopLoweringVisitor(CodeElementInjectingVisitor):
 
         raise ForLoopLoweringError("For loops are not supported yet.", location=elm.location)
 
-    def _check_loop_inside_function(self, elm: CodeElementFor):
+    def _get_current_function(self, elm: CodeElementFor) -> CodeElementFunction:
         for parent in reversed(self.parents):
             if isinstance(parent, CodeElementFunction):
-                return
+                return parent
             if isinstance(parent, CairoModule):
                 break
 
         raise ForLoopLoweringError(
             "For loops are unsupported outside functions.", location=elm.location
         )
-
-    def _borrow_current_implicit_args(self) -> Optional[IdentifierList]:
-        for parent in reversed(self.parents):
-            if isinstance(parent, CodeElementFunction):
-                return parent.implicit_arguments
-
-        return None
 
 
 def _check_body_has_no_alloc_locals(code_block: CodeBlock):
