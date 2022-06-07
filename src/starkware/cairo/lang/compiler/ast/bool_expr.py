@@ -63,7 +63,7 @@ class BoolEqExpr(BoolExpr):
 @dataclasses.dataclass
 class BoolAndExpr(BoolExpr):
     """
-    Represents logical conjunction of two ``BoolExpr``s (``and`` operator).
+    Represents logical *and* of two ``BoolExpr``s (``and`` operator).
     """
 
     a: BoolExpr
@@ -89,7 +89,7 @@ class BoolAndExpr(BoolExpr):
 @dataclasses.dataclass
 class BoolOrExpr(BoolExpr):
     """
-    Represents logical alternative of two ``BoolExpr``s (``or`` operator).
+    Represents logical *or* of two ``BoolExpr``s (``or`` operator).
     """
 
     a: BoolExpr
