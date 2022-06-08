@@ -244,10 +244,12 @@ results in ``1000``, ``0110`` and ``1110``:
     from starkware.cairo.common.bitwise import bitwise_operations
 
     # Binary (1100, 1010).
-    let (and, xor, or) = bitwise_operations(12, 10)
-    assert and = 8  # Binary 1000.
-    assert xor = 6  # Binary 0110.
-    assert or = 14  # Binary 1110.
+    let (bitwise_and, bitwise_xor, bitwise_or) = bitwise_operations(
+        12, 10
+    )
+    assert bitwise_and = 8  # Binary 1000.
+    assert bitwise_xor = 6  # Binary 0110.
+    assert bitwise_or = 14  # Binary 1110.
 
 .. _common_library_default_dict:
 
