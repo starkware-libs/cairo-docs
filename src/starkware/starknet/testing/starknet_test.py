@@ -107,7 +107,7 @@ async def test_struct_arrays(starknet: Starknet):
 
 
 @pytest.mark.asyncio
-async def test_deploy_unwhitelisted_hint_contract(starknet: Starknet) -> StarknetContract:
+async def test_deploy_unwhitelisted_hint_contract(starknet: Starknet):
     deployed_contract = await starknet.deploy(
         source=HINT_CONTRACT_FILE, disable_hint_validation=True
     )

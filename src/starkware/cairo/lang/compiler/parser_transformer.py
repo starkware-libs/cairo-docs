@@ -7,7 +7,7 @@ from lark import Token, Transformer, v_args
 
 from starkware.cairo.lang.compiler.ast.aliased_identifier import AliasedIdentifier
 from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
-from starkware.cairo.lang.compiler.ast.bool_expr import BoolEqExpr, BoolAndExpr, BoolExpr
+from starkware.cairo.lang.compiler.ast.bool_expr import BoolAndExpr, BoolEqExpr, BoolExpr
 from starkware.cairo.lang.compiler.ast.cairo_types import (
     CairoType,
     TypeCodeoffset,
@@ -54,6 +54,7 @@ from starkware.cairo.lang.compiler.ast.expr import (
     ExprConst,
     ExprDeref,
     ExprDot,
+    Expression,
     ExprHint,
     ExprIdentifier,
     ExprNeg,
@@ -223,7 +224,11 @@ class ParserTransformer(Transformer):
     @v_args(meta=True)
     def type_pointer2(self, value, meta):
         location = self.meta2loc(meta)
-        inner_location = dataclasses.replace(location, end_col=location.end_col - 1)
+        inner_location = (
+            None
+            if location is None
+            else dataclasses.replace(location, end_col=location.end_col - 1)
+        )
         return TypePointer(
             pointee=TypePointer(pointee=value[0], location=inner_location), location=location
         )

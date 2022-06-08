@@ -1,7 +1,7 @@
 from starkware.cairo.lang.compiler.ast.code_elements import CodeElement, CodeElementIf
 from starkware.cairo.lang.compiler.ast.node import AstNode
 from starkware.cairo.lang.compiler.ast.visitor import Visitor
-from starkware.cairo.lang.compiler.unique_name_provider import UniqueNameProvider, UniqueNameKind
+from starkware.cairo.lang.compiler.unique_name_provider import UniqueNameKind, UniqueNameProvider
 
 
 class IfLabelAssigner(Visitor):

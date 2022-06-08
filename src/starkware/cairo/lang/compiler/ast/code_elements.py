@@ -1,6 +1,6 @@
 import dataclasses
 from abc import abstractmethod
-from typing import Any, Dict, List, Optional, Sequence, Union, Iterable
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Union
 
 from starkware.cairo.lang.compiler.ast.aliased_identifier import AliasedIdentifier
 from starkware.cairo.lang.compiler.ast.arguments import IdentifierList

@@ -35,6 +35,7 @@ KEYWORDS = [
     "codeoffset",
     "new",
     "using",
+    "and",
 ]
 
 

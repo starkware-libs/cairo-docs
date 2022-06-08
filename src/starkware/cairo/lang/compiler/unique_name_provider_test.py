@@ -1,4 +1,4 @@
-from starkware.cairo.lang.compiler.unique_name_provider import UniqueNameProvider, UniqueNameKind
+from starkware.cairo.lang.compiler.unique_name_provider import UniqueNameKind, UniqueNameProvider
 
 
 def test_unique_name_provider_next():

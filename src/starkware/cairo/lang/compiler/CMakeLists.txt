@@ -51,6 +51,7 @@ python_lib(cairo_compile_lib
     preprocessor/bool_expr/__init__.py
     preprocessor/bool_expr/errors.py
     preprocessor/bool_expr/lowering.py
+    preprocessor/bool_expr/lowering_test_utils.py
     preprocessor/compound_expressions.py
     preprocessor/default_pass_manager.py
     preprocessor/dependency_graph.py
@@ -152,7 +153,7 @@ full_python_test(cairo_compile_test
     parser_errors_test.py
     parser_test_utils.py
     parser_test.py
-    preprocessor/memento_test.py
+    preprocessor/bool_expr/lowering_test.py
     preprocessor/compound_expressions_test.py
     preprocessor/conftest.py
     preprocessor/dependency_graph_test.py
@@ -161,6 +162,7 @@ full_python_test(cairo_compile_test
     preprocessor/identifier_collector_test.py
     preprocessor/if_labels_test.py
     preprocessor/local_variables_test.py
+    preprocessor/memento_test.py
     preprocessor/preprocessor_test.py
     preprocessor/reg_tracking_test.py
     preprocessor/struct_collector_test.py
@@ -171,6 +173,7 @@ full_python_test(cairo_compile_test
     type_casts_test.py
     type_system_visitor_test.py
     type_utils_test.py
+    unique_name_provider_test.py
 
     LIBS
     cairo_compile_lib

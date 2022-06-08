@@ -12,6 +12,7 @@ from starkware.cairo.lang.compiler.ast.cairo_types import (
     TypeTuple,
 )
 from starkware.cairo.lang.compiler.ast.code_elements import (
+    CodeElementIf,
     CodeElementImport,
     CodeElementReference,
     CodeElementReturnValueReference,

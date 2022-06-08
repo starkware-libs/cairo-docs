@@ -1,9 +1,11 @@
-from starkware.cairo.lang.compiler.ast.bool_expr import BoolExpr, BoolAndExpr, BoolEqExpr
-from starkware.cairo.lang.compiler.ast.code_elements import CodeElementIf, CodeBlock
+from typing import Optional
+
+from starkware.cairo.lang.compiler.ast.bool_expr import BoolAndExpr, BoolEqExpr, BoolExpr
+from starkware.cairo.lang.compiler.ast.code_elements import CodeBlock, CodeElementIf
 from starkware.cairo.lang.compiler.ast.visitor import Visitor
 from starkware.cairo.lang.compiler.error_handling import Location
 from starkware.cairo.lang.compiler.preprocessor.bool_expr.errors import BoolExprLoweringError
-from starkware.cairo.lang.compiler.preprocessor.pass_manager import VisitorStage, PassManagerContext
+from starkware.cairo.lang.compiler.preprocessor.pass_manager import PassManagerContext, VisitorStage
 
 
 class BoolExprLoweringStage(VisitorStage):
@@ -29,7 +31,7 @@ class BoolExprLoweringVisitor(Visitor):
         if isinstance(elm.condition, BoolEqExpr):
             return elm
 
-        # TODO(mkaput, 19/05/2022): Support else blocks
+        # TODO(mkaput, 19/05/2022): Support else blocks.
         if elm.else_code_block is not None:
             raise BoolExprLoweringError(
                 "Else blocks are not supported with boolean logic expressions yet.",
@@ -42,7 +44,7 @@ class BoolExprLoweringVisitor(Visitor):
 
 
 def _lower_conjunction_chain(
-    lhs: BoolExpr, main_code_block: CodeBlock, location: Location
+    lhs: BoolExpr, main_code_block: CodeBlock, location: Optional[Location]
 ) -> CodeElementIf:
     """
     Substitutes::

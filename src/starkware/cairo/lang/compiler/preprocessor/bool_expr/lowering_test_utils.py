@@ -35,4 +35,6 @@ def lower_and_format(code: str) -> str:
 
 
 def verify_exception(*args, **kwargs):
-    utils.verify_exception(*args, **kwargs, exc_type=BoolExprLoweringError)
+    kwargs = kwargs.copy()
+    kwargs["exc_type"] = BoolExprLoweringError
+    utils.verify_exception(*args, **kwargs)
