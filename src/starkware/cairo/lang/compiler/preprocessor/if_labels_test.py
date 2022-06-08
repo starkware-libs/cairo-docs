@@ -1,4 +1,4 @@
-from starkware.cairo.lang.compiler.preprocessor.preprocessor_test_utils import preprocess_str, PRIME
+from starkware.cairo.lang.compiler.preprocessor.preprocessor_test_utils import PRIME, preprocess_str
 
 
 def test_if_labels_are_set():

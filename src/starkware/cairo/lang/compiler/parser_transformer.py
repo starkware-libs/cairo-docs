@@ -65,7 +65,6 @@ from starkware.cairo.lang.compiler.ast.expr import (
     ExprReg,
     ExprSubscript,
     ExprTuple,
-    Expression,
 )
 from starkware.cairo.lang.compiler.ast.expr_func_call import ExprFuncCall
 from starkware.cairo.lang.compiler.ast.instructions import (

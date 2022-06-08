@@ -16,7 +16,6 @@ from starkware.cairo.lang.compiler.ast.code_elements import (
     CodeElementImport,
     CodeElementReference,
     CodeElementReturnValueReference,
-    CodeElementIf,
 )
 from starkware.cairo.lang.compiler.ast.expr import (
     ExprConst,

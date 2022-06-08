@@ -729,4 +729,3 @@ Consider the function ``foo()`` that returns two values.
     let (local a, _) = foo()
 
 For more information see :ref:`return_values_unpacking`.
-
