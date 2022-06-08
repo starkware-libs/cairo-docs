@@ -30,7 +30,7 @@ function calls. Consider the following (contrived) example:
 
     from starkware.cairo.common.math import assert_not_zero
 
-    func inverse(x) -> (res):
+    func inverse(x) -> (res : felt):
         with_attr error_message("x must not be zero. Got x={x}."):
             return (res=1 / x)
         end

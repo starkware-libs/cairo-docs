@@ -40,8 +40,8 @@ which is equivalent to
     [ap] = 0x68656c6c6f
 
 It is important to note that a short-string is simply a way to represent a field element,
-it not a real string.
-Cairo doesn't support strings at the moment, and when it does strings will be represented using
+it's not a real string.
+Cairo doesn't support strings at the moment, and when it does, strings will be represented using
 ``"`` rather than ``'`` (similar to the distinction in C/C++).
 
 The string's first character is the most significant byte of the integer (big endian
@@ -386,7 +386,7 @@ Exercise
 
 .. tested-code:: cairo locals_exercise2
 
-    func pow4(n) -> (m):
+    func pow4(n) -> (m : felt):
         alloc_locals
         local x
 

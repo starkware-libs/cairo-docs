@@ -10,6 +10,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 import os
+import re
 import sys
 from typing import List
 
@@ -74,3 +75,41 @@ if is_starknet:
     html_css_files = [
         "https://starknet.io/wp-content/themes/starknet/sphinx.css",
     ]
+
+
+CAIRO_VERSION_FILE = os.path.join(os.path.dirname(__file__), "../lang/VERSION")
+CAIRO_VERSION = open(CAIRO_VERSION_FILE).read().strip()
+
+replacements = {
+    "VERSION": CAIRO_VERSION,
+    "ACCOUNT_ADDRESS": "0x078d796e87cfa496bffad27be9ed42f2709bd6e32a6366f842fdf38664a1412d",
+    "ACCOUNT_ADDRESS_TRIMMED": "0x78d796e87cfa496bffad27be9ed42f2709bd6e32a6366f842fdf38664a1412d",
+    "ACCOUNT_CLASS_HASH": "0x74acbf20e655c80c4fa16e3574489073e0093fd8b386d9614ab2d6cf5b866bf",
+    "INTRO_CONTRACT_CLASS_HASH": (
+        "0x1e2208b571b2cb68908f37a196ed5e391c8933a6db23bb3939acedee40d9b8a"
+    ),
+    "INTRO_CONTRACT_ADDRESS": "0x039564c4f6d9f45a963a6dc8cf32737f0d51a08e446304626173fd838bd70e1c",
+    "INTRO_CONTRACT_ADDRESS_TRIMMED": (
+        "0x39564c4f6d9f45a963a6dc8cf32737f0d51a08e446304626173fd838bd70e1c"
+    ),
+}
+
+
+def substitute_variables(app, docname, source):
+    # Allow skipping variable substitution (for example, this is used when generating codes.json).
+    if os.environ.get("DONT_SUBSTITUTE_VARIABLES") == "1":
+        return
+
+    def replace_variable(match) -> str:
+        variable_name = match.group(1)
+        assert variable_name in replacements, (
+            f"Unexpected variable name '{variable_name}'. "
+            "Please make sure it is defined in src/starkware/cairo/docs/conf.py."
+        )
+        return replacements[variable_name]
+
+    source[0] = re.sub("\$\[([a-zA-Z0-9_]+)\]", replace_variable, source[0])
+
+
+def setup(app):
+    app.connect("source-read", substitute_variables)

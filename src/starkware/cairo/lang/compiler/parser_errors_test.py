@@ -234,6 +234,20 @@ new A() new
     )
 
 
+def test_modifier_in_tuple():
+    verify_exception(
+        """
+let a : (b : local felt) = 5
+""",
+        """
+file:?:?: Unexpected token Token('LOCAL', 'local'). Expected one of: \
+"(", "codeoffset", "felt", identifier.
+let a : (b : local felt) = 5
+             ^***^
+""",
+    )
+
+
 def test_if_with_parenthesized_condition():
     verify_exception(
         """
@@ -246,5 +260,5 @@ file:?:?: Unexpected token Token(\'_DBL_EQ\', \'==\'). Expected one of: "(", ")"
 "[", "{", operator.
 if (a == 0 and b == 1):
       ^^
-""",
+      """,
     )

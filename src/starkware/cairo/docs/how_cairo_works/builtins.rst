@@ -87,7 +87,7 @@ Take a look at the following implementation of ``hash2``
 
     from starkware.cairo.common.cairo_builtins import HashBuiltin
 
-    func hash2{hash_ptr : HashBuiltin*}(x, y) -> (z):
+    func hash2{hash_ptr : HashBuiltin*}(x, y) -> (z : felt):
         # Create a copy of the reference and advance hash_ptr.
         let hash = hash_ptr
         let hash_ptr = hash_ptr + HashBuiltin.SIZE
@@ -126,7 +126,7 @@ You can call ``hash2()`` in a few ways:
         from starkware.cairo.common.cairo_builtins import HashBuiltin
         from starkware.cairo.common.hash import hash2
 
-        func foo{hash_ptr0 : HashBuiltin*}() -> (z):
+        func foo{hash_ptr0 : HashBuiltin*}() -> (z : felt):
             let (z) = hash2{hash_ptr=hash_ptr0}(1, 2)
             # The previous statement rebinds the value of hash_ptr0.
             # If hash_ptr0 were used here, it would've referred to
@@ -143,7 +143,7 @@ You can call ``hash2()`` in a few ways:
         from starkware.cairo.common.cairo_builtins import HashBuiltin
         from starkware.cairo.common.hash import hash2
 
-        func foo{hash_ptr : HashBuiltin*}() -> (z):
+        func foo{hash_ptr : HashBuiltin*}() -> (z : felt):
             let (z) = hash2(1, 2)
             # The previous statement rebinds the value of hash_ptr.
             # If hash_ptr were used here, it would've referred to the
@@ -253,7 +253,7 @@ You should get the following error:
         hash2(3, 4)
         ^*********^
     hash.cairo:13:12: Reference 'hash_ptr' was revoked.
-    func hash2{hash_ptr : HashBuiltin*}(x, y) -> (result):
+    func hash2{hash_ptr : HashBuiltin*}(x, y) -> (result : felt):
                ^*********************^
     Reference was defined here:
     test.cairo:13:5
@@ -267,7 +267,7 @@ In this case, the line ``hash2(1, 2)`` rebinds ``hash_ptr`` to the value returne
 by ``hash2`` (due to the implicit argument of ``hash2``).
 This reference is relative to the ``ap`` register.
 The call to ``foo()`` revokes this reference since the compiler cannot track the expected change
-to the ``ap`` register. On the other hand, the line ``hash2(1, 2)`` requires this reference,
+to the ``ap`` register. On the other hand, the line ``hash2(3, 4)`` requires this reference,
 which is the reason we got that the error.
 
 To solve it, you can add the line ``local hash_ptr : HashBuiltin* = hash_ptr``
@@ -334,7 +334,7 @@ A possible solution is to rebind ``hash_ptr`` *at the end* of both branches
     from starkware.cairo.common.cairo_builtins import HashBuiltin
     from starkware.cairo.common.hash import hash2
 
-    func bar{hash_ptr : HashBuiltin*}(x):
+    func bar{hash_ptr : HashBuiltin*}(x : felt):
         if x == 0:
             hash2(1, 2)
             tempvar hash_ptr = hash_ptr
@@ -600,7 +600,7 @@ assuming that :math:`|\mathbb{F}| > 2^{128}`:
 
 .. tested-code:: cairo division
 
-    func div{range_check_ptr}(x, y) -> (q, r):
+    func div{range_check_ptr}(x, y) -> (q : felt, r : felt):
         alloc_locals
         local q
         local r

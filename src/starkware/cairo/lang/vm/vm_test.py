@@ -14,35 +14,20 @@ from starkware.cairo.lang.vm.relocatable import (
     MaybeRelocatableDict,
     RelocatableValue,
 )
+from starkware.cairo.lang.vm.test_utils import run_program_in_vm
 from starkware.cairo.lang.vm.virtual_machine_base import Rule, VirtualMachineBase
 from starkware.cairo.lang.vm.vm import RunContext, VirtualMachine
 from starkware.cairo.lang.vm.vm_exceptions import InconsistentAutoDeductionError, VmException
 from starkware.python.test_utils import maybe_raises
 
-PRIME = 2 ** 64 + 13
+PRIME = 2**64 + 13
 
 
 def run_single(code: str, steps: int, *, pc=RelocatableValue(0, 10), ap=100, fp=100, extra_mem={}):
     program = compile_cairo(code, PRIME, debug_info=True)
-
-    # Set memory[fp - 1] to an arbitrary value, since [fp - 1] is assumed to be set.
-    memory: MaybeRelocatableDict = {
-        **{pc + i: v for i, v in enumerate(program.data)},
-        fp - 1: 1234,
-        **extra_mem,
-    }
-    context = RunContext(
-        pc=pc,
-        ap=ap,
-        fp=fp,
-        memory=MemoryDict(memory),
-        prime=PRIME,
+    return run_program_in_vm(
+        program=program, steps=steps, pc=pc, ap=ap, fp=fp, extra_mem=extra_mem, prime=PRIME
     )
-
-    vm = VirtualMachine(program, context, {})
-    for _ in range(steps):
-        vm.step()
-    return vm
 
 
 def test_memory_dict():

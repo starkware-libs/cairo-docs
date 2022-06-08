@@ -7,7 +7,7 @@ In order to follow this tutorial you should have basic familiarity with writing
 Cairo code. For example, you can read the first few pages of the
 ":ref:`Hello, Cairo <hello_cairo>`" tutorial.
 You should also :ref:`set up your environment <quickstart>` and make sure your
-installed Cairo version is at least ``0.8.2``
+installed Cairo version is at least ``$[VERSION]``
 (you can check your version by running ``cairo-compile --version``).
 
 .. _first_contract:
@@ -49,7 +49,7 @@ Let's start by looking at the following StarkNet contract:
         range_check_ptr,
     }() -> (res : felt):
         let (res) = balance.read()
-        return (res)
+        return (res=res)
     end
 
 The first line, ``%lang starknet`` declares that this file should be read as a StarkNet contract
@@ -186,8 +186,10 @@ Let's examine the file ``contract_abi.json`` that was created during the contrac
 
 The ABI file contains a list of all the callable functions and their expected inputs.
 
-Deploy the contract on the StarkNet testnet
--------------------------------------------
+.. _declare_contract:
+
+Declare the contract on the StarkNet testnet
+--------------------------------------------
 
 In order to instruct the CLI to work with the StarkNet testnet you should either
 pass ``--network=alpha-goerli`` on every use, or set the ``STARKNET_NETWORK`` environment variable
@@ -196,6 +198,33 @@ as follows:
 .. tested-code:: bash starknet_env
 
     export STARKNET_NETWORK=alpha-goerli
+
+Unlike Ethereum, StarkNet distinguishes between a contract class and a contract instance.
+A contract class represents the code of a contract (but with no state), while a contract instance
+represents a specific instance of the class, with its own state.
+
+Run the following command to declare your contract class on the StarkNet testnet:
+
+.. tested-code:: bash starknet_declare
+
+    starknet declare --contract contract_compiled.json
+
+The output should look like:
+
+.. tested-code:: none starknet_declare_output
+
+    Declare transaction was sent.
+    Contract class hash: $[INTRO_CONTRACT_CLASS_HASH]
+    Transaction hash: 0x762e166dd3326b2e263eb5bcfdccd225dc88e067fdf7c92cf8ce5e4ea01f9f1
+
+You can see here the class hash of your new contract. You'll need this class hash in order to
+deploy an instance of the contract using the :ref:`deploy system call <deploying_from_contracts>`.
+
+**Note**: You are not required to declare a contract before deploying it when using the ``deploy``
+command. The ``deploy`` command also declares the contract.
+
+Deploy the contract on the StarkNet testnet
+-------------------------------------------
 
 **Important note**: The alpha release is an experimental release. Newer versions may
 require a reset of the network's state (resulting in the removal of the deployed contracts).
@@ -211,7 +240,7 @@ The output should look like:
 .. tested-code:: none starknet_deploy_output
 
     Deploy transaction was sent.
-    Contract address: 0x039564c4f6d9f45a963a6dc8cf32737f0d51a08e446304626173fd838bd70e1c
+    Contract address: $[INTRO_CONTRACT_ADDRESS]
     Transaction hash: 0x125e4bc5251af8ee2664ea0d1495b36c593f25f78f1a78f637a3f7aafa9e22
 
 You can see here the address of your new contract. You'll need this address to interact with
@@ -242,8 +271,11 @@ The result should look like:
 .. tested-code:: none starknet_invoke_output
 
     Invoke transaction was sent.
-    Contract address: 0x05a4d278dceae5ff055796f1f59a646f72628730b7d72acb5483062cb1ce82dd
+    Contract address: $[INTRO_CONTRACT_ADDRESS]
     Transaction hash: 0x69d743891f69d758928e163eff1e3d7256752f549f134974d4aa8d26d5d7da8
+
+**Note**: Due to the use of fees in StarkNet, every interaction with a contract through
+a function invocation must be done using an account. To set up an account, see :ref:`account_setup`.
 
 .. _tx_status:
 
