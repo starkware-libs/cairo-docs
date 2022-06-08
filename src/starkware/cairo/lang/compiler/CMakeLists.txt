@@ -157,11 +157,11 @@ full_python_test(cairo_compile_test
     preprocessor/flow_test.py
     preprocessor/identifier_aware_visitor_test.py
     preprocessor/identifier_collector_test.py
+    preprocessor/if_labels_test.py
     preprocessor/local_variables_test.py
     preprocessor/preprocessor_test.py
     preprocessor/reg_tracking_test.py
     preprocessor/struct_collector_test.py
-    preprocessor/unique_labels_test.py
     proxy_identifier_manager_test.py
     references_test.py
     resolve_search_result_test.py
