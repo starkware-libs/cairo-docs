@@ -7,16 +7,22 @@ from starkware.cairo.lang.compiler.ast.for_loop import ForClauseIn
 from starkware.cairo.lang.compiler.ast.types import TypedIdentifier
 from starkware.cairo.lang.compiler.error_handling import Location
 from starkware.cairo.lang.compiler.preprocessor.for_loop.errors import ForLoopLoweringError
+from starkware.cairo.lang.compiler.preprocessor.for_loop.generators import GeneratorLowering
 
 
 @dataclasses.dataclass
 class InClauseLowering:
     iter_identifier: TypedIdentifier
     generator_location: Location
+    generator: GeneratorLowering
 
     @classmethod
     def from_clause(cls, clause: ForClauseIn) -> "InClauseLowering":
-        return cls(iter_identifier=clause.identifier, generator_location=clause.generator.location)
+        return cls(
+            iter_identifier=clause.identifier,
+            generator_location=clause.generator.location,
+            generator=GeneratorLowering.from_in_clause(clause),
+        )
 
 
 def fetch_in_clause(elm: CodeElementFor) -> ForClauseIn:
