@@ -54,7 +54,9 @@ end
 
 # Given a list of KeyValue, sums the values, grouped by key,
 # and returns a list of pairs (key, sum_of_values).
-func sum_by_key{range_check_ptr}(list : KeyValue*, size) -> (result : KeyValue*, result_size):
+func sum_by_key{range_check_ptr}(list : KeyValue*, size) -> (
+    result : KeyValue*, result_size : felt
+):
     alloc_locals
     %{
         # Initialize cumulative_sums with an empty dictionary.

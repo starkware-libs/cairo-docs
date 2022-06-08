@@ -247,10 +247,6 @@ Putting it all together
             squashed_dict=squashed_dict,
         )
 
-        # Store range_check_ptr in a local variable to make it
-        # accessible after the call to output_initial_values().
-        local range_check_ptr = range_check_ptr
-
         # Verify that the squashed dict has exactly 15 entries.
         # This will guarantee that all the values in the tile list
         # are in the range 1-15.
@@ -296,14 +292,6 @@ You should note that while it looks like a variable name ``range_check_ptr`` is 
 its value, this is not the case -- Cairo is immutable.
 Rather than the value changing, the meaning of ``range_check_ptr`` throughout the function changes.
 You can learn more about reference rebinding :ref:`here <reference_rebinding>`.
-
-Now, let's focus on the line ``local range_check_ptr = range_check_ptr``.
-Try to compile without it
-(you can use the ``main()`` below), and see what happens.
-Due to the call to
-``output_initial_values``, the reference ``range_check_ptr`` which we got from ``squash_dict``
-is revoked (see :ref:`revoked_references`).
-The solution is to store this value in a local variable (local variables are not revoked).
 
 Let's modify our previous dummy main to see the results of what we did so far
 (note that you'll need to put the ``%builtin`` directive at the top of the file,

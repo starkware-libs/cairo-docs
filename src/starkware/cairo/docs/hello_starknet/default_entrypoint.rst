@@ -3,7 +3,7 @@ Default entry point
 
 There are cases where the contract entry points are not known in advance.
 The most prominent example is a delegate proxy that forwards calls to an implementation
-contract.
+contract class.
 Such a proxy can be implemented using the ``__default__`` entry point as follows:
 
 .. tested-code:: cairo delegate_proxy
@@ -12,20 +12,20 @@ Such a proxy can be implemented using the ``__default__`` entry point as follows
     %builtins pedersen range_check bitwise
 
     from starkware.cairo.common.cairo_builtins import HashBuiltin
-    from starkware.starknet.common.syscalls import delegate_call
+    from starkware.starknet.common.syscalls import library_call
 
-    # The address of the implementation contract.
+    # The implementation class hash.
     @storage_var
-    func impl_address() -> (address : felt):
+    func implementation_hash() -> (class_hash : felt):
     end
 
-    @external
+    @constructor
     func constructor{
         syscall_ptr : felt*,
         pedersen_ptr : HashBuiltin*,
         range_check_ptr,
-    }(impl_address_ : felt):
-        impl_address.write(value=impl_address_)
+    }(implementation_hash_ : felt):
+        implementation_hash.write(value=implementation_hash_)
         return ()
     end
 
@@ -39,10 +39,10 @@ Such a proxy can be implemented using the ``__default__`` entry point as follows
     }(selector : felt, calldata_size : felt, calldata : felt*) -> (
         retdata_size : felt, retdata : felt*
     ):
-        let (address) = impl_address.read()
+        let (class_hash) = implementation_hash.read()
 
-        let (retdata_size : felt, retdata : felt*) = delegate_call(
-            contract_address=address,
+        let (retdata_size : felt, retdata : felt*) = library_call(
+            class_hash=class_hash,
             function_selector=selector,
             calldata_size=calldata_size,
             calldata=calldata,
@@ -61,14 +61,51 @@ Similarly, the ``@raw_output`` decorator instructs the compiler not to process
 the function's return value.
 In such a case the function's return values must be ``retdata_size`` and ``retdata``.
 
-In a similar way to ``__default__``, the ``__l1_default__`` entry point that is executed when an L1
-handler is invoked but the requested selector is missing. This entry point in combination with the
-``delegate_l1_handler`` system call can be used to forward L1 handlers as follows:
+Let's see how to use this proxy pattern.
 
-.. tested-code:: cairo delegate_l1_handler
+Create a file named ``balance_contract.cairo`` containing the example balance contract code
+in :ref:`starknet_intro`
+and declare that contract as explained in :ref:`declare_contract`.
+Denote the hash of the new contract class by ``BALANCE_CLASS_HASH``.
+
+Now, create a file named ``delegate_proxy.cairo`` containing the proxy code above,
+and deploy that contract, with the value ``BALANCE_CLASS_HASH`` for the ``implementation_hash_``
+constructor argument:
+
+.. tested-code:: bash deploy_delegate_proxy
+
+    starknet deploy \
+        --contract delegate_proxy_compiled.json \
+        --inputs BALANCE_CLASS_HASH
+
+Denote the address of the new contract by ``PROXY_CONTRACT``.
+
+Invoke the ``increase_balance`` function of the balance class through the delegate proxy contract.
+You should use the address of the **delegate proxy contract**
+with the ABI of the **implementation class**,
+which is where the invoked function is defined.
+The rest of the parameters are as expected -- the inputs of the function.
+
+.. tested-code:: bash invoke_increase_balance_through_delegate_proxy
+
+    starknet invoke \
+        --address PROXY_CONTRACT \
+        --abi balance_contract_abi.json \
+        --function increase_balance \
+        --inputs 10000
+
+This will increase the balance stored in the proxy contract.
+Note that in our case, the implementation balance contract was only declared and not deployed,
+so it does not have storage of its own.
+
+In a similar way to ``__default__``, the ``__l1_default__`` entry point is executed when an L1
+handler is invoked but the requested selector is missing. This entry point in combination with the
+``library_call_l1_handler`` system call can be used to forward L1 handlers as follows:
+
+.. tested-code:: cairo library_call_l1_handler
 
     from starkware.starknet.common.syscalls import (
-        delegate_l1_handler,
+        library_call_l1_handler,
     )
 
     @l1_handler
@@ -78,10 +115,10 @@ handler is invoked but the requested selector is missing. This entry point in co
         pedersen_ptr : HashBuiltin*,
         range_check_ptr,
     }(selector : felt, calldata_size : felt, calldata : felt*):
-        let (address) = impl_address.read()
+        let (class_hash) = implementation_hash.read()
 
-        delegate_l1_handler(
-            contract_address=address,
+        library_call_l1_handler(
+            class_hash=class_hash,
             function_selector=selector,
             calldata_size=calldata_size,
             calldata=calldata,
@@ -89,10 +126,10 @@ handler is invoked but the requested selector is missing. This entry point in co
         return ()
     end
 
-The ``delegate_l1_handler`` system call is similar to the delegate_call except that it invokes an
+The ``library_call_l1_handler`` system call is similar to ``library_call`` except that it invokes an
 ``l1_handler`` entry point instead of an ``external`` entry point.
 The system call does not consume an L1 -> L2 message as in the typical use case, the relevant
-message is consumed by the l1_handler that issued the system call.
-Furthermore, this system call cannot be used to trick the called contract into accepting a 'fake'
-L1 -> L2 message, as the entry point is executed in the context of the calling contract, rather than
-the context of the called contract.
+message is consumed by the L1 handler that issued the system call.
+
+Note that calling ``library_call_l1_handler`` outside of an L1 handler may be dangerous,
+as the called handler is likely to assume the appropriate message was consumed.

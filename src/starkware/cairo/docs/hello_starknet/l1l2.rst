@@ -57,16 +57,11 @@ messages, it is not enforced by the protocol (so a Sequencer may choose
 to skip a message).
 This should be taken into account when designing the message protocol between the two contracts.
 
-Notes
-*****
-
 **Important note**: The StarkNet Alpha system is still under development, and therefore
 from time to time the state of the system will reset and all contracts will be removed.
 This means that you shouldn't move valuable assets
 to the StarkNet system, unless
 you have a way to withdraw them given the removal of the L2 contract.
-That being said,
-recall that StarkNet Alpha only runs on the Goerli *testnet*.
 
 An example of a simple token bridge
 -----------------------------------
@@ -285,9 +280,9 @@ be a 251-bit integer value:
 
     export USERID="<favorite 251-bit integer>"
 
-Invoke the ``increase_balance`` function and then the ``withdraw`` function:
+Invoke the ``increase_balance`` function:
 
-.. tested-code:: bash l1l2_invoke
+.. tested-code:: bash l1l2_invoke_increase_balance
 
     starknet invoke \
         --address ${CONTRACT_ADDRESS} \
@@ -296,6 +291,10 @@ Invoke the ``increase_balance`` function and then the ``withdraw`` function:
         --inputs \
             ${USERID} \
             3333
+
+After the balance is increased, invoke the ``withdraw`` function:
+
+.. tested-code:: bash l1l2_invoke_withdraw
 
     starknet invoke \
         --address ${CONTRACT_ADDRESS} \
@@ -331,8 +330,8 @@ of the example contract, deployed at address
 with the following arguments:
 ``CONTRACT_ADDRESS, USERID, 1000``
 (where, as before, ``CONTRACT_ADDRESS`` is the address of the **L2** contract you deployed).
-After the ``withdraw()`` transaction, the user's L1 balance should be 1000 and
-their L2 balance should be 2333.
+After the ``withdraw()`` transaction, the user's L1 balance should be ``1000`` and
+their L2 balance should be ``2333``.
 
 After your ``withdraw()`` transaction is accepted on-chain, call the ``deposit()``
 function of the example contract. Use the following arguments:
@@ -342,7 +341,7 @@ It may take some time until StarkNet processes the incoming message and calls th
 (for example, the system waits for a few blockchain confirmations).
 But after that time, you'll be able to see the updated balance of the user
 by invoking ``starknet call`` for ``get_balance`` again.
-The new balances should be: L1 balance -- 400 and L2 balance -- 2933.
+The new balances should be: L1 balance -- ``400`` and L2 balance -- ``2933``.
 
 
 .. test::

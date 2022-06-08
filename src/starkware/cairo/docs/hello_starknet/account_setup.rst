@@ -1,3 +1,5 @@
+.. _account_setup:
+
 Setting up a StarkNet account
 =============================
 
@@ -89,5 +91,7 @@ You can acquire L2 ETH in the following ways:
 1.  Use the `StarkNet Faucet <https://faucet.goerli.starknet.io/>`__
     to get small amounts of ETH directly to the account you have just created.
     This should suffice for simple transactions.
-2.  Use the StarkNet L2 bridge (**coming soon**)
+2.  Use StarkGate -- the StarkNet L2 bridge
+    (`L1 contract <https://goerli.etherscan.io/address/0xc3511006C04EF1d78af4C8E0e74Ec18A6E64Ff9e>`__
+    / `Web App <https://goerli.starkgate.starknet.io>`__)
     to transfer your existing Goerli L1 ETH to and from the L2 account.

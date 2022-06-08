@@ -20,13 +20,23 @@ The output should resemble:
         "status": "ACCEPTED_ON_L2",
         "transaction": {
             "calldata": [
-                "0x4d2"
+                "0x1",
+                "$[INTRO_CONTRACT_ADDRESS_TRIMMED]",
+                "0x362398bec32bc0ebb411203221a35a0301193a96f317ebe5e40be9f60d15320",
+                "0x0",
+                "0x1",
+                "0x1",
+                "0x4d2",
+                "0x0"
             ],
-            "contract_address": "0x039564c4f6d9f45a963a6dc8cf32737f0d51a08e446304626173fd838bd70e1c",
-            "entry_point_selector": "0x362398bec32bc0ebb411203221a35a0301193a96f317ebe5e40be9f60d15320",
+            "contract_address": "$[ACCOUNT_ADDRESS_TRIMMED]",
+            "entry_point_selector": "0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
             "entry_point_type": "EXTERNAL",
             "max_fee": "0x0",
-            "signature": [],
+            "signature": [
+                "0x26ee1f973def2e6d5c7f32aaad96c84dab32df6a62ee0e8b530a72bc5478fe6",
+                "0x502b15e440cc2a8a1966f0c973015096715e366fde36a4659c56f84249688e"
+            ],
             "transaction_hash": "0x69d743891f69d758928e163eff1e3d7256752f549f134974d4aa8d26d5d7da8",
             "type": "INVOKE_FUNCTION"
         },
@@ -70,14 +80,13 @@ The output should resemble:
         "execution_resources": {
             "builtin_instance_counter": {
                 "bitwise_builtin": 0,
-                "ec_op_builtin": 0,
-                "ecdsa_builtin": 0,
+                "ecdsa_builtin": 1,
                 "output_builtin": 0,
                 "pedersen_builtin": 2,
-                "range_check_builtin": 8
+                "range_check_builtin": 10
             },
-            "n_memory_holes": 22,
-            "n_steps": 168
+            "n_memory_holes": 27,
+            "n_steps": 410
         },
         "l2_to_l1_messages": [
             {
@@ -122,43 +131,45 @@ The output should resemble:
 
     {
         "function_invocation": {
+            "call_type": "CALL",
             "calldata": [
+                "0x1",
+                "$[INTRO_CONTRACT_ADDRESS_TRIMMED]",
+                "0x15511cc3694f64379908437d6d64458dc76d02482052bfb8a5b33a72c054c77",
+                "0x0",
+                "0x2",
+                "0x2",
                 "0xbc614e",
-                "0x3e8"
+                "0x3e8",
+                "0x1"
             ],
             "caller_address": "0x0",
-            "code_address": "0x3ae7fee16103cd5d9c09a8160cdd9ebd9a75c530bbafa53d9b7c920542ca1f3",
-            "contract_address": "0x3ae7fee16103cd5d9c09a8160cdd9ebd9a75c530bbafa53d9b7c920542ca1f3",
+            "class_hash": "$[ACCOUNT_CLASS_HASH]",
+            "contract_address": "$[ACCOUNT_ADDRESS_TRIMMED]",
             "entry_point_type": "EXTERNAL",
             "events": [],
             "execution_resources": {
                 "builtin_instance_counter": {
                     "bitwise_builtin": 0,
-                    "ec_op_builtin": 0,
-                    "ecdsa_builtin": 0,
+                    "ecdsa_builtin": 1,
                     "output_builtin": 0,
                     "pedersen_builtin": 2,
-                    "range_check_builtin": 8
+                    "range_check_builtin": 10
                 },
-                "n_memory_holes": 22,
-                "n_steps": 168
+                "n_memory_holes": 27,
+                "n_steps": 410
             },
-            "internal_calls": [],
-            "messages": [
-                {
-                    "order": 0,
-                    "payload": [
-                        "0x0",
-                        "0xbc614e",
-                        "0x3e8"
-                    ],
-                    "to_address": "0xd62F98664F8f7A1aec2F7cB602aF1f2354A881D2"
-                }
+            "internal_calls": [
+                ...
             ],
+            "messages": [],
             "result": [],
-            "selector": "0x15511cc3694f64379908437d6d64458dc76d02482052bfb8a5b33a72c054c77"
+            "selector": "0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad"
         },
-        "signature": []
+        "signature": [
+            "0x6e4606a3c0f3bd0eac37ddfbf2645f62c04474e5eac51a2f6225ee7702996a",
+            "0x389d0bae9be71ceb3b6092dda9b76279543bc2bfe271c3d05a812c3dbeffeb7"
+        ]
     }
 
 estimate_fee
@@ -187,7 +198,7 @@ The output should resemble:
 
 .. tested-code:: none starknet_estimate_fee_output
 
-    The estimated fee is: 259600000000000 WEI (0.000260 ETH).
+    The estimated fee is: 599500000000000 WEI (0.000599 ETH).
 
 get_code
 --------
@@ -229,10 +240,42 @@ The output should resemble:
         ]
     }
 
+get_class_by_hash
+-----------------
+
+To get the full class compatible with a specific hash, run the following command:
+
+.. tested-code:: bash starknet_get_class_by_hash
+
+    starknet get_class_by_hash --class_hash CLASS_HASH
+
+The output should resemble:
+
+.. tested-code:: none starknet_get_class_by_hash_output
+
+    {
+        "abi": [
+            {
+                "inputs": [
+                    {
+                        "name": "amount",
+                        "type": "felt"
+                    }
+                ],
+                "name": "increase_balance",
+                "outputs": [],
+                "type": "function"
+            },
+
+            ...
+
+        }
+    }
+
 get_full_contract
 -----------------
 
-To get the full contract definition of a contract at a specific address, run the following command:
+To get the full contract class of a contract at a specific address, run the following command:
 
 .. tested-code:: bash starknet_get_full_contract
 
@@ -260,6 +303,21 @@ The output should resemble:
 
         }
     }
+
+get_class_hash_at
+--------------------
+
+To get the hash of a contract at a specific address, run the following command:
+
+.. tested-code:: bash starknet_get_class_hash_at
+
+    starknet get_class_hash_at --contract_address CONTRACT_ADDRESS
+
+The output should resemble:
+
+.. tested-code:: none starknet_get_class_hash_at_output
+
+    "0x1e2208b571b2cb68908f37a196ed5e391c8933a6db23bb3939acedee40d9b8a"
 
 get_block
 ---------
@@ -295,8 +353,20 @@ The output should resemble:
                     "n_steps": 0
                 },
                 "l2_to_l1_messages": [],
-                "transaction_hash": "0x50f392748f303a37f0a9053b7295d51231bee3e0a9dbf42bcb1c8392e4d8503",
+                "transaction_hash": "0x61a03a850ff258a213b14c386449cf213fddc276e4ad7695834ab4113cd39d6",
                 "transaction_index": 0
+            },
+            {
+                "actual_fee": "0x0",
+                "events": [],
+                "execution_resources": {
+                    "builtin_instance_counter": {},
+                    "n_memory_holes": 0,
+                    "n_steps": 0
+                },
+                "l2_to_l1_messages": [],
+                "transaction_hash": "0x50f392748f303a37f0a9053b7295d51231bee3e0a9dbf42bcb1c8392e4d8503",
+                "transaction_index": 1
             },
             {
                 "actual_fee": "0x0",
@@ -304,35 +374,51 @@ The output should resemble:
                 "execution_resources": {
                     "builtin_instance_counter": {
                         "bitwise_builtin": 0,
-                        "ec_op_builtin": 0,
-                        "ecdsa_builtin": 0,
+                        "ecdsa_builtin": 1,
                         "output_builtin": 0,
                         "pedersen_builtin": 0,
-                        "range_check_builtin": 0
+                        "range_check_builtin": 2
                     },
-                    "n_memory_holes": 0,
-                    "n_steps": 65
+                    "n_memory_holes": 4,
+                    "n_steps": 307
                 },
                 "l2_to_l1_messages": [],
                 "transaction_hash": "0x1ba395964b6d4308b14a78a8f6f59dbc0c753ad966e5d3e1e3118ca29e10841",
-                "transaction_index": 1
+                "transaction_index": 2
             }
         ],
         "transactions": [
             {
+                "class_hash": "0x12762b15b73e3a24e8601ec99303163e8b69c53b5005819fc96e719e28f7aea",
+                "max_fee": "0x0",
+                "nonce": "0x0",
+                "sender_address": "0x1",
+                "signature": [],
+                "transaction_hash": "0x61a03a850ff258a213b14c386449cf213fddc276e4ad7695834ab4113cd39d6",
+                "type": "DECLARE",
+                "version": "0x0"
+            },
+            {
                 "class_hash": "0x711941b11a8236b8cca42b664e19342ac7300abb1dc44957763cb65877c2708",
                 "constructor_calldata": [],
-                "contract_address": "0x05a4d278dceae5ff055796f1f59a646f72628730b7d72acb5483062cb1ce82dd",
+                "contract_address": "$[INTRO_CONTRACT_ADDRESS_TRIMMED]",
                 "contract_address_salt": "0x0",
                 "transaction_hash": "0x602e4b4e9e046d2692af3702fe013fef996df040af335223e7526c9c4fe6fb",
                 "type": "DEPLOY"
             },
             {
                 "calldata": [
-                    "0x4d2"
+                    "0x1",
+                    "$[INTRO_CONTRACT_ADDRESS_TRIMMED]",
+                    "0x362398bec32bc0ebb411203221a35a0301193a96f317ebe5e40be9f60d15320",
+                    "0x0",
+                    "0x1",
+                    "0x1",
+                    "0x4d2",
+                    "0x0"
                 ],
-                "contract_address": "0x05a4d278dceae5ff055796f1f59a646f72628730b7d72acb5483062cb1ce82dd",
-                "entry_point_selector": "0x362398bec32bc0ebb411203221a35a0301193a96f317ebe5e40be9f60d15320",
+                "contract_address": "$[ACCOUNT_ADDRESS_TRIMMED]",
+                "entry_point_selector": "0x15d40a3d6ca2ac30f4031e42be28da9b056fef9bb7357ac5e85627ee876e5ad",
                 "entry_point_type": "EXTERNAL",
                 "max_fee": "0x0",
                 "signature": [],
@@ -386,7 +472,7 @@ The output should resemble:
             "deployed_contracts": [
                 {
                     "address": "0x7c5b47040c4e1d8d7937e7daf5bafba2db1f8a28fdb72cd53dd0c857a7dd2d9",
-                    "contract_hash": "03b9181402fccc351a4fa4084f606c1e7c7d30cc5c58eb62fc12d1decc6b3004"
+                    "class_hash": "03b9181402fccc351a4fa4084f606c1e7c7d30cc5c58eb62fc12d1decc6b3004"
                 }
             ],
             "storage_diffs": {
@@ -456,7 +542,7 @@ Using the same contract we have used so far, you should get:
 Note that this is the same result obtained by the call to ``get_balance``.
 
 Later on, at the :ref:`user authentication <user_authentication>` section, you will see :ref:`a
-generalization of storage variables <storage_maps>`, which allow, for example, a balance
+generalization of storage variables <storage_maps>`, which allows, for example, having a balance
 variable for each user. This will require minor adjustments to the code above, which we will review
 in the relevant section.
 

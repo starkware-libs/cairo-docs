@@ -165,7 +165,7 @@ You can query the transaction status:
     starknet tx_status --hash TX_HASH
 
 Finally, after the transaction is executed (status ``ACCEPTED_ON_L2`` or ``ACCEPTED_ON_L1``)
-we may query the user's balance.
+you may query the user's balance:
 
 .. tested-code:: bash user_auth_call
 

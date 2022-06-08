@@ -13,7 +13,7 @@ python_lib(cairo_docs_lib
 )
 
 python_venv(cairo_docs_venv
-    PYTHON python3.7
+    PYTHON ${PYTHON_COMMAND}
 
     LIBS
     cairo_common_lib
@@ -82,7 +82,7 @@ add_test(
 set (CODES_JSON_PATH "${CMAKE_CURRENT_BINARY_DIR}/codes.json")
 add_custom_command(
     OUTPUT ${CODES_JSON_PATH}
-    COMMAND DOCS_SKIP_TESTS=1 DOCS_CODES_JSON_FILE=${CODES_JSON_PATH}
+    COMMAND DOCS_SKIP_TESTS=1 DOCS_CODES_JSON_FILE=${CODES_JSON_PATH} DONT_SUBSTITUTE_VARIABLES=1
         ${CMAKE_CURRENT_BINARY_DIR}/cairo_docs_test
     DEPENDS cairo_docs_test ${RST_FILES} testing.py
 )
@@ -96,7 +96,7 @@ python_lib(cairo_codes_json_lib
 
 full_python_test(cairo_docs_additional_tests
     PREFIX starkware/cairo/docs
-    PYTHON python3.7
+    PYTHON ${PYTHON_COMMAND}
     TESTED_MODULES starkware/cairo/docs
 
     FILES

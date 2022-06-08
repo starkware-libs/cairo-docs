@@ -110,7 +110,7 @@ Now we can write a function that updates the balances of a given account and ret
 
     func modify_account{range_check_ptr}(
         state : AmmState, account_id, diff_a, diff_b
-    ) -> (state : AmmState, key):
+    ) -> (state : AmmState, key : felt):
         alloc_locals
 
         # Define a reference to state.account_dict_end so that we
@@ -388,7 +388,7 @@ Merkle tree, supporting :math:`2^{10} = 1024` accounts):
     # from account_id to an address in memory of the Account struct.
     func compute_merkle_roots{
         pedersen_ptr : HashBuiltin*, range_check_ptr
-    }(state : AmmState) -> (root_before, root_after):
+    }(state : AmmState) -> (root_before : felt, root_after : felt):
         alloc_locals
 
         # Squash the account dictionary.
@@ -396,7 +396,6 @@ Merkle tree, supporting :math:`2^{10} = 1024` accounts):
             dict_accesses_start=state.account_dict_start,
             dict_accesses_end=state.account_dict_end,
         )
-        local range_check_ptr = range_check_ptr
 
         # Hash the dict values.
         %{

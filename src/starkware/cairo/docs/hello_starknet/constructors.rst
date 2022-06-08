@@ -1,3 +1,5 @@
+.. _constructors:
+
 Constructors
 ============
 
@@ -33,17 +35,33 @@ For example, we can define an ownable contract as follows:
         return ()
     end
 
-Save the contract as ownable.cairo, compile and deploy it.
+    @view
+    func get_owner{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr,
+    }() -> (address : felt):
+        let (address) = owner.read()
+        return (address)
+    end
+
+Save the contract as ``ownable.cairo`` and then compile and declare it.
+
+.. tested-code:: bash ownable_compile_and_declare
+
+    starknet-compile ownable.cairo \
+        --output ownable_compiled.json \
+        --abi ownable_abi.json
+    starknet declare --contract ownable_compiled.json
+
+After the compilation the contract is ready to be deployed.
 When you deploy the contract, pass the arguments using the ``--inputs`` argument.
 The number of inputs must match the signature of the constructor. Otherwise, the deploy transaction
 will fail.
 
 .. tested-code:: bash ownable_deploy
 
-    starknet-compile ownable.cairo \
-        --output ownable_compiled.json \
-        --abi ownable_abi.json
     starknet deploy --contract ownable_compiled.json --inputs 123
 
-When a contract is deployed, the contract address, contract definition hash and the constructor
+When a contract is deployed, the contract address, contract class hash and the constructor
 calldata are included in the on-chain data.

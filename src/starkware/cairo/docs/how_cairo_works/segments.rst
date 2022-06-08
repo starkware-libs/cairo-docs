@@ -62,7 +62,7 @@ Compile the following code and run it with
 
     %builtins output
 
-    func main(output_ptr) -> (output_ptr):
+    func main(output_ptr : felt*) -> (output_ptr : felt*):
         [ap] = output_ptr; ap++
         %{
             print('ap =', ap)
