@@ -20,6 +20,7 @@ This tutorial walks you through writing and deploying a StarkNet contract.
     constructors
     more_features
     calling_contracts
+    deploying_from_contracts
     events
     l1l2
     default_entrypoint

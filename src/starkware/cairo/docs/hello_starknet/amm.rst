@@ -349,13 +349,13 @@ Interaction examples
 --------------------
 
 We can now explore a few examples which demonstrate contract interaction using the StarkNet CLI
-tool. An instance of this contract is deployed and initialized at AMM_ADDRESS.
+tool. An instance of this contract is deployed and initialized at ``AMM_ADDRESS``.
 Set the following environment variable:
 
 .. tested-code:: bash amm_contract_address
 
     # The deployment address of the AMM contract.
-    export AMM_ADDRESS=0x1020ea863b3cfd528f8d43fa739c8f3c2b24e919914c616c004f29a8896cca8
+    export AMM_ADDRESS=0x24d70250b7beff3cfdf694af9c77703afa06edc9fe4d061f17ac2201b779c99
 
 We assume the reader is familiar with the StarkNet CLI. If this is not the case, we recommend you
 review this :ref:`section <starknet_intro>`.

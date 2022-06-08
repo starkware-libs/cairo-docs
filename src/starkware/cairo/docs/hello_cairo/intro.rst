@@ -11,7 +11,7 @@ array:
 
     # Computes the sum of the memory elements at addresses:
     #   arr + 0, arr + 1, ..., arr + (size - 1).
-    func array_sum(arr : felt*, size) -> (sum):
+    func array_sum(arr : felt*, size) -> (sum : felt):
         if size == 0:
             return (sum=0)
         end
@@ -24,7 +24,7 @@ array:
 The first two lines are comment lines, and are ignored by the compiler.
 Comments in Cairo start with ``#`` and continue until the end of the line.
 
-The first non-comment line ``func array_sum(arr : felt*, size) -> (sum):``
+The first non-comment line ``func array_sum(arr : felt*, size) -> (sum : felt):``
 defines a function named ``array_sum``
 which takes two arguments: ``arr`` and ``size``.
 ``arr`` points to an array of ``size`` elements.

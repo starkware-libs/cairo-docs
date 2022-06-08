@@ -5,7 +5,7 @@ def test_if_labels_are_set():
     program = preprocess_str(
         code="""
 namespace B:
-    func foo(x, y) -> (res):
+    func foo(x, y) -> (res : felt):
         if x == 0:
             if y == 0:
                 return (res=0)

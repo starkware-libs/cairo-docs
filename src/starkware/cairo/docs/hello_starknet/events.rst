@@ -1,3 +1,5 @@
+.. _events:
+
 Events
 ======
 
@@ -56,13 +58,13 @@ Invoke ``increase_balance()``:
         --function increase_balance \
         --inputs 4321
 
-Wait for the transaction to be accepted (when its status is PENDING at least)
+Wait for the transaction to be accepted (when its status is ``PENDING`` at least)
 and run the following line to see the emitted event
-(replace ``${TX_HASH}`` with the transaction hash you got from the last command):
+(replace ``${TRANSACTION_HASH}`` with the transaction hash you got from the last command):
 
 .. tested-code:: bash events_get_tx_receipt
 
-    starknet get_transaction_receipt --hash ${TX_HASH}
+    starknet get_transaction_receipt --hash ${TRANSACTION_HASH}
 
 Consider the ``events`` section of the output. It should resemble:
 
@@ -85,7 +87,7 @@ The result contains the following fields:
 
 *   ``from_address`` -- the address of the contract emitting the event.
 *   ``data`` -- the arguments passed to ``increase_balance_called.emit``:
-    the balance before (0) and the amount (4321==0x10e1).
+    the balance before (``0``) and the amount (``4321==0x10e1``).
 *   ``key`` -- The event's key is derived from the name of the event (``increase_balance_called``).
     If your contract emits more than one type of event, you can use this field to
     distinguish between them. You can use python to get the event key from its name:

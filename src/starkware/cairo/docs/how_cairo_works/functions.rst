@@ -37,7 +37,7 @@ or the high-level syntax:
 
 The full syntax of ``call`` is similar to ``jmp``:
 you can call a label (a function is also considered a label),
-and make a relative call (``call rel ...``) (``call abs`` is not supported).
+and make a relative or absolute call (``call rel/abs ...``).
 
 .. _fp_register:
 
@@ -228,7 +228,7 @@ while line C does not.
 
 .. tested-code:: cairo accessing_registers1
 
-    local __fp__ = fp_and_pc.fp_val  # A.
+    local __fp__ : felt* = fp_and_pc.fp_val  # A.
     tempvar x = fp  # B.
     tempvar y = [fp]  # C.
 
@@ -239,7 +239,7 @@ while line C does not.
 
     PRIME = 2**64 + 13
     code = f"""
-    func foo() -> (x, y):
+    func foo() -> (x : felt, y : felt):
         alloc_locals
         {codes['accessing_registers0']}
         {codes['accessing_registers1']}
@@ -268,7 +268,7 @@ and returns their sum ``z`` and product ``w``:
 
 .. tested-code:: cairo foo
 
-    func foo(x, y) -> (z, w):
+    func foo(x, y) -> (z : felt, w : felt):
         [ap] = x + y; ap++  # z.
         [ap] = x * y; ap++  # w.
         ret
@@ -315,11 +315,10 @@ For example, to use the values returned by ``foo`` you may write:
     foo(x=4, y=5)
     [ap] = [ap - 1] + [ap - 2]; ap++  # Compute z + w.
 
-The Cairo compiler automatically creates constants named ``foo.Return.z`` and ``foo.Return.w``
-with the values -1 and -2 respectively, so that ``[ap - 1]`` can be written as
-``[ap + foo.Return.z]``.
+The Cairo compiler automatically creates a type definition named ``foo.Return``
+with the return type: ``(z : felt, w : felt)``.
 In fact, one may define a :ref:`typed reference <typed_references>`
-as follows ``let foo_ret : foo.Return = ap``.
+as follows ``let foo_ret = [cast(ap - 2, foo.Return*)]``.
 Now, you can access ``z`` as ``foo_ret.z``.
 
 Cairo supports a syntactic sugar for these cases (which we call "return value references"):
@@ -327,7 +326,8 @@ Cairo supports a syntactic sugar for these cases (which we call "return value re
 .. tested-code:: cairo call_foo3
 
     let foo_ret = foo(x=4, y=5)
-    # foo_ret is implicitly a reference to ap with type foo.Return.
+    # foo_ret is implicitly a reference to (ap - 2) with type
+    # foo.Return.
     [ap] = foo_ret.z + foo_ret.w; ap++
 
 .. _return_values_unpacking:
@@ -455,7 +455,7 @@ Read the following Fibonacci program:
         ret
     end
 
-    func fib(first_element, second_element, n) -> (res):
+    func fib(first_element, second_element, n) -> (res : felt):
         jmp fib_body if n != 0
         [ap] = second_element; ap++
         ret
@@ -511,15 +511,15 @@ Cairo supports the following syntactic sugar which allows returning values from 
 
 .. tested-code:: cairo return_tuple0
 
-    func foo() -> (a, b):
-        return (<expr0>, b=<expr1>)
+    func foo() -> (a : felt, b : felt):
+        return (a=<expr0>, b=<expr1>)
     end
 
 This is equivalent to:
 
 .. tested-code:: cairo return_tuple1
 
-    func foo() -> (a, b):
+    func foo() -> (a : felt, b : felt):
         [ap] = <expr0>; ap++
         [ap] = <expr1>; ap++
         ret

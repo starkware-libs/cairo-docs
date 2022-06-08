@@ -21,7 +21,7 @@ setuptools.setup(
     setup_requires=["wheel"],
     url="https://cairo-lang.org/",
     package_data={
-        "starkware.cairo.common": ["*.cairo"],
+        "starkware.cairo.common": ["*.cairo", "*/*.cairo"],
         "starkware.cairo.lang.compiler": ["cairo.ebnf", "lib/*.cairo"],
         "starkware.cairo.lang.tracer": ["*.html", "*.css", "*.js", "*.png"],
         "starkware.cairo.lang": ["VERSION"],
@@ -29,7 +29,7 @@ setuptools.setup(
         "starkware.crypto.signature": ["pedersen_params.json"],
         "starkware.starknet": ["common/*.cairo", "definitions/*.yml"],
         "starkware.starknet.business_logic.execution": ["os_resources.json"],
-        "starkware.starknet.core.os": ["*.cairo", "*.json"],
+        "starkware.starknet.core.os": ["*/*.cairo", "*.cairo", "*.json"],
         "starkware.starknet.security": ["whitelists/*.json"],
         "starkware.starknet.testing": ["*.json"],
         "starkware.starknet.third_party.open_zeppelin": ["account.json"],

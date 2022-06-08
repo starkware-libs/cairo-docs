@@ -80,7 +80,7 @@ with the addresses you got when you deployed the two contracts:
         --inputs BALANCE_CONTRACT 10000
 
 This will increase the balance stored in ``BALANCE_CONTRACT``.
-Note that in our case, ``PROXY_CONTRACT`` does not have a storage of its own.
+Note that in our case, the storage of ``PROXY_CONTRACT`` will not be affected.
 
 Wait until the transaction is added to a block, and then
 check the balance using the following two ways:
@@ -123,21 +123,27 @@ You can get the current contract's address by using the ``get_contract_address()
 
 The above is similar to ``address(this)`` in Solidity.
 
-Delegate calls
+Library calls
 --------------
 
-A delegate call is a way to invoke a function declared in another contract within the context of the
+A library call is a way to invoke a function declared in a given contract class within the context
+of the
 calling contract.
+It is possible to invoke a function defined in any previously declared class (in particular, a class
+of any contract which is already deployed).
 
-In particular, storage-changing operations in the invoked function will change the state of the
-calling contract instead of affecting the state of the contract containing the function itself.
+Storage-changing operations in the invoked function will change the state of the calling contract.
 Similarly, ``get_caller_address()`` and ``get_contract_address()`` will return the same value they
-would have returned if they were called from the **calling** function
+would have returned if they were called from the **calling** function.
 
-To perform a delegate call, use the contract interface as above, but prepend ``delegate_`` to the
-function name.
+Note that a library call is very similar to Ethereum's delegate call. The difference is that
+a delegate call requires a deployed contract, while a library call works with a contract class
+(the contract instance is not used in Ethereum's delegate call anyway).
 
-.. tested-code:: cairo delegate_increase_balance
+To perform a library call, use the contract interface as above, but prepend ``library_call_`` to the
+function name and pass a class hash instead of a contract address.
+
+.. tested-code:: cairo library_call_increase_balance
 
     # Define local balance variable in our proxy contract.
     @storage_var
@@ -146,23 +152,43 @@ function name.
 
     @external
     func increase_my_balance{syscall_ptr : felt*, range_check_ptr}(
-        other_contract_address : felt, amount : felt
+        class_hash : felt, amount : felt
     ):
-        # Increase the local balance variable using a function from a different contract by adding
-        # delegate_ before the function name.
-        IBalanceContract.delegate_increase_balance(
-            contract_address=other_contract_address, amount=amount
+        # Increase the local balance variable using a function from a
+        # different contract class using a library call.
+        IBalanceContract.library_call_increase_balance(
+            class_hash=class_hash, amount=amount
         )
         return ()
     end
 
-Invoking increase_my_balance will increase the balance in the calling contract's storage using the
-``increase_balance()`` function of the other contract.
+Modify the file ``proxy_contract.cairo`` you created earlier by adding the code above.
+Recompile and redeploy this new version of the proxy contract, and
+denote its address by ``PROXY_CONTRACT``.
 
-Unlike a regular contract call, here the balance of the calling contract (rather than the called
+Next, declare a library class, in our case -- the already compiled example balance contract.
+
+.. tested-code:: bash declare_balance_contract_class
+
+    starknet declare --contract balance_contract_compiled.json
+
+Denote the hash of this class by ``BALANCE_CLASS_HASH``.
+Now, invoke ``increase_my_balance``:
+
+.. tested-code:: bash invoke_increase_my_balance
+
+    starknet invoke \
+        --address PROXY_CONTRACT \
+        --abi proxy_contract_abi.json \
+        --function increase_my_balance \
+        --inputs BALANCE_CLASS_HASH 12321
+
+This increases the balance in the proxy contract's storage
+using the ``increase_balance()`` function of the balance contract class.
+Unlike a regular contract call, here the balance of the calling contract (rather than of another
 contract) is modified.
 
-Note: you can use delegate call to invoke a function that changes a storage variable
+Note: you can use library call to invoke a function that changes a storage variable
 which wasn't defined in the calling contract. In such a case, the new corresponding
 storage variable will be created in the calling contract, but it won't be easily accessible (you can
-access it by a second delegate call, or directly using ``storage_read()``).
+access it by a second library call, or directly using ``storage_read()``).
