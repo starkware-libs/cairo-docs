@@ -4492,6 +4492,7 @@ ret
     )
 
 
+@pytest.mark.skip
 def test_for_const():
     code = """
 func main():
@@ -4522,6 +4523,7 @@ ret
     )
 
 
+@pytest.mark.skip
 def test_for_typed_iterator_invalid_cast():
     verify_exception(
         """
@@ -4541,6 +4543,7 @@ file:?:?: Cannot cast 'felt' to '(felt, felt)'.
     )
 
 
+@pytest.mark.skip
 def test_for_slice():
     code = """
 func alloc() -> (ptr : felt*):
@@ -4590,6 +4593,7 @@ ret
     )
 
 
+@pytest.mark.skip
 def test_for_range_reference_start():
     code = """
 func main():
@@ -4622,6 +4626,7 @@ ret
     )
 
 
+@pytest.mark.skip
 def test_for_range_reference_stop():
     code = """
 func main():
@@ -4656,6 +4661,7 @@ ret
     )
 
 
+@pytest.mark.skip
 def test_for_range_reference_step():
     code = """
 func main():
@@ -4690,6 +4696,7 @@ ret
     )
 
 
+@pytest.mark.skip
 def test_for_reference_body_vars():
     code = """
 func main():
@@ -4729,6 +4736,7 @@ ret
     )
 
 
+@pytest.mark.skip
 def test_for_range_unbound_stop():
     verify_exception(
         """
@@ -4749,6 +4757,7 @@ file:?:?: Unknown identifier 'stop'.
     )
 
 
+@pytest.mark.skip
 def test_for_range_unbound_step():
     verify_exception(
         """
@@ -4769,6 +4778,7 @@ file:?:?: Unknown identifier 'step'.
     )
 
 
+@pytest.mark.skip
 def test_for_unbound_body_var():
     verify_exception(
         """
@@ -4789,6 +4799,7 @@ file:?:?: Unknown identifier 'x'.
     )
 
 
+@pytest.mark.skip
 def test_for_compiles_same_independent_of_binding_layout():
     code_a = """
 func main():
@@ -4818,6 +4829,7 @@ end
     )
 
 
+@pytest.mark.skip
 def test_for_access_implicit_arguments():
     code = """
 func write{implicit_ptr : felt*}(value):
