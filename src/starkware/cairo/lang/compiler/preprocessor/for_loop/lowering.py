@@ -1,8 +1,22 @@
+from typing import Optional
+
+from starkware.cairo.lang.compiler.ast.arguments import IdentifierList
+from starkware.cairo.lang.compiler.ast.code_elements import (
+    CodeElementFor,
+    CodeElementFunction,
+    CodeBlock,
+    CodeElement,
+    CodeElementAllocLocals,
+)
+from starkware.cairo.lang.compiler.ast.module import CairoModule
 from starkware.cairo.lang.compiler.preprocessor.code_element_injecting_visitor import (
     CodeElementInjectingVisitor,
 )
-
-from starkware.cairo.lang.compiler.ast.code_elements import CodeElementFor
+from starkware.cairo.lang.compiler.preprocessor.for_loop.clauses import (
+    InClauseLowering,
+    fetch_in_clause,
+    fetch_bound_identifiers,
+)
 from starkware.cairo.lang.compiler.preprocessor.for_loop.errors import ForLoopLoweringError
 from starkware.cairo.lang.compiler.preprocessor.pass_manager import PassManagerContext, VisitorStage
 
@@ -27,4 +41,36 @@ class ForLoopLoweringVisitor(CodeElementInjectingVisitor):
         return elm
 
     def visit_CodeElementFor(self, elm: CodeElementFor):
+        current_function = self._get_current_function(elm)
+
+        # Borrow implicit arguments of for loop body from current function.
+        implicit_arguments = current_function.implicit_arguments
+
+        in_clause = fetch_in_clause(elm=elm)
+        bound_identifiers = fetch_bound_identifiers(elm=elm)
+
+        lowering = InClauseLowering.from_clause(clause=in_clause)
+
+        _check_body_has_no_alloc_locals(code_block=elm.code_block)
+
         raise ForLoopLoweringError("For loops are not supported yet.", location=elm.location)
+
+    def _get_current_function(self, elm: CodeElementFor) -> CodeElementFunction:
+        for parent in reversed(self.parents):
+            if isinstance(parent, CodeElementFunction):
+                return parent
+            if isinstance(parent, CairoModule):
+                break
+
+        raise ForLoopLoweringError(
+            "For loops are unsupported outside functions.", location=elm.location
+        )
+
+
+def _check_body_has_no_alloc_locals(code_block: CodeBlock):
+    elms = code_block.code_elements
+    if len(elms) > 0 and isinstance(elms[0].code_elm, CodeElementAllocLocals):
+        raise ForLoopLoweringError(
+            "alloc_locals is not allowed in the body of a for loop.",
+            location=elms[0].location,
+        )
