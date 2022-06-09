@@ -1,3 +1,5 @@
+import pytest
+
 from starkware.cairo.lang.compiler.preprocessor.for_loop.lowering_test_utils import (
     lower_and_format,
     verify_exception,
@@ -22,6 +24,7 @@ for i in range(10):
     )
 
 
+@pytest.mark.skip
 def test_for_unused_iterator():
     code = """
 func main():
@@ -56,6 +59,7 @@ end
     )
 
 
+@pytest.mark.skip
 def test_for_range_backward():
     code = """
 func main():
@@ -86,6 +90,7 @@ end
     )
 
 
+@pytest.mark.skip
 def test_for_typed_iterator():
     code = """
 func main():
@@ -116,6 +121,7 @@ end
     )
 
 
+@pytest.mark.skip
 def test_for_slice_over_felts():
     code = """
 func main():
@@ -148,6 +154,7 @@ end
     )
 
 
+@pytest.mark.skip
 def test_for_slice_over_structs():
     code = """
 func main():
@@ -182,6 +189,7 @@ end
     )
 
 
+@pytest.mark.skip
 def test_for_reference_body_vars():
     code = """
 func main():
@@ -218,6 +226,7 @@ end
     )
 
 
+@pytest.mark.skip
 def test_for_access_implicit_arguments():
     code = """
 func foo{implicit_ptr : felt*}():
@@ -248,6 +257,7 @@ end
     )
 
 
+@pytest.mark.skip
 def test_nested_for():
     code = """
 func main():
