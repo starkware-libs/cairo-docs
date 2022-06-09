@@ -33,12 +33,12 @@ def test_convert_bool_expr_to_jumps():
         {
             BoolExprId(0): JumpToLabelDescriptor(
                 bool_expr=a,
-                on_true=None,
+                on_true=BoolExprId(1),
                 on_false=BoolExprId(2),
             ),
             BoolExprId(1): JumpToLabelDescriptor(
                 bool_expr=b,
-                on_true=None,
+                on_true=BoolExprId(2),
                 on_false=TRUE_ID,
             ),
             BoolExprId(2): JumpToLabelDescriptor(
@@ -48,11 +48,11 @@ def test_convert_bool_expr_to_jumps():
             ),
             BoolExprId(3): JumpToLabelDescriptor(
                 bool_expr=d,
-                on_true=None,
+                on_true=TRUE_ID,
                 on_false=FALSE_ID,
             ),
             TRUE_ID: Terminal(case=True, exit=EXIT_ID),
-            FALSE_ID: Terminal(case=False, exit=None),
+            FALSE_ID: Terminal(case=False, exit=EXIT_ID),
             EXIT_ID: Exit(),
         }
     )
@@ -79,12 +79,12 @@ def test_convert_bool_expr_to_jumps_without_else():
         {
             BoolExprId(0): JumpToLabelDescriptor(
                 bool_expr=a,
-                on_true=None,
+                on_true=BoolExprId(1),
                 on_false=BoolExprId(2),
             ),
             BoolExprId(1): JumpToLabelDescriptor(
                 bool_expr=b,
-                on_true=None,
+                on_true=BoolExprId(2),
                 on_false=TRUE_ID,
             ),
             BoolExprId(2): JumpToLabelDescriptor(
@@ -94,10 +94,10 @@ def test_convert_bool_expr_to_jumps_without_else():
             ),
             BoolExprId(3): JumpToLabelDescriptor(
                 bool_expr=d,
-                on_true=None,
+                on_true=TRUE_ID,
                 on_false=EXIT_ID,
             ),
-            TRUE_ID: Terminal(case=True, exit=None),
+            TRUE_ID: Terminal(case=True, exit=EXIT_ID),
             EXIT_ID: Exit(),
         }
     )
@@ -109,11 +109,11 @@ def test_convert_eq_to_jump():
         {
             BoolExprId(0): JumpToLabelDescriptor(
                 bool_expr=expr,
-                on_true=None,
+                on_true=TRUE_ID,
                 on_false=FALSE_ID,
             ),
             TRUE_ID: Terminal(case=True, exit=EXIT_ID),
-            FALSE_ID: Terminal(case=False, exit=None),
+            FALSE_ID: Terminal(case=False, exit=EXIT_ID),
             EXIT_ID: Exit(),
         }
     )
@@ -125,11 +125,11 @@ def test_convert_neq_to_jump():
         {
             BoolExprId(0): JumpToLabelDescriptor(
                 bool_expr=expr,
-                on_true=None,
+                on_true=FALSE_ID,
                 on_false=TRUE_ID,
             ),
+            TRUE_ID: Terminal(case=True, exit=EXIT_ID),
             FALSE_ID: Terminal(case=False, exit=EXIT_ID),
-            TRUE_ID: Terminal(case=True, exit=None),
             EXIT_ID: Exit(),
         }
     )
@@ -145,16 +145,16 @@ def test_convert_and_to_jump():
         {
             BoolExprId(0): JumpToLabelDescriptor(
                 bool_expr=a,
-                on_true=None,
+                on_true=BoolExprId(1),
                 on_false=FALSE_ID,
             ),
             BoolExprId(1): JumpToLabelDescriptor(
                 bool_expr=b,
-                on_true=None,
+                on_true=FALSE_ID,
                 on_false=TRUE_ID,
             ),
+            TRUE_ID: Terminal(case=True, exit=EXIT_ID),
             FALSE_ID: Terminal(case=False, exit=EXIT_ID),
-            TRUE_ID: Terminal(case=True, exit=None),
             EXIT_ID: Exit(),
         }
     )
@@ -170,7 +170,7 @@ def test_convert_and_to_jump_without_else():
         {
             BoolExprId(0): JumpToLabelDescriptor(
                 bool_expr=a,
-                on_true=None,
+                on_true=BoolExprId(1),
                 on_false=EXIT_ID,
             ),
             BoolExprId(1): JumpToLabelDescriptor(
@@ -178,7 +178,7 @@ def test_convert_and_to_jump_without_else():
                 on_true=EXIT_ID,
                 on_false=TRUE_ID,
             ),
-            TRUE_ID: Terminal(case=True, exit=None),
+            TRUE_ID: Terminal(case=True, exit=EXIT_ID),
             EXIT_ID: Exit(),
         }
     )
@@ -199,11 +199,11 @@ def test_convert_or_to_jump():
             ),
             BoolExprId(1): JumpToLabelDescriptor(
                 bool_expr=b,
-                on_true=None,
+                on_true=FALSE_ID,
                 on_false=TRUE_ID,
             ),
+            TRUE_ID: Terminal(case=True, exit=EXIT_ID),
             FALSE_ID: Terminal(case=False, exit=EXIT_ID),
-            TRUE_ID: Terminal(case=True, exit=None),
             EXIT_ID: Exit(),
         }
     )
