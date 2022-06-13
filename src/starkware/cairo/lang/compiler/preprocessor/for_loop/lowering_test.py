@@ -48,12 +48,11 @@ func $func0($var1 : felt):
     alloc_locals
     if $var1 == 24:
         return ()
-    else:
-        let _i = $var1
-        [ap] = 42; ap++
-        [ap] = 43; ap++
-        return $func0($var1=$var1 + 2)
     end
+    let _i = $var1
+    [ap] = 42; ap++
+    [ap] = 43; ap++
+    return $func0($var1=$var1 + 2)
 end
 """
     )
@@ -80,11 +79,10 @@ func $func0($var1 : felt):
     alloc_locals
     if $var1 == -7:
         return ()
-    else:
-        let _i = $var1
-        [ap] = 42; ap++
-        return $func0($var1=$var1 + (-2))
     end
+    let _i = $var1
+    [ap] = 42; ap++
+    return $func0($var1=$var1 + (-2))
 end
 """
     )
@@ -111,11 +109,10 @@ func $func0($var1 : felt):
     alloc_locals
     if $var1 == 5:
         return ()
-    else:
-        let i : felt* = cast($var1, felt*)
-        assert [i] = 456
-        return $func0($var1=$var1 + 1)
     end
+    let i : felt* = cast($var1, felt*)
+    assert [i] = 456
+    return $func0($var1=$var1 + 1)
 end
 """
     )
@@ -144,11 +141,10 @@ func $func0($var1 : felt*, $var2 : felt*):
     alloc_locals
     if $var1 == $var2:
         return ()
-    else:
-        let i : felt* = cast($var1, felt*)
-        assert [i] = 456
-        return $func0($var1=$var1 + 1, $var2=$var2)
     end
+    let i : felt* = cast($var1, felt*)
+    assert [i] = 456
+    return $func0($var1=$var1 + 1, $var2=$var2)
 end
 """
     )
@@ -178,12 +174,11 @@ func $func0($var1 : felt*, $var2 : felt*):
     alloc_locals
     if $var1 == $var2:
         return ()
-    else:
-        let i : Point* = cast($var1, Point*)
-        assert i.x = 456
-        assert i.y = 567
-        return $func0($var1=$var1 + Point.SIZE, $var2=$var2)
     end
+    let i : Point* = cast($var1, Point*)
+    assert i.x = 456
+    assert i.y = 567
+    return $func0($var1=$var1 + Point.SIZE, $var2=$var2)
 end
 """
     )
@@ -216,11 +211,10 @@ func $func0($var1 : felt, x, y):
     alloc_locals
     if $var1 == 5:
         return ()
-    else:
-        let i = $var1
-        tempvar f = x * y + 456
-        return $func0($var1=$var1 + 1, x=x, y=y)
     end
+    let i = $var1
+    tempvar f = x * y + 456
+    return $func0($var1=$var1 + 1, x=x, y=y)
 end
 """
     )
@@ -247,11 +241,10 @@ func $func0{implicit_ptr : felt*}($var1 : felt):
     alloc_locals
     if $var1 == 5:
         return ()
-    else:
-        let i = $var1
-        write(i)
-        return $func0($var1=$var1 + 1)
     end
+    let i = $var1
+    write(i)
+    return $func0($var1=$var1 + 1)
 end
 """
     )
@@ -284,33 +277,30 @@ func $func0($var1 : felt):
     alloc_locals
     if $var1 == 100:
         return ()
-    else:
-        let i = $var1
-        let z = i
-        $func2($var3=0)
-        return $func0($var1=$var1 + 1)
     end
+    let i = $var1
+    let z = i
+    $func2($var3=0)
+    return $func0($var1=$var1 + 1)
 end
 func $func2($var3 : felt):
     alloc_locals
     if $var3 == 101:
         return ()
-    else:
-        let j = $var3
-        let y = j
-        $func4($var5=0)
-        return $func2($var3=$var3 + 1)
     end
+    let j = $var3
+    let y = j
+    $func4($var5=0)
+    return $func2($var3=$var3 + 1)
 end
 func $func4($var5 : felt):
     alloc_locals
     if $var5 == 102:
         return ()
-    else:
-        let k = $var5
-        let x = k
-        return $func4($var5=$var5 + 1)
     end
+    let k = $var5
+    let x = k
+    return $func4($var5=$var5 + 1)
 end
 """
     )
