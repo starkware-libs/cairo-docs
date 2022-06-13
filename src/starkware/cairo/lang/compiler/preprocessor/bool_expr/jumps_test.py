@@ -4,7 +4,7 @@ from starkware.cairo.lang.compiler.preprocessor.bool_expr.jumps import (
     EXIT_ID,
     Exit,
     FALSE_ID,
-    JumpTable,
+    JumpGraph,
     JumpToLabelDescriptor,
     TRUE_ID,
     Terminal,
@@ -29,7 +29,7 @@ def test_convert_bool_expr_to_jumps():
         ),
     )
 
-    assert convert_bool_expr_to_jumps(expr=expr, has_false_case=True) == JumpTable(
+    assert convert_bool_expr_to_jumps(expr=expr, has_false_case=True) == JumpGraph(
         {
             BoolExprId(0): JumpToLabelDescriptor(
                 bool_expr=a,
@@ -75,7 +75,7 @@ def test_convert_bool_expr_to_jumps_without_else():
         ),
     )
 
-    assert convert_bool_expr_to_jumps(expr=expr, has_false_case=False) == JumpTable(
+    assert convert_bool_expr_to_jumps(expr=expr, has_false_case=False) == JumpGraph(
         {
             BoolExprId(0): JumpToLabelDescriptor(
                 bool_expr=a,
@@ -105,7 +105,7 @@ def test_convert_bool_expr_to_jumps_without_else():
 
 def test_convert_eq_to_jump():
     expr = BoolEqExpr(a=NotImplemented, b=NotImplemented, eq=True)
-    assert convert_bool_expr_to_jumps(expr=expr, has_false_case=True) == JumpTable(
+    assert convert_bool_expr_to_jumps(expr=expr, has_false_case=True) == JumpGraph(
         {
             BoolExprId(0): JumpToLabelDescriptor(
                 bool_expr=expr,
@@ -121,7 +121,7 @@ def test_convert_eq_to_jump():
 
 def test_convert_neq_to_jump():
     expr = BoolEqExpr(a=NotImplemented, b=NotImplemented, eq=False)
-    assert convert_bool_expr_to_jumps(expr=expr, has_false_case=True) == JumpTable(
+    assert convert_bool_expr_to_jumps(expr=expr, has_false_case=True) == JumpGraph(
         {
             BoolExprId(0): JumpToLabelDescriptor(
                 bool_expr=expr,
@@ -141,7 +141,7 @@ def test_convert_and_to_jump():
     b = BoolEqExpr(a=NotImplemented, b=NotImplemented, eq=False)
     expr = BoolAndExpr(a=a, b=b)
 
-    assert convert_bool_expr_to_jumps(expr=expr, has_false_case=True) == JumpTable(
+    assert convert_bool_expr_to_jumps(expr=expr, has_false_case=True) == JumpGraph(
         {
             BoolExprId(0): JumpToLabelDescriptor(
                 bool_expr=a,
@@ -166,7 +166,7 @@ def test_convert_and_to_jump_without_else():
     b = BoolEqExpr(a=NotImplemented, b=NotImplemented, eq=False)
     expr = BoolAndExpr(a=a, b=b)
 
-    assert convert_bool_expr_to_jumps(expr=expr, has_false_case=False) == JumpTable(
+    assert convert_bool_expr_to_jumps(expr=expr, has_false_case=False) == JumpGraph(
         {
             BoolExprId(0): JumpToLabelDescriptor(
                 bool_expr=a,
@@ -190,7 +190,7 @@ def test_convert_or_to_jump():
     b = BoolEqExpr(a=NotImplemented, b=NotImplemented, eq=False)
     expr = BoolOrExpr(a=a, b=b)
 
-    assert convert_bool_expr_to_jumps(expr=expr, has_false_case=True) == JumpTable(
+    assert convert_bool_expr_to_jumps(expr=expr, has_false_case=True) == JumpGraph(
         {
             BoolExprId(0): JumpToLabelDescriptor(
                 bool_expr=a,
