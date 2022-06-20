@@ -26,7 +26,10 @@ class JumpGraphNode(ABC):
 class JumpToLabelDescriptor(JumpGraphNode):
     """
     A value describing the parameters of ``jmp label if expr != 0`` (``JumpToLabelInstruction``)
-    instruction which will realise given ``BoolEqExpr`` being part of more complex ``BoolExpr``.
+    instruction which will be a product of compiling a single ``BoolEqExpr``.
+
+    The ``on_true`` edge may be ``None``, which means that the instruction to jump in the ``True``
+    case should be placed right after this instruction in emitted code.
     """
 
     bool_expr: BoolEqExpr
@@ -39,6 +42,9 @@ class Terminal(JumpGraphNode):
     """
     Placeholder value reflecting location of if's ``main`` (``case=True``)
     or ``else`` (``case=False``) code blocks.
+
+    The ``exit`` edge is used to connect the ``Terminal`` to the ``Exit`` node. It may be ``None``,
+    which means that the ``Exit`` node should be placed right after this terminal in emitted code.
     """
 
     case: bool
@@ -56,24 +62,30 @@ class Exit(JumpGraphNode):
 
 class JumpGraph(OrderedDict[BoolExprId, JumpGraphNode]):
     """
-    A single conditional jump instruction can be treated as following graph node, with one input
+    A single conditional jump instruction can be treated as a graph node, with one input
     and two outputs::
 
                                   ┌──► [ on_true ]
         [ input ] ──► condition ──┤
                                   └──► [ on_false ]
 
-    Compiled, this would build the following Cairo pseudo-code::
+    Compiled, this would build the following Cairo pseudocode if condition is a ``==`` expression::
 
         input:
             jmp on_false if condition != 0
         on_true:
 
-    A ``JumpGraph`` is a graph of such nodes, layout out as an ordered dictionary, where edges
+    Or following pseudocode in case of a ``!=`` expression::
+
+        input:
+            jmp on_false if condition != 0
+            jmp on_true
+
+    A ``JumpGraph`` is a graph of such nodes, laid out as an ordered dictionary, where edges
     are represented as keys of the dictionary.
 
-    A jump graph includes two extra nodes, called ``Terminal``s. They represent the ``main``
-    and ``else`` code blocks of the processed ``CodeElementIf``. The purpose of the ``Terminal``s
+    A jump graph includes two extra nodes, called ``Terminal``. They represent the ``main``
+    and ``else`` code blocks of the processed ``CodeElementIf``. The purpose of the ``Terminal``
     is to denote the order in which these code blocks should be emitted. When a condition is
     negated, some jumps can be avoided if the ``else`` block is before the ``main`` one.
 
@@ -81,7 +93,7 @@ class JumpGraph(OrderedDict[BoolExprId, JumpGraphNode]):
     All terminals should lead to exit.
 
     A jump graph is implemented as an ordered dictionary, where associated ``BoolExprId``s are used
-    as dictionary keys. Order of dictionary keys reflects order of execution.
+    as dictionary keys. The order of dictionary keys reflects order of execution.
 
     Keys are opaque and are guaranteed to be stable for many evaluations of same boolean expression,
     in order to allow jump graphs to be compared for equality.
@@ -91,11 +103,11 @@ class JumpGraph(OrderedDict[BoolExprId, JumpGraphNode]):
 
 def convert_bool_expr_to_jumps(expr: BoolExpr, has_false_case: bool) -> JumpGraph:
     """
-    Converts a ``CodeElementIf``'s condition (a ``BoolExpr``) into a series of
-    ``JumpToLabelInstruction``'s.
+    Converts a ``CodeElementIf``'s condition (a ``BoolExpr``) into a graph of conditional jumps
+    (expressed as ``JumpGraphNode`` objects).
 
     This function implements only the algorithm. It does not build any code elements,
-    instead it operates on abstract items subclassing from ``JumpGraphItem``
+    instead it operates on abstract items subclassing from ``JumpGraphNode``.
 
     Arguments:
     has_false_case: states if processed ``CodeElementIf`` has an _else_ clause.
@@ -105,8 +117,8 @@ def convert_bool_expr_to_jumps(expr: BoolExpr, has_false_case: bool) -> JumpGrap
     The conversion algorithm consists of 3 parts:
 
     1. Assign unique numeric value (``BoolExprId``) to each leaf (``BoolEqExpr``) of
-       the condition expression. These values are used as pointers in emitted ``JumpGraph``.
-    2. Walk the entire boolean  expression tree and emit ``JumpToLabelDescriptor``s, wiring them
+       the condition expression. These values are used as pointers in the emitted ``JumpGraph``.
+    2. Walk the entire boolean expression tree and emit ``JumpToLabelDescriptor``s, wiring them
        together in such a way that the jumps will emulate boolean operations, assuming lazy
        evaluation.
 
@@ -115,13 +127,13 @@ def convert_bool_expr_to_jumps(expr: BoolExpr, has_false_case: bool) -> JumpGrap
     3. Apply optimizations to reduce the number of emitted jump instructions.
     """
 
-    expr_index_builder = _ExprIndexBuilder()
-    expr_index_builder.visit(expr)
-    expr_index = expr_index_builder.index
+    expr_index = _ExprIndexBuilder.build(expr)
 
-    builder = _JumpGraphBuilder(expr_index=expr_index, has_false_case=has_false_case)
-    builder.visit_terminal(expr)
-    jump_graph = builder.jump_graph
+    jump_graph = _JumpGraphBuilder.build(
+        expr=expr,
+        expr_index=expr_index,
+        has_false_case=has_false_case,
+    )
 
     return jump_graph
 
@@ -130,10 +142,20 @@ _ExprIndex = Dict[BoolExprId, BoolExpr]
 
 
 class _ExprIndexBuilder(Visitor):
+    """
+    Assigns unique numeric identifiers to each ``BoolEqExpr`` in a ``BoolExpr``.
+    """
+
     def __init__(self):
         super().__init__()
         self.counter = 0
         self.index: _ExprIndex = {}
+
+    @classmethod
+    def build(cls, expr: BoolExpr) -> _ExprIndex:
+        builder = cls()
+        builder.visit(expr)
+        return builder.index
 
     def visit_BoolEqExpr(self, expr: BoolEqExpr):
         self.index[self.counter] = expr
@@ -162,7 +184,13 @@ class _JumpGraphBuilder:
         self.has_false_case = has_false_case
         self.reverse_expr_index = _ReverseExprIndex(expr_index)
 
-    def visit_terminal(self, expr: BoolExpr):
+    @classmethod
+    def build(cls, expr: BoolExpr, expr_index: _ExprIndex, has_false_case: bool) -> JumpGraph:
+        builder = cls(expr_index=expr_index, has_false_case=has_false_case)
+        builder.start(expr)
+        return builder.jump_graph
+
+    def start(self, expr: BoolExpr):
         self.visit(
             expr=expr,
             on_true=TRUE_ID,
