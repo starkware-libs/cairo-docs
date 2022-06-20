@@ -25,8 +25,10 @@ class JumpGraphNode(ABC):
 @dataclasses.dataclass
 class JumpToLabelDescriptor(JumpGraphNode):
     """
-    A value describing the parameters of ``jmp label if expr != 0`` (``JumpToLabelInstruction``)
-    instruction which will be a product of compiling a single ``BoolEqExpr``.
+    A JumpGraph node that describes the parameters of ``jmp label if expr != 0``
+    (``JumpToLabelInstruction``).
+
+    See ``JumpGraph`` for more details.
 
     The ``on_true`` edge may be ``None``, which means that the instruction to jump in the ``True``
     case should be placed right after this instruction in emitted code.
