@@ -1,56 +1,62 @@
 = Summary
 
+// Todo: Add a section for Cairo 0 -> 1.0 migrations: e.g migrating a contract? see here
+// Todo: Add a Getting started section
+// Todo: Make titles lower case after first letter
+// Todo: Looking for Starknet? section
+
 == Introduction
 
-link:notation.adoc[Notation]
+xref:notation.adoc[Notation]
 
 == Language Constructs
 
-* link:lexical-structure.adoc[Lexical structure]
-** link:keywords.adoc[Keywords]
-** link:identifiers.adoc[Identifiers]
-** link:comments.adoc[Comments]
-** link:whitespace.adoc[Whitespace]
-** link:punctuation.adoc[Punctuation]
+* xref:lexical-structure.adoc[Lexical structure]
+** xref:keywords.adoc[Keywords]
+** xref:identifiers.adoc[Identifiers]
+** xref:comments.adoc[Comments]
+** xref:whitespace.adoc[Whitespace]
+** xref:punctuation.adoc[Punctuation]
 
 * Modules and source files
 
-* link:items.adoc[Items]
-** Use declarations
-** Functions
+* xref:items.adoc[Items]
+** xref:module.adoc[Modules]
+** xref:use.adoc[Use declarations]
+** xref:functions.adoc[Functions]
+*** xref:generics.adoc[Generic parameters]
 *** Implicit arguments
 ** Type aliases
 ** Structs
 ** Enums
 ** Constant items
-** Traits
-** Implementations
+** xref:traits.adoc[Traits and impls]
 
 * Names
 ** Paths
 ** Namespaces
 ** Visibility
-** link:prelude.adoc[Prelude]
-** link:naming-conventions.adoc[Naming conventions]
+** xref:prelude.adoc[Prelude]
+** xref:naming-conventions.adoc[Naming conventions]
 
-* link:statements.adoc[Statements]
-** link:let-statement.adoc[Let statement]
-** link:assignment-statement.adoc[Assignment statement]
-** link:item-statement.adoc[Item statement]
-** link:expression-statement.adoc[Expression statement]
+* xref:statements.adoc[Statements]
+** xref:let-statement.adoc[Let statement]
+** xref:assignment-statement.adoc[Assignment statement]
+** xref:item-statement.adoc[Item statement]
+** xref:expression-statement.adoc[Expression statement]
 
-* link:expressions.adoc[Expressions]
-** link:literal-expressions.adoc[Literal expressions]
+* xref:expressions.adoc[Expressions]
+** xref:literal-expressions.adoc[Literal expressions]
 ** Path expressions
-** link:block-expression.adoc[Block expression]
-** link:operator-expressions.adoc[Operator expressions]
-*** link:negation-operators.adoc[Negation operators]
+** xref:block-expression.adoc[Block expression]
+** xref:operator-expressions.adoc[Operator expressions]
+*** xref:negation-operators.adoc[Negation operators]
 *** Arithmetic and logical operators
 *** Equality operators
 *** Comparison operators
 *** Boolean operators
 *** Error propagation operator
-** link:parentheses.adoc[Parenthesized expressions]
+** xref:parentheses.adoc[Parenthesized expressions]
 ** Function calls
 ** Method calls
 ** Field access expressions
@@ -64,21 +70,23 @@ link:notation.adoc[Notation]
 
 * Patterns
 
-* link:type-system.adoc[Type system]
-** link:types.adoc[Types]
+* xref:type-system.adoc[Type system]
+** xref:types.adoc[Types]
 *** Boolean types
-*** Felt type
+*** Felt252 type
 *** Integer types
 *** String types
-*** link:unit-type.adoc[Unit type]
-*** link:never-type.adoc[Never type]
+*** xref:unit-type.adoc[Unit type]
+*** xref:never-type.adoc[Never type]
 *** Tuple types
 *** Struct types
 *** Enum types
 *** Array types
 *** Slice types
 *** Error type
+** xref:linear-types.adoc[Linear Types]
 ** Generics
+** xref:inference.adoc[Inference]
 ** Type layout
 *** Packed structs
 
@@ -97,4 +105,4 @@ link:notation.adoc[Notation]
 
 == Appendices
 
-* link:Full Grammar
+* xref:Full Grammar

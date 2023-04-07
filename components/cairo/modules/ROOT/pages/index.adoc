@@ -1,6 +1,12 @@
 [id="index"]
 
-= Intro
+= Welcome to Cairo 1.0
 
-This primer is intended to cover introductory concepts upon which Cairo and StarkNet are built, and also to get you acquainted with the format of this course.
-Each section will involve drilling down on a high-level concept as it pertains to StarkNet or Cairo until we hit an "atomic" or irreducible concept we can represent in a simple/runnable code example:
+Cairo is a programming language and a virtual
+machine that enables developers to create highly performant and secure smart contracts on
+blockchains. Developed by StarkWare, Cairo is specifically designed to address the challenges of scalability and privacy in decentralized applications.
+
+With its simplified syntax and efficient execution, Cairo allows developers to write complex contracts in a more accessible manner, while maintaining the highest level of security and reliability.
+
+This documentation provides an overview of the implementation of the Cairo virtual machine and a
+compiler, enabling developers to create, test and deploy smart contracts on different blockchain platforms.

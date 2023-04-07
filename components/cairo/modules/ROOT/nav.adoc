@@ -1,9 +1,11 @@
 * xref:SUMMARY.adoc[Summary]
 
-** Introduction
-*** xref:notation.adoc[Notation]
+* Introduction
+** xref:index.adoc[Welcome to Cairo 1.0]
+** xref:notation.adoc[Notation]
 
-** Language Constructs
+* Language Constructs
+
 ** xref:lexical-structure.adoc[Lexical structure]
 *** xref:keywords.adoc[Keywords]
 *** xref:identifiers.adoc[Identifiers]
@@ -14,33 +16,35 @@
 ** Modules and source files
 
 ** xref:items.adoc[Items]
-*** Use declarations
+*** xref:module.adoc[Modules]
+*** xref:use.adoc[Use declarations]
+
 *** Functions
+**** xref:generics.adoc[Generic parameters]
 **** Implicit arguments
+
 *** Type aliases
 *** Structs
 *** Enums
 *** Constant items
-*** Traits
-*** Implementations
+*** xref:traits.adoc[Traits and impls]
 
 ** Names
 *** Paths
 *** Namespaces
 *** Visibility
 *** xref:prelude.adoc[Prelude]
-** xref:naming-conventions.adoc[Naming conventions]
+*** xref:naming-conventions.adoc[Naming conventions]
 
 ** xref:statements.adoc[Statements]
 *** xref:let-statement.adoc[Let statement]
 *** xref:assignment-statement.adoc[Assignment statement]
-*** Item statement
+*** xref:item-statement.adoc[Item statement]
 *** xref:expression-statement.adoc[Expression statement]
 
 ** xref:expressions.adoc[Expressions]
 *** xref:literal-expressions.adoc[Literal expressions]
-
-** Path expressions
+*** Path expressions
 *** xref:block-expression.adoc[Block expression]
 *** xref:operator-expressions.adoc[Operator expressions]
 **** xref:negation-operators.adoc[Negation operators]
@@ -49,8 +53,9 @@
 **** Comparison operators
 **** Boolean operators
 **** Error propagation operator
+
 *** xref:parentheses.adoc[Parenthesized expressions]
-*** Function calls
+** xref:functions.adoc[Function calls]
 *** Method calls
 *** Field access expressions
 *** Tuple expressions
@@ -66,7 +71,7 @@
 ** xref:type-system.adoc[Type system]
 *** xref:types.adoc[Types]
 **** Boolean types
-**** Felt type
+**** Felt252 type
 **** Integer types
 **** String types
 **** xref:unit-type.adoc[Unit type]
@@ -77,20 +82,18 @@
 **** Array types
 **** Slice types
 **** Error type
+*** xref:linear-types.adoc[Linear Types]
 *** Generics
+*** xref:inference.adoc[Inference]
 *** Type layout
-
+**** Packed structs
 ** Hints
 
-** Language Semantics
-*** Memory model
-*** Constant evaluation
-*** Application binary interface
-*** Runtime
+* Language Semantics
+** Memory model
+** Constant evaluation
+** Application binary interface
+** Runtime
 
-
-
-
-
-
-
+* Appendices
+** Full Grammar
