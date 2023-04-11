@@ -47,7 +47,7 @@
 **** xref:error-propagation-operator.adoc[Error propagation operator]
 
 *** xref:parentheses.adoc[Parenthesized expressions]
-** xref:functions.adoc[Function calls]
+** xref:language_constructs:function-calls.adoc[Function calls]
 *** xref:method-calls.adoc[Method calls]
 *** xref:field-access-expressions.adoc[Field access expressions]
 *** xref:tuple-expressions.adoc[Tuple expressions]

@@ -6,7 +6,7 @@
 rustup override set stable && rustup update
 ```
 
-Ensure rust was installed correctly by running the following from the root project directory:
+Ensure Rust was installed correctly by running the following from the root project directory:
 ```bash
 cargo test
 ```
