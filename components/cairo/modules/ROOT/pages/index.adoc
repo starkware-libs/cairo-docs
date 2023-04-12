@@ -1,8 +1,6 @@
 [id="index"]
 = Welcome to Cairo 1.0
 
-## The blazing fast compiler for Cairo, written in 🦀 Rust 🦀
-
 Cairo is the first Turing-complete language for creating provable programs for general
 computation.
 

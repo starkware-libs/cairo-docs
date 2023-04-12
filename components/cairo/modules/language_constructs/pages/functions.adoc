@@ -25,7 +25,7 @@ fn inc_n<T, const N>(x: T) -> T {
 }
 ----
 
-== Function Signature
+== Function signature
 
 The function signature defines the function name, the generic parameters, the parameters and the
 return type.
@@ -37,14 +37,14 @@ fn <name>[<<generic_parameters>>](<parameters>) [-> <return_type>]
 
 In the example above, the signature is `fn inc_n<T, const N>(x: T) \-> T`.
 
-=== Function Name
+=== Function name
 
 The function name is the name used to refer to the function.
 The Cairo convention is to name functions using the 'snake_case' form.
 
 In the example above, the function name is `inc_n`.
 
-=== Generic Parameters
+=== Generic parameters
 
 xref:generics.adoc[Generic parameters] are used to define generic functions.
 They are defined using a comma-separated list, enclosed by angle brackets (`<...>`).
@@ -93,7 +93,7 @@ it also affects its value in the caller function. For example:
 ----
 `x` is a mutable parameter and `y` is a reference parameter. See below an example of calling it.
 
-=== Return Type
+=== Return type
 
 The return type defines the type of the value that is returned by the function when it is called.
 It is the type that appears in the signature after the `\->`.
@@ -105,7 +105,7 @@ In this case, the return type can be omitted (including the `\->`).
 
 In the example above, the return type is of type `T`.
 
-== Function Body
+== Function body
 
 // TODO(yuval): move most of it to a separate page about block expressions.
 
@@ -121,7 +121,7 @@ If there is no tail expression, the function returns the xref:unit-type.adoc[uni
 In the example above, the function body is `{ x + N }`, which consists of zero statements and a
 tail expression `x + N` whose value is the return value of the function.
 
-== Calling a Function
+== Calling a function
 
 // TODO(yuval): move most of it to a separate page about function call expressions.
 

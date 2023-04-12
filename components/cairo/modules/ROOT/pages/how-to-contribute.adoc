@@ -5,7 +5,7 @@ First off, thanks for taking the time to contribute! Contributions are what make
 Please read xref:contribution-guidelines.adoc[our contribution guidelines], and thank you for being
 involved!
 
-## Documentation contributions
+## Documentation contributions needed
 
 See below for a full list of content and what is currently missing:
 

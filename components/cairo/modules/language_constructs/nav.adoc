@@ -1,6 +1,6 @@
 // Language constructs
 * Language Constructs
-** xref:lexical-structure.adoc[Lexical structure]
+** Lexical structure
 *** xref:keywords.adoc[Keywords]
 *** xref:identifiers.adoc[Identifiers]
 *** xref:comments.adoc[Comments]
@@ -75,7 +75,7 @@
 **** xref:slice-types.adoc[Slice types]
 **** xref:error-type.adoc[Error type]
 *** xref:linear-types.adoc[Linear Types]
-*** xref:generics.adoc[Generics]
+*** Generics
 *** xref:inference.adoc[Inference]
 *** xref:type-layout.adoc[Type layout]
 **** xref:packed-structs.adoc[Packed structs]

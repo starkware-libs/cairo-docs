@@ -1,4 +1,4 @@
-# Cairo roadmap
+# Cairo 0 feature parity
 
 The next milestone is to reach feature parity with Cairo version 0.
 
