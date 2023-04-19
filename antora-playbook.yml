@@ -4,10 +4,10 @@ site:
 
 content:
   sources:
-  - url: .
+  - url: https://github.com/starkware-libs/cairo.git
     branches: 'HEAD'
     start_paths:
-      - components/cairo
+      - docs/reference/src/components/cairo
 ui:
   bundle:
     url: ./ui/build/ui-bundle.zip
