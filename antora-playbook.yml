@@ -4,10 +4,10 @@ site:
 
 content:
   sources:
-  - url: https://github.com/starkware-libs/cairo.git
-    branches: 'HEAD'
-    start_paths:
-      - docs/reference/src/components/cairo
+    - url: https://github.com/starkware-libs/cairo.git
+      branches: 'HEAD'
+      start_paths:
+        - docs/reference/src/components/cairo
 ui:
   bundle:
     url: ./ui/build/ui-bundle.zip
@@ -22,10 +22,10 @@ asciidoc:
 
 antora:
   extensions:
-  - '@antora/lunr-extension'
+    - '@antora/lunr-extension'
 
 output:
   destinations:
-  - provider: fs
-    path: ./public_html/
-    clean: true
+    - provider: fs
+      path: ./public_html/
+      clean: true
