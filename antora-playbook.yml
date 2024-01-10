@@ -6,8 +6,10 @@ content:
   sources:
     - url: https://github.com/starkware-libs/cairo.git
       branches: 'HEAD'
+      edit_url: 'https://github.com/starkware-libs/cairo/edit/main/{path}'
       start_paths:
         - docs/reference/src/components/cairo
+
 ui:
   bundle:
     url: https://github.com/starknet-io/starknet-docs-antora-ui/raw/HEAD/build/ui-bundle.zip
