@@ -23,9 +23,9 @@ asciidoc:
     page-pagination: ''
     experimental: ''
 
-antora:
-  extensions:
-    - '@antora/lunr-extension'
+#antora:
+#  extensions:
+#    - '@antora/lunr-extension'
 
 output:
   destinations:
