@@ -1,0 +1,18 @@
+$ scarb test 
+     Running test test (snforge test)
+    Blocking waiting for file lock on registry db cache
+    Blocking waiting for file lock on registry db cache
+   Compiling test test v0.1.0 (listings/scarb/test/Scarb.toml)
+   Compiling test(listings/scarb/test/Scarb.toml)
+    Finished `dev` profile target(s) in 10 seconds
+
+
+Collected 4 test(s) from test package
+Running 4 test(s) from tests/
+[PASS] test_tests::test_bar (gas: ~1)
+[PASS] test_tests::test_foo_bar (gas: ~1)
+[PASS] test_tests::test_foo (gas: ~1)
+[PASS] test_tests::test_baz (gas: ~1)
+Running 0 test(s) from src/
+Tests: 4 passed, 0 failed, 0 skipped, 0 ignored, 0 filtered out
+

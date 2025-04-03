@@ -1,0 +1,11 @@
+$ scarb test -- --ignored
+     Running test unit_testing (snforge test)
+   Compiling test(listings/testing/unit_testing/Scarb.toml)
+    Finished `dev` profile target(s) in 5 seconds
+
+
+Collected 1 test(s) from unit_testing package
+Running 1 test(s) from src/
+[PASS] unit_testing::ignore_tests::ignored_test (gas: ~1)
+Tests: 1 passed, 0 failed, 0 skipped, 0 ignored, 7 filtered out
+

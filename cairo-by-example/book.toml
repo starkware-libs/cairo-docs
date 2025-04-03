@@ -1,0 +1,42 @@
+[book]
+title = "Cairo By Example"
+description = "Cairo by Example (CBE) is a collection of runnable examples that illustrate various Cairo concepts and core libraries."
+author = "The Cairo Community"
+
+[output.html]
+git-repository-url = "https://github.com/cairo-lang/cairo-by-example"
+edit-url-template = "https://github.com/cairo-lang/cairo-by-example/edit/main/{path}"
+additional-css = ["theme/css/last-changed.css", "theme/css/chat.css"]
+additional-js = [
+  "theme/js/index.mjs",
+  "theme/wasm-cairo/pkg/wasm-cairo.js",
+  "theme/wasm-cairo/pkg/wasm-cairo_bg.wasm",
+  "theme/wasm-cairo/worker.cjs",
+]
+mathjax-support = true
+
+[preprocessor.cairo]
+after = ["links"]
+
+[output.html.playground]
+editable = true
+# editor = "ace"
+# line-numbers = true
+runnable = true
+
+[output.html.fold]
+enable = true
+
+[rust]
+edition = "2021"
+
+[build]
+extra-watch-dirs = ["po"]
+
+[preprocessor.gettext]
+after = ["links"]
+
+[output.html.code.hidelines]
+cairo = "# "
+
+[output.markdown]

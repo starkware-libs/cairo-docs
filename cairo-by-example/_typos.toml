@@ -1,0 +1,8 @@
+[default]
+
+[type.po]
+extend-glob = ["*.po", "*.css", "*.js"]
+check-file = false
+
+[files]
+extend-exclude = ["po/*.po", "listings/**/*.json", "**/*.excalidraw"]
