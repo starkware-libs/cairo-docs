@@ -8,7 +8,7 @@ on:
 
 jobs:
   release-version:
-    name: Releasing a Cairo 1.0 docs version
+    name: Releasing a version
     runs-on: ubuntu-latest
     if: ${{ !contains(github.event.head_commit.message, 'chore') || (github.ref_name == 'master' && !contains(github.event.head_commit.message, 'chore(release)')) }}
     steps:
