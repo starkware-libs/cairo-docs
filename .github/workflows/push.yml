@@ -20,8 +20,9 @@ jobs:
         with:
           node-version: 16
 
-      - name: Install node_modules
-        run: yarn
+      - name: Install mdbook
+        run: cargo install mdbook --locked --version 0.4.31
+        shell: bash
 
       - name: Authenticate with GitHub
         run: |
@@ -31,5 +32,8 @@ jobs:
       - name: Build book (English)
         run: mdbook build -d book
 
+      - name: Rename book to public_html
+        run: mv book public_html
+
       - name: scp upload to production site
-        run: sshpass -p ${{ secrets.PROD_PASS }} scp -o 'StrictHostKeyChecking no' -r book/ ${{ secrets.PROD_USER }}@${{ secrets.PROD_IP }}:~/
+        run: sshpass -p ${{ secrets.PROD_PASS }} scp -o 'StrictHostKeyChecking no' -r public_html/ ${{ secrets.PROD_USER }}@${{ secrets.PROD_IP }}:~/
