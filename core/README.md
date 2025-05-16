@@ -1,6 +1,6 @@
-The Core library docs are auto-generated from the Core library's codebase using Scarb.
+The Core library docs are auto-generated from its [codebase](https://github.com/starkware-libs/cairo/tree/main/corelib) using [Scarb](https://docs.swmansion.com/scarb/docs/extensions/documentation-generation.html).
 
-To preview the docs in your default web, run:
+To preview the docs, run:
 ```
 mdbook serve --open
 ```
