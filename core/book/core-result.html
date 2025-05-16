@@ -1,0 +1,277 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>result - The Cairo Core Library Docs</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Cairo Core Library Docs</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="result"><a class="header" href="#result">result</a></h1>
+<p>Error handling with the <code>Result</code> type.<a href="./core-result-Result.html"><code>Result</code></a> is the type used for returning and propagating errors. It is an enum with the variants, <a href="%60Ok(T)%60"><code>Ok(T)</code></a>, representing success and containing a value, and <a href="%60Err(E)%60"><code>Err(E)</code></a>, representing error and containing an error value.</p>
+<pre><code class="language-cairo">enum Result&lt;T, E&gt; {
+   Ok: T,
+   Err: E,
+}
+</code></pre>
+<p>Functions return <a href="./core-result-Result.html"><code>Result</code></a> whenever errors are expected and recoverable.A simple function returning <a href="./core-result-Result.html"><code>Result</code></a> might be defined and used like so:</p>
+<pre><code class="language-cairo">fn parse_version(header: felt252) -&gt; Result&lt;felt252, felt252&gt; {
+    match header {
+        0 =&gt; Ok(0),
+        1 =&gt; Ok(1),
+        _ =&gt; Err('invalid version'),
+    }
+}
+
+let version = parse_version(1);
+match version {
+    Ok(v) =&gt; println!("working with version {}", v),
+    Err(e) =&gt; println!("error parsing version: {:?}", e)
+}
+</code></pre>
+<h1 id="results-must-be-useda-common-problem-with-using-return-values-to-indicate-errors-is-that-it-is-easy-to-ignore-the-return-value-thus-failing-to-handle-the-error-result-is-annotated-with-the-must_use-attribute-which-will-cause-the-compiler-to-issue-a-warning-when-a-result-value-is-ignored---method-overviewin-addition-to-working-with-pattern-matching-result-provides-a-wide-variety-of-different-methods---querying-the-variantthe-is_ok-and-is_err-methods-return-true-if-the-result-is-ok-or-err-respectively---extracting-contained-valuesthese-methods-extract-the-contained-value-in-a-resultt-eresultt-e-when-it-is-the-ok-variant-if-the-result-is-errexpect-panics-with-a-provided-felt252-error-message--unwrap-panics-with-a-generic-message--unwrap_or-returns-the-provided-default-value--unwrap_or_default-returns-the-default-value-of-the-type-t-which-must-implement-the-default-trait--unwrap_or_else-returns-the-result-of-evaluating-the-provided-functionexpect-resulttraitexpect-unwrap-resulttraitunwrap-unwrap_or-resulttraitunwrap_or-unwrap_or_default-resulttraitunwrap_or_default-unwrap_or_else-resulttraitunwrap_or_elsethese-methods-extract-the-contained-value-in-a-resultt-eresultt-e-when-it-is-the-err-variant-if-the-result-is-okexpect_err-panics-with-a-provided-felt252-error-message--unwrap_err-panics-with-a-generic-messageexpect_err-resulttraitexpect_err-unwrap_err-resulttraitunwrap_err---transforming-contained-valuesthese-methods-transform-result-to-optionok-transforms-resultt-eresultt-e-into-optiont-mapping-okv-to-somev-and-erre-to-none--err-transforms-resultt-eresultt-e-into-optione-mapping-okv-to-none-and-erre-to-someethis-method-transforms-the-contained-value-of-the-ok-variantmap-transforms-resultt-eresultt-e-into-resultu-eresultu-e-by-applying-the-provided-function-to-the-contained-value-of-ok-and-leaving-err-values-unchangedthis-method-transforms-the-contained-value-of-the-err-variantmap_err-transforms-resultt-eresultt-e-into-resultt-fresultt-f-by-applying-the-provided-function-to-the-contained-value-of-err-and-leaving-ok-values-unchangedthese-methods-transform-a-resultt-eresultt-e-into-a-value-of-a-possibly-different-type-umap_or-applies-the-provided-function-to-the-contained-value-of-ok-or-returns-the-provided-default-value-if-the-result-is-err--map_or_else-applies-the-provided-function-to-the-contained-value-of-ok-or-applies-the-provided-default-fallback-function-to-the-contained-value-of-errmap_or-resulttraitmap_or-map_or_else-resulttraitmap_or_else---boolean-operatorsthese-methods-treat-the-result-as-a-boolean-value-where-ok-acts-like-true-and-err-acts-like-false-there-are-two-categories-of-these-methods-ones-that-take-a-result-as-input-and-ones-that-take-a-function-as-inputthe-and-and-or-methods-take-another-result-as-input-and-produce-a-result-as-output-the-and-method-can-produce-a-resultu-eresultu-e-value-having-a-different-inner-type-u-than-resultt-eresultt-e-the-or-method-can-produce-a-resultt-fresultt-f-value-having-a-different-error-type-f-than-resultt-eresultt-e-method---self------input------output----------------------------------------------and--erre--ignored--erre---and--okx---errd---errd---and--okx---oky----oky----or---erre--errd---errd---or---erre--oky----oky----or---okx---ignored--okx--and-resulttraitand-or-resulttraitorthe-and_then-and-or_else-methods-take-a-function-as-input-and-only-evaluate-the-function-when-they-need-to-produce-a-new-value-the-and_then-method-can-produce-a-resultu-eresultu-e-value-having-a-different-inner-type-u-than-resultt-eresultt-e-the-or_else-method-can-produce-a-resultt-fresultt-f-value-having-a-different-error-type-f-than-resultt-eresultt-e-method--------self------function-input--function-result--output-------------------------------------------------------------------------and_then--erre--not-provided--not-evaluated--erre---and_then--okx---x-------------errd---------errd---and_then--okx---x-------------oky----------oky----or_else---erre--e-------------errd---------errd---or_else---erre--e-------------oky----------oky----or_else---okx---not-provided--not-evaluated--okx--and_then-resulttraitand_then-or_else-resulttraitor_else---the-question-mark-operator-when-writing-code-that-calls-many-functions-that-return-the-result-type-handling-okerr-can-be-tedious-the-question-mark-operator--hides-some-of-the-boilerplate-of-propagating-errors-up-the-call-stackit-replaces-this"><a class="header" href="#results-must-be-useda-common-problem-with-using-return-values-to-indicate-errors-is-that-it-is-easy-to-ignore-the-return-value-thus-failing-to-handle-the-error-result-is-annotated-with-the-must_use-attribute-which-will-cause-the-compiler-to-issue-a-warning-when-a-result-value-is-ignored---method-overviewin-addition-to-working-with-pattern-matching-result-provides-a-wide-variety-of-different-methods---querying-the-variantthe-is_ok-and-is_err-methods-return-true-if-the-result-is-ok-or-err-respectively---extracting-contained-valuesthese-methods-extract-the-contained-value-in-a-resultt-eresultt-e-when-it-is-the-ok-variant-if-the-result-is-errexpect-panics-with-a-provided-felt252-error-message--unwrap-panics-with-a-generic-message--unwrap_or-returns-the-provided-default-value--unwrap_or_default-returns-the-default-value-of-the-type-t-which-must-implement-the-default-trait--unwrap_or_else-returns-the-result-of-evaluating-the-provided-functionexpect-resulttraitexpect-unwrap-resulttraitunwrap-unwrap_or-resulttraitunwrap_or-unwrap_or_default-resulttraitunwrap_or_default-unwrap_or_else-resulttraitunwrap_or_elsethese-methods-extract-the-contained-value-in-a-resultt-eresultt-e-when-it-is-the-err-variant-if-the-result-is-okexpect_err-panics-with-a-provided-felt252-error-message--unwrap_err-panics-with-a-generic-messageexpect_err-resulttraitexpect_err-unwrap_err-resulttraitunwrap_err---transforming-contained-valuesthese-methods-transform-result-to-optionok-transforms-resultt-eresultt-e-into-optiont-mapping-okv-to-somev-and-erre-to-none--err-transforms-resultt-eresultt-e-into-optione-mapping-okv-to-none-and-erre-to-someethis-method-transforms-the-contained-value-of-the-ok-variantmap-transforms-resultt-eresultt-e-into-resultu-eresultu-e-by-applying-the-provided-function-to-the-contained-value-of-ok-and-leaving-err-values-unchangedthis-method-transforms-the-contained-value-of-the-err-variantmap_err-transforms-resultt-eresultt-e-into-resultt-fresultt-f-by-applying-the-provided-function-to-the-contained-value-of-err-and-leaving-ok-values-unchangedthese-methods-transform-a-resultt-eresultt-e-into-a-value-of-a-possibly-different-type-umap_or-applies-the-provided-function-to-the-contained-value-of-ok-or-returns-the-provided-default-value-if-the-result-is-err--map_or_else-applies-the-provided-function-to-the-contained-value-of-ok-or-applies-the-provided-default-fallback-function-to-the-contained-value-of-errmap_or-resulttraitmap_or-map_or_else-resulttraitmap_or_else---boolean-operatorsthese-methods-treat-the-result-as-a-boolean-value-where-ok-acts-like-true-and-err-acts-like-false-there-are-two-categories-of-these-methods-ones-that-take-a-result-as-input-and-ones-that-take-a-function-as-inputthe-and-and-or-methods-take-another-result-as-input-and-produce-a-result-as-output-the-and-method-can-produce-a-resultu-eresultu-e-value-having-a-different-inner-type-u-than-resultt-eresultt-e-the-or-method-can-produce-a-resultt-fresultt-f-value-having-a-different-error-type-f-than-resultt-eresultt-e-method---self------input------output----------------------------------------------and--erre--ignored--erre---and--okx---errd---errd---and--okx---oky----oky----or---erre--errd---errd---or---erre--oky----oky----or---okx---ignored--okx--and-resulttraitand-or-resulttraitorthe-and_then-and-or_else-methods-take-a-function-as-input-and-only-evaluate-the-function-when-they-need-to-produce-a-new-value-the-and_then-method-can-produce-a-resultu-eresultu-e-value-having-a-different-inner-type-u-than-resultt-eresultt-e-the-or_else-method-can-produce-a-resultt-fresultt-f-value-having-a-different-error-type-f-than-resultt-eresultt-e-method--------self------function-input--function-result--output-------------------------------------------------------------------------and_then--erre--not-provided--not-evaluated--erre---and_then--okx---x-------------errd---------errd---and_then--okx---x-------------oky----------oky----or_else---erre--e-------------errd---------errd---or_else---erre--e-------------oky----------oky----or_else---okx---not-provided--not-evaluated--okx--and_then-resulttraitand_then-or_else-resulttraitor_else---the-question-mark-operator-when-writing-code-that-calls-many-functions-that-return-the-result-type-handling-okerr-can-be-tedious-the-question-mark-operator--hides-some-of-the-boilerplate-of-propagating-errors-up-the-call-stackit-replaces-this">Results must be usedA common problem with using return values to indicate errors is that it is easy to ignore the return value, thus failing to handle the error. <a href="./core-result-Result.html"><code>Result</code></a> is annotated with the <code>#[must_use]</code> attribute, which will cause the compiler to issue a warning when a Result value is ignored.  # Method overviewIn addition to working with pattern matching, <a href="./core-result-Result.html"><code>Result</code></a> provides a wide variety of different methods.  ## Querying the variantThe <a href="%60is_ok%60"><code>is_ok</code></a> and <a href="%60is_err%60"><code>is_err</code></a> methods return <code>true</code> if the <a href="./core-result-Result.html"><code>Result</code></a> is <a href="./core-result.html#ok"><code>Ok</code></a> or <a href="./core-result.html#err"><code>Err</code></a>, respectively.  ## Extracting contained valuesThese methods extract the contained value in a [<code>Result&lt;T, E&gt;</code>](<code>Result&lt;T, E&gt;</code>) when it is the <a href="./core-result.html#ok"><code>Ok</code></a> variant. If the <a href="./core-result-Result.html"><code>Result</code></a> is <a href="./core-result.html#err"><code>Err</code></a>:<a href="%60expect%60"><code>expect</code></a> panics with a provided felt252 error message * <a href="%60unwrap%60"><code>unwrap</code></a> panics with a generic message * <a href="%60unwrap_or%60"><code>unwrap_or</code></a> returns the provided default value * <a href="%60unwrap_or_default%60"><code>unwrap_or_default</code></a> returns the default value of the type <code>T</code> (which must implement the <a href="./core-traits-Default.html"><code>Default</code></a> trait) * <a href="%60unwrap_or_else%60"><code>unwrap_or_else</code></a> returns the result of evaluating the provided function<a href="%60expect%60"><code>expect</code></a>: ResultTrait::expect <a href="%60unwrap%60"><code>unwrap</code></a>: ResultTrait::unwrap <a href="%60unwrap_or%60"><code>unwrap_or</code></a>: ResultTrait::unwrap_or <a href="%60unwrap_or_default%60"><code>unwrap_or_default</code></a>: ResultTrait::unwrap_or_default <a href="%60unwrap_or_else%60"><code>unwrap_or_else</code></a>: ResultTrait::unwrap_or_elseThese methods extract the contained value in a [<code>Result&lt;T, E&gt;</code>](<code>Result&lt;T, E&gt;</code>) when it is the <a href="./core-result.html#err"><code>Err</code></a> variant. If the <a href="./core-result-Result.html"><code>Result</code></a> is <a href="./core-result.html#ok"><code>Ok</code></a>:<a href="%60expect_err%60"><code>expect_err</code></a> panics with a provided felt252 error message * <a href="%60unwrap_err%60"><code>unwrap_err</code></a> panics with a generic message<a href="%60expect_err%60"><code>expect_err</code></a>: ResultTrait::expect_err <a href="%60unwrap_err%60"><code>unwrap_err</code></a>: ResultTrait::unwrap_err  ## Transforming contained valuesThese methods transform <a href="./core-result-Result.html"><code>Result</code></a> to <a href="./core-option-Option.html"><code>Option</code></a>:<a href="%60ok%60"><code>ok</code></a> transforms [<code>Result&lt;T, E&gt;</code>](<code>Result&lt;T, E&gt;</code>) into <a href="%60Option%3CT%3E%60"><code>Option&lt;T&gt;</code></a>, mapping <a href="%60Ok(v)%60"><code>Ok(v)</code></a> to <a href="%60Some(v)%60"><code>Some(v)</code></a> and <a href="%60Err(e)%60"><code>Err(e)</code></a> to <a href="./core-option.html#none"><code>None</code></a> * <a href="%60err%60"><code>err</code></a> transforms [<code>Result&lt;T, E&gt;</code>](<code>Result&lt;T, E&gt;</code>) into <a href="%60Option%3CE%3E%60"><code>Option&lt;E&gt;</code></a>, mapping <a href="%60Ok(v)%60"><code>Ok(v)</code></a> to <a href="./core-option.html#none"><code>None</code></a> and <a href="%60Err(e)%60"><code>Err(e)</code></a> to <a href="%60Some(e)%60"><code>Some(e)</code></a>This method transforms the contained value of the <a href="./core-result.html#ok"><code>Ok</code></a> variant:<a href="%60map%60"><code>map</code></a> transforms [<code>Result&lt;T, E&gt;</code>](<code>Result&lt;T, E&gt;</code>) into [<code>Result&lt;U, E&gt;</code>](<code>Result&lt;U, E&gt;</code>) by applying the provided function to the contained value of <a href="./core-result.html#ok"><code>Ok</code></a> and leaving <a href="./core-result.html#err"><code>Err</code></a> values unchangedThis method transforms the contained value of the <a href="./core-result.html#err"><code>Err</code></a> variant:<a href="%60map_err%60"><code>map_err</code></a> transforms [<code>Result&lt;T, E&gt;</code>](<code>Result&lt;T, E&gt;</code>) into [<code>Result&lt;T, F&gt;</code>](<code>Result&lt;T, F&gt;</code>) by applying the provided function to the contained value of <a href="./core-result.html#err"><code>Err</code></a> and leaving <a href="./core-result.html#ok"><code>Ok</code></a> values unchangedThese methods transform a [<code>Result&lt;T, E&gt;</code>](<code>Result&lt;T, E&gt;</code>) into a value of a possibly different type <code>U</code>:<a href="%60map_or%60"><code>map_or</code></a> applies the provided function to the contained value of <a href="./core-result.html#ok"><code>Ok</code></a>, or returns the provided default value if the <a href="./core-result-Result.html"><code>Result</code></a> is <a href="./core-result.html#err"><code>Err</code></a> * <a href="%60map_or_else%60"><code>map_or_else</code></a> applies the provided function to the contained value of <a href="./core-result.html#ok"><code>Ok</code></a>, or applies the provided default fallback function to the contained value of <a href="./core-result.html#err"><code>Err</code></a><a href="%60map_or%60"><code>map_or</code></a>: ResultTrait::map_or <a href="%60map_or_else%60"><code>map_or_else</code></a>: ResultTrait::map_or_else  ## Boolean operatorsThese methods treat the <a href="./core-result-Result.html"><code>Result</code></a> as a boolean value, where <a href="./core-result.html#ok"><code>Ok</code></a> acts like <a href="%60true%60"><code>true</code></a> and <a href="./core-result.html#err"><code>Err</code></a> acts like <a href="%60false%60"><code>false</code></a>. There are two categories of these methods: ones that take a <a href="./core-result-Result.html"><code>Result</code></a> as input, and ones that take a function as input.The <a href="%60and%60"><code>and</code></a> and <a href="%60or%60"><code>or</code></a> methods take another <a href="./core-result-Result.html"><code>Result</code></a> as input, and produce a <a href="./core-result-Result.html"><code>Result</code></a> as output. The <a href="%60and%60"><code>and</code></a> method can produce a [<code>Result&lt;U, E&gt;</code>](<code>Result&lt;U, E&gt;</code>) value having a different inner type <code>U</code> than [<code>Result&lt;T, E&gt;</code>](<code>Result&lt;T, E&gt;</code>). The <a href="%60or%60"><code>or</code></a> method can produce a [<code>Result&lt;T, F&gt;</code>](<code>Result&lt;T, F&gt;</code>) value having a different error type <code>F</code> than [<code>Result&lt;T, E&gt;</code>](<code>Result&lt;T, E&gt;</code>).| method  | self     | input     | output   | |---------|----------|-----------|----------| | <a href="%60and%60"><code>and</code></a> | <code>Err(e)</code> | (ignored) | <code>Err(e)</code> | | <a href="%60and%60"><code>and</code></a> | <code>Ok(x)</code>  | <code>Err(d)</code>  | <code>Err(d)</code> | | <a href="%60and%60"><code>and</code></a> | <code>Ok(x)</code>  | <code>Ok(y)</code>   | <code>Ok(y)</code>  | | <a href="%60or%60"><code>or</code></a>  | <code>Err(e)</code> | <code>Err(d)</code>  | <code>Err(d)</code> | | <a href="%60or%60"><code>or</code></a>  | <code>Err(e)</code> | <code>Ok(y)</code>   | <code>Ok(y)</code>  | | <a href="%60or%60"><code>or</code></a>  | <code>Ok(x)</code>  | (ignored) | <code>Ok(x)</code>  |<a href="%60and%60"><code>and</code></a>: ResultTrait::and <a href="%60or%60"><code>or</code></a>: ResultTrait::orThe <a href="%60and_then%60"><code>and_then</code></a> and <a href="%60or_else%60"><code>or_else</code></a> methods take a function as input, and only evaluate the function when they need to produce a new value. The <a href="%60and_then%60"><code>and_then</code></a> method can produce a [<code>Result&lt;U, E&gt;</code>](<code>Result&lt;U, E&gt;</code>) value having a different inner type <code>U</code> than [<code>Result&lt;T, E&gt;</code>](<code>Result&lt;T, E&gt;</code>). The <a href="%60or_else%60"><code>or_else</code></a> method can produce a [<code>Result&lt;T, F&gt;</code>](<code>Result&lt;T, F&gt;</code>) value having a different error type <code>F</code> than [<code>Result&lt;T, E&gt;</code>](<code>Result&lt;T, E&gt;</code>).| method       | self     | function input | function result | output   | |--------------|----------|----------------|-----------------|----------| | <a href="%60and_then%60"><code>and_then</code></a> | <code>Err(e)</code> | (not provided) | (not evaluated) | <code>Err(e)</code> | | <a href="%60and_then%60"><code>and_then</code></a> | <code>Ok(x)</code>  | <code>x</code>            | <code>Err(d)</code>        | <code>Err(d)</code> | | <a href="%60and_then%60"><code>and_then</code></a> | <code>Ok(x)</code>  | <code>x</code>            | <code>Ok(y)</code>         | <code>Ok(y)</code>  | | <a href="%60or_else%60"><code>or_else</code></a>  | <code>Err(e)</code> | <code>e</code>            | <code>Err(d)</code>        | <code>Err(d)</code> | | <a href="%60or_else%60"><code>or_else</code></a>  | <code>Err(e)</code> | <code>e</code>            | <code>Ok(y)</code>         | <code>Ok(y)</code>  | | <a href="%60or_else%60"><code>or_else</code></a>  | <code>Ok(x)</code>  | (not provided) | (not evaluated) | <code>Ok(x)</code>  |<a href="%60and_then%60"><code>and_then</code></a>: ResultTrait::and_then <a href="%60or_else%60"><code>or_else</code></a>: ResultTrait::or_else  # The question mark operator, <code>?</code>When writing code that calls many functions that return the <a href="./core-result-Result.html"><code>Result</code></a> type, handling <code>Ok</code>/<code>Err</code> can be tedious. The question mark operator, <code>?</code>, hides some of the boilerplate of propagating errors up the call stack.It replaces this:</a></h1>
+<pre><code class="language-cairo">use core::integer::u8_overflowing_add;
+
+fn add_three_numbers(a: u8, b: u8, c: u8) -&gt; Result&lt;u8, u8&gt; {
+    match u8_overflowing_add(a, b) {
+        Ok(sum_ab) =&gt; {
+            match u8_overflowing_add(sum_ab, c) {
+                Ok(total) =&gt; Ok(total),
+                Err(e) =&gt; Err(e),
+            }
+        },
+        Err(e) =&gt; Err(e),
+    }
+}
+</code></pre>
+<p>With this:</p>
+<pre><code class="language-cairo">use core::integer::u8_overflowing_add;
+
+fn add_three_numbers_2(a: u8, b: u8, c: u8) -&gt; Result&lt;u8, u8&gt; {
+    let total = u8_overflowing_add(u8_overflowing_add(a, b)?, c)?;
+    Ok(total)
+}
+</code></pre>
+<p>It's much nicer<img src="./core-result.html#ok" alt="Ok" />: Ok <a href="./core-result.html#err"><code>Err</code></a>: Err  ## Iterating over <code>Result</code>A <a href="./core-result-Result.html"><code>Result</code></a> can be iterated over. This can be helpful if you need an iterator that is conditionally empty. The iterator will either produce a single value (when the <a href="./core-result-Result.html"><code>Result</code></a> is <a href="./core-result.html#ok"><code>Ok</code></a>), or produce no values (when the <a href="./core-result-Result.html"><code>Result</code></a> is <a href="./core-result.html#err"><code>Err</code></a>). For example, <a href="%60into_iter%60"><code>into_iter</code></a> contains <a href="%60Some(v)%60"><code>Some(v)</code></a> if the <a href="./core-result-Result.html"><code>Result</code></a> is <a href="%60Ok(v)%60"><code>Ok(v)</code></a>, and <a href="./core-option.html#none"><code>None</code></a> if the <a href="./core-result-Result.html"><code>Result</code></a> is <a href="./core-result.html#err"><code>Err</code></a>.</p>
+<p>Fully qualified path: <code>core::result</code></p>
+<h2 id="enums"><a class="header" href="#enums">Enums</a></h2>
+<ul>
+<li><a href="./core-result-Result.html">Result</a></li>
+</ul>
+<h2 id="traits"><a class="header" href="#traits">Traits</a></h2>
+<ul>
+<li><a href="./core-result-ResultTrait.html">ResultTrait</a></li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="core-dict.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="core-option.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="core-dict.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="core-option.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

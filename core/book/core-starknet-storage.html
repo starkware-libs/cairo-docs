@@ -1,0 +1,377 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>storage - The Cairo Core Library Docs</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Cairo Core Library Docs</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="storage"><a class="header" href="#storage">storage</a></h1>
+<p>Storage-related types and traits for Cairo contracts.This module implements the storage system for Starknet contracts, providing high-level abstractions for persistent data storage. It offers a type-safe interface for reading and writing to Starknet storage through the <a href="%60StoragePointerReadAccess%60"><code>StoragePointerReadAccess</code></a> and <a href="%60StoragePointerWriteAccess%60"><code>StoragePointerWriteAccess</code></a> traits, along with useful storage-only collection types like <a href="%60Vec%60"><code>Vec</code></a> and <a href="%60Map%60"><code>Map</code></a>.<a href="%60Vec%60"><code>Vec</code></a>: starknet::storage::vec::Vec <a href="%60Map%60"><code>Map</code></a>: starknet::storage::map::Map  # OverviewThe storage system in Starknet contracts is built on a key-value store where each storage slot is identified by a 251-bit address. The storage system allows interactions with storage using state variables, which are declared inside a <code>Storage</code> struct annotated with the <code>#[storage]</code> attribute. This ensures type-safe storage access and simplifies the process of reading and writing to storage.  # Using the Storage SystemStorage is typically declared using the <code>#[storage]</code> attribute on a struct:</p>
+<pre><code class="language-cairo"><span class="boring">[storage]
+</span>struct Storage {
+    balance: u256,
+    users: Map&lt;ContractAddress, User&gt;,
+    nested_data: Map&lt;ContractAddress, Map&lt;ContractAddress, u8&gt;&gt;,
+    collection: Vec&lt;u8&gt;,
+}
+</code></pre>
+<p>Any type that implements the <code>Store</code> trait (or it's optimized <code>StorePacked</code> variant) can be used in storage.  This type can simply be derived using <code>#[derive(Store)]</code> - provided that all of the members of the type also implement <code>Store</code>.</p>
+<pre><code class="language-cairo"><span class="boring">[derive(Copy, Default, Drop, Store)]
+</span>struct User {
+    name: felt252,
+    age: u8,
+}
+</code></pre>
+<p>Interaction with storage is made through a set of traits, depending on the type interacted with:<a href="%60StoragePointerReadAccess%60"><code>StoragePointerReadAccess</code></a> and <a href="%60StoragePointerWriteAccess%60"><code>StoragePointerWriteAccess</code></a> allow for reading and writing storable types. - <a href="%60StorageMapReadAccess%60"><code>StorageMapReadAccess</code></a> and <a href="%60StorageMapWriteAccess%60"><code>StorageMapWriteAccess</code></a> allow for reading and writing to storage <a href="%60Map%60"><code>Map</code></a>s. - <a href="%60StoragePathEntry%60"><code>StoragePathEntry</code></a> allows for accessing a specific entry in a <a href="%60Map%60"><code>Map</code></a>, and can be combined with the <code>StoragePointer</code> traits to read and write in these entries. - <a href="%60VecTrait%60"><code>VecTrait</code></a> and <a href="%60MutableVecTrait%60"><code>MutableVecTrait</code></a> allow for interacting with storage <a href="%60Vec%60"><code>Vec</code></a>s.<a href="%60VecTrait%60"><code>VecTrait</code></a>: starknet::storage::vec::VecTrait <a href="%60MutableVecTrait%60"><code>MutableVecTrait</code></a>: starknet::storage::vec::MutableVecTrait <a href="%60StorageMapReadAccess%60"><code>StorageMapReadAccess</code></a>: starknet::storage::map::StorageMapReadAccess <a href="%60StorageMapWriteAccess%60"><code>StorageMapWriteAccess</code></a>: starknet::storage::map::StorageMapWriteAccess <a href="%60StoragePathEntry%60"><code>StoragePathEntry</code></a>: starknet::storage::map::StoragePathEntry  ## Examples</p>
+<pre><code class="language-cairo">fn use_storage(self: @ContractState) {
+    let address = 'address'.try_into().unwrap();
+    // Reading values
+    let balance = self.balance.read();
+    // For a `Map`, use the `entry` method to access values at specific keys:
+    let user = self.users.entry(address).read();
+    // Accessing nested `Map`s requires chaining `entry` calls:
+    let nested = self.nested_data.entry(address).entry(address).read();
+    // Accessing a specific index in a `Vec` requires using the `index` method:
+    let element = self.collection[index];
+
+    // Writing values
+    self.balance.write(100);
+    self.users.entry(address).write(Default::default());
+    self.nested_data.entry(address).entry(address).write(10);
+    self.collection[index].write(20);
+}
+</code></pre>
+<h1 id="storage-lifecyclewhen-you-access-a-storage-variable-it-goes-through-several-transformationsflattenedstorage-the-starting-point-is-your-contracts-storage-struct-each-member-is-represented-either-as-a-storagebase-or-another-flattenedstorage-for-substoragev0-or-flat-membersstoragebase-for-simple-variables-this-holds-the-sn_keccak-hash-of-the-variable-name-which-becomes-the-storage-address-for-example"><a class="header" href="#storage-lifecyclewhen-you-access-a-storage-variable-it-goes-through-several-transformationsflattenedstorage-the-starting-point-is-your-contracts-storage-struct-each-member-is-represented-either-as-a-storagebase-or-another-flattenedstorage-for-substoragev0-or-flat-membersstoragebase-for-simple-variables-this-holds-the-sn_keccak-hash-of-the-variable-name-which-becomes-the-storage-address-for-example">Storage LifecycleWhen you access a storage variable, it goes through several transformations:FlattenedStorage: The starting point is your contract's storage struct. Each member is represented either as a <code>StorageBase</code> or another <code>FlattenedStorage</code> (for <code>#[substorage(v0)]</code> or <code>#[flat]</code> members).StorageBase: For simple variables, this holds the <code>sn_keccak</code> hash of the variable name, which becomes the storage address. For example:</a></h1>
+<pre><code>#[storage]
+struct Storage {
+    balance: u128,  // Stored at sn_keccak('balance')
+}
+</code></pre>
+<p>StoragePath: For complex types, a <code>StoragePath</code> represents an un-finalized path to aspecific entry in storage. For example, a <code>StoragePath</code> for a <code>Map</code> can be updated withspecific keys to point to a specific entry in the map.StoragePointer: The final form, pointing to the actual storage location. For multi-slotvalues (like structs), values are stored sequentially from this address.  # Storage CollectionsCairo's memory collection types, like <a href="%60Felt252Dict%60"><code>Felt252Dict</code></a> and <a href="./core-array-Array.html"><code>Array</code></a>, can not be used in storage.Consequently, any type that contains these types can not be used in storage either.Instead, Cairo has two storage-only collection types: <a href="%60Map%60"><code>Map</code></a> and <a href="%60Vec%60"><code>Vec</code></a>.Instead of storing these memory collections directly, you will need to reflect them intostorage using the <a href="%60Map%60"><code>Map</code></a> and <a href="%60Vec%60"><code>Vec</code></a> types.  # Address CalculationStorage addresses are calculated deterministically:For a single value variable, the address is the <code>sn_keccak</code> hash of the variable name's ASCIIencoding. <code>sn_keccak</code> is Starknet's version of the Keccak-256 hash function, with its outputtruncated to 250 bits.For variables composed of multiple values (tuples, structs, or enums), the base storageaddress is also the <code>sn_keccak</code> hash of the variable name's ASCII encoding. The storage layoutthen varies depending on the specific type. A struct will store its members as a sequence ofprimitive types, while an enum will store its variant index, followed by the members of thevariant.For variables within a storage node, the address is calculated using a chain of hashes thatrepresents the node structure. Given a member <code>m</code> within a storage variable <code>variable_name</code>,the path is computed as <code>h(sn_keccak(variable_name), sn_keccak(m))</code>, where <code>h</code> is the Pedersenhash. For nested storage nodes, this process repeats, creating a hash chain representing thepath to each leaf node. At the leaf node, the storage calculation follows the standard rules forthat variable type.For <a href="%60Map%60"><code>Map</code></a> or <a href="%60Vec%60"><code>Vec</code></a> variables, the address is calculated relative to the storage baseaddress (the <code>sn_keccak</code> hash of the variable name) combined with the mapping keys or vectorindices.See their respective module documentation for more details.</p>
+<p>Fully qualified path: <code>core::starknet::storage</code></p>
+<h2 id="structs"><a class="header" href="#structs">Structs</a></h2>
+<ul>
+<li>
+<p><a href="./core-starknet-storage-StoragePointer.html">StoragePointer</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-StoragePointer0Offset.html">StoragePointer0Offset</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-StoragePath.html">StoragePath</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-PendingStoragePath.html">PendingStoragePath</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-Mutable.html">Mutable</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-map-Map.html">Map</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-storage_base-FlattenedStorage.html">FlattenedStorage</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-storage_base-StorageBase.html">StorageBase</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-vec-Vec.html">Vec</a></p>
+</li>
+</ul>
+<h2 id="traits"><a class="header" href="#traits">Traits</a></h2>
+<ul>
+<li>
+<p><a href="./core-starknet-storage-StorageAsPointer.html">StorageAsPointer</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-StoragePointerReadAccess.html">StoragePointerReadAccess</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-StoragePointerWriteAccess.html">StoragePointerWriteAccess</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-StorageAsPath.html">StorageAsPath</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-PendingStoragePathTrait.html">PendingStoragePathTrait</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-IntoIterRange.html">IntoIterRange</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-ValidStorageTypeTrait.html">ValidStorageTypeTrait</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-map-StorageMapReadAccess.html">StorageMapReadAccess</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-map-StorageMapWriteAccess.html">StorageMapWriteAccess</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-map-StoragePathEntry.html">StoragePathEntry</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-storage_base-StorageTrait.html">StorageTrait</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-storage_base-StorageTraitMut.html">StorageTraitMut</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-storage_node-StorageNode.html">StorageNode</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-storage_node-StorageNodeMut.html">StorageNodeMut</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-sub_pointers-SubPointers.html">SubPointers</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-sub_pointers-SubPointersForward.html">SubPointersForward</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-sub_pointers-SubPointersMut.html">SubPointersMut</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-sub_pointers-SubPointersMutForward.html">SubPointersMutForward</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-vec-MutableVecTrait.html">MutableVecTrait</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-vec-VecTrait.html">VecTrait</a></p>
+</li>
+</ul>
+<h2 id="impls"><a class="header" href="#impls">Impls</a></h2>
+<ul>
+<li>
+<p><a href="./core-starknet-storage-SubPointersDeref.html">SubPointersDeref</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-SubPointersMutDeref.html">SubPointersMutDeref</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-StorableStoragePointerReadAccess.html">StorableStoragePointerReadAccess</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-StorageNodeDeref.html">StorageNodeDeref</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage-StorageNodeMutDeref.html">StorageNodeMutDeref</a></p>
+</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="core-starknet-account.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="core-starknet-testing.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="core-starknet-account.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="core-starknet-testing.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

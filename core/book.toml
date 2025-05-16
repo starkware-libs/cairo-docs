@@ -1,0 +1,18 @@
+[book]
+language = "en"
+multilingual = false
+src = "src"
+title = "The Cairo Core Library Docs"
+
+[output.html]
+no-section-label = true
+
+[output.html.playground]
+runnable = false
+
+[output.html.fold]
+enable = true
+level = 0
+
+[output.html.code.hidelines]
+cairo = "#"

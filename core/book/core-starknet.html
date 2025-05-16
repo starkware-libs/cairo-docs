@@ -1,0 +1,351 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>starknet - The Cairo Core Library Docs</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Cairo Core Library Docs</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="starknet"><a class="header" href="#starknet">starknet</a></h1>
+<p>Functionalities for interacting with the Starknet network.  # Core ComponentsStorage: The <code>storage</code> module defines abstractions on how to interact with Starknet contract storage. - Syscalls: The <code>syscalls</code> module contains the extern declarations for all the system calls available in Starknet. - Contract Addresses: The <code>contract_address</code> and <code>eth_address</code> modules provide types and utilities for working with Starknet contract addresses and Ethereum addresses. - Cryptography: The <code>secp256k1</code>, <code>secp256r1</code>, <code>secp256_trait</code>, and <code>eth_signature</code> modules handle various elliptic curve operations. - Execution Info: The <code>info</code> module exposes functions for accessing information about the current contract execution, such as the caller address, contract address, block info, and transaction info.</p>
+<p>Fully qualified path: <code>core::starknet</code></p>
+<h2 id="modules"><a class="header" href="#modules">Modules</a></h2>
+<ul>
+<li>
+<p><a href="./core-starknet-storage_access.html">storage_access</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-syscalls.html">syscalls</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-contract_address.html">contract_address</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-secp256_trait.html">secp256_trait</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-secp256k1.html">secp256k1</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-secp256r1.html">secp256r1</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-eth_address.html">eth_address</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-eth_signature.html">eth_signature</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-class_hash.html">class_hash</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-event.html">event</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-account.html">account</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage.html">storage</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-testing.html">testing</a></p>
+</li>
+</ul>
+<h2 id="constants"><a class="header" href="#constants">Constants</a></h2>
+<ul>
+<li><a href="./core-starknet-VALIDATED.html">VALIDATED</a></li>
+</ul>
+<h2 id="free-functions"><a class="header" href="#free-functions">Free functions</a></h2>
+<ul>
+<li>
+<p><a href="./core-starknet-info-get_block_info.html">get_block_info</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-info-get_block_number.html">get_block_number</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-info-get_block_timestamp.html">get_block_timestamp</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-info-get_caller_address.html">get_caller_address</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-info-get_contract_address.html">get_contract_address</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-info-get_execution_info.html">get_execution_info</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-info-get_tx_info.html">get_tx_info</a></p>
+</li>
+</ul>
+<h2 id="structs"><a class="header" href="#structs">Structs</a></h2>
+<ul>
+<li>
+<p><a href="./core-starknet-eth_address-EthAddress.html">EthAddress</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-info-v2-ExecutionInfo.html">ExecutionInfo</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-info-v2-ResourceBounds.html">ResourceBounds</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-info-v2-TxInfo.html">TxInfo</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-info-BlockInfo.html">BlockInfo</a></p>
+</li>
+</ul>
+<h2 id="type-aliases"><a class="header" href="#type-aliases">Type aliases</a></h2>
+<ul>
+<li><a href="./core-starknet-SyscallResult.html">SyscallResult</a></li>
+</ul>
+<h2 id="traits"><a class="header" href="#traits">Traits</a></h2>
+<ul>
+<li>
+<p><a href="./core-starknet-SyscallResultTrait.html">SyscallResultTrait</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage_access-Store.html">Store</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-event-Event.html">Event</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-account-AccountContract.html">AccountContract</a></p>
+</li>
+</ul>
+<h2 id="extern-types"><a class="header" href="#extern-types">Extern types</a></h2>
+<ul>
+<li>
+<p><a href="./core-starknet-System.html">System</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-storage_access-StorageAddress.html">StorageAddress</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-contract_address-ContractAddress.html">ContractAddress</a></p>
+</li>
+<li>
+<p><a href="./core-starknet-class_hash-ClassHash.html">ClassHash</a></p>
+</li>
+</ul>
+<h2 id="extern-functions"><a class="header" href="#extern-functions">Extern functions</a></h2>
+<ul>
+<li><a href="./core-starknet-contract_address-contract_address_const.html">contract_address_const</a></li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="core-fmt.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="core-internal.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="core-fmt.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="core-internal.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

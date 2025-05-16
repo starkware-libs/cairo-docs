@@ -1,0 +1,278 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>option - The Cairo Core Library Docs</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Cairo Core Library Docs</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="option"><a class="header" href="#option">option</a></h1>
+<p>Optional values.The <a href="./core-option-Option.html"><code>Option</code></a> type represents an optional value: every <a href="./core-option-Option.html"><code>Option</code></a> is either <a href="./core-option.html#some"><code>Some</code></a> and contains a value, or <a href="./core-option.html#none"><code>None</code></a>, and does not. <a href="./core-option-Option.html"><code>Option</code></a> types are very common in Cairo code, as they have a number of uses:Initial values * Return values for functions that are not defined over their entire input range (partial functions) * Return value for otherwise reporting simple errors, where <a href="./core-option.html#none"><code>None</code></a> is returned on error * Optional struct fields * Optional function argumentsOptions are commonly paired with pattern matching to query the presence of a value and take action, always accounting for the <code>None</code> case.</p>
+<pre><code class="language-cairo">fn divide(numerator: u64, denominator: u64) -&gt; Option&lt;u64&gt; {
+    if denominator == 0 {
+        None
+    } else {
+        Some(numerator / denominator)
+    }
+}
+
+// The return value of the function is an option
+let result = divide(2, 3);
+
+// Pattern match to retrieve the value
+match result {
+    // The division was valid
+    Some(x) =&gt; println!("Result: {x}"),
+    // The division was invalid
+    None    =&gt; println!("Cannot divide by 0"),
+}
+</code></pre>
+<h1 id="the-question-mark-operator-similar-to-the-result-type-when-writing-code-that-calls-many-functions-that-return-the-option-type-handling-somenone-can-be-tedious-the-question-mark-operator--hides-some-of-the-boilerplate-of-propagating-values-up-the-call-stackit-replaces-this"><a class="header" href="#the-question-mark-operator-similar-to-the-result-type-when-writing-code-that-calls-many-functions-that-return-the-option-type-handling-somenone-can-be-tedious-the-question-mark-operator--hides-some-of-the-boilerplate-of-propagating-values-up-the-call-stackit-replaces-this">The question mark operator, <code>?</code>Similar to the <a href="./core-result-Result.html"><code>Result</code></a> type, when writing code that calls many functions that return the <a href="./core-option-Option.html"><code>Option</code></a> type, handling <code>Some</code>/<code>None</code> can be tedious. The question mark operator, <code>?</code>, hides some of the boilerplate of propagating values up the call stack.It replaces this:</a></h1>
+<pre><code class="language-cairo">fn add_last_numbers(mut array: Array&lt;u32&gt;) -&gt; Option&lt;u32&gt; {
+    let a = array.pop_front();
+    let b = array.pop_front();
+
+    match (a, b) {
+        (Some(x), Some(y)) =&gt; Some(x + y),
+        _ =&gt; None,
+    }
+}
+
+</code></pre>
+<p>With this:</p>
+<pre><code class="language-cairo">fn add_last_numbers(mut array: Array&lt;u32&gt;) -&gt; Option&lt;u32&gt; {
+    Some(array.pop_front()? + array.pop_front()?)
+ }
+</code></pre>
+<p>It's much nicer!Ending the expression with <code>?</code> will result in the <a href="./core-option.html#some"><code>Some</code></a>'s unwrapped value, unless the result is <a href="./core-option.html#none"><code>None</code></a>, in which case <a href="./core-option.html#none"><code>None</code></a> is returned early from the enclosing function. <code>?</code> can be used in functions that return <a href="./core-option-Option.html"><code>Option</code></a> because of the early return of <a href="./core-option.html#none"><code>None</code></a> that it provides.<a href="./core-option.html#some"><code>Some</code></a>: Some <a href="./core-option.html#none"><code>None</code></a>: None  # Method overviewIn addition to working with pattern matching, <a href="./core-option-Option.html"><code>Option</code></a> provides a wide variety of different methods.  ## Querying the variantThe <a href="%60is_some%60"><code>is_some</code></a> and <a href="%60is_none%60"><code>is_none</code></a> methods return <code>true</code> if the <a href="./core-option-Option.html"><code>Option</code></a> is <a href="./core-option.html#some"><code>Some</code></a> or <a href="./core-option.html#none"><code>None</code></a>, respectively.<a href="%60is_none%60"><code>is_none</code></a>: OptionTrait::is_none <a href="%60is_none_or%60"><code>is_none_or</code></a>: OptionTrait::is_none_or <a href="%60is_some%60"><code>is_some</code></a>: OptionTrait::is_some <a href="%60is_some_and%60"><code>is_some_and</code></a>: OptionTrait::is_some_and  ## Extracting the contained valueThese methods extract the contained value in an <a href="%60Option%3CT%3E%60"><code>Option&lt;T&gt;</code></a> when it is the <a href="./core-option.html#some"><code>Some</code></a> variant. If the <a href="./core-option-Option.html"><code>Option</code></a> is <a href="./core-option.html#none"><code>None</code></a>:<a href="%60expect%60"><code>expect</code></a> panics with a provided custom message * <a href="%60unwrap%60"><code>unwrap</code></a> panics with a generic message * <a href="%60unwrap_or%60"><code>unwrap_or</code></a> returns the provided default value * <a href="%60unwrap_or_default%60"><code>unwrap_or_default</code></a> returns the default value of the type <code>T</code> (which must implement the <a href="./core-traits-Default.html"><code>Default</code></a> trait) * <a href="%60unwrap_or_else%60"><code>unwrap_or_else</code></a> returns the result of evaluating the provided function<a href="%60expect%60"><code>expect</code></a>: OptionTrait::expect <a href="%60unwrap%60"><code>unwrap</code></a>: OptionTrait::unwrap <a href="%60unwrap_or%60"><code>unwrap_or</code></a>: OptionTrait::unwrap_or <a href="%60unwrap_or_default%60"><code>unwrap_or_default</code></a>: OptionTrait::unwrap_or_default <a href="%60unwrap_or_else%60"><code>unwrap_or_else</code></a>: OptionTrait::unwrap_or_else  ## Transforming contained valuesThese methods transform <a href="./core-option-Option.html"><code>Option</code></a> to <a href="./core-result-Result.html"><code>Result</code></a>:<a href="%60ok_or%60"><code>ok_or</code></a> transforms <a href="%60Some(v)%60"><code>Some(v)</code></a> to <a href="%60Ok(v)%60"><code>Ok(v)</code></a>, and <a href="./core-option.html#none"><code>None</code></a> to <a href="%60Err(err)%60"><code>Err(err)</code></a> using the provided default <code>err</code> value. * <a href="%60ok_or_else%60"><code>ok_or_else</code></a> transforms <a href="%60Some(v)%60"><code>Some(v)</code></a> to <a href="%60Ok(v)%60"><code>Ok(v)</code></a>, and <a href="./core-option.html#none"><code>None</code></a> to a value of <a href="./core-result.html#err"><code>Err</code></a> using the provided function<a href="%60Err(err)%60"><code>Err(err)</code></a>: Err <a href="%60Ok(v)%60"><code>Ok(v)</code></a>: Ok <a href="%60Some(v)%60"><code>Some(v)</code></a>: Some <a href="%60ok_or%60"><code>ok_or</code></a>: OptionTrait::ok_or <a href="%60ok_or_else%60"><code>ok_or_else</code></a>: OptionTrait::ok_or_elseThese methods transform the <a href="./core-option.html#some"><code>Some</code></a> variant:<a href="%60map%60"><code>map</code></a> transforms <a href="%60Option%3CT%3E%60"><code>Option&lt;T&gt;</code></a> to <a href="%60Option%3CU%3E%60"><code>Option&lt;U&gt;</code></a> by applying the provided function to the contained value of <a href="./core-option.html#some"><code>Some</code></a> and leaving <a href="./core-option.html#none"><code>None</code></a> values unchangedThese methods transform <a href="%60Option%3CT%3E%60"><code>Option&lt;T&gt;</code></a> to a value of a possibly different type <code>U</code>:<a href="%60map_or%60"><code>map_or</code></a> applies the provided function to the contained value of <a href="./core-option.html#some"><code>Some</code></a>, or returns the provided default value if the <a href="./core-option-Option.html"><code>Option</code></a> is <a href="./core-option.html#none"><code>None</code></a> * <a href="%60map_or_else%60"><code>map_or_else</code></a> applies the provided function to the contained value of <a href="./core-option.html#some"><code>Some</code></a>, or returns the result of evaluating the provided fallback function if the <a href="./core-option-Option.html"><code>Option</code></a> is <a href="./core-option.html#none"><code>None</code></a><a href="%60map_or%60"><code>map_or</code></a>: OptionTrait::map_or <a href="%60map_or_else%60"><code>map_or_else</code></a>: OptionTrait::map_or_else  ## Boolean operatorsThese methods treat the <a href="./core-option-Option.html"><code>Option</code></a> as a boolean value, where <a href="./core-option.html#some"><code>Some</code></a> acts like <a href="%60true%60"><code>true</code></a> and <a href="./core-option.html#none"><code>None</code></a> acts like <a href="%60false%60"><code>false</code></a>. There are two categories of these methods: ones that take an <a href="./core-option-Option.html"><code>Option</code></a> as input, and ones that take a function as input (to be lazily evaluated).The <a href="%60and%60"><code>and</code></a>, <a href="%60or%60"><code>or</code></a>, and <a href="%60xor%60"><code>xor</code></a> methods take another <a href="./core-option-Option.html"><code>Option</code></a> as input, and produce an <a href="./core-option-Option.html"><code>Option</code></a> as output. Only the <a href="%60and%60"><code>and</code></a> method can produce an <a href="%60Option%3CU%3E%60"><code>Option&lt;U&gt;</code></a> value having a different inner type <code>U</code> than <a href="%60Option%3CT%3E%60"><code>Option&lt;T&gt;</code></a>.| method  | self      | input     | output    | |---------|-----------|-----------|-----------| | <a href="%60and%60"><code>and</code></a> | <code>None</code>    | (ignored) | <code>None</code>    | | <a href="%60and%60"><code>and</code></a> | <code>Some(x)</code> | <code>None</code>    | <code>None</code>    | | <a href="%60and%60"><code>and</code></a> | <code>Some(x)</code> | <code>Some(y)</code> | <code>Some(y)</code> | | <a href="%60or%60"><code>or</code></a>  | <code>None</code>    | <code>None</code>    | <code>None</code>    | | <a href="%60or%60"><code>or</code></a>  | <code>None</code>    | <code>Some(y)</code> | <code>Some(y)</code> | | <a href="%60or%60"><code>or</code></a>  | <code>Some(x)</code> | (ignored) | <code>Some(x)</code> | | <a href="%60xor%60"><code>xor</code></a> | <code>None</code>    | <code>None</code>    | <code>None</code>    | | <a href="%60xor%60"><code>xor</code></a> | <code>None</code>    | <code>Some(y)</code> | <code>Some(y)</code> | | <a href="%60xor%60"><code>xor</code></a> | <code>Some(x)</code> | <code>None</code>    | <code>Some(x)</code> | | <a href="%60xor%60"><code>xor</code></a> | <code>Some(x)</code> | <code>Some(y)</code> | <code>None</code>    |<a href="%60and%60"><code>and</code></a>: OptionTrait::and <a href="%60or%60"><code>or</code></a>: OptionTrait::or <a href="%60xor%60"><code>xor</code></a>: OptionTrait::xorThe <a href="%60and_then%60"><code>and_then</code></a> and <a href="%60or_else%60"><code>or_else</code></a> methods take a function as input, and only evaluate the function when they need to produce a new value. Only the <a href="%60and_then%60"><code>and_then</code></a> method can produce an <a href="%60Option%3CU%3E%60"><code>Option&lt;U&gt;</code></a> value having a different inner type <code>U</code> than <a href="%60Option%3CT%3E%60"><code>Option&lt;T&gt;</code></a>.| method       | self      | function input | function result | output    | |--------------|-----------|----------------|-----------------|-----------| | <a href="%60and_then%60"><code>and_then</code></a> | <code>None</code>    | (not provided) | (not evaluated) | <code>None</code>    | | <a href="%60and_then%60"><code>and_then</code></a> | <code>Some(x)</code> | <code>x</code>            | <code>None</code>          | <code>None</code>    | | <a href="%60and_then%60"><code>and_then</code></a> | <code>Some(x)</code> | <code>x</code>            | <code>Some(y)</code>       | <code>Some(y)</code> | | <a href="%60or_else%60"><code>or_else</code></a>  | <code>None</code>    | (not provided) | <code>None</code>          | <code>None</code>    | | <a href="%60or_else%60"><code>or_else</code></a>  | <code>None</code>    | (not provided) | <code>Some(y)</code>       | <code>Some(y)</code> | | <a href="%60or_else%60"><code>or_else</code></a>  | <code>Some(x)</code> | (not provided) | (not evaluated) | <code>Some(x)</code> |<a href="%60and_then%60"><code>and_then</code></a>: OptionTrait::and_then <a href="%60or_else%60"><code>or_else</code></a>: OptionTrait::or_else ## Iterating over <code>Option</code>An <a href="./core-option-Option.html"><code>Option</code></a> can be iterated over. This can be helpful if you need an iterator that is conditionally empty. The iterator will either produce a single value (when the <a href="./core-option-Option.html"><code>Option</code></a> is <a href="./core-option.html#some"><code>Some</code></a>), or produce no values (when the <a href="./core-option-Option.html"><code>Option</code></a> is <a href="./core-option.html#none"><code>None</code></a>). For example, <a href="%60into_iter%60"><code>into_iter</code></a> contains <a href="%60Some(v)%60"><code>Some(v)</code></a> if the <a href="./core-option-Option.html"><code>Option</code></a> is <a href="%60Some(v)%60"><code>Some(v)</code></a>, and <a href="./core-option.html#none"><code>None</code></a> if the <a href="./core-option-Option.html"><code>Option</code></a> is <a href="./core-option.html#none"><code>None</code></a>.</p>
+<p>Fully qualified path: <code>core::option</code></p>
+<h2 id="structs"><a class="header" href="#structs">Structs</a></h2>
+<ul>
+<li><a href="./core-option-OptionIter.html">OptionIter</a></li>
+</ul>
+<h2 id="enums"><a class="header" href="#enums">Enums</a></h2>
+<ul>
+<li><a href="./core-option-Option.html">Option</a></li>
+</ul>
+<h2 id="traits"><a class="header" href="#traits">Traits</a></h2>
+<ul>
+<li><a href="./core-option-OptionTrait.html">OptionTrait</a></li>
+</ul>
+<h2 id="impls"><a class="header" href="#impls">Impls</a></h2>
+<ul>
+<li><a href="./core-option-DestructOption.html">DestructOption</a></li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="core-result.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="core-clone.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="core-result.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="core-clone.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
