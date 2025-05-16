@@ -1,4 +1,4 @@
-The Core library docs are auto-generated from its [codebase](https://github.com/starkware-libs/cairo/tree/main/corelib) using [Scarb](https://docs.swmansion.com/scarb/docs/extensions/documentation-generation.html).
+The Cairo Core library docs are auto-generated from the library's [codebase](https://github.com/starkware-libs/cairo/tree/main/corelib) using [Scarb](https://docs.swmansion.com/scarb/docs/extensions/documentation-generation.html).
 
 To preview the docs, run:
 ```
