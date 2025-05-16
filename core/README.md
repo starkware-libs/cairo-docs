@@ -7,7 +7,7 @@ mdbook serve --open
 
 To update the docs:
 
-1. Verify Scarb and mdbook are installed:
+1. Verify the latest versions of [Scarb](https://github.com/software-mansion/scarb/releases) and [mdBook](https://github.com/rust-lang/mdBook/releases) are installed:
     ```
     scarb --version && mdbook --version
     ```  
