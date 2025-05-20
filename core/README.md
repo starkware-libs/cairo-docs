@@ -29,7 +29,7 @@ To update the docs:
 
 4. Navigate back to the `core` directory, replace the existing docs, and delete the `cairo` directory:
     ```
-    cd ../.. && rm -rf src && cp -r cairo/corelib/target/doc/core/src/ src/ && rm -rf cairo
+    cd ../.. && cp -r cairo/corelib/target/doc/core/src/ src/ && rm -rf cairo
     ```
 
 5. Add `intro.md` to the new docs:
