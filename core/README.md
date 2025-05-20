@@ -29,7 +29,7 @@ To update the docs:
 
 4. Add `intro.md` to the new docs:
     ```
-    cp intro.md intro.md sed -i "" "1s/.*/- [Introduction](.\/intro.md)/" src/SUMMARY.md
+    cp intro.md src/intro.md sed -i "" "1s/.*/- [Introduction](.\/intro.md)/" src/SUMMARY.md
     ```
 
 5. Rebuild the book:
