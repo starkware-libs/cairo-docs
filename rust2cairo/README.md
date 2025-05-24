@@ -1,16 +1,15 @@
-# Cairo By Example
+# Rust2Cairo By Example
 
-Learn Cairo with examples (Live code editor included)
+Learn how to move from Rust to Cairo with examples (Live code editor included)
 
 ## Using
 
-If you'd like to read Cairo by Example, you can visit <https://docs.cairo-lang.org/cairo-by-example/>
-to read it online.
+If you'd like to read Rust2Cairo by Example, you can visit <https://docs.cairo-lang.org/rust2caro-by-example/> to read it online.
 
 If you'd like to read it locally, [install Rust], and then:
 
 ```bash
-git clone https://github.com/cairo-book/cairo-by-example
+git clone https://github.com/cairo-docs/rust2cairo-by-example
 cd cairo-by-example
 cargo install mdbook
 mdbook build
