@@ -1,0 +1,14 @@
+$ scarb cairo-run 
+warn: `scarb cairo-run` will be deprecated soon
+help: use `scarb execute` instead
+   Compiling split v0.1.0 (listings/mod/split/Scarb.toml)
+    Finished `dev` profile target(s) in 3 seconds
+     Running split
+called `my::function()`
+called `function()`
+called `my::indirect_access()`, that
+> 
+called `my::private_function()`
+called `my::nested::function()`
+Run completed successfully, returning []
+

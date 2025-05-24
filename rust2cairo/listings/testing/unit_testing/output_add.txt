@@ -1,0 +1,22 @@
+$ scarb test add
+     Running test unit_testing (snforge test)
+    Blocking waiting for file lock on registry db cache
+   Compiling test(listings/testing/unit_testing/Scarb.toml)
+    Finished `dev` profile target(s) in 6 seconds
+
+
+Collected 4 test(s) from unit_testing package
+Running 4 test(s) from src/
+[PASS] unit_testing::add_tests::test_add (gas: ~1)
+[PASS] unit_testing::ignore_tests::test_add (gas: ~1)
+[FAIL] unit_testing::add_tests::test_bad_add
+
+Failure data:
+    0x7533325f737562204f766572666c6f77 ('u32_sub Overflow')
+
+[PASS] unit_testing::ignore_tests::test_add_hundred (gas: ~1)
+Tests: 3 passed, 1 failed, 0 skipped, 0 ignored, 4 filtered out
+
+Failures:
+    unit_testing::add_tests::test_bad_add
+

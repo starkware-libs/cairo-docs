@@ -1,0 +1,17 @@
+$ scarb test divide
+     Running test unit_testing (snforge test)
+   Compiling test(listings/testing/unit_testing/Scarb.toml)
+    Finished `dev` profile target(s) in 6 seconds
+
+
+Collected 3 test(s) from unit_testing package
+Running 3 test(s) from src/
+[PASS] unit_testing::divide_tests::test_divide (gas: ~1)
+[PASS] unit_testing::divide_tests::test_any_panic (gas: ~1)
+
+Success data:
+    "Divide-by-zero error"
+
+[PASS] unit_testing::divide_tests::test_specific_panic (gas: ~1)
+Tests: 3 passed, 0 failed, 0 skipped, 0 ignored, 5 filtered out
+
