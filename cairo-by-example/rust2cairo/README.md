@@ -4,13 +4,13 @@ Learn how to move from Rust to Cairo with examples (Live code editor included)
 
 ## Using
 
-If you'd like to read Rust2Cairo by Example, you can visit <https://docs.cairo-lang.org/rust2caro-by-example/> to read it online.
+<!-- If you'd like to read Rust2Cairo by Example, you can visit <https://docs.cairo-lang.org/rust2cairo-by-example/> to read it online. -->
 
-If you'd like to read it locally, [install Rust], and then:
+If you'd like to read Rust2Cairo by Example locally, [install Rust], and then:
 
 ```bash
-git clone https://github.com/cairo-docs/rust2cairo-by-example
-cd cairo-by-example
+git clone https://github.com/starkware-libs/cairo-docs.git
+cd cairo-docs/cairo-by-example/rust2cairo
 cargo install mdbook
 mdbook build
 mdbook serve
