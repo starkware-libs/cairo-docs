@@ -1,6 +1,6 @@
 # Formatted print
 
-Cairo handles printing similarly to Rust, except:
+Cairo handles printing similarly to [Rust](https://doc.rust-lang.org/rust-by-example/hello/print.html), except:
 
 - [`macros`][macros] are defined in [`core::fmt`][fmt] instead of `std::fmt`
 - `format!` writes formatted text to [`ByteArray`][bytearray] instead of `String`
