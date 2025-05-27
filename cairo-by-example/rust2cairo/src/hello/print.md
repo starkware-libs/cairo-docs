@@ -1,6 +1,6 @@
 # Formatted print
 
-Cairo handles printing similarly to [Rust](https://doc.rust-lang.org/rust-by-example/hello/print.html), except:
+Printing in Cairo is handled similarly to [Rust](https://doc.rust-lang.org/rust-by-example/hello/print.html), except:
 
 - [`macros`][macros] are defined in [`core::fmt`][fmt] instead of `std::fmt`
 - `format!` writes formatted text to [`ByteArray`][bytearray] instead of `String`
@@ -9,15 +9,6 @@ Cairo handles printing similarly to [Rust](https://doc.rust-lang.org/rust-by-exa
 ```cairo,editable
 {{#include ../../listings/hello/print/src/lib.cairo}}
 ```
-
-<!-- [`core::fmt`][fmt] contains many [`traits`][traits] which govern the display of text. The base form of two important ones are listed below:
-
-- `fmt::Debug`: Uses the `{:?}` marker. Format text for debugging purposes.
-- `fmt::Display`: Uses the `{}` marker. Format text in a more elegant, user
-  friendly fashion.
-
-Here, we used `fmt::Display` because the std library provides implementations
-for these types. To print text for custom types, more steps are required. -->
 
 ### Activities
 

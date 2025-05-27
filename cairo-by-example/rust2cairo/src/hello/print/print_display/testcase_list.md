@@ -1,11 +1,6 @@
 # Testcase: List
 
-Implementing `fmt::Display` for a structure where the elements must each be
-handled sequentially is tricky. The problem is that each `write!` generates a
-`fmt::Result`. Proper handling of this requires dealing with _all_ the
-results. Cairo provides the `?` operator for exactly this purpose.
-
-> While the `?` operator is available in the language, it does not work inside loops. You can `break` with the `Err` value to exit the loop, and use the `?` operator on the returned value.
+Implementing `fmt::Display` for a structure where the elements must each be handled sequentially in Cairo is similar to [Rust](https://doc.rust-lang.org/rust-by-example/hello/print/print_display/testcase_list.html), except that the `?` operator does not work inside loops. Instead, you can `break` with the `Err` value to exit the loop, and use the `?` operator on the returned value:
 
 ```cairo
 {{#include ../../../../listings/hello/print/testcase_list/src/lib.cairo}}

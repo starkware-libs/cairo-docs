@@ -1,6 +1,6 @@
 # Hello World
 
-The the source code of the traditional Hello World program in Cairo is identical to the one in [Rust](https://doc.rust-lang.org/rust-by-example/hello.html):
+The source code of the traditional Hello World program in Cairo is identical to the one in [Rust](https://doc.rust-lang.org/rust-by-example/hello.html):
 
 ```cairo,editable
 {{#include ../listings/hello/hello/src/lib.cairo}}
