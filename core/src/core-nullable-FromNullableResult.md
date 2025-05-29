@@ -1,12 +1,14 @@
 # FromNullableResult
 
-Represents the result of matching a `Nullable` value.Used to safely handle both null and non-null cases when using `match_nullable` on a `Nullable`.
+Represents the result of matching a `Nullable` value.
+Used to safely handle both null and non-null cases when using `match_nullable` on a
+`Nullable`.
 
-Fully qualified path: `core::nullable::FromNullableResult`
+Fully qualified path: [core](./core.md)::[nullable](./core-nullable.md)::[FromNullableResult](./core-nullable-FromNullableResult.md)
 
-<pre><code class="language-rust">pub enum FromNullableResult&lt;T&gt; {
+<pre><code class="language-cairo">pub enum FromNullableResult {
     Null,
-    NotNull: Box&lt;T&gt;,
+    NotNull: <a href="core-box-Box.html">Box&lt;T&gt;</a>,
 }</code></pre>
 
 ## Variants
@@ -15,17 +17,17 @@ Fully qualified path: `core::nullable::FromNullableResult`
 
 Represents a null value
 
-Fully qualified path: `core::nullable::FromNullableResult::Null`
+Fully qualified path: [core](./core.md)::[nullable](./core-nullable.md)::[FromNullableResult](./core-nullable-FromNullableResult.md)::[Null](./core-nullable-FromNullableResult.md#null)
 
-<pre><code class="language-rust">Null</code></pre>
+<pre><code class="language-cairo">Null</code></pre>
 
 
 ### NotNull
 
 The boxed value when not null
 
-Fully qualified path: `core::nullable::FromNullableResult::NotNull`
+Fully qualified path: [core](./core.md)::[nullable](./core-nullable.md)::[FromNullableResult](./core-nullable-FromNullableResult.md)::[NotNull](./core-nullable-FromNullableResult.md#notnull)
 
-<pre><code class="language-rust">NotNull : Box &lt; T &gt;</code></pre>
+<pre><code class="language-cairo">NotNull: <a href="core-box-Box.html">Box&lt;T&gt;</a></code></pre>
 
 

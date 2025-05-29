@@ -1,9 +1,13 @@
 # Mul
 
-The multiplication operator `*`.  # Examples`Mul`tipliable types:
+The multiplication operator `*`.
+# Examples
+
+`Mul`tipliable types:
 ```cairo
 assert!(3_u8 * 2_u8 == 6_u8);
 ```
+
 Implementing `Mul` for a type:
 ```cairo
 #[derive(Copy, Drop, PartialEq)]
@@ -27,21 +31,23 @@ let p3 = p1 * p2;
 assert!(p3 == Point { x: 2, y: 0 });
 ```
 
-Fully qualified path: `core::traits::Mul`
+Fully qualified path: [core](./core.md)::[traits](./core-traits.md)::[Mul](./core-traits-Mul.md)
 
-<pre><code class="language-rust">pub trait Mul&lt;T&gt;</code></pre>
+<pre><code class="language-cairo">pub trait Mul&lt;T&gt;</code></pre>
 
 ## Trait functions
 
 ### mul
 
-Performs the `*` operation.  # Examples
+Performs the `*` operation.
+# Examples
+
 ```cairo
 assert!(12 * 2 == 24);
 ```
 
-Fully qualified path: `core::traits::Mul::mul`
+Fully qualified path: [core](./core.md)::[traits](./core-traits.md)::[Mul](./core-traits-Mul.md)::[mul](./core-traits-Mul.md#mul-1)
 
-<pre><code class="language-rust">fn mul(lhs: T, rhs: T) -&gt; T</code></pre>
+<pre><code class="language-cairo">fn mul&lt;T, T&gt;(lhs: T, rhs: T) -&gt; T</code></pre>
 
 

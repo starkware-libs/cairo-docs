@@ -2,9 +2,9 @@
 
 Wrapper type to ensure that a type `T` is dropped using a specific `Drop` impl.
 
-Fully qualified path: `core::internal::DropWith`
+Fully qualified path: [core](./core.md)::[internal](./core-internal.md)::[DropWith](./core-internal-DropWith.md)
 
-<pre><code class="language-rust">pub struct DropWith&lt;T, impl DropT: Drop&lt;T&gt;&gt; {
+<pre><code class="language-cairo">pub struct DropWith&lt;T, impl DropT: <a href="core-traits-Drop.html">Drop</a>&lt;T&gt;&gt; {
     pub value: T,
 }</code></pre>
 
@@ -12,8 +12,8 @@ Fully qualified path: `core::internal::DropWith`
 
 ### value
 
-Fully qualified path: `core::internal::DropWith::value`
+Fully qualified path: [core](./core.md)::[internal](./core-internal.md)::[DropWith](./core-internal-DropWith.md)::[value](./core-internal-DropWith.md#value)
 
-<pre><code class="language-rust">pub value: T</code></pre>
+<pre><code class="language-cairo">pub value: T</code></pre>
 
 

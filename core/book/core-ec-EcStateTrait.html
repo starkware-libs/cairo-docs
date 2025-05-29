@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,41 +156,69 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="ecstatetrait"><a class="header" href="#ecstatetrait">EcStateTrait</a></h1>
-<p>Fully qualified path: <code>core::ec::EcStateTrait</code></p>
-<pre><code class="language-rust">pub trait EcStateTrait</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ec.html">ec</a>::<a href="./core-ec-EcStateTrait.html">EcStateTrait</a></p>
+<pre><code class="language-cairo">pub trait EcStateTrait
+</code></pre>
 <h2 id="trait-functions"><a class="header" href="#trait-functions">Trait functions</a></h2>
 <h3 id="init"><a class="header" href="#init">init</a></h3>
-<p>Initializes an EC computation with the zero point.  # Examples</p>
+<p>Initializes an EC computation with the zero point.</p>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
 <pre><code class="language-cairo">let mut state = EcStateTrait::init();
 </code></pre>
-<p>Fully qualified path: <code>core::ec::EcStateTrait::init</code></p>
-<pre><code class="language-rust">fn init() -&gt; EcState nopanic</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ec.html">ec</a>::<a href="./core-ec-EcStateTrait.html">EcStateTrait</a>::<a href="./core-ec-EcStateTrait.html#init">init</a></p>
+<pre><code class="language-cairo">fn init() -&gt; <a href="core-ec-EcState.html">EcState</a>
+</code></pre>
 <h3 id="add"><a class="header" href="#add">add</a></h3>
-<p>Adds a point to the computation.  # Arguments<code>p</code> - The non-zero point to add</p>
-<p>Fully qualified path: <code>core::ec::EcStateTrait::add</code></p>
-<pre><code class="language-rust">fn add(ref self: EcState, p: NonZeroEcPoint) nopanic</code></pre>
+<p>Adds a point to the computation.</p>
+<h1 id="arguments"><a class="header" href="#arguments">Arguments</a></h1>
+<ul>
+<li><code>p</code> - The non-zero point to add</li>
+</ul>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ec.html">ec</a>::<a href="./core-ec-EcStateTrait.html">EcStateTrait</a>::<a href="./core-ec-EcStateTrait.html#add">add</a></p>
+<pre><code class="language-cairo">fn add(ref self: <a href="core-ec-EcState.html">EcState</a>, p: <a href="core-zeroable-NonZero.html">NonZero&lt;EcPoint&gt;</a>)
+</code></pre>
 <h3 id="sub"><a class="header" href="#sub">sub</a></h3>
-<p>Subtracts a point to the computation.  # Arguments<code>p</code> - The non-zero point to subtract</p>
-<p>Fully qualified path: <code>core::ec::EcStateTrait::sub</code></p>
-<pre><code class="language-rust">fn sub(ref self: EcState, p: NonZeroEcPoint)</code></pre>
+<p>Subtracts a point to the computation.</p>
+<h1 id="arguments-1"><a class="header" href="#arguments-1">Arguments</a></h1>
+<ul>
+<li><code>p</code> - The non-zero point to subtract</li>
+</ul>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ec.html">ec</a>::<a href="./core-ec-EcStateTrait.html">EcStateTrait</a>::<a href="./core-ec-EcStateTrait.html#sub">sub</a></p>
+<pre><code class="language-cairo">fn sub(ref self: <a href="core-ec-EcState.html">EcState</a>, p: <a href="core-zeroable-NonZero.html">NonZero&lt;EcPoint&gt;</a>)
+</code></pre>
 <h3 id="add_mul"><a class="header" href="#add_mul">add_mul</a></h3>
-<p>Adds the product <code>p * scalar</code> to the state.  # Arguments<code>scalar</code> - The scalar to multiply the point by * <code>p</code> - The non-zero point to multiply and add</p>
-<p>Fully qualified path: <code>core::ec::EcStateTrait::add_mul</code></p>
-<pre><code class="language-rust">fn add_mul(ref self: EcState, scalar: felt252, p: NonZeroEcPoint) nopanic</code></pre>
+<p>Adds the product <code>p * scalar</code> to the state.</p>
+<h1 id="arguments-2"><a class="header" href="#arguments-2">Arguments</a></h1>
+<ul>
+<li><code>scalar</code> - The scalar to multiply the point by</li>
+<li><code>p</code> - The non-zero point to multiply and add</li>
+</ul>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ec.html">ec</a>::<a href="./core-ec-EcStateTrait.html">EcStateTrait</a>::<a href="./core-ec-EcStateTrait.html#add_mul">add_mul</a></p>
+<pre><code class="language-cairo">fn add_mul(ref self: <a href="core-ec-EcState.html">EcState</a>, scalar: <a href="core-felt252.html">felt252</a>, p: <a href="core-zeroable-NonZero.html">NonZero&lt;EcPoint&gt;</a>)
+</code></pre>
 <h3 id="finalize_nz"><a class="header" href="#finalize_nz">finalize_nz</a></h3>
-<p>Finalizes the EC computation and returns the result as a non-zero point.  # Returns<code>Option&lt;NonZeroEcPoint&gt;</code> - The resulting point, or None if the result is the zero point  # PanicsPanics if the result is the point at infinity.</p>
-<p>Fully qualified path: <code>core::ec::EcStateTrait::finalize_nz</code></p>
-<pre><code class="language-rust">fn finalize_nz(self: EcState) -&gt; Option&lt;NonZeroEcPoint&gt; nopanic</code></pre>
+<p>Finalizes the EC computation and returns the result as a non-zero point.</p>
+<h1 id="returns"><a class="header" href="#returns">Returns</a></h1>
+<ul>
+<li><code>Option&lt;NonZeroEcPoint&gt;</code> - The resulting point, or None if the result is the zero point</li>
+</ul>
+<h1 id="panics"><a class="header" href="#panics">Panics</a></h1>
+<p>Panics if the result is the point at infinity.</p>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ec.html">ec</a>::<a href="./core-ec-EcStateTrait.html">EcStateTrait</a>::<a href="./core-ec-EcStateTrait.html#finalize_nz">finalize_nz</a></p>
+<pre><code class="language-cairo">fn finalize_nz(self: <a href="core-ec-EcState.html">EcState</a>) -&gt; <a href="core-option-Option.html">Option&lt;NonZero&lt;EcPoint&gt;&gt;</a>
+</code></pre>
 <h3 id="finalize"><a class="header" href="#finalize">finalize</a></h3>
-<p>Finalizes the EC computation and returns the result.Returns the zero point if the computation results in the point at infinity.</p>
-<p>Fully qualified path: <code>core::ec::EcStateTrait::finalize</code></p>
-<pre><code class="language-rust">fn finalize(self: EcState) -&gt; EcPoint</code></pre>
+<p>Finalizes the EC computation and returns the result.
+Returns the zero point if the computation results in the point at infinity.</p>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ec.html">ec</a>::<a href="./core-ec-EcStateTrait.html">EcStateTrait</a>::<a href="./core-ec-EcStateTrait.html#finalize">finalize</a></p>
+<pre><code class="language-cairo">fn finalize(self: <a href="core-ec-EcState.html">EcState</a>) -&gt; <a href="core-ec-EcPoint.html">EcPoint</a>
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-clone-Clone.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-ec-traits.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
@@ -201,7 +232,7 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-clone-Clone.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-ec-traits.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
@@ -212,22 +243,6 @@
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

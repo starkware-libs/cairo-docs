@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,41 +156,51 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="boxtrait"><a class="header" href="#boxtrait">BoxTrait</a></h1>
-<p>Fully qualified path: <code>core::box::BoxTrait</code></p>
-<pre><code class="language-rust">pub trait BoxTrait&lt;T&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-box.html">box</a>::<a href="./core-box-BoxTrait.html">BoxTrait</a></p>
+<pre><code class="language-cairo">pub trait BoxTrait&lt;T&gt;
+</code></pre>
 <h2 id="trait-functions"><a class="header" href="#trait-functions">Trait functions</a></h2>
 <h3 id="new"><a class="header" href="#new">new</a></h3>
-<p>Creates a new <code>Box</code> with the given value.Allocates space in the boxed segment for the provided value and returns a <code>Box&lt;T&gt;</code> that points to it. # Examples</p>
+<p>Creates a new <code>Box</code> with the given value.
+Allocates space in the boxed segment for the provided value
+and returns a <code>Box&lt;T&gt;</code> that points to it.</p>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
 <pre><code class="language-cairo">let x = 42;
 let boxed_x = BoxTrait::new(x);
 </code></pre>
-<p>Fully qualified path: <code>core::box::BoxTrait::new</code></p>
-<pre><code class="language-rust">fn new(value: T) -&gt; Box&lt;T&gt; nopanic</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-box.html">box</a>::<a href="./core-box-BoxTrait.html">BoxTrait</a>::<a href="./core-box-BoxTrait.html#new">new</a></p>
+<pre><code class="language-cairo">fn new&lt;T, T&gt;(value: T) -&gt; <a href="core-box-Box.html">Box&lt;T&gt;</a>
+</code></pre>
 <h3 id="unbox"><a class="header" href="#unbox">unbox</a></h3>
-<p>Unboxes the given <code>Box</code> and returns the wrapped value.  # Examples</p>
+<p>Unboxes the given <code>Box</code> and returns the wrapped value.</p>
+<h1 id="examples-1"><a class="header" href="#examples-1">Examples</a></h1>
 <pre><code class="language-cairo">let boxed = BoxTrait::new(42);
 assert!(boxed.unbox() == 42);
 </code></pre>
-<p>Fully qualified path: <code>core::box::BoxTrait::unbox</code></p>
-<pre><code class="language-rust">fn unbox(self: Box&lt;T&gt;) -&gt; T nopanic</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-box.html">box</a>::<a href="./core-box-BoxTrait.html">BoxTrait</a>::<a href="./core-box-BoxTrait.html#unbox">unbox</a></p>
+<pre><code class="language-cairo">fn unbox&lt;T, T&gt;(self: Box&lt;T&gt;) -&gt; T
+</code></pre>
 <h3 id="as_snapshot"><a class="header" href="#as_snapshot">as_snapshot</a></h3>
-<p>Converts the given snapshot of a <code>Box</code> into a <code>Box</code> of a snapshot. Useful for structures that aren't copyable.  # Examples</p>
+<p>Converts the given snapshot of a <code>Box</code> into a <code>Box</code> of a snapshot.
+Useful for structures that aren't copyable.</p>
+<h1 id="examples-2"><a class="header" href="#examples-2">Examples</a></h1>
 <pre><code class="language-cairo">let snap_boxed_arr = @BoxTraits::new(array![1, 2, 3]);
 let boxed_snap_arr = snap_boxed_arr.as_snapshot();
 let snap_arr = boxed_snap_arr.unbox();
 </code></pre>
-<p>Fully qualified path: <code>core::box::BoxTrait::as_snapshot</code></p>
-<pre><code class="language-rust">fn as_snapshot(self: @Box&lt;T&gt;) -&gt; Box&lt;@T&gt; nopanic</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-box.html">box</a>::<a href="./core-box-BoxTrait.html">BoxTrait</a>::<a href="./core-box-BoxTrait.html#as_snapshot">as_snapshot</a></p>
+<pre><code class="language-cairo">fn as_snapshot&lt;T, T&gt;(self: @Box&lt;T&gt;) -&gt; <a href="core-box-Box.html">Box&lt;@T&gt;</a>
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-circuit-EvalCircuitTrait.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-box-traits.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-nullable-NullableTrait.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-box-extern_types.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -197,33 +210,17 @@ let snap_arr = boxed_snap_arr.unbox();
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-circuit-EvalCircuitTrait.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-box-traits.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-nullable-NullableTrait.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-box-extern_types.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

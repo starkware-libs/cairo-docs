@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,14 +156,23 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="deploy_syscall"><a class="header" href="#deploy_syscall">deploy_syscall</a></h1>
-<p>Deploys a new instance of a previously declared class.  # Arguments<code>class_hash</code> - The class hash of the contract to be deployed. * <code>contract_address_salt</code> - The salt, an arbitrary value provided by the deployer, used in the computation of the contract's address. * <code>calldata</code> - Call arguments for the constructor. * <code>deploy_from_zero</code> - Deploy the contract from the zero address.  # ReturnsThe address of the deployed contract. * The serialized return value of the constructor.</p>
-<p>Fully qualified path: <code>core::starknet::syscalls::deploy_syscall</code></p>
-<pre><code class="language-rust">pub extern fn deploy_syscall(
-    class_hash: ClassHash,
-    contract_address_salt: felt252,
-    calldata: Span&lt;felt252&gt;,
-    deploy_from_zero: bool,
-) -&gt; SyscallResult&lt;(ContractAddress, Span&lt;felt252&gt;)&gt; implicits(GasBuiltin, System) nopanic;</code></pre>
+<p>Deploys a new instance of a previously declared class.</p>
+<h1 id="arguments"><a class="header" href="#arguments">Arguments</a></h1>
+<ul>
+<li><code>class_hash</code> - The class hash of the contract to be deployed.</li>
+<li><code>contract_address_salt</code> - The salt, an arbitrary value provided by the deployer, used in the
+computation of the contract's address.</li>
+<li><code>calldata</code> - Call arguments for the constructor.</li>
+<li><code>deploy_from_zero</code> - Deploy the contract from the zero address.</li>
+</ul>
+<h1 id="returns"><a class="header" href="#returns">Returns</a></h1>
+<ul>
+<li>The address of the deployed contract.</li>
+<li>The serialized return value of the constructor.</li>
+</ul>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-syscalls.html">syscalls</a>::<a href="./core-starknet-syscalls-deploy_syscall.html">deploy_syscall</a></p>
+<pre><code class="language-cairo">pub extern fn deploy_syscall(class_hash: <a href="core-starknet-class_hash-ClassHash.html">ClassHash</a>, contract_address_salt: <a href="core-felt252.html">felt252</a>, calldata: <a href="core-array-Span.html">Span&lt;felt252&gt;</a>, deploy_from_zero: <a href="core-bool.html">bool</a>) -&gt; <a href="core-result-Result.html">Result&lt;(ContractAddress, Span&lt;felt252&gt;), Array&lt;felt252&gt;&gt;</a> implicits(GasBuiltin, System) nopanic;
+</code></pre>
 
                     </main>
 
@@ -191,22 +203,6 @@
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

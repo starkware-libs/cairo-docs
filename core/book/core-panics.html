@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,7 +156,12 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="panics"><a class="header" href="#panics">panics</a></h1>
-<p>Core panic mechanism.This module provides the core panic functionality used for error handling in Cairo. It defines the basic types and functions used to trigger and manage panics, which are Cairo's mechanism for handling unrecoverable errors.Panics can be triggered in several ways:Using the <code>panic</code> function:</p>
+<p>Core panic mechanism.
+This module provides the core panic functionality used for error handling in Cairo.
+It defines the basic types and functions used to trigger and manage panics, which
+are Cairo's mechanism for handling unrecoverable errors.
+Panics can be triggered in several ways:
+Using the <code>panic</code> function:</p>
 <pre><code class="language-cairo">use core::panics::panic;
 
 panic(array!['An error occurred']);
@@ -162,33 +170,36 @@ panic(array!['An error occurred']);
 <pre><code class="language-cairo">panic!("Panic message");
 </code></pre>
 <p>This macro internally converts the message into a <code>ByteArray</code> and uses <code>panic_with_byte_array</code>.</p>
-<p>Fully qualified path: <code>core::panics</code></p>
-<h2 id="free-functions"><a class="header" href="#free-functions">Free functions</a></h2>
-<ul>
-<li><a href="./core-panics-panic_with_byte_array.html">panic_with_byte_array</a></li>
-</ul>
-<h2 id="structs"><a class="header" href="#structs">Structs</a></h2>
-<ul>
-<li><a href="./core-panics-Panic.html">Panic</a></li>
-</ul>
-<h2 id="enums"><a class="header" href="#enums">Enums</a></h2>
-<ul>
-<li><a href="./core-panics-PanicResult.html">PanicResult</a></li>
-</ul>
-<h2 id="extern-functions"><a class="header" href="#extern-functions">Extern functions</a></h2>
-<ul>
-<li><a href="./core-panics-panic.html">panic</a></li>
-</ul>
-
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-panics.html">panics</a></p>
+<h2 id="free-functions"><a class="header" href="#free-functions"><a href="./core-panics-free_functions.html">Free functions</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-panics-panic_with_byte_array.html">panic_with_byte_array</a></td><td style="text-align: left">Panics with a <code>ByteArray</code>  message. Constructs a panic message by prepending the <code>BYTE_ARRAY_MAGIC</code>  value and serializing the provided <code>ByteArray</code>  into the panic data.<a href="./core-panics-panic_with_byte_array.html">...</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="structs"><a class="header" href="#structs"><a href="./core-panics-structs.html">Structs</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-panics-Panic.html">Panic</a></td><td style="text-align: left">Represents a panic condition in Cairo. A <code>Panic</code>  is created when the program encounters an unrecoverable error condition and needs to terminate execution.<a href="./core-panics-Panic.html">...</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="enums"><a class="header" href="#enums"><a href="./core-panics-enums.html">Enums</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-panics-PanicResult.html">PanicResult</a></td><td style="text-align: left">Result type for operations that can trigger a panic.<a href="./core-panics-PanicResult.html">...</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="extern-functions"><a class="header" href="#extern-functions"><a href="./core-panics-extern_functions.html">Extern functions</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-panics-panic.html">panic</a></td><td style="text-align: left">Triggers an immediate panic with the provided data and terminates execution.<a href="./core-panics-panic.html">...</a></td></tr>
+</tbody></table>
+</div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-ops.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-ops-function-FnOnce.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-hash.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-panics-free_functions.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -198,33 +209,17 @@ panic(array!['An error occurred']);
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-ops.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-ops-function-FnOnce.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-hash.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-panics-free_functions.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,11 +156,16 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="peekabletrait"><a class="header" href="#peekabletrait">PeekableTrait</a></h1>
-<p>Fully qualified path: <code>core::iter::adapters::peekable::PeekableTrait</code></p>
-<pre><code class="language-rust">pub trait PeekableTrait&lt;I, impl IterI: Iterator&lt;I&gt;, +Copy&lt;IterI::Item&gt;, +Drop&lt;IterI::Item&gt;&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-adapters.html">adapters</a>::<a href="./core-iter-adapters-peekable.html">peekable</a>::<a href="./core-iter-adapters-peekable-PeekableTrait.html">PeekableTrait</a></p>
+<pre><code class="language-cairo">pub trait PeekableTrait&lt;I, impl IterI: <a href="core-iter-traits-iterator-Iterator.html">Iterator</a>&lt;I&gt;<a href="core-traits-Copy.html">+Copy&lt;Item&gt;</a><a href="core-traits-Drop.html">+Drop&lt;Item&gt;</a>&gt;
+</code></pre>
 <h2 id="trait-functions"><a class="header" href="#trait-functions">Trait functions</a></h2>
 <h3 id="peek"><a class="header" href="#peek">peek</a></h3>
-<p>Returns a copy to the next() value without advancing the iterator.Like <a href="%60next%60"><code>next</code></a>, if there is a value, it is wrapped in a <code>Some(T)</code>. But if the iteration is over, <code>None</code> is returned.  # ExamplesBasic usage:</p>
+<p>Returns a copy of the next() value without advancing the iterator.
+Like <code>next</code>, if there is a value, it is wrapped in a <code>Some(T)</code>.
+But if the iteration is over, <code>None</code> is returned.</p>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
+<p>Basic usage:</p>
 <pre><code class="language-cairo">let mut iter = (1..4_u8).into_iter().peekable();
 
 // peek() lets us see one step into the future
@@ -176,18 +184,19 @@ assert_eq!(iter.next(), Some(3));
 assert_eq!(iter.peek(), None);
 assert_eq!(iter.next(), None);
 </code></pre>
-<p>Fully qualified path: <code>core::iter::adapters::peekable::PeekableTrait::peek</code></p>
-<pre><code class="language-rust">fn peek(ref self: Peekable&lt;I, IterI::Item&gt;) -&gt; Option&lt;IterI::Item&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-adapters.html">adapters</a>::<a href="./core-iter-adapters-peekable.html">peekable</a>::<a href="./core-iter-adapters-peekable-PeekableTrait.html">PeekableTrait</a>::<a href="./core-iter-adapters-peekable-PeekableTrait.html#peek">peek</a></p>
+<pre><code class="language-cairo">fn peek&lt;I, impl IterI: Iterator&lt;I&gt;, +Copy&lt;IterI::Item&gt;, +Drop&lt;IterI::Item&gt;, I, impl IterI: Iterator&lt;I&gt;, +Copy&lt;IterI::Item&gt;, +Drop&lt;IterI::Item&gt;&gt;(ref self: Peekable&lt;I, IterI::Item&gt;) -&gt; <a href="core-option-Option.html">Option&lt;Item&gt;</a>
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-string-StringLiteral.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-iter-adapters-peekable-traits.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-iter-traits-collect-Extend.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-iter-traits.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -197,33 +206,17 @@ assert_eq!(iter.next(), None);
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-string-StringLiteral.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-iter-adapters-peekable-traits.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-iter-traits-collect-Extend.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-iter-traits.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

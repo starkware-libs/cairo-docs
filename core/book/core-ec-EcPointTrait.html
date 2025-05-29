@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,64 +156,107 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="ecpointtrait"><a class="header" href="#ecpointtrait">EcPointTrait</a></h1>
-<p>Fully qualified path: <code>core::ec::EcPointTrait</code></p>
-<pre><code class="language-rust">pub trait EcPointTrait</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ec.html">ec</a>::<a href="./core-ec-EcPointTrait.html">EcPointTrait</a></p>
+<pre><code class="language-cairo">pub trait EcPointTrait
+</code></pre>
 <h2 id="trait-functions"><a class="header" href="#trait-functions">Trait functions</a></h2>
 <h3 id="new"><a class="header" href="#new">new</a></h3>
-<p>Creates a new EC point from its (x, y) coordinates.  # Arguments<code>x</code> - The x-coordinate of the point * <code>y</code> - The y-coordinate of the point  # ReturnsReturns <code>None</code> if the point (x, y) is not on the curve.  # Examples</p>
+<p>Creates a new EC point from its (x, y) coordinates.</p>
+<h1 id="arguments"><a class="header" href="#arguments">Arguments</a></h1>
+<ul>
+<li><code>x</code> - The x-coordinate of the point</li>
+<li><code>y</code> - The y-coordinate of the point</li>
+</ul>
+<h1 id="returns"><a class="header" href="#returns">Returns</a></h1>
+<p>Returns <code>None</code> if the point (x, y) is not on the curve.</p>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
 <pre><code class="language-cairo">let point = EcPointTrait::new(
     x: 336742005567258698661916498343089167447076063081786685068305785816009957563,
     y: 1706004133033694959518200210163451614294041810778629639790706933324248611779,
 ).unwrap();
 </code></pre>
-<p>Fully qualified path: <code>core::ec::EcPointTrait::new</code></p>
-<pre><code class="language-rust">fn new(x: felt252, y: felt252) -&gt; Option&lt;EcPoint&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ec.html">ec</a>::<a href="./core-ec-EcPointTrait.html">EcPointTrait</a>::<a href="./core-ec-EcPointTrait.html#new">new</a></p>
+<pre><code class="language-cairo">fn new(x: <a href="core-felt252.html">felt252</a>, y: <a href="core-felt252.html">felt252</a>) -&gt; <a href="core-option-Option.html">Option&lt;EcPoint&gt;</a>
+</code></pre>
 <h3 id="new_nz"><a class="header" href="#new_nz">new_nz</a></h3>
 <p>Creates a new NonZero EC point from its (x, y) coordinates.</p>
-<p>Fully qualified path: <code>core::ec::EcPointTrait::new_nz</code></p>
-<pre><code class="language-rust">fn new_nz(x: felt252, y: felt252) -&gt; Option&lt;NonZeroEcPoint&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ec.html">ec</a>::<a href="./core-ec-EcPointTrait.html">EcPointTrait</a>::<a href="./core-ec-EcPointTrait.html#new_nz">new_nz</a></p>
+<pre><code class="language-cairo">fn new_nz(x: <a href="core-felt252.html">felt252</a>, y: <a href="core-felt252.html">felt252</a>) -&gt; <a href="core-option-Option.html">Option&lt;NonZero&lt;EcPoint&gt;&gt;</a>
+</code></pre>
 <h3 id="new_from_x"><a class="header" href="#new_from_x">new_from_x</a></h3>
-<p>Creates a new EC point from its x coordinate.  # Arguments<code>x</code> - The x-coordinate of the point  # ReturnsReturns <code>None</code> if no point with the given x-coordinate exists on the curve.  # PanicsPanics if <code>x</code> is 0, as this would be the point at infinity.  # Examples</p>
+<p>Creates a new EC point from its x coordinate.</p>
+<h1 id="arguments-1"><a class="header" href="#arguments-1">Arguments</a></h1>
+<ul>
+<li><code>x</code> - The x-coordinate of the point</li>
+</ul>
+<h1 id="returns-1"><a class="header" href="#returns-1">Returns</a></h1>
+<p>Returns <code>None</code> if no point with the given x-coordinate exists on the curve.</p>
+<h1 id="panics"><a class="header" href="#panics">Panics</a></h1>
+<p>Panics if <code>x</code> is 0, as this would be the point at infinity.</p>
+<h1 id="examples-1"><a class="header" href="#examples-1">Examples</a></h1>
 <pre><code class="language-cairo">let valid = EcPointTrait::new_from_x(1);
 assert!(valid.is_some());
 let invalid = EcPointTrait::new_from_x(0);
 assert!(invalid.is_none());
 </code></pre>
-<p>Fully qualified path: <code>core::ec::EcPointTrait::new_from_x</code></p>
-<pre><code class="language-rust">fn new_from_x(x: felt252) -&gt; Option&lt;EcPoint&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ec.html">ec</a>::<a href="./core-ec-EcPointTrait.html">EcPointTrait</a>::<a href="./core-ec-EcPointTrait.html#new_from_x">new_from_x</a></p>
+<pre><code class="language-cairo">fn new_from_x(x: <a href="core-felt252.html">felt252</a>) -&gt; <a href="core-option-Option.html">Option&lt;EcPoint&gt;</a>
+</code></pre>
 <h3 id="new_nz_from_x"><a class="header" href="#new_nz_from_x">new_nz_from_x</a></h3>
 <p>Creates a new NonZero EC point from its x coordinate.</p>
-<p>Fully qualified path: <code>core::ec::EcPointTrait::new_nz_from_x</code></p>
-<pre><code class="language-rust">fn new_nz_from_x(x: felt252) -&gt; Option&lt;NonZeroEcPoint&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ec.html">ec</a>::<a href="./core-ec-EcPointTrait.html">EcPointTrait</a>::<a href="./core-ec-EcPointTrait.html#new_nz_from_x">new_nz_from_x</a></p>
+<pre><code class="language-cairo">fn new_nz_from_x(x: <a href="core-felt252.html">felt252</a>) -&gt; <a href="core-option-Option.html">Option&lt;NonZero&lt;EcPoint&gt;&gt;</a>
+</code></pre>
 <h3 id="coordinates"><a class="header" href="#coordinates">coordinates</a></h3>
-<p>Returns the coordinates of the EC point.  # ReturnsA tuple containing the (x, y) coordinates of the point.  # PanicsPanics if the point is the point at infinity.  # Examples</p>
+<p>Returns the coordinates of the EC point.</p>
+<h1 id="returns-2"><a class="header" href="#returns-2">Returns</a></h1>
+<p>A tuple containing the (x, y) coordinates of the point.</p>
+<h1 id="panics-1"><a class="header" href="#panics-1">Panics</a></h1>
+<p>Panics if the point is the point at infinity.</p>
+<h1 id="examples-2"><a class="header" href="#examples-2">Examples</a></h1>
 <pre><code class="language-cairo">let point_nz = EcPointTrait::new_nz_from_x(1).unwrap();
 let (x, _y) = point_nz.coordinates();
 assert!(x == 1);
 </code></pre>
-<p>Fully qualified path: <code>core::ec::EcPointTrait::coordinates</code></p>
-<pre><code class="language-rust">fn coordinates(self: NonZeroEcPoint) -&gt; (felt252, felt252)</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ec.html">ec</a>::<a href="./core-ec-EcPointTrait.html">EcPointTrait</a>::<a href="./core-ec-EcPointTrait.html#coordinates">coordinates</a></p>
+<pre><code class="language-cairo">fn coordinates(self: <a href="core-zeroable-NonZero.html">NonZero&lt;EcPoint&gt;</a>) -&gt; (<a href="core-felt252.html">felt252</a>, <a href="core-felt252.html">felt252</a>)
+</code></pre>
 <h3 id="x"><a class="header" href="#x">x</a></h3>
-<p>Returns the x coordinate of the EC point.  # PanicsPanics if the point is the point at infinity.  # Examples</p>
+<p>Returns the x coordinate of the EC point.</p>
+<h1 id="panics-2"><a class="header" href="#panics-2">Panics</a></h1>
+<p>Panics if the point is the point at infinity.</p>
+<h1 id="examples-3"><a class="header" href="#examples-3">Examples</a></h1>
 <pre><code class="language-cairo">let point_nz = EcPointTrait::new_nz_from_x(1).unwrap();
 let x = point_nz.x();
 assert!(x == 1);
 </code></pre>
-<p>Fully qualified path: <code>core::ec::EcPointTrait::x</code></p>
-<pre><code class="language-rust">fn x(self: NonZeroEcPoint) -&gt; felt252</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ec.html">ec</a>::<a href="./core-ec-EcPointTrait.html">EcPointTrait</a>::<a href="./core-ec-EcPointTrait.html#x">x</a></p>
+<pre><code class="language-cairo">fn x(self: <a href="core-zeroable-NonZero.html">NonZero&lt;EcPoint&gt;</a>) -&gt; <a href="core-felt252.html">felt252</a>
+</code></pre>
 <h3 id="y"><a class="header" href="#y">y</a></h3>
-<p>Returns the y coordinate of the EC point.  # PanicsPanics if the point is the point at infinity.  # Examples</p>
+<p>Returns the y coordinate of the EC point.</p>
+<h1 id="panics-3"><a class="header" href="#panics-3">Panics</a></h1>
+<p>Panics if the point is the point at infinity.</p>
+<h1 id="examples-4"><a class="header" href="#examples-4">Examples</a></h1>
 <pre><code class="language-cairo">let gen_point =
 EcPointTrait::new_nz_from_x(0x1ef15c18599971b7beced415a40f0c7deacfd9b0d1819e03d723d8bc943cfca).unwrap();
 let y = gen_point.y();
 assert!(y == 0x5668060aa49730b7be4801df46ec62de53ecd11abe43a32873000c36e8dc1f);
 </code></pre>
-<p>Fully qualified path: <code>core::ec::EcPointTrait::y</code></p>
-<pre><code class="language-rust">fn y(self: NonZeroEcPoint) -&gt; felt252</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ec.html">ec</a>::<a href="./core-ec-EcPointTrait.html">EcPointTrait</a>::<a href="./core-ec-EcPointTrait.html#y">y</a></p>
+<pre><code class="language-cairo">fn y(self: <a href="core-zeroable-NonZero.html">NonZero&lt;EcPoint&gt;</a>) -&gt; <a href="core-felt252.html">felt252</a>
+</code></pre>
 <h3 id="mul"><a class="header" href="#mul">mul</a></h3>
-<p>Computes the product of an EC point by the given scalar.  # Arguments<code>scalar</code> - The scalar to multiply the point by  # ReturnsThe resulting point after scalar multiplication.</p>
-<p>Fully qualified path: <code>core::ec::EcPointTrait::mul</code></p>
-<pre><code class="language-rust">fn mul(self: EcPoint, scalar: felt252) -&gt; EcPoint</code></pre>
+<p>Computes the product of an EC point by the given scalar.</p>
+<h1 id="arguments-2"><a class="header" href="#arguments-2">Arguments</a></h1>
+<ul>
+<li><code>scalar</code> - The scalar to multiply the point by</li>
+</ul>
+<h1 id="returns-3"><a class="header" href="#returns-3">Returns</a></h1>
+<p>The resulting point after scalar multiplication.</p>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ec.html">ec</a>::<a href="./core-ec-EcPointTrait.html">EcPointTrait</a>::<a href="./core-ec-EcPointTrait.html#mul">mul</a></p>
+<pre><code class="language-cairo">fn mul(self: <a href="core-ec-EcPoint.html">EcPoint</a>, scalar: <a href="core-felt252.html">felt252</a>) -&gt; <a href="core-ec-EcPoint.html">EcPoint</a>
+</code></pre>
 
                     </main>
 
@@ -220,7 +266,7 @@ assert!(y == 0x5668060aa49730b7be4801df46ec62de53ecd11abe43a32873000c36e8dc1f);
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-integer-NumericLiteral.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-ec-impls.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -234,29 +280,13 @@ assert!(y == 0x5668060aa49730b7be4801df46ec62de53ecd11abe43a32873000c36e8dc1f);
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-integer-NumericLiteral.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-ec-impls.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

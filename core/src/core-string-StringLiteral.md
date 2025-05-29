@@ -1,6 +1,6 @@
 # StringLiteral
 
-Fully qualified path: `core::string::StringLiteral`
+Fully qualified path: [core](./core.md)::[string](./core-string.md)::[StringLiteral](./core-string-StringLiteral.md)
 
-<pre><code class="language-rust">pub trait StringLiteral&lt;T&gt;;</code></pre>
+<pre><code class="language-cairo">pub trait StringLiteral&lt;T&gt;</code></pre>
 

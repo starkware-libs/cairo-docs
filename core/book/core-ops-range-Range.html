@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,7 +156,12 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="range"><a class="header" href="#range">Range</a></h1>
-<p>A (half-open) range bounded inclusively below and exclusively above (<code>start..end</code>).The range <code>start..end</code> contains all values with <code>start &lt;= x &lt; end</code>. It is empty if <code>start &gt;= end</code>.  # ExamplesThe <code>start..end</code> syntax is a <code>Range</code>:</p>
+<p>A (half-open) range bounded inclusively below and exclusively above
+(<code>start..end</code>).
+The range <code>start..end</code> contains all values with <code>start &lt;= x &lt; end</code>.
+It is empty if <code>start &gt;= end</code>.</p>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
+<p>The <code>start..end</code> syntax is a <code>Range</code>:</p>
 <pre><code class="language-cairo">assert!((3..5) == core::ops::Range { start: 3, end: 5 });
 
 let mut sum = 0;
@@ -162,27 +170,30 @@ for i in 3..6 {
 }
 assert!(sum == 3 + 4 + 5);
 </code></pre>
-<p>Fully qualified path: <code>core::ops::range::Range</code></p>
-<pre><code class="language-rust">#[derive(Clone, Drop, PartialEq)]
-pub struct Range&lt;T&gt; {
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ops.html">ops</a>::<a href="./core-ops-range.html">range</a>::<a href="./core-ops-range-Range.html">Range</a></p>
+<pre><code class="language-cairo"><span class="boring">[derive(Clone, Drop, PartialEq)]
+</span>pub struct Range&lt;T&gt; {
     pub start: T,
     pub end: T,
-}</code></pre>
+}
+</code></pre>
 <h2 id="members"><a class="header" href="#members">Members</a></h2>
 <h3 id="start"><a class="header" href="#start">start</a></h3>
 <p>The lower bound of the range (inclusive).</p>
-<p>Fully qualified path: <code>core::ops::range::Range::start</code></p>
-<pre><code class="language-rust">pub start: T</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ops.html">ops</a>::<a href="./core-ops-range.html">range</a>::<a href="./core-ops-range-Range.html">Range</a>::<a href="./core-ops-range-Range.html#start">start</a></p>
+<pre><code class="language-cairo">pub start: T
+</code></pre>
 <h3 id="end"><a class="header" href="#end">end</a></h3>
 <p>The upper bound of the range (exclusive).</p>
-<p>Fully qualified path: <code>core::ops::range::Range::end</code></p>
-<pre><code class="language-rust">pub end: T</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ops.html">ops</a>::<a href="./core-ops-range.html">range</a>::<a href="./core-ops-range-Range.html">Range</a>::<a href="./core-ops-range-Range.html#end">end</a></p>
+<pre><code class="language-cairo">pub end: T
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-integer-u512.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-ops-range-structs.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
@@ -196,7 +207,7 @@ pub struct Range&lt;T&gt; {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-integer-u512.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-ops-range-structs.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
@@ -207,22 +218,6 @@ pub struct Range&lt;T&gt; {
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

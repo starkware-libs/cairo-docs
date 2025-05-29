@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,108 +156,87 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="traits"><a class="header" href="#traits">traits</a></h1>
-<p>Core traits for various operations.This module provides a collection of essential traits that define common behavior patterns for Cairo types.  # Main Categories  ## Memory Management - <a href="./core-traits-Copy.html"><code>Copy</code></a>: Enables value semantics for types - <a href="./core-traits-Drop.html"><code>Drop</code></a>: Allows values to be safely discarded - <a href="./core-traits-Destruct.html"><code>Destruct</code></a>: Provides custom cleanup behavior for non-droppable types - <a href="./core-traits-PanicDestruct.html"><code>PanicDestruct</code></a>: Handles destruction during panic scenarios  ## Arithmetic Operations - <a href="./core-traits-Add.html"><code>Add</code></a>, <a href="./core-traits-Sub.html"><code>Sub</code></a>, <a href="./core-traits-Mul.html"><code>Mul</code></a>, <a href="./core-traits-Div.html"><code>Div</code></a>, <a href="./core-traits-Rem.html"><code>Rem</code></a>: Standard arithmetic operators (<code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code>) - <a href="./core-traits-DivRem.html"><code>DivRem</code></a>: Combined division and remainder operation - <a href="./core-traits-Neg.html"><code>Neg</code></a>: Unary negation (<code>-</code>)  ## Bitwise Operations - <a href="./core-traits-BitAnd.html"><code>BitAnd</code></a>, <a href="./core-traits-BitOr.html"><code>BitOr</code></a>, <a href="./core-traits-BitXor.html"><code>BitXor</code></a>: Binary bitwise operations (<code>&amp;</code>, <code>|</code>, <code>^</code>) - <a href="./core-traits-BitNot.html"><code>BitNot</code></a>: Unary bitwise complement (<code>~</code>)  ## Comparison - <a href="./core-traits-PartialEq.html"><code>PartialEq</code></a>: Equality comparison (<code>==</code>, <code>!=</code>) - <a href="./core-traits-PartialOrd.html"><code>PartialOrd</code></a>: Ordering comparison (<code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>)  ## Type Conversion - <a href="./core-traits-Into.html"><code>Into</code></a>: Infallible type conversion - <a href="./core-traits-TryInto.html"><code>TryInto</code></a>: Fallible type conversion  ## Utility Traits - <a href="./core-traits-Default.html"><code>Default</code></a>: Creation of default values - <a href="./core-traits-Felt252DictValue.html"><code>Felt252DictValue</code></a>: Support for dictionary value types</p>
-<p>Fully qualified path: <code>core::traits</code></p>
-<h2 id="traits-1"><a class="header" href="#traits-1">Traits</a></h2>
+<p>Core traits for various operations.
+This module provides a collection of essential traits that define common behavior patterns
+for Cairo types.</p>
+<h1 id="main-categories"><a class="header" href="#main-categories">Main Categories</a></h1>
+<h2 id="memory-management"><a class="header" href="#memory-management">Memory Management</a></h2>
 <ul>
-<li>
-<p><a href="./core-traits-Copy.html">Copy</a></p>
-</li>
-<li>
-<p><a href="./core-traits-Drop.html">Drop</a></p>
-</li>
-<li>
-<p><a href="./core-traits-Add.html">Add</a></p>
-</li>
-<li>
-<p><a href="./core-traits-AddEq.html">AddEq</a></p>
-</li>
-<li>
-<p><a href="./core-traits-Sub.html">Sub</a></p>
-</li>
-<li>
-<p><a href="./core-traits-SubEq.html">SubEq</a></p>
-</li>
-<li>
-<p><a href="./core-traits-Mul.html">Mul</a></p>
-</li>
-<li>
-<p><a href="./core-traits-MulEq.html">MulEq</a></p>
-</li>
-<li>
-<p><a href="./core-traits-Div.html">Div</a></p>
-</li>
-<li>
-<p><a href="./core-traits-DivEq.html">DivEq</a></p>
-</li>
-<li>
-<p><a href="./core-traits-Rem.html">Rem</a></p>
-</li>
-<li>
-<p><a href="./core-traits-RemEq.html">RemEq</a></p>
-</li>
-<li>
-<p><a href="./core-traits-DivRem.html">DivRem</a></p>
-</li>
-<li>
-<p><a href="./core-traits-PartialEq.html">PartialEq</a></p>
-</li>
-<li>
-<p><a href="./core-traits-BitAnd.html">BitAnd</a></p>
-</li>
-<li>
-<p><a href="./core-traits-BitOr.html">BitOr</a></p>
-</li>
-<li>
-<p><a href="./core-traits-BitXor.html">BitXor</a></p>
-</li>
-<li>
-<p><a href="./core-traits-BitNot.html">BitNot</a></p>
-</li>
-<li>
-<p><a href="./core-traits-PartialOrd.html">PartialOrd</a></p>
-</li>
-<li>
-<p><a href="./core-traits-Into.html">Into</a></p>
-</li>
-<li>
-<p><a href="./core-traits-TryInto.html">TryInto</a></p>
-</li>
-<li>
-<p><a href="./core-traits-Neg.html">Neg</a></p>
-</li>
-<li>
-<p><a href="./core-traits-Not.html">Not</a></p>
-</li>
-<li>
-<p><a href="./core-traits-IndexView.html">IndexView</a></p>
-</li>
-<li>
-<p><a href="./core-traits-Index.html">Index</a></p>
-</li>
-<li>
-<p><a href="./core-traits-Destruct.html">Destruct</a></p>
-</li>
-<li>
-<p><a href="./core-traits-PanicDestruct.html">PanicDestruct</a></p>
-</li>
-<li>
-<p><a href="./core-traits-Default.html">Default</a></p>
-</li>
-<li>
-<p><a href="./core-traits-Felt252DictValue.html">Felt252DictValue</a></p>
-</li>
+<li><a href="./core-traits-Copy.html"><code>Copy</code></a>: Enables value semantics for types</li>
+<li><a href="./core-traits-Drop.html"><code>Drop</code></a>: Allows values to be safely discarded</li>
+<li><a href="./core-traits-Destruct.html"><code>Destruct</code></a>: Provides custom cleanup behavior for non-droppable types</li>
+<li><a href="./core-traits-PanicDestruct.html"><code>PanicDestruct</code></a>: Handles destruction during panic scenarios</li>
 </ul>
-
+<h2 id="arithmetic-operations"><a class="header" href="#arithmetic-operations">Arithmetic Operations</a></h2>
+<ul>
+<li><a href="./core-traits-Add.html"><code>Add</code></a>, <a href="./core-traits-Sub.html"><code>Sub</code></a>, <a href="./core-traits-Mul.html"><code>Mul</code></a>, <a href="./core-traits-Div.html"><code>Div</code></a>, <a href="./core-traits-Rem.html"><code>Rem</code></a>: Standard arithmetic operators (<code>+</code>, <code>-</code>, <code>*</code>,
+<code>/</code>, <code>%</code>)</li>
+<li><a href="./core-traits-DivRem.html"><code>DivRem</code></a>: Combined division and remainder operation</li>
+<li><a href="./core-traits-Neg.html"><code>Neg</code></a>: Unary negation (<code>-</code>)</li>
+</ul>
+<h2 id="bitwise-operations"><a class="header" href="#bitwise-operations">Bitwise Operations</a></h2>
+<ul>
+<li><a href="./core-traits-BitAnd.html"><code>BitAnd</code></a>, <a href="./core-traits-BitOr.html"><code>BitOr</code></a>, <a href="./core-traits-BitXor.html"><code>BitXor</code></a>: Binary bitwise operations (<code>&amp;</code>, <code>|</code>, <code>^</code>)</li>
+<li><a href="./core-traits-BitNot.html"><code>BitNot</code></a>: Unary bitwise complement (<code>~</code>)</li>
+</ul>
+<h2 id="comparison"><a class="header" href="#comparison">Comparison</a></h2>
+<ul>
+<li><a href="./core-traits-PartialEq.html"><code>PartialEq</code></a>: Equality comparison (<code>==</code>, <code>!=</code>)</li>
+<li><a href="./core-traits-PartialOrd.html"><code>PartialOrd</code></a>: Ordering comparison (<code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>)</li>
+</ul>
+<h2 id="type-conversion"><a class="header" href="#type-conversion">Type Conversion</a></h2>
+<ul>
+<li><a href="./core-traits-Into.html"><code>Into</code></a>: Infallible type conversion</li>
+<li><a href="./core-traits-TryInto.html"><code>TryInto</code></a>: Fallible type conversion</li>
+</ul>
+<h2 id="utility-traits"><a class="header" href="#utility-traits">Utility Traits</a></h2>
+<ul>
+<li><a href="./core-traits-Default.html"><code>Default</code></a>: Creation of default values</li>
+<li><a href="./core-traits-Felt252DictValue.html"><code>Felt252DictValue</code></a>: Support for dictionary value types</li>
+</ul>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-traits.html">traits</a></p>
+<h2 id="traits-1"><a class="header" href="#traits-1"><a href="./core-traits-traits.html">Traits</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-traits-Copy.html">Copy</a></td><td style="text-align: left">A trait for copying values. By default, variables in Cairo have 'move semantics', meaning they are moved when used. However, types implementing <code>Copy</code>  have 'copy semantics', allowing the value to be<a href="./core-traits-Copy.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-Drop.html">Drop</a></td><td style="text-align: left">A trait for types that can be safely dropped. Types implementing <code>Drop</code>  can be automatically discarded when they go out of scope.<a href="./core-traits-Drop.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-Add.html">Add</a></td><td style="text-align: left">The addition operator <code>+</code> .<a href="./core-traits-Add.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-AddEq.html">AddEq</a></td><td style="text-align: left"><a href="./core-traits-AddEq.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-Sub.html">Sub</a></td><td style="text-align: left">The subtraction operator <code>-</code> .<a href="./core-traits-Sub.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-SubEq.html">SubEq</a></td><td style="text-align: left"><a href="./core-traits-SubEq.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-Mul.html">Mul</a></td><td style="text-align: left">The multiplication operator <code>*</code> .<a href="./core-traits-Mul.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-MulEq.html">MulEq</a></td><td style="text-align: left"><a href="./core-traits-MulEq.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-Div.html">Div</a></td><td style="text-align: left">The division operator <code>/</code> . Types implementing this trait support the division operation via the <code>/</code>  operator.<a href="./core-traits-Div.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-DivEq.html">DivEq</a></td><td style="text-align: left"><a href="./core-traits-DivEq.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-Rem.html">Rem</a></td><td style="text-align: left">The remainder operator <code>%</code> . Types implementing this trait support the remainder operation via the <code>%</code>  operator.<a href="./core-traits-Rem.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-RemEq.html">RemEq</a></td><td style="text-align: left"><a href="./core-traits-RemEq.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-DivRem.html">DivRem</a></td><td style="text-align: left">Performs truncated division and remainder. This trait provides a way to efficiently compute both the quotient and remainder in a single<a href="./core-traits-DivRem.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-PartialEq.html">PartialEq</a></td><td style="text-align: left">Trait for comparisons using the equality operator. Implementing this trait for types provides the <code>==</code>  and <code>!=</code>  operators for those types.<a href="./core-traits-PartialEq.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-BitAnd.html">BitAnd</a></td><td style="text-align: left">The bitwise AND operator <code>&amp;</code> .<a href="./core-traits-BitAnd.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-BitOr.html">BitOr</a></td><td style="text-align: left">The bitwise OR operator `</td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-BitXor.html">BitXor</a></td><td style="text-align: left">The bitwise XOR operator <code>^</code> .<a href="./core-traits-BitXor.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-BitNot.html">BitNot</a></td><td style="text-align: left">The bitwise NOT operator <code>~</code> .<a href="./core-traits-BitNot.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-PartialOrd.html">PartialOrd</a></td><td style="text-align: left">Trait for comparing types that form a partialorder . The <code>lt</code> , <code>le</code> , <code>gt</code> , and <code>ge</code>  methods of this trait can be called using the <code>&lt;</code> , <code>&lt;=</code> , <code>&gt;</code> , and <code>&gt;=</code>  operators, respectively.<a href="./core-traits-PartialOrd.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-Into.html">Into</a></td><td style="text-align: left">A value-to-value conversion that consumes the input value. Note: This trait must not fail . If the conversion can fail, use <a href="./core-traits-TryInto.html"><code>TryInto</code></a> .<a href="./core-traits-Into.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-TryInto.html">TryInto</a></td><td style="text-align: left">Simple and safe type conversions that may fail in a controlled way under some circumstances. This is useful when you are doing a type conversion that may trivially succeed but may also need<a href="./core-traits-TryInto.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-Neg.html">Neg</a></td><td style="text-align: left">The unary negation operator <code>-</code> .<a href="./core-traits-Neg.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-Not.html">Not</a></td><td style="text-align: left">The unary logical negation operator <code>!</code> .<a href="./core-traits-Not.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-IndexView.html">IndexView</a></td><td style="text-align: left"><a href="./core-traits-IndexView.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-Index.html">Index</a></td><td style="text-align: left"><a href="./core-traits-Index.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-Destruct.html">Destruct</a></td><td style="text-align: left">A trait that allows for custom destruction behavior of a type. In Cairo, values must be explicitly handled - they cannot be silently dropped. Types can only go out of scope in two ways: 1. Implement<a href="./core-traits-Destruct.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-PanicDestruct.html">PanicDestruct</a></td><td style="text-align: left">A trait that allows for destruction of a value in case of a panic. This trait is automatically implemented from the <code>Destruct</code>  implementation for a type.<a href="./core-traits-PanicDestruct.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-Default.html">Default</a></td><td style="text-align: left">A trait for giving a type a useful default value. Cairo implements <code>Default</code>  for various primitives types.<a href="./core-traits-Default.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-traits-Felt252DictValue.html">Felt252DictValue</a></td><td style="text-align: left">A trait that must be implemented for any type that will be stored as a value in a <code>Felt252Dict</code> . When working with dictionaries in Cairo, we need a way to represent "empty" or "uninitialized"<a href="./core-traits-Felt252DictValue.html">...</a></td></tr>
+</tbody></table>
+</div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-modules.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-boolean.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-traits-traits.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -264,33 +246,17 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-modules.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-boolean.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-traits-traits.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

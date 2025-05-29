@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,12 +156,18 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="dict"><a class="header" href="#dict">dict</a></h1>
-<p>A dictionary-like data structure that maps <code>felt252</code> keys to values of any type.The <code>Felt252Dict</code> provides efficient key-value storage with operations for inserting, retrieving, and updating values. Each operation creates a new entry that can be validated through a process called squashing.  # ExamplesOne can create a new dictionary using the <a href="%60Default::default%60"><code>Default::default</code></a> method:</p>
+<p>A dictionary-like data structure that maps <code>felt252</code> keys to values of any type.
+The <code>Felt252Dict</code> provides efficient key-value storage with operations for inserting,
+retrieving, and updating values. Each operation creates a new entry that can be validated
+through a process called squashing.</p>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
+<p>One can create a new dictionary using the <code>Default::default</code> method:</p>
 <pre><code class="language-cairo">use core::dict::Felt252Dict;
 
 let mut dict: Felt252Dict&lt;u8&gt; = Default::default();
 </code></pre>
-<p>... then insert new values corresponding to a given key with the <a href="%60Felt252DictTrait::insert%60"><code>Felt252DictTrait::insert</code></a> method, and retrieve any value given a key with the <a href="%60Felt252DictTrait::get%60"><code>Felt252DictTrait::get</code></a> method.</p>
+<p>... then insert new values corresponding to a given key with the <code>Felt252DictTrait::insert</code>
+method, and retrieve any value given a key with the <code>Felt252DictTrait::get</code> method.</p>
 <pre><code class="language-cairo">dict.insert(0, 10);
 dict.insert(1, 20);
 assert!(dict.get(0) == 10);
@@ -167,7 +176,14 @@ assert!(dict.get(1) == 20);
 dict.insert(0, 20);
 assert!(dict.get(0) == 20);
 </code></pre>
-<p>It is also possible to use the <a href="%60Felt252DictTrait::entry%60"><code>Felt252DictTrait::entry</code></a> method to retrieve the last entry given a certain key. In this case, the method takes ownership of the dictionary and returns the entry to update. After that, using the <a href="%60Felt252DictEntryTrait::finalize%60"><code>Felt252DictEntryTrait::finalize</code></a> allows to create a new entry in the dictionary. Using <code>entry</code> and <code>finalize</code> methods can be very useful given that it does not require the type in the dictionary to be copyable, meaning that we can use non-copyable types like arrays as dictionary values.</p>
+<p>It is also possible to use the <code>Felt252DictTrait::entry</code> method to retrieve the last entry
+given a certain key.
+In this case, the method takes ownership of the dictionary and returns the entry to update.
+After that, using the <code>Felt252DictEntryTrait::finalize</code> allows to create a new entry in the
+dictionary.
+Using <code>entry</code> and <code>finalize</code> methods can be very useful given that it does not require the type
+in the dictionary to be copyable, meaning that we can use non-copyable types like arrays as
+dictionary values.</p>
 <pre><code class="language-cairo">use core::dict::Felt252Dict;
 
 let mut dict: Felt252Dict&lt;u8&gt; = Default::default();
@@ -177,41 +193,30 @@ let (entry, prev_value) = dict.entry(0);
 let new_value: u8 = 20;
 dict = entry.finalize(new_value);
 </code></pre>
-<p>Fully qualified path: <code>core::dict</code></p>
-<h2 id="traits"><a class="header" href="#traits">Traits</a></h2>
-<ul>
-<li>
-<p><a href="./core-dict-Felt252DictTrait.html">Felt252DictTrait</a></p>
-</li>
-<li>
-<p><a href="./core-dict-Felt252DictEntryTrait.html">Felt252DictEntryTrait</a></p>
-</li>
-<li>
-<p><a href="./core-dict-SquashedFelt252DictTrait.html">SquashedFelt252DictTrait</a></p>
-</li>
-</ul>
-<h2 id="extern-types"><a class="header" href="#extern-types">Extern types</a></h2>
-<ul>
-<li>
-<p><a href="./core-dict-Felt252Dict.html">Felt252Dict</a></p>
-</li>
-<li>
-<p><a href="./core-dict-SquashedFelt252Dict.html">SquashedFelt252Dict</a></p>
-</li>
-<li>
-<p><a href="./core-dict-Felt252DictEntry.html">Felt252DictEntry</a></p>
-</li>
-</ul>
-
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-dict.html">dict</a></p>
+<h2 id="traits"><a class="header" href="#traits"><a href="./core-dict-traits.html">Traits</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-dict-Felt252DictTrait.html">Felt252DictTrait</a></td><td style="text-align: left">Basic trait for the <code>Felt252Dict</code>  type.<a href="./core-dict-Felt252DictTrait.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-dict-Felt252DictEntryTrait.html">Felt252DictEntryTrait</a></td><td style="text-align: left">Basic trait for the <code>Felt252DictEntryTrait</code>  type.<a href="./core-dict-Felt252DictEntryTrait.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-dict-SquashedFelt252DictTrait.html">SquashedFelt252DictTrait</a></td><td style="text-align: left"><a href="./core-dict-SquashedFelt252DictTrait.html">...</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="extern-types"><a class="header" href="#extern-types"><a href="./core-dict-extern_types.html">Extern types</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-dict-Felt252Dict.html">Felt252Dict</a></td><td style="text-align: left">A dictionary that maps <code>felt252</code>  keys to a value of any type.<a href="./core-dict-Felt252Dict.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-dict-SquashedFelt252Dict.html">SquashedFelt252Dict</a></td><td style="text-align: left">A dictionary in a squashed state. It cannot be mutated anymore.<a href="./core-dict-SquashedFelt252Dict.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-dict-Felt252DictEntry.html">Felt252DictEntry</a></td><td style="text-align: left">An intermediate type that is returned after calling the <code>entry</code>  method that consumes ownership of the dictionary. This ensures that the dictionary cannot be mutated until the entry is<a href="./core-dict-Felt252DictEntry.html">...</a></td></tr>
+</tbody></table>
+</div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-array.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-array-Array.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-result.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-dict-traits.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -221,33 +226,17 @@ dict = entry.finalize(new_value);
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-array.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-array-Array.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-result.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-dict-traits.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

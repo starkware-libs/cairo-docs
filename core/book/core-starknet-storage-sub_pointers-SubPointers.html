@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,25 +156,30 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="subpointers"><a class="header" href="#subpointers">SubPointers</a></h1>
-<p>Similar to storage node, but for structs which are stored sequentially in the storage. In contrast to storage node, the fields of the struct are just at an offset from the base address of the struct.</p>
-<p>Fully qualified path: <code>core::starknet::storage::sub_pointers::SubPointers</code></p>
-<pre><code class="language-rust">pub trait SubPointers&lt;T&gt;</code></pre>
+<p>Similar to storage node, but for structs which are stored sequentially in the storage. In
+contrast to storage node, the fields of the struct are just at an offset from the base address
+of the struct.</p>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-storage.html">storage</a>::<a href="./core-starknet-storage-sub_pointers.html">sub_pointers</a>::<a href="./core-starknet-storage-sub_pointers-SubPointers.html">SubPointers</a></p>
+<pre><code class="language-cairo">pub trait SubPointers&lt;T&gt;
+</code></pre>
 <h2 id="trait-functions"><a class="header" href="#trait-functions">Trait functions</a></h2>
 <h3 id="sub_pointers"><a class="header" href="#sub_pointers">sub_pointers</a></h3>
 <p>Creates a sub pointers struct for the given storage pointer to a struct T.</p>
-<p>Fully qualified path: <code>core::starknet::storage::sub_pointers::SubPointers::sub_pointers</code></p>
-<pre><code class="language-rust">fn sub_pointers(self: StoragePointer&lt;T&gt;) -&gt; Self::SubPointersType</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-storage.html">storage</a>::<a href="./core-starknet-storage-sub_pointers.html">sub_pointers</a>::<a href="./core-starknet-storage-sub_pointers-SubPointers.html">SubPointers</a>::<a href="./core-starknet-storage-sub_pointers-SubPointers.html#sub_pointers">sub_pointers</a></p>
+<pre><code class="language-cairo">fn sub_pointers&lt;T, T&gt;(self: StoragePointer&lt;T&gt;) -&gt; <a href="core-starknet-storage-sub_pointers-SubPointers.html">SubPointers&lt;T&gt;SubPointersType</a>
+</code></pre>
 <h2 id="trait-types"><a class="header" href="#trait-types">Trait types</a></h2>
 <h3 id="subpointerstype"><a class="header" href="#subpointerstype">SubPointersType</a></h3>
 <p>The type of the storage pointers, generated for the struct T.</p>
-<p>Fully qualified path: <code>core::starknet::storage::sub_pointers::SubPointers::SubPointersType</code></p>
-<pre><code class="language-rust">type SubPointersType;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-storage.html">storage</a>::<a href="./core-starknet-storage-sub_pointers.html">sub_pointers</a>::<a href="./core-starknet-storage-sub_pointers-SubPointers.html">SubPointers</a>::<a href="./core-starknet-storage-sub_pointers-SubPointers.html#subpointerstype">SubPointersType</a></p>
+<pre><code class="language-cairo">type SubPointersType;
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-starknet-storage-storage_node-StorageNodeMut.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-starknet-storage-sub_pointers-traits.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
@@ -185,7 +193,7 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-starknet-storage-storage_node-StorageNodeMut.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-starknet-storage-sub_pointers-traits.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
@@ -196,22 +204,6 @@
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

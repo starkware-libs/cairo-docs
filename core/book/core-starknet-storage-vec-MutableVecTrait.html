@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,12 +156,17 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="mutablevectrait"><a class="header" href="#mutablevectrait">MutableVecTrait</a></h1>
-<p>Provides mutable access to elements in a storage <a href="./core-starknet-storage-vec-Vec.html"><code>Vec</code></a>.This trait extends the read functionality with methods to append new elements and modify existing ones.</p>
-<p>Fully qualified path: <code>core::starknet::storage::vec::MutableVecTrait</code></p>
-<pre><code class="language-rust">pub trait MutableVecTrait&lt;T&gt;</code></pre>
+<p>Provides mutable access to elements in a storage <a href="./core-starknet-storage-vec-Vec.html"><code>Vec</code></a>.
+This trait extends the read functionality with methods to append new elements
+and modify existing ones.</p>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-storage.html">storage</a>::<a href="./core-starknet-storage-vec.html">vec</a>::<a href="./core-starknet-storage-vec-MutableVecTrait.html">MutableVecTrait</a></p>
+<pre><code class="language-cairo">pub trait MutableVecTrait&lt;T&gt;
+</code></pre>
 <h2 id="trait-functions"><a class="header" href="#trait-functions">Trait functions</a></h2>
 <h3 id="get"><a class="header" href="#get">get</a></h3>
-<p>Returns a mutable storage path to the element at the specified index, or <code>None</code> if out of bounds.  # Examples</p>
+<p>Returns a mutable storage path to the element at the specified index, or <code>None</code> if out of
+bounds.</p>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
 <pre><code class="language-cairo">use starknet::storage::{Vec, MutableVecTrait, StoragePointerWriteAccess};
 
 <span class="boring">[storage]
@@ -175,10 +183,14 @@ fn set_number(ref self: ContractState, index: u64, number: u256) -&gt; bool {
     }
 }
 </code></pre>
-<p>Fully qualified path: <code>core::starknet::storage::vec::MutableVecTrait::get</code></p>
-<pre><code class="language-rust">fn get(self: T, index: u64) -&gt; Option&lt;StoragePath&lt;Mutable&lt;Self::ElementType&gt;&gt;&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-storage.html">storage</a>::<a href="./core-starknet-storage-vec.html">vec</a>::<a href="./core-starknet-storage-vec-MutableVecTrait.html">MutableVecTrait</a>::<a href="./core-starknet-storage-vec-MutableVecTrait.html#get">get</a></p>
+<pre><code class="language-cairo">fn get&lt;T, T&gt;(self: T, index: <a href="core-integer-u64.html">u64</a>) -&gt; <a href="core-option-Option.html">Option&lt;StoragePath&lt;Mutable&lt;MutableVecTrait&lt;T&gt;ElementType&gt;&gt;&gt;</a>
+</code></pre>
 <h3 id="at"><a class="header" href="#at">at</a></h3>
-<p>Returns a mutable storage path to the element at the specified index.  # PanicsPanics if the index is out of bounds.  # Examples</p>
+<p>Returns a mutable storage path to the element at the specified index.</p>
+<h1 id="panics"><a class="header" href="#panics">Panics</a></h1>
+<p>Panics if the index is out of bounds.</p>
+<h1 id="examples-1"><a class="header" href="#examples-1">Examples</a></h1>
 <pre><code class="language-cairo">use starknet::storage::{Vec, MutableVecTrait, StoragePointerWriteAccess};
 
 <span class="boring">[storage]
@@ -190,10 +202,14 @@ fn set_number(ref self: ContractState, index: u64, number: u256) {
     self.numbers.at(index).write(number);
 }
 </code></pre>
-<p>Fully qualified path: <code>core::starknet::storage::vec::MutableVecTrait::at</code></p>
-<pre><code class="language-rust">fn at(self: T, index: u64) -&gt; StoragePath&lt;Mutable&lt;Self::ElementType&gt;&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-storage.html">storage</a>::<a href="./core-starknet-storage-vec.html">vec</a>::<a href="./core-starknet-storage-vec-MutableVecTrait.html">MutableVecTrait</a>::<a href="./core-starknet-storage-vec-MutableVecTrait.html#at">at</a></p>
+<pre><code class="language-cairo">fn at&lt;T, T&gt;(self: T, index: <a href="core-integer-u64.html">u64</a>) -&gt; <a href="core-starknet-storage-StoragePath.html">StoragePath&lt;Mutable&lt;MutableVecTrait&lt;T&gt;ElementType&gt;&gt;</a>
+</code></pre>
 <h3 id="len"><a class="header" href="#len">len</a></h3>
-<p>Returns the number of elements in the vector.The length is stored at the vector's base storage address and is automatically updated when elements are appended.  # Examples</p>
+<p>Returns the number of elements in the vector.
+The length is stored at the vector's base storage address and is automatically
+updated when elements are appended.</p>
+<h1 id="examples-2"><a class="header" href="#examples-2">Examples</a></h1>
 <pre><code class="language-cairo">use starknet::storage::{Vec, MutableVecTrait};
 
 <span class="boring">[storage]
@@ -205,10 +221,17 @@ fn is_empty(self: @ContractState) -&gt; bool {
     self.numbers.len() == 0
 }
 </code></pre>
-<p>Fully qualified path: <code>core::starknet::storage::vec::MutableVecTrait::len</code></p>
-<pre><code class="language-rust">fn len(self: T) -&gt; u64</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-storage.html">storage</a>::<a href="./core-starknet-storage-vec.html">vec</a>::<a href="./core-starknet-storage-vec-MutableVecTrait.html">MutableVecTrait</a>::<a href="./core-starknet-storage-vec-MutableVecTrait.html#len">len</a></p>
+<pre><code class="language-cairo">fn len&lt;T, T&gt;(self: T) -&gt; <a href="core-integer-u64.html">u64</a>
+</code></pre>
 <h3 id="append"><a class="header" href="#append">append</a></h3>
-<p>Returns a mutable storage path to write a new element at the end of the vector.This operation: 1. Increments the vector's length 2. Returns a storage path to write the new element  # Examples</p>
+<p>Returns a mutable storage path to write a new element at the end of the vector.
+This operation:</p>
+<ol>
+<li>Increments the vector's length</li>
+<li>Returns a storage path to write the new element</li>
+</ol>
+<h1 id="examples-3"><a class="header" href="#examples-3">Examples</a></h1>
 <pre><code class="language-cairo">use starknet::storage::{Vec, MutableVecTrait, StoragePointerWriteAccess};
 
 <span class="boring">[storage]
@@ -220,10 +243,27 @@ fn push_number(ref self: ContractState, number: u256) {
     self.numbers.append().write(number);
 }
 </code></pre>
-<p>Fully qualified path: <code>core::starknet::storage::vec::MutableVecTrait::append</code></p>
-<pre><code class="language-rust">fn append(self: T) -&gt; StoragePath&lt;Mutable&lt;Self::ElementType&gt;&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-storage.html">storage</a>::<a href="./core-starknet-storage-vec.html">vec</a>::<a href="./core-starknet-storage-vec-MutableVecTrait.html">MutableVecTrait</a>::<a href="./core-starknet-storage-vec-MutableVecTrait.html#append">append</a></p>
+<pre><code class="language-cairo">fn append&lt;T, T&gt;(self: T) -&gt; <a href="core-starknet-storage-StoragePath.html">StoragePath&lt;Mutable&lt;MutableVecTrait&lt;T&gt;ElementType&gt;&gt;</a>
+</code></pre>
 <h3 id="allocate"><a class="header" href="#allocate">allocate</a></h3>
-<p>Allocates space for a new element at the end of the vector, returning a mutable storage path to write the element.This function is a replacement for the deprecated <code>append</code> function, which allowed appending new elements to a vector. Unlike <code>append</code>, <code>allocate</code> is specifically useful when you need to prepare space for elements of unknown or dynamic size (e.g., appending another vector).  # Use Case<code>allocate</code> is essential when pushing a vector into another vector, as the size of the nested vector is unknown at compile time. It allows the caller to allocate the required space first, then write the nested vector into the allocated space using <code>.write()</code>.This is necessary because pushing directly (e.g., <code>vec.push(nested_vec)</code>) is not supported due to <code>Vec</code> being only a storage abstraction.  # Deprecation NoteThe <code>append</code> function is now deprecated. Use <code>allocate</code> to achieve the same functionality with improved clarity and flexibility.  # Examples</p>
+<p>Allocates space for a new element at the end of the vector, returning a mutable storage path
+to write the element.
+This function is a replacement for the deprecated <code>append</code> function, which allowed
+appending new elements to a vector.
+Unlike <code>push</code>, which gets an object to write to the vector, <code>allocate</code> is specifically
+useful when you need to prepare space for elements of unknown or dynamic size (e.g.,
+appending another vector).</p>
+<h1 id="use-case"><a class="header" href="#use-case">Use Case</a></h1>
+<p><code>allocate</code> is essential when pushing a vector into another vector, as the size of the
+nested vector is unknown at compile time. It allows the caller to allocate the required
+space first, then write the nested vector into the allocated space using <code>.write()</code>.
+This is necessary because pushing directly (e.g., <code>vec.push(nested_vec)</code>) is not supported
+due to <code>Vec</code> being only a storage abstraction.</p>
+<h1 id="deprecation-note"><a class="header" href="#deprecation-note">Deprecation Note</a></h1>
+<p>The <code>append</code> function is now deprecated. Use <code>allocate</code> to achieve the same functionality
+with improved clarity and flexibility.</p>
+<h1 id="examples-4"><a class="header" href="#examples-4">Examples</a></h1>
 <pre><code class="language-cairo">use starknet::storage::{Vec, MutableVecTrait, StoragePointerWriteAccess};
 
 <span class="boring">[storage]
@@ -239,10 +279,20 @@ fn append_nested_vector(ref self: ContractState, elements: Array&lt;u256&gt;) {
     }
 }
 </code></pre>
-<p>Fully qualified path: <code>core::starknet::storage::vec::MutableVecTrait::allocate</code></p>
-<pre><code class="language-rust">fn allocate(self: T) -&gt; StoragePath&lt;Mutable&lt;Self::ElementType&gt;&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-storage.html">storage</a>::<a href="./core-starknet-storage-vec.html">vec</a>::<a href="./core-starknet-storage-vec-MutableVecTrait.html">MutableVecTrait</a>::<a href="./core-starknet-storage-vec-MutableVecTrait.html#allocate">allocate</a></p>
+<pre><code class="language-cairo">fn allocate&lt;T, T&gt;(self: T) -&gt; <a href="core-starknet-storage-StoragePath.html">StoragePath&lt;Mutable&lt;MutableVecTrait&lt;T&gt;ElementType&gt;&gt;</a>
+</code></pre>
 <h3 id="push"><a class="header" href="#push">push</a></h3>
-<p>Pushes a new value onto the vector.This operation: 1. Increments the vector's length. 2. Writes the provided value to the new storage location at the end of the vector.  # NoteIf you need to allocate storage without writing a value (e.g., when appending another vector), consider using <a href="%60allocate%60"><code>allocate</code></a> instead.  # Examples</p>
+<p>Pushes a new value onto the vector.
+This operation:</p>
+<ol>
+<li>Increments the vector's length.</li>
+<li>Writes the provided value to the new storage location at the end of the vector.</li>
+</ol>
+<h1 id="note"><a class="header" href="#note">Note</a></h1>
+<p>If you need to allocate storage without writing a value (e.g., when appending another
+vector), consider using <code>allocate</code> instead.</p>
+<h1 id="examples-5"><a class="header" href="#examples-5">Examples</a></h1>
 <pre><code class="language-cairo">use starknet::storage::{Vec, MutableVecTrait};
 
 <span class="boring">[storage]
@@ -254,12 +304,18 @@ fn push_number(ref self: ContractState, number: u256) {
     self.numbers.push(number);
 }
 </code></pre>
-<p>Fully qualified path: <code>core::starknet::storage::vec::MutableVecTrait::push</code></p>
-<pre><code class="language-rust">fn push&lt;+Drop&lt;Self::ElementType&gt;, +starknet::Store&lt;Self::ElementType&gt;&gt;(
-    self: T, value: Self::ElementType,
-)</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-storage.html">storage</a>::<a href="./core-starknet-storage-vec.html">vec</a>::<a href="./core-starknet-storage-vec-MutableVecTrait.html">MutableVecTrait</a>::<a href="./core-starknet-storage-vec-MutableVecTrait.html#push">push</a></p>
+<pre><code class="language-cairo">fn push&lt;T, T, +Drop&lt;Self::ElementType&gt;, +starknet::Store&lt;Self::ElementType&gt;&gt;(self: T, value: Self::ElementType)
+</code></pre>
 <h3 id="pop"><a class="header" href="#pop">pop</a></h3>
-<p>Pops the last value off the vector.This operation: 1. Retrieves the value stored at the last position in the vector. 2. Decrements the vector's length. 3. Returns the retrieved value or <code>None</code> if the vector is empty.  # Examples</p>
+<p>Pops the last value off the vector.
+This operation:</p>
+<ol>
+<li>Retrieves the value stored at the last position in the vector.</li>
+<li>Decrements the vector's length.</li>
+<li>Returns the retrieved value or <code>None</code> if the vector is empty.</li>
+</ol>
+<h1 id="examples-6"><a class="header" href="#examples-6">Examples</a></h1>
 <pre><code class="language-cairo">use starknet::storage::{Vec, MutableVecTrait};
 
 <span class="boring">[storage]
@@ -271,20 +327,20 @@ fn pop_number(ref self: ContractState) -&gt; Option&lt;u256&gt; {
     self.numbers.pop()
 }
 </code></pre>
-<p>Fully qualified path: <code>core::starknet::storage::vec::MutableVecTrait::pop</code></p>
-<pre><code class="language-rust">fn pop&lt;+Drop&lt;Self::ElementType&gt;, +starknet::Store&lt;Self::ElementType&gt;&gt;(
-    self: T,
-) -&gt; Option&lt;Self::ElementType&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-storage.html">storage</a>::<a href="./core-starknet-storage-vec.html">vec</a>::<a href="./core-starknet-storage-vec-MutableVecTrait.html">MutableVecTrait</a>::<a href="./core-starknet-storage-vec-MutableVecTrait.html#pop">pop</a></p>
+<pre><code class="language-cairo">fn pop&lt;T, T, +Drop&lt;Self::ElementType&gt;, +starknet::Store&lt;Self::ElementType&gt;&gt;(self: T) -&gt; <a href="core-option-Option.html">Option&lt;MutableVecTrait&lt;T&gt;ElementType&gt;</a>
+</code></pre>
 <h2 id="trait-types"><a class="header" href="#trait-types">Trait types</a></h2>
 <h3 id="elementtype"><a class="header" href="#elementtype">ElementType</a></h3>
-<p>Fully qualified path: <code>core::starknet::storage::vec::MutableVecTrait::ElementType</code></p>
-<pre><code class="language-rust">type ElementType;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-storage.html">storage</a>::<a href="./core-starknet-storage-vec.html">vec</a>::<a href="./core-starknet-storage-vec-MutableVecTrait.html">MutableVecTrait</a>::<a href="./core-starknet-storage-vec-MutableVecTrait.html#elementtype">ElementType</a></p>
+<pre><code class="language-cairo">type ElementType;
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-starknet-storage-sub_pointers-SubPointersMutForward.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-starknet-storage-vec-traits.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
@@ -298,7 +354,7 @@ fn pop_number(ref self: ContractState) -&gt; Option&lt;u256&gt; {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-starknet-storage-sub_pointers-SubPointersMutForward.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-starknet-storage-vec-traits.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
@@ -309,22 +365,6 @@ fn pop_number(ref self: ContractState) -&gt; Option&lt;u256&gt; {
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

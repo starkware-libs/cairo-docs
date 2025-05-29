@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,144 +156,130 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="starknet"><a class="header" href="#starknet">starknet</a></h1>
-<p>Functionalities for interacting with the Starknet network.  # Core ComponentsStorage: The <code>storage</code> module defines abstractions on how to interact with Starknet contract storage. - Syscalls: The <code>syscalls</code> module contains the extern declarations for all the system calls available in Starknet. - Contract Addresses: The <code>contract_address</code> and <code>eth_address</code> modules provide types and utilities for working with Starknet contract addresses and Ethereum addresses. - Cryptography: The <code>secp256k1</code>, <code>secp256r1</code>, <code>secp256_trait</code>, and <code>eth_signature</code> modules handle various elliptic curve operations. - Execution Info: The <code>info</code> module exposes functions for accessing information about the current contract execution, such as the caller address, contract address, block info, and transaction info.</p>
-<p>Fully qualified path: <code>core::starknet</code></p>
-<h2 id="modules"><a class="header" href="#modules">Modules</a></h2>
+<p>Functionalities for interacting with the Starknet network.</p>
+<h1 id="core-components"><a class="header" href="#core-components">Core Components</a></h1>
+<ul>
+<li>Storage: The <code>storage</code> module defines abstractions on how to interact with Starknet
+contract storage.</li>
+<li>Syscalls: The <code>syscalls</code> module contains the extern declarations for all the system calls
+available in Starknet.</li>
+<li>Contract Addresses: The <code>contract_address</code> and <code>eth_address</code> modules provide types and
+utilities for working with Starknet contract addresses and Ethereum addresses.</li>
+<li>Cryptography: The <code>secp256k1</code>, <code>secp256r1</code>, <code>secp256_trait</code>, and <code>eth_signature</code> modules
+handle various elliptic curve operations.</li>
+<li>Execution Info: The <code>info</code> module exposes functions for accessing information about the
+current contract execution, such as the caller address, contract address, block info, and
+transaction info.</li>
+</ul>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a></p>
+<h2 id="modules"><a class="header" href="#modules"><a href="./core-starknet-modules.html">Modules</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-starknet-storage_access.html">storage_access</a></td><td style="text-align: left">Storage access primitives for Starknet contract storage. This module provides abstractions over the system calls for reading from and writing to Starknet<a href="./core-starknet-storage_access.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls.html">syscalls</a></td><td style="text-align: left">Utilities for interacting with the Starknet OS. Writing smart contracts requires various associated operations, such as calling another contract<a href="./core-starknet-syscalls.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-contract_address.html">contract_address</a></td><td style="text-align: left">The <code>ContractAddress</code>  type represents a Starknet contract address, with a value range of <code>[0, 2**251)</code> . A variable of type <code>ContractAddress</code>  can be created from a <code>felt252</code>  value using the<a href="./core-starknet-contract_address.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-secp256_trait.html">secp256_trait</a></td><td style="text-align: left">Elliptic Curve Digital Signature Algorithm (ECDSA) for Secp256k1 and Secp256r1 curves. This module provides traits and functions for working with ECDSA signatures<a href="./core-starknet-secp256_trait.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-secp256k1.html">secp256k1</a></td><td style="text-align: left">Functions and constructs related to elliptic curve operations on the secp256k1 curve. This module provides functionality for performing operations on the secp256k1 elliptic curve,<a href="./core-starknet-secp256k1.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-secp256r1.html">secp256r1</a></td><td style="text-align: left">Functions and constructs related to elliptic curve operations on the secp256r1 curve. This module provides functionality for performing operations on the NIST P-256 (also known as<a href="./core-starknet-secp256r1.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-eth_address.html">eth_address</a></td><td style="text-align: left">Ethereum address type for working with Ethereum primitives. This module provides the <a href="./core-starknet-eth_address-EthAddress.html"><code>EthAddress</code></a>  type, which is used when interacting with Ethereum<a href="./core-starknet-eth_address.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-eth_signature.html">eth_signature</a></td><td style="text-align: left">Utilities for Ethereum signature verification and address recovery. This module provides functionality for working with Ethereum signatures.<a href="./core-starknet-eth_signature.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-class_hash.html">class_hash</a></td><td style="text-align: left">The <code>ClassHash</code>  type represents a Starknet contract class hash, with a value range of <code>[0, 2**251)</code> . A variable of type <code>ClassHash</code>  can be created from a <code>felt252</code>  value using the<a href="./core-starknet-class_hash.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-event.html">event</a></td><td style="text-align: left">Event handling traits for Starknet smart contracts. This module provides traits for serializing, deserializing and emitting events on Starknet. The <a href="./core-starknet-event-Event.html"><code>Event</code></a><a href="./core-starknet-event.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-account.html">account</a></td><td style="text-align: left">Account module defining the <code>Call</code>  struct and the <a href="./core-starknet-account-AccountContract.html"><code>AccountContract</code></a>  trait. The <code>Call</code><a href="./core-starknet-account.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage.html">storage</a></td><td style="text-align: left">Storage-related types and traits for Cairo contracts. This module implements the storage system for Starknet contracts, providing high-level<a href="./core-starknet-storage.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-testing.html">testing</a></td><td style="text-align: left">Testing utilities for Starknet contracts. This module provides functions for testing Starknet contracts. The functions<a href="./core-starknet-testing.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-info.html">info</a></td><td style="text-align: left">Information about the Starknet execution environment. This module provides access to runtime information about the current transaction,<a href="./core-starknet-info.html">...</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="constants"><a class="header" href="#constants"><a href="./core-starknet-constants.html">Constants</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-starknet-VALIDATED.html">VALIDATED</a></td><td style="text-align: left">The expected return value of the <code>__validate__</code>  function in account contracts. This constant is used to indicate that a transaction validation was successful.<a href="./core-starknet-VALIDATED.html">...</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="type-aliases"><a class="header" href="#type-aliases"><a href="./core-starknet-type_aliases.html">Type aliases</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-starknet-SyscallResult.html">SyscallResult</a></td><td style="text-align: left">The <code>Result</code>  type for a syscall.<a href="./core-starknet-SyscallResult.html">...</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="traits"><a class="header" href="#traits"><a href="./core-starknet-traits.html">Traits</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-starknet-SyscallResultTrait.html">SyscallResultTrait</a></td><td style="text-align: left">Trait for handling syscall results.<a href="./core-starknet-SyscallResultTrait.html">...</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="extern-types"><a class="header" href="#extern-types"><a href="./core-starknet-extern_types.html">Extern types</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-starknet-System.html">System</a></td><td style="text-align: left"><a href="./core-starknet-System.html">...</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="re-exports"><a class="header" href="#re-exports">Re-exports</a></h2>
 <ul>
 <li>
-<p><a href="./core-starknet-storage_access.html">storage_access</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-syscalls.html">syscalls</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-contract_address.html">contract_address</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-secp256_trait.html">secp256_trait</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-secp256k1.html">secp256k1</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-secp256r1.html">secp256r1</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-eth_address.html">eth_address</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-eth_signature.html">eth_signature</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-class_hash.html">class_hash</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-event.html">event</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-account.html">account</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage.html">storage</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-testing.html">testing</a></p>
+<h3 id="free-functions"><a class="header" href="#free-functions">Free functions</a></h3>
 </li>
 </ul>
-<h2 id="constants"><a class="header" href="#constants">Constants</a></h2>
-<ul>
-<li><a href="./core-starknet-VALIDATED.html">VALIDATED</a></li>
-</ul>
-<h2 id="free-functions"><a class="header" href="#free-functions">Free functions</a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-starknet-info-get_block_info.html">get_block_info</a></td><td style="text-align: left">Returns the block information for the current block.<a href="./core-starknet-info-get_block_info.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-info-get_block_number.html">get_block_number</a></td><td style="text-align: left">Returns the number of the current block.<a href="./core-starknet-info-get_block_number.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-info-get_block_timestamp.html">get_block_timestamp</a></td><td style="text-align: left">Returns the timestamp of the current block.<a href="./core-starknet-info-get_block_timestamp.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-info-get_caller_address.html">get_caller_address</a></td><td style="text-align: left">Returns the address of the caller contract. Returns <code>0</code>  if there is no caller—for example, when a transaction begins execution inside an account contract. Note: This function returns the direct<a href="./core-starknet-info-get_caller_address.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-info-get_contract_address.html">get_contract_address</a></td><td style="text-align: left">Returns the address of the contract being executed.<a href="./core-starknet-info-get_contract_address.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-info-get_execution_info.html">get_execution_info</a></td><td style="text-align: left">Returns the execution info for the current execution.<a href="./core-starknet-info-get_execution_info.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-info-get_tx_info.html">get_tx_info</a></td><td style="text-align: left">Returns the transaction information for the current transaction.<a href="./core-starknet-info-get_tx_info.html">...</a></td></tr>
+</tbody></table>
+</div><br>
 <ul>
 <li>
-<p><a href="./core-starknet-info-get_block_info.html">get_block_info</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-info-get_block_number.html">get_block_number</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-info-get_block_timestamp.html">get_block_timestamp</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-info-get_caller_address.html">get_caller_address</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-info-get_contract_address.html">get_contract_address</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-info-get_execution_info.html">get_execution_info</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-info-get_tx_info.html">get_tx_info</a></p>
+<h3 id="structs"><a class="header" href="#structs">Structs</a></h3>
 </li>
 </ul>
-<h2 id="structs"><a class="header" href="#structs">Structs</a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-starknet-eth_address-EthAddress.html">EthAddress</a></td><td style="text-align: left">An Ethereum address, 20 bytes in length.<a href="./core-starknet-eth_address-EthAddress.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-info-v2-ExecutionInfo.html">ExecutionInfo</a></td><td style="text-align: left">The same as <code>ExecutionInfo</code> , but with the <code>TxInfo</code>  field replaced with <code>v2::TxInfo</code> .<a href="./core-starknet-info-v2-ExecutionInfo.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-info-v2-ResourceBounds.html">ResourceBounds</a></td><td style="text-align: left">V3 transactions resources used for enabling the fee market.<a href="./core-starknet-info-v2-ResourceBounds.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-info-v2-TxInfo.html">TxInfo</a></td><td style="text-align: left">Extended information about the current transaction.<a href="./core-starknet-info-v2-TxInfo.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-info-BlockInfo.html">BlockInfo</a></td><td style="text-align: left">Information about the current block.<a href="./core-starknet-info-BlockInfo.html">...</a></td></tr>
+</tbody></table>
+</div><br>
 <ul>
 <li>
-<p><a href="./core-starknet-eth_address-EthAddress.html">EthAddress</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-info-v2-ExecutionInfo.html">ExecutionInfo</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-info-v2-ResourceBounds.html">ResourceBounds</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-info-v2-TxInfo.html">TxInfo</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-info-BlockInfo.html">BlockInfo</a></p>
+<h3 id="traits-1"><a class="header" href="#traits-1">Traits</a></h3>
 </li>
 </ul>
-<h2 id="type-aliases"><a class="header" href="#type-aliases">Type aliases</a></h2>
-<ul>
-<li><a href="./core-starknet-SyscallResult.html">SyscallResult</a></li>
-</ul>
-<h2 id="traits"><a class="header" href="#traits">Traits</a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-starknet-storage_access-Store.html">Store</a></td><td style="text-align: left">Trait for types that can be stored in Starknet contract storage. The <code>Store</code>  trait enables types to be stored in and retrieved from Starknet's contract storage. Cairo implements <code>Store</code><a href="./core-starknet-storage_access-Store.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-event-Event.html">Event</a></td><td style="text-align: left">A trait for handling serialization and deserialization of events. Events in Starknet are stored in transaction receipts as a combination of keys and data fields.<a href="./core-starknet-event-Event.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-account-AccountContract.html">AccountContract</a></td><td style="text-align: left">A trait for account contracts that support class declarations (only <code>__validate__</code>  and <code>__execute__</code>  are mandatory for an account). This trait assumes that the calldata for invoke transactions is<a href="./core-starknet-account-AccountContract.html">...</a></td></tr>
+</tbody></table>
+</div><br>
 <ul>
 <li>
-<p><a href="./core-starknet-SyscallResultTrait.html">SyscallResultTrait</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage_access-Store.html">Store</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-event-Event.html">Event</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-account-AccountContract.html">AccountContract</a></p>
+<h3 id="extern-types-1"><a class="header" href="#extern-types-1">Extern types</a></h3>
 </li>
 </ul>
-<h2 id="extern-types"><a class="header" href="#extern-types">Extern types</a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-starknet-storage_access-StorageAddress.html">StorageAddress</a></td><td style="text-align: left">Represents the address of a storage value in a Starknet contract. The value range of this type is <code>[0, 2**251)</code> .<a href="./core-starknet-storage_access-StorageAddress.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-contract_address-ContractAddress.html">ContractAddress</a></td><td style="text-align: left">Represents a Starknet contract address. The value range of this type is <code>[0, 2**251)</code> .<a href="./core-starknet-contract_address-ContractAddress.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-class_hash-ClassHash.html">ClassHash</a></td><td style="text-align: left">Represents a Starknet contract class hash. The value range of this type is <code>[0, 2**251)</code> .<a href="./core-starknet-class_hash-ClassHash.html">...</a></td></tr>
+</tbody></table>
+</div><br>
 <ul>
 <li>
-<p><a href="./core-starknet-System.html">System</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage_access-StorageAddress.html">StorageAddress</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-contract_address-ContractAddress.html">ContractAddress</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-class_hash-ClassHash.html">ClassHash</a></p>
+<h3 id="extern-functions"><a class="header" href="#extern-functions">Extern functions</a></h3>
 </li>
 </ul>
-<h2 id="extern-functions"><a class="header" href="#extern-functions">Extern functions</a></h2>
-<ul>
-<li><a href="./core-starknet-contract_address-contract_address_const.html">contract_address_const</a></li>
-</ul>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-starknet-contract_address-contract_address_const.html">contract_address_const</a></td><td style="text-align: left">Returns a <code>ContractAddress</code>  given a <code>felt252</code>  value.<a href="./core-starknet-contract_address-contract_address_const.html">...</a></td></tr>
+</tbody></table>
+</div><br>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-fmt.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-fmt-LowerHex.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-internal.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-starknet-modules.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -300,33 +289,17 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-fmt.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-fmt-LowerHex.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-internal.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-starknet-modules.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

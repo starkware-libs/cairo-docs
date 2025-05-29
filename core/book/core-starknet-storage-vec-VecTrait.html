@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,12 +156,16 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="vectrait"><a class="header" href="#vectrait">VecTrait</a></h1>
-<p>Provides read-only access to elements in a storage <a href="./core-starknet-storage-vec-Vec.html"><code>Vec</code></a>.This trait enables retrieving elements and checking the vector's length without modifying the underlying storage.</p>
-<p>Fully qualified path: <code>core::starknet::storage::vec::VecTrait</code></p>
-<pre><code class="language-rust">pub trait VecTrait&lt;T&gt;</code></pre>
+<p>Provides read-only access to elements in a storage <a href="./core-starknet-storage-vec-Vec.html"><code>Vec</code></a>.
+This trait enables retrieving elements and checking the vector's length without
+modifying the underlying storage.</p>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-storage.html">storage</a>::<a href="./core-starknet-storage-vec.html">vec</a>::<a href="./core-starknet-storage-vec-VecTrait.html">VecTrait</a></p>
+<pre><code class="language-cairo">pub trait VecTrait&lt;T&gt;
+</code></pre>
 <h2 id="trait-functions"><a class="header" href="#trait-functions">Trait functions</a></h2>
 <h3 id="get"><a class="header" href="#get">get</a></h3>
-<p>Returns a storage path to the element at the specified index, or <code>None</code> if out of bounds.  # Examples</p>
+<p>Returns a storage path to the element at the specified index, or <code>None</code> if out of bounds.</p>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
 <pre><code class="language-cairo">use starknet::storage::{Vec, VecTrait, StoragePointerReadAccess};
 
 <span class="boring">[storage]
@@ -170,10 +177,14 @@ fn maybe_number(self: @ContractState, index: u64) -&gt; Option&lt;u256&gt; {
     self.numbers.get(index).map(|ptr| ptr.read())
 }
 </code></pre>
-<p>Fully qualified path: <code>core::starknet::storage::vec::VecTrait::get</code></p>
-<pre><code class="language-rust">fn get(self: T, index: u64) -&gt; Option&lt;StoragePath&lt;Self::ElementType&gt;&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-storage.html">storage</a>::<a href="./core-starknet-storage-vec.html">vec</a>::<a href="./core-starknet-storage-vec-VecTrait.html">VecTrait</a>::<a href="./core-starknet-storage-vec-VecTrait.html#get">get</a></p>
+<pre><code class="language-cairo">fn get&lt;T, T&gt;(self: T, index: <a href="core-integer-u64.html">u64</a>) -&gt; <a href="core-option-Option.html">Option&lt;StoragePath&lt;VecTrait&lt;T&gt;ElementType&gt;&gt;</a>
+</code></pre>
 <h3 id="at"><a class="header" href="#at">at</a></h3>
-<p>Returns a storage path to access the element at the specified index.  # PanicsPanics if the index is out of bounds.  # Examples</p>
+<p>Returns a storage path to access the element at the specified index.</p>
+<h1 id="panics"><a class="header" href="#panics">Panics</a></h1>
+<p>Panics if the index is out of bounds.</p>
+<h1 id="examples-1"><a class="header" href="#examples-1">Examples</a></h1>
 <pre><code class="language-cairo">use starknet::storage::{Vec, VecTrait, StoragePointerReadAccess};
 
 <span class="boring">[storage]
@@ -185,10 +196,14 @@ fn get_number(self: @ContractState, index: u64) -&gt; u256 {
     self.numbers.at(index).read()
 }
 </code></pre>
-<p>Fully qualified path: <code>core::starknet::storage::vec::VecTrait::at</code></p>
-<pre><code class="language-rust">fn at(self: T, index: u64) -&gt; StoragePath&lt;Self::ElementType&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-storage.html">storage</a>::<a href="./core-starknet-storage-vec.html">vec</a>::<a href="./core-starknet-storage-vec-VecTrait.html">VecTrait</a>::<a href="./core-starknet-storage-vec-VecTrait.html#at">at</a></p>
+<pre><code class="language-cairo">fn at&lt;T, T&gt;(self: T, index: <a href="core-integer-u64.html">u64</a>) -&gt; <a href="core-starknet-storage-StoragePath.html">StoragePath&lt;VecTrait&lt;T&gt;ElementType&gt;</a>
+</code></pre>
 <h3 id="len"><a class="header" href="#len">len</a></h3>
-<p>Returns the number of elements in the vector.The length is stored at the vector's base storage address and is automatically updated when elements are appended.  # Examples</p>
+<p>Returns the number of elements in the vector.
+The length is stored at the vector's base storage address and is automatically
+updated when elements are appended.</p>
+<h1 id="examples-2"><a class="header" href="#examples-2">Examples</a></h1>
 <pre><code class="language-cairo">use starknet::storage::{Vec, VecTrait};
 
 <span class="boring">[storage]
@@ -200,12 +215,14 @@ fn is_empty(self: @ContractState) -&gt; bool {
     self.numbers.len() == 0
 }
 </code></pre>
-<p>Fully qualified path: <code>core::starknet::storage::vec::VecTrait::len</code></p>
-<pre><code class="language-rust">fn len(self: T) -&gt; u64</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-storage.html">storage</a>::<a href="./core-starknet-storage-vec.html">vec</a>::<a href="./core-starknet-storage-vec-VecTrait.html">VecTrait</a>::<a href="./core-starknet-storage-vec-VecTrait.html#len">len</a></p>
+<pre><code class="language-cairo">fn len&lt;T, T&gt;(self: T) -&gt; <a href="core-integer-u64.html">u64</a>
+</code></pre>
 <h2 id="trait-types"><a class="header" href="#trait-types">Trait types</a></h2>
 <h3 id="elementtype"><a class="header" href="#elementtype">ElementType</a></h3>
-<p>Fully qualified path: <code>core::starknet::storage::vec::VecTrait::ElementType</code></p>
-<pre><code class="language-rust">type ElementType;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-storage.html">storage</a>::<a href="./core-starknet-storage-vec.html">vec</a>::<a href="./core-starknet-storage-vec-VecTrait.html">VecTrait</a>::<a href="./core-starknet-storage-vec-VecTrait.html#elementtype">ElementType</a></p>
+<pre><code class="language-cairo">type ElementType;
+</code></pre>
 
                     </main>
 
@@ -215,7 +232,7 @@ fn is_empty(self: @ContractState) -&gt; bool {
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-bytes_31-Bytes31Trait.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-starknet-storage-storage_node.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -229,29 +246,13 @@ fn is_empty(self: @ContractState) -&gt; bool {
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-bytes_31-Bytes31Trait.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-starknet-storage-storage_node.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

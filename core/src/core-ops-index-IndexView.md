@@ -1,6 +1,12 @@
 # IndexView
 
-A trait for indexing operations (`container[index]`) where the input type is not modified.`container[index]` is syntactic sugar for `container.index(index)`.  # ExamplesThe following example implements `IndexView` on a `NucleotideCount` container, which can be indexed without modifying the input, enabling individual counts to be retrieved with index syntax.
+A trait for indexing operations (`container[index]`) where the input type is not modified.
+`container[index]` is syntactic sugar for `container.index(index)`.
+# Examples
+
+The following example implements `IndexView` on a `NucleotideCount` container, which can be
+indexed without modifying the input, enabling individual counts to be retrieved with index
+syntax.
 ```cairo
 use core::ops::IndexView;
 
@@ -40,19 +46,22 @@ assert!(nucleotide_count[Nucleotide::G] == 10);
 assert!(nucleotide_count[Nucleotide::T] == 12);
 ```
 
-Fully qualified path: `core::ops::index::IndexView`
+Fully qualified path: [core](./core.md)::[ops](./core-ops.md)::[index](./core-ops-index.md)::[IndexView](./core-ops-index-IndexView.md)
 
-<pre><code class="language-rust">pub trait IndexView&lt;C, I&gt;</code></pre>
+<pre><code class="language-cairo">pub trait IndexView&lt;C, I&gt;</code></pre>
 
 ## Trait functions
 
 ### index
 
-Performs the indexing (`container[index]`) operation.  # PanicsMay panic if the index is out of bounds.
+Performs the indexing (`container[index]`) operation.
+# Panics
 
-Fully qualified path: `core::ops::index::IndexView::index`
+May panic if the index is out of bounds.
 
-<pre><code class="language-rust">fn index(self: @C, index: I) -&gt; Self::Target</code></pre>
+Fully qualified path: [core](./core.md)::[ops](./core-ops.md)::[index](./core-ops-index.md)::[IndexView](./core-ops-index-IndexView.md)::[index](./core-ops-index-IndexView.md#index)
+
+<pre><code class="language-cairo">fn index&lt;C, I, C, I&gt;(self: @C, index: I) -&gt; <a href="core-ops-index-IndexView.html">IndexView&lt;C, I&gt;Target</a></code></pre>
 
 
 ## Trait types
@@ -61,8 +70,8 @@ Fully qualified path: `core::ops::index::IndexView::index`
 
 The returned type after indexing.
 
-Fully qualified path: `core::ops::index::IndexView::Target`
+Fully qualified path: [core](./core.md)::[ops](./core-ops.md)::[index](./core-ops-index.md)::[IndexView](./core-ops-index-IndexView.md)::[Target](./core-ops-index-IndexView.md#target)
 
-<pre><code class="language-rust">type Target;</code></pre>
+<pre><code class="language-cairo">type Target;</code></pre>
 
 

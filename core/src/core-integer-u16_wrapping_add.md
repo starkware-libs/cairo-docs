@@ -1,6 +1,6 @@
 # u16_wrapping_add
 
-Fully qualified path: `core::integer::u16_wrapping_add`
+Fully qualified path: [core](./core.md)::[integer](./core-integer.md)::[u16_wrapping_add](./core-integer-u16_wrapping_add.md)
 
-<pre><code class="language-rust">pub fn u16_wrapping_add(lhs: u16, rhs: u16) -&gt; u16 implicits(RangeCheck) nopanic</code></pre>
+<pre><code class="language-cairo">pub fn u16_wrapping_add(lhs: <a href="core-integer-u16.html">u16</a>, rhs: <a href="core-integer-u16.html">u16</a>) -&gt; <a href="core-integer-u16.html">u16</a></code></pre>
 

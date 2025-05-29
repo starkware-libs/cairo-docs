@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,7 +156,22 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="tryinto"><a class="header" href="#tryinto">TryInto</a></h1>
-<p>Simple and safe type conversions that may fail in a controlled way under some circumstances.This is useful when you are doing a type conversion that may trivially succeed but may also need special handling. For example, there is no way to convert an <a href="./core-integer-i64.html"><code>i64</code></a> into an <a href="./core-integer-i32.html"><code>i32</code></a> using the <a href="./core-traits-Into.html"><code>Into</code></a> trait, because an <a href="./core-integer-i64.html"><code>i64</code></a> may contain a value that an <a href="./core-integer-i32.html"><code>i32</code></a> cannot represent and so the conversion would lose data.  This might be handled by truncating the <a href="./core-integer-i64.html"><code>i64</code></a> to an <a href="./core-integer-i32.html"><code>i32</code></a> or by simply returning <a href="%60Bounded::%3Ci32%3E::MAX%60"><code>Bounded::&lt;i32&gt;::MAX</code></a>, or by some other method. The <a href="./core-traits-Into.html"><code>Into</code></a> trait is intended for perfect conversions, so the <code>TryInto</code> trait informs the programmer when a type conversion could go bad and lets them decide how to handle it.  # Generic Implementations<a href="./core-traits-TryInto.html"><code>TryInto</code></a> is reflexive, which means that <code>TryInto&lt;T, T&gt;</code> is implemented - <a href="./core-traits-TryInto.html"><code>TryInto</code></a> is implemented for all types that implement <a href="./core-traits-Into.html"><code>Into</code></a>  # ExamplesConverting chess coordinates (like 'e4') into a validated position:</p>
+<p>Simple and safe type conversions that may fail in a controlled way under
+some circumstances.
+This is useful when you are doing a type conversion that may trivially succeed but may also need
+special handling. For example, there is no way to convert an <a href="./core-integer-i64.html"><code>i64</code></a> into an <a href="./core-integer-i32.html"><code>i32</code></a> using the
+<a href="./core-traits-Into.html"><code>Into</code></a> trait, because an <a href="./core-integer-i64.html"><code>i64</code></a> may contain a value that an <a href="./core-integer-i32.html"><code>i32</code></a> cannot represent and so
+the conversion would lose data.  This might be handled by truncating the <a href="./core-integer-i64.html"><code>i64</code></a> to an <a href="./core-integer-i32.html"><code>i32</code></a>
+or by simply returning <code>Bounded::&lt;i32&gt;::MAX</code>, or by some other method. The <a href="./core-traits-Into.html"><code>Into</code></a> trait
+is intended for perfect conversions, so the <code>TryInto</code> trait informs the programmer when a type
+conversion could go bad and lets them decide how to handle it.</p>
+<h1 id="generic-implementations"><a class="header" href="#generic-implementations">Generic Implementations</a></h1>
+<ul>
+<li><a href="./core-traits-TryInto.html"><code>TryInto</code></a> is reflexive, which means that <code>TryInto&lt;T, T&gt;</code> is implemented</li>
+<li><a href="./core-traits-TryInto.html"><code>TryInto</code></a> is implemented for all types that implement <a href="./core-traits-Into.html"><code>Into</code></a></li>
+</ul>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
+<p>Converting chess coordinates (like 'e4') into a validated position:</p>
 <pre><code class="language-cairo"><span class="boring">[derive(Copy, Drop, PartialEq)]
 </span> struct Position {
      file: u8, // Column a-h (0-7)
@@ -192,18 +210,22 @@ let invalid_rank = ('a', 9).try_into();
 assert!(invalid_file == None);
 assert!(invalid_rank == None);
 </code></pre>
-<p>Fully qualified path: <code>core::traits::TryInto</code></p>
-<pre><code class="language-rust">pub trait TryInto&lt;T, S&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-traits.html">traits</a>::<a href="./core-traits-TryInto.html">TryInto</a></p>
+<pre><code class="language-cairo">pub trait TryInto&lt;T, S&gt;
+</code></pre>
 <h2 id="trait-functions"><a class="header" href="#trait-functions">Trait functions</a></h2>
 <h3 id="try_into"><a class="header" href="#try_into">try_into</a></h3>
-<p>Attempts to convert the input type T into the output type S. In the event of a conversion error, returns <a href="./core-option.html#none"><code>None</code></a>.  # Examples</p>
+<p>Attempts to convert the input type T into the output type S.
+In the event of a conversion error, returns <a href="./core-option.html#none"><code>None</code></a>.</p>
+<h1 id="examples-1"><a class="header" href="#examples-1">Examples</a></h1>
 <pre><code class="language-cairo">let a: Option&lt;u8&gt; = 1_u16.try_into();
 assert!(a == Some(1));
 let b: Option&lt;u8&gt; = 256_u16.try_into();
 assert!(b == None);
 </code></pre>
-<p>Fully qualified path: <code>core::traits::TryInto::try_into</code></p>
-<pre><code class="language-rust">fn try_into(self: T) -&gt; Option&lt;S&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-traits.html">traits</a>::<a href="./core-traits-TryInto.html">TryInto</a>::<a href="./core-traits-TryInto.html#try_into">try_into</a></p>
+<pre><code class="language-cairo">fn try_into&lt;T, S, T, S&gt;(self: T) -&gt; <a href="core-option-Option.html">Option&lt;S&gt;</a>
+</code></pre>
 
                     </main>
 
@@ -234,22 +256,6 @@ assert!(b == None);
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

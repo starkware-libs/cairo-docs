@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,12 +156,21 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="iterator"><a class="header" href="#iterator">Iterator</a></h1>
-<p>A trait for dealing with iterators.This is the main iterator trait. For more about the concept of iterators generally, please see the [module-level documentation](module-level documentation). In particular, you may want to know how to [implement <code>Iterator</code>][impl].[module-level documentation](module-level documentation): crate::iter <a href="impl">impl</a>: crate::iter#implementing-iterator</p>
-<p>Fully qualified path: <code>core::iter::traits::iterator::Iterator</code></p>
-<pre><code class="language-rust">pub trait Iterator&lt;T&gt;</code></pre>
+<p>A trait for dealing with iterators.
+This is the main iterator trait. For more about the concept of iterators
+generally, please see the <a href="./core-iter.html">module-level documentation</a>. In particular, you
+may want to know how to <a href="./core-iter.html">implement <code>Iterator</code></a>.</p>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-iterator.html">iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html">Iterator</a></p>
+<pre><code class="language-cairo">pub trait Iterator&lt;T&gt;
+</code></pre>
 <h2 id="trait-functions"><a class="header" href="#trait-functions">Trait functions</a></h2>
 <h3 id="next"><a class="header" href="#next">next</a></h3>
-<p>Advances the iterator and returns the next value.Returns <a href="./core-option.html#none"><code>None</code></a> when iteration is finished. Individual iterator implementations may choose to resume iteration, and so calling <code>next()</code> again may or may not eventually start returning <a href="%60Some(Item)%60"><code>Some(Item)</code></a> again at some point.<a href="%60Some(Item)%60"><code>Some(Item)</code></a>: Some <a href="./core-option.html#none"><code>None</code></a>: None  # Examples</p>
+<p>Advances the iterator and returns the next value.
+Returns <a href="./core-option.html#none"><code>None</code></a> when iteration is finished. Individual iterator
+implementations may choose to resume iteration, and so calling <code>next()</code>
+again may or may not eventually start returning <a href="./core-option.html#some"><code>Some(Item)</code></a> again at some
+point.</p>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
 <pre><code class="language-cairo">let mut iter = [1, 2, 3].span().into_iter();
 
 // A call to next() returns the next value...
@@ -173,30 +185,57 @@ assert_eq!(None, iter.next());
 assert_eq!(None, iter.next());
 assert_eq!(None, iter.next());
 </code></pre>
-<p>Fully qualified path: <code>core::iter::traits::iterator::Iterator::next</code></p>
-<pre><code class="language-rust">fn next(ref self: T) -&gt; Option&lt;Self::Item&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-iterator.html">iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html">Iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html#next">next</a></p>
+<pre><code class="language-cairo">fn next&lt;T, T&gt;(ref self: T) -&gt; <a href="core-option-Option.html">Option&lt;Iterator&lt;T&gt;Item&gt;</a>
+</code></pre>
 <h3 id="count"><a class="header" href="#count">count</a></h3>
-<p>Consumes the iterator, counting the number of iterations and returning it.This method will call <a href="%60next%60"><code>next</code></a> repeatedly until <a href="./core-option.html#none"><code>None</code></a> is encountered, returning the number of times it saw <a href="./core-option.html#some"><code>Some</code></a>. Note that <a href="%60next%60"><code>next</code></a> has to be called at least once even if the iterator does not have any elements.  # Overflow BehaviorThe method does no guarding against overflows, so counting elements of an iterator with more than <a href="./core-num-traits-bounded-Bounded.html"><code>Bounded::&lt;usize&gt;::MAX</code></a> elements either produces the wrong result or panics.  # PanicsThis function might panic if the iterator has more than <a href="./core-num-traits-bounded-Bounded.html"><code>Bounded::&lt;usize&gt;::MAX</code></a> elements.  # Examples</p>
+<p>Consumes the iterator, counting the number of iterations and returning it.
+This method will call <code>next</code> repeatedly until <a href="./core-option.html#none"><code>None</code></a> is encountered,
+returning the number of times it saw <a href="./core-option.html#some"><code>Some</code></a>. Note that <code>next</code> has to be
+called at least once even if the iterator does not have any elements.</p>
+<h1 id="overflow-behavior"><a class="header" href="#overflow-behavior">Overflow Behavior</a></h1>
+<p>The method does no guarding against overflows, so counting elements of
+an iterator with more than <a href="./core-num-traits-bounded-Bounded.html"><code>Bounded::&lt;usize&gt;::MAX</code></a> elements either produces the
+wrong result or panics.</p>
+<h1 id="panics"><a class="header" href="#panics">Panics</a></h1>
+<p>This function might panic if the iterator has more than <a href="./core-num-traits-bounded-Bounded.html"><code>Bounded::&lt;usize&gt;::MAX</code></a>
+elements.</p>
+<h1 id="examples-1"><a class="header" href="#examples-1">Examples</a></h1>
 <pre><code class="language-cairo">let mut a = array![1, 2, 3].into_iter();
 assert_eq!(a.count(), 3);
 
 let mut a = array![1, 2, 3, 4, 5].into_iter();
 assert_eq!(a.count(), 5);
 </code></pre>
-<p>Fully qualified path: <code>core::iter::traits::iterator::Iterator::count</code></p>
-<pre><code class="language-rust">fn count&lt;+Destruct&lt;T&gt;, +Destruct&lt;Self::Item&gt;&gt;(self: T) -&gt; usize</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-iterator.html">iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html">Iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html#count">count</a></p>
+<pre><code class="language-cairo">fn count&lt;T, T, +Destruct&lt;T&gt;, +Destruct&lt;Self::Item&gt;&gt;(self: T) -&gt; <a href="core-integer-u32.html">u32</a>
+</code></pre>
 <h3 id="last"><a class="header" href="#last">last</a></h3>
-<p>Consumes the iterator, returning the last element.This method will evaluate the iterator until it returns <a href="./core-option.html#none"><code>None</code></a>. While doing so, it keeps track of the current element. After <a href="./core-option.html#none"><code>None</code></a> is returned, <code>last()</code> will then return the last element it saw.  # Examples</p>
+<p>Consumes the iterator, returning the last element.
+This method will evaluate the iterator until it returns <a href="./core-option.html#none"><code>None</code></a>. While
+doing so, it keeps track of the current element. After <a href="./core-option.html#none"><code>None</code></a> is
+returned, <code>last()</code> will then return the last element it saw.</p>
+<h1 id="examples-2"><a class="header" href="#examples-2">Examples</a></h1>
 <pre><code class="language-cairo">let mut a = array![1, 2, 3].into_iter();
 assert_eq!(a.last(), Option::Some(3));
 
 let mut a = array![].into_iter();
 assert_eq!(a.last(), Option::None);
 </code></pre>
-<p>Fully qualified path: <code>core::iter::traits::iterator::Iterator::last</code></p>
-<pre><code class="language-rust">fn last&lt;+Destruct&lt;T&gt;, +Destruct&lt;Self::Item&gt;&gt;(self: T) -&gt; Option&lt;Self::Item&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-iterator.html">iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html">Iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html#last">last</a></p>
+<pre><code class="language-cairo">fn last&lt;T, T, +Destruct&lt;T&gt;, +Destruct&lt;Self::Item&gt;&gt;(self: T) -&gt; <a href="core-option-Option.html">Option&lt;Iterator&lt;T&gt;Item&gt;</a>
+</code></pre>
 <h3 id="advance_by"><a class="header" href="#advance_by">advance_by</a></h3>
-<p>Advances the iterator by <code>n</code> elements.This method will eagerly skip <code>n</code> elements by calling <a href="%60next%60"><code>next</code></a> up to <code>n</code> times until <a href="./core-option.html#none"><code>None</code></a> is encountered.<code>advance_by(n)</code> will return <code>Ok(())</code> if the iterator successfully advances by <code>n</code> elements, or a <code>Err(NonZero&lt;usize&gt;)</code> with value <code>k</code> if <a href="./core-option.html#none"><code>None</code></a> is encountered, where <code>k</code> is remaining number of steps that could not be advanced because the iterator ran out. If <code>self</code> is empty and <code>n</code> is non-zero, then this returns <code>Err(n)</code>. Otherwise, <code>k</code> is always less than <code>n</code>.<a href="./core-option.html#none"><code>None</code></a>: None <a href="%60next%60"><code>next</code></a>: Iterator::next  # Examples</p>
+<p>Advances the iterator by <code>n</code> elements.
+This method will eagerly skip <code>n</code> elements by calling <code>next</code> up to <code>n</code>
+times until <a href="./core-option.html#none"><code>None</code></a> is encountered.
+<code>advance_by(n)</code> will return <code>Ok(())</code> if the iterator successfully advances by
+<code>n</code> elements, or a <code>Err(NonZero&lt;usize&gt;)</code> with value <code>k</code> if <a href="./core-option.html#none"><code>None</code></a> is encountered,
+where <code>k</code> is remaining number of steps that could not be advanced because the iterator ran
+out.
+If <code>self</code> is empty and <code>n</code> is non-zero, then this returns <code>Err(n)</code>.
+Otherwise, <code>k</code> is always less than <code>n</code>.</p>
+<h1 id="examples-3"><a class="header" href="#examples-3">Examples</a></h1>
 <pre><code class="language-cairo">let mut iter = array![1_u8, 2, 3, 4].into_iter();
 
 assert_eq!(iter.advance_by(2), Ok(()));
@@ -204,12 +243,21 @@ assert_eq!(iter.next(), Some(3));
 assert_eq!(iter.advance_by(0), Ok(()));
 assert_eq!(iter.advance_by(100), Err(99));
 </code></pre>
-<p>Fully qualified path: <code>core::iter::traits::iterator::Iterator::advance_by</code></p>
-<pre><code class="language-rust">fn advance_by&lt;+Destruct&lt;T&gt;, +Destruct&lt;Self::Item&gt;&gt;(
-    ref self: T, n: usize,
-) -&gt; Result&lt;(), NonZero&lt;usize&gt;&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-iterator.html">iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html">Iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html#advance_by">advance_by</a></p>
+<pre><code class="language-cairo">fn advance_by&lt;T, T, +Destruct&lt;T&gt;, +Destruct&lt;Self::Item&gt;&gt;(ref self: T, n: <a href="core-integer-u32.html">u32</a>) -&gt; <a href="core-result-Result.html">Result&lt;(), NonZero&lt;u32&gt;&gt;</a>
+</code></pre>
 <h3 id="nth"><a class="header" href="#nth">nth</a></h3>
-<p>Returns the <code>n</code>th element of the iterator.Like most indexing operations, the count starts from zero, so <code>nth(0)</code> returns the first value, <code>nth(1)</code> the second, and so on.Note that all preceding elements, as well as the returned element, will be consumed from the iterator. That means that the preceding elements will be discarded, and also that calling <code>nth(0)</code> multiple times on the same iterator will return different elements.<code>nth()</code> will return <a href="./core-option.html#none"><code>None</code></a> if <code>n</code> is greater than or equal to the length of the iterator.  # ExamplesBasic usage:</p>
+<p>Returns the <code>n</code>th element of the iterator.
+Like most indexing operations, the count starts from zero, so <code>nth(0)</code>
+returns the first value, <code>nth(1)</code> the second, and so on.
+Note that all preceding elements, as well as the returned element, will be
+consumed from the iterator. That means that the preceding elements will be
+discarded, and also that calling <code>nth(0)</code> multiple times on the same iterator
+will return different elements.
+<code>nth()</code> will return <a href="./core-option.html#none"><code>None</code></a> if <code>n</code> is greater than or equal to the length of the
+iterator.</p>
+<h1 id="examples-4"><a class="header" href="#examples-4">Examples</a></h1>
+<p>Basic usage:</p>
 <pre><code class="language-cairo">let mut iter = array![1, 2, 3].into_iter();
 assert_eq!(iter.nth(1), Some(2));
 </code></pre>
@@ -223,10 +271,25 @@ assert_eq!(iter.nth(1), None);
 <pre><code class="language-cairo">let mut iter = array![1, 2, 3].into_iter();
 assert_eq!(iter.nth(10), None);
 </code></pre>
-<p>Fully qualified path: <code>core::iter::traits::iterator::Iterator::nth</code></p>
-<pre><code class="language-rust">fn nth&lt;+Destruct&lt;T&gt;, +Destruct&lt;Self::Item&gt;&gt;(ref self: T, n: usize) -&gt; Option&lt;Self::Item&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-iterator.html">iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html">Iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html#nth">nth</a></p>
+<pre><code class="language-cairo">fn nth&lt;T, T, +Destruct&lt;T&gt;, +Destruct&lt;Self::Item&gt;&gt;(ref self: T, n: <a href="core-integer-u32.html">u32</a>) -&gt; <a href="core-option-Option.html">Option&lt;Iterator&lt;T&gt;Item&gt;</a>
+</code></pre>
 <h3 id="map"><a class="header" href="#map">map</a></h3>
-<p>Takes a closure and creates an iterator which calls that closure on each element.<code>map()</code> transforms one iterator into another, by means of its argument: something that implements <a href="%60FnOnce%60"><code>FnOnce</code></a>. It produces a new iterator which calls this closure on each element of the original iterator.If you are good at thinking in types, you can think of <code>map()</code> like this: If you have an iterator that gives you elements of some type <code>A</code>, and you want an iterator of some other type <code>B</code>, you can use <code>map()</code>, passing a closure that takes an <code>A</code> and returns a <code>B</code>.<code>map()</code> is conceptually similar to a <code>for</code> loop. However, as <code>map()</code> is lazy, it is best used when you're already working with other iterators. If you're doing some sort of looping for a side effect, it's considered more idiomatic to use <code>for</code> than <code>map()</code>.  # ExamplesBasic usage:</p>
+<p>Takes a closure and creates an iterator which calls that closure on each
+element.
+<code>map()</code> transforms one iterator into another, by means of its argument:
+something that implements <code>FnOnce</code>. It produces a new iterator which
+calls this closure on each element of the original iterator.
+If you are good at thinking in types, you can think of <code>map()</code> like this:
+If you have an iterator that gives you elements of some type <code>A</code>, and
+you want an iterator of some other type <code>B</code>, you can use <code>map()</code>,
+passing a closure that takes an <code>A</code> and returns a <code>B</code>.
+<code>map()</code> is conceptually similar to a <code>for</code> loop. However, as <code>map()</code> is
+lazy, it is best used when you're already working with other iterators.
+If you're doing some sort of looping for a side effect, it's considered
+more idiomatic to use <code>for</code> than <code>map()</code>.</p>
+<h1 id="examples-5"><a class="header" href="#examples-5">Examples</a></h1>
+<p>Basic usage:</p>
 <pre><code class="language-cairo">let mut iter = array![1, 2, 3].into_iter().map(|x| 2 * x);
 
 assert!(iter.next() == Some(2));
@@ -246,12 +309,22 @@ for x in 0..5_usize {
     println!("{x}");
 }
 </code></pre>
-<p>Fully qualified path: <code>core::iter::traits::iterator::Iterator::map</code></p>
-<pre><code class="language-rust">fn map&lt;B, F, +core::ops::Fn&lt;F, (Self::Item,)&gt;[Output: B], +Drop&lt;T&gt;, +Drop&lt;F&gt;&gt;(
-    self: T, f: F,
-) -&gt; Map&lt;T, F&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-iterator.html">iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html">Iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html#map">map</a></p>
+<pre><code class="language-cairo">fn map&lt;T, T, B, F, +core::ops::Fn&lt;F, (Self::Item,)&gt;[Output: B], +Drop&lt;T&gt;, +Drop&lt;F&gt;&gt;(self: T, f: F) -&gt; <a href="core-iter-adapters-map-Map.html">Map&lt;T, F&gt;</a>
+</code></pre>
 <h3 id="enumerate"><a class="header" href="#enumerate">enumerate</a></h3>
-<p>Creates an iterator which gives the current iteration count as well as the next value.The iterator returned yields pairs <code>(i, val)</code>, where <code>i</code> is the current index of iteration and <code>val</code> is the value returned by the iterator.<code>enumerate()</code> keeps its count as a <a href="./core-usize.html"><code>usize</code></a>.  # Overflow BehaviorThe method does no guarding against overflows, so enumerating more than <code>Bounded::&lt;usize&gt;::MAX</code> elements will always panic.  # PanicsWill panic if the to-be-returned index overflows a <code>usize</code>.  # Examples</p>
+<p>Creates an iterator which gives the current iteration count as well as
+the next value.
+The iterator returned yields pairs <code>(i, val)</code>, where <code>i</code> is the
+current index of iteration and <code>val</code> is the value returned by the
+iterator.
+<code>enumerate()</code> keeps its count as a <a href="./core-usize.html"><code>usize</code></a>.</p>
+<h1 id="overflow-behavior-1"><a class="header" href="#overflow-behavior-1">Overflow Behavior</a></h1>
+<p>The method does no guarding against overflows, so enumerating more than
+<code>Bounded::&lt;usize&gt;::MAX</code> elements will always panic.</p>
+<h1 id="panics-1"><a class="header" href="#panics-1">Panics</a></h1>
+<p>Will panic if the to-be-returned index overflows a <code>usize</code>.</p>
+<h1 id="examples-6"><a class="header" href="#examples-6">Examples</a></h1>
 <pre><code class="language-cairo">let mut iter = array!['a', 'b', 'c'].into_iter().enumerate();
 
 assert_eq!(iter.next(), Some((0, 'a')));
@@ -259,10 +332,35 @@ assert_eq!(iter.next(), Some((1, 'b')));
 assert_eq!(iter.next(), Some((2, 'c')));
 assert_eq!(iter.next(), None);
 </code></pre>
-<p>Fully qualified path: <code>core::iter::traits::iterator::Iterator::enumerate</code></p>
-<pre><code class="language-rust">fn enumerate(self: T) -&gt; Enumerate&lt;T&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-iterator.html">iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html">Iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html#enumerate">enumerate</a></p>
+<pre><code class="language-cairo">fn enumerate&lt;T, T&gt;(self: T) -&gt; <a href="core-iter-adapters-enumerate-Enumerate.html">Enumerate&lt;T&gt;</a>
+</code></pre>
 <h3 id="fold"><a class="header" href="#fold">fold</a></h3>
-<p>Folds every element into an accumulator by applying an operation, returning the final result.<code>fold()</code> takes two arguments: an initial value, and a closure with two arguments: an 'accumulator', and an element. The closure returns the value that the accumulator should have for the next iteration.The initial value is the value the accumulator will have on the first call.After applying this closure to every element of the iterator, <code>fold()</code> returns the accumulator.Folding is useful whenever you have a collection of something, and want to produce a single value from it.Note: <code>fold()</code>, and similar methods that traverse the entire iterator, might not terminate for infinite iterators, even on traits for which a result is determinable in finite time.Note: <code>fold()</code> combines elements in a left-associative fashion. For associative operators like <code>+</code>, the order the elements are combined in is not important, but for non-associative operators like <code>-</code> the order will affect the final result.  # Note to ImplementersSeveral of the other (forward) methods have default implementations in terms of this one, so try to implement this explicitly if it can do something better than the default <code>for</code> loop implementation.In particular, try to have this call <code>fold()</code> on the internal parts from which this iterator is composed.  # ExamplesBasic usage:</p>
+<p>Folds every element into an accumulator by applying an operation,
+returning the final result.
+<code>fold()</code> takes two arguments: an initial value, and a closure with two
+arguments: an 'accumulator', and an element. The closure returns the value that
+the accumulator should have for the next iteration.
+The initial value is the value the accumulator will have on the first
+call.
+After applying this closure to every element of the iterator, <code>fold()</code>
+returns the accumulator.
+Folding is useful whenever you have a collection of something, and want
+to produce a single value from it.
+Note: <code>fold()</code>, and similar methods that traverse the entire iterator,
+might not terminate for infinite iterators, even on traits for which a
+result is determinable in finite time.
+Note: <code>fold()</code> combines elements in a left-associative fashion. For associative
+operators like <code>+</code>, the order the elements are combined in is not important, but for
+non-associative operators like <code>-</code> the order will affect the final result.</p>
+<h1 id="note-to-implementers"><a class="header" href="#note-to-implementers">Note to Implementers</a></h1>
+<p>Several of the other (forward) methods have default implementations in
+terms of this one, so try to implement this explicitly if it can
+do something better than the default <code>for</code> loop implementation.
+In particular, try to have this call <code>fold()</code> on the internal parts
+from which this iterator is composed.</p>
+<h1 id="examples-7"><a class="header" href="#examples-7">Examples</a></h1>
+<p>Basic usage:</p>
 <pre><code class="language-cairo">let mut iter = array![1, 2, 3].into_iter();
 
 // the sum of all of the elements of the array
@@ -270,7 +368,18 @@ let sum = iter.fold(0, |acc, x| acc + x);
 
 assert_eq!(sum, 6);
 </code></pre>
-<p>Let's walk through each step of the iteration here:| element | acc | x | result | |---------|-----|---|--------| |         | 0   |   |        | | 1       | 0   | 1 | 1      | | 2       | 1   | 2 | 3      | | 3       | 3   | 3 | 6      |And so, our final result, <code>6</code>.It's common for people who haven't used iterators a lot to use a <code>for</code> loop with a list of things to build up a result. Those can be turned into <code>fold()</code>s:</p>
+<p>Let's walk through each step of the iteration here:</p>
+<div class="table-wrapper"><table><thead><tr><th>element</th><th>acc</th><th>x</th><th>result</th></tr></thead><tbody>
+<tr><td></td><td>0</td><td></td><td></td></tr>
+<tr><td>1</td><td>0</td><td>1</td><td>1</td></tr>
+<tr><td>2</td><td>1</td><td>2</td><td>3</td></tr>
+<tr><td>3</td><td>3</td><td>3</td><td>6</td></tr>
+</tbody></table>
+</div>
+<p>And so, our final result, <code>6</code>.
+It's common for people who haven't used iterators a lot to
+use a <code>for</code> loop with a list of things to build up a result. Those
+can be turned into <code>fold()</code>s:</p>
 <pre><code class="language-cairo">let mut numbers = array![1, 2, 3, 4, 5].span();
 
 let mut result = 0;
@@ -287,46 +396,53 @@ let result2 = numbers_iter.fold(0, |acc, x| acc + (*x));
 // they're the same
 assert_eq!(result, result2);
 </code></pre>
-<p>Fully qualified path: <code>core::iter::traits::iterator::Iterator::fold</code></p>
-<pre><code class="language-rust">fn fold&lt;
-    B, F, +core::ops::Fn&lt;F, (B, Self::Item)&gt;[Output: B], +Destruct&lt;T&gt;, +Destruct&lt;F&gt;, +Destruct&lt;B&gt;,
-&gt;(
-    ref self: T, init: B, f: F,
-) -&gt; B</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-iterator.html">iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html">Iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html#fold">fold</a></p>
+<pre><code class="language-cairo">fn fold&lt;T, T, B, F, +core::ops::Fn&lt;F, (B, Self::Item)&gt;[Output: B], +Destruct&lt;T&gt;, +Destruct&lt;F&gt;, +Destruct&lt;B&gt;&gt;(ref self: T, init: B, f: F) -&gt; B
+</code></pre>
 <h3 id="any"><a class="header" href="#any">any</a></h3>
-<p>Tests if any element of the iterator matches a predicate.<code>any()</code> takes a closure that returns <code>true</code> or <code>false</code>. It applies this closure to each element of the iterator, and if any of them return <code>true</code>, then so does <code>any()</code>. If they all return <code>false</code>, it returns <code>false</code>.<code>any()</code> is short-circuiting; in other words, it will stop processing as soon as it finds a <code>true</code>, given that no matter what else happens, the result will also be <code>true</code>.An empty iterator returns <code>false</code>.  # ExamplesBasic usage:</p>
+<p>Tests if any element of the iterator matches a predicate.
+<code>any()</code> takes a closure that returns <code>true</code> or <code>false</code>. It applies this closure to each
+element of the iterator, and if any of them return <code>true</code>, then so does <code>any()</code>. If they all
+return <code>false</code>, it returns <code>false</code>.
+<code>any()</code> is short-circuiting; in other words, it will stop processing as soon as it finds a
+<code>true</code>, given that no matter what else happens, the result will also be <code>true</code>.
+An empty iterator returns <code>false</code>.</p>
+<h1 id="examples-8"><a class="header" href="#examples-8">Examples</a></h1>
+<p>Basic usage:</p>
 <pre><code class="language-cairo">assert!(array![1, 2, 3].into_iter().any(|x| x == 2));
 
 assert!(!array![1, 2, 3].into_iter().any(|x| x &gt; 5));
 </code></pre>
-<p>Fully qualified path: <code>core::iter::traits::iterator::Iterator::any</code></p>
-<pre><code class="language-rust">fn any&lt;
-    P,
-    +core::ops::Fn&lt;P, (Self::Item,)&gt;[Output: bool],
-    +Destruct&lt;P&gt;,
-    +Destruct&lt;T&gt;,
-    +Destruct&lt;Self::Item&gt;,
-&gt;(
-    ref self: T, predicate: P,
-) -&gt; bool</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-iterator.html">iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html">Iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html#any">any</a></p>
+<pre><code class="language-cairo">fn any&lt;T, T, P, +core::ops::Fn&lt;P, (Self::Item,)&gt;[Output: bool], +Destruct&lt;P&gt;, +Destruct&lt;T&gt;, +Destruct&lt;Self::Item&gt;&gt;(ref self: T, predicate: P) -&gt; <a href="core-bool.html">bool</a>
+</code></pre>
 <h3 id="all"><a class="header" href="#all">all</a></h3>
-<p>Tests if every element of the iterator matches a predicate.<code>all()</code> takes a closure that returns <code>true</code> or <code>false</code>. It applies this closure to each element of the iterator, and if all of them return <code>true</code>, then so does <code>all()</code>. If any of them return <code>false</code>, it returns <code>false</code>.<code>all()</code> is short-circuiting; in other words, it will stop processing as soon as it finds a <code>false</code>, given that no matter what else happens, the result will also be <code>false</code>.An empty iterator returns <code>true</code>.  # ExamplesBasic usage:</p>
+<p>Tests if every element of the iterator matches a predicate.
+<code>all()</code> takes a closure that returns <code>true</code> or <code>false</code>. It applies this closure to each
+element of the iterator, and if all of them return <code>true</code>, then so does <code>all()</code>. If any
+of them return <code>false</code>, it returns <code>false</code>.
+<code>all()</code> is short-circuiting; in other words, it will stop processing as soon as it finds a
+<code>false</code>, given that no matter what else happens, the result will also be <code>false</code>.
+An empty iterator returns <code>true</code>.</p>
+<h1 id="examples-9"><a class="header" href="#examples-9">Examples</a></h1>
+<p>Basic usage:</p>
 <pre><code class="language-cairo">assert!(array![1, 2, 3].into_iter().all(|x| x &gt; 0));
 
 assert!(!array![1, 2, 3].into_iter().all(|x| x &gt; 2));
 </code></pre>
-<p>Fully qualified path: <code>core::iter::traits::iterator::Iterator::all</code></p>
-<pre><code class="language-rust">fn all&lt;
-    P,
-    +core::ops::Fn&lt;P, (Self::Item,)&gt;[Output: bool],
-    +Destruct&lt;P&gt;,
-    +Destruct&lt;T&gt;,
-    +Destruct&lt;Self::Item&gt;,
-&gt;(
-    ref self: T, predicate: P,
-) -&gt; bool</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-iterator.html">iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html">Iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html#all">all</a></p>
+<pre><code class="language-cairo">fn all&lt;T, T, P, +core::ops::Fn&lt;P, (Self::Item,)&gt;[Output: bool], +Destruct&lt;P&gt;, +Destruct&lt;T&gt;, +Destruct&lt;Self::Item&gt;&gt;(ref self: T, predicate: P) -&gt; <a href="core-bool.html">bool</a>
+</code></pre>
 <h3 id="find"><a class="header" href="#find">find</a></h3>
-<p>Searches for an element of an iterator that satisfies a predicate.<code>find()</code> takes a closure that returns <code>true</code> or <code>false</code>. It applies this closure to each element of the iterator as a snapshot, and if any of them return <code>true</code>, then <code>find()</code> returns <a href="%60Some(element)%60"><code>Some(element)</code></a>. If they all return <code>false</code>, it returns <a href="./core-option.html#none"><code>None</code></a>.<code>find()</code> is short-circuiting; in other words, it will stop processing as soon as the closure returns <code>true</code>.  # ExamplesBasic usage:</p>
+<p>Searches for an element of an iterator that satisfies a predicate.
+<code>find()</code> takes a closure that returns <code>true</code> or <code>false</code>. It applies
+this closure to each element of the iterator as a snapshot, and if
+any of them return <code>true</code>, then <code>find()</code> returns <code>Some(element)</code>.
+If they all return <code>false</code>, it returns <a href="./core-option.html#none"><code>None</code></a>.
+<code>find()</code> is short-circuiting; in other words, it will stop processing
+as soon as the closure returns <code>true</code>.</p>
+<h1 id="examples-10"><a class="header" href="#examples-10">Examples</a></h1>
+<p>Basic usage:</p>
 <pre><code class="language-cairo">let mut iter = array![1, 2, 3].into_iter();
 
 assert_eq!(iter.find(|x| *x == 2), Option::Some(2));
@@ -342,18 +458,17 @@ assert_eq!(iter.find(|x| *x == 2), Option::Some(2));
 assert_eq!(iter.next(), Option::Some(3));
 </code></pre>
 <p>Note that <code>iter.find(f)</code> is equivalent to <code>iter.filter(f).next()</code>.</p>
-<p>Fully qualified path: <code>core::iter::traits::iterator::Iterator::find</code></p>
-<pre><code class="language-rust">fn find&lt;
-    P,
-    +core::ops::Fn&lt;P, (@Self::Item,)&gt;[Output: bool],
-    +Destruct&lt;P&gt;,
-    +Destruct&lt;T&gt;,
-    +Destruct&lt;Self::Item&gt;,
-&gt;(
-    ref self: T, predicate: P,
-) -&gt; Option&lt;Self::Item&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-iterator.html">iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html">Iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html#find">find</a></p>
+<pre><code class="language-cairo">fn find&lt;T, T, P, +core::ops::Fn&lt;P, (@Self::Item,)&gt;[Output: bool], +Destruct&lt;P&gt;, +Destruct&lt;T&gt;, +Destruct&lt;Self::Item&gt;&gt;(ref self: T, predicate: P) -&gt; <a href="core-option-Option.html">Option&lt;Iterator&lt;T&gt;Item&gt;</a>
+</code></pre>
 <h3 id="filter"><a class="header" href="#filter">filter</a></h3>
-<p>Creates an iterator which uses a closure to determine if an element should be yielded. The closure takes each element as a snapshot.Given an element the closure must return <code>true</code> or <code>false</code>. The returned iterator will yield only the elements for which the closure returns <code>true</code>.  # ExamplesBasic usage:</p>
+<p>Creates an iterator which uses a closure to determine if an element
+should be yielded. The closure takes each element as a snapshot.
+Given an element the closure must return <code>true</code> or <code>false</code>. The returned
+iterator will yield only the elements for which the closure returns
+<code>true</code>.</p>
+<h1 id="examples-11"><a class="header" href="#examples-11">Examples</a></h1>
+<p>Basic usage:</p>
 <pre><code class="language-cairo">let a = array![0_u32, 1, 2];
 
 let mut iter = a.into_iter().filter(|x| *x &gt; 0);
@@ -363,18 +478,22 @@ assert_eq!(iter.next(), Option::Some(2));
 assert_eq!(iter.next(), Option::None);
 </code></pre>
 <p>Note that <code>iter.filter(f).next()</code> is equivalent to <code>iter.find(f)</code>.</p>
-<p>Fully qualified path: <code>core::iter::traits::iterator::Iterator::filter</code></p>
-<pre><code class="language-rust">fn filter&lt;
-    P,
-    +core::ops::Fn&lt;P, (@Self::Item,)&gt;[Output: bool],
-    +Destruct&lt;P&gt;,
-    +Destruct&lt;T&gt;,
-    +Destruct&lt;Self::Item&gt;,
-&gt;(
-    self: T, predicate: P,
-) -&gt; Filter&lt;T, P&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-iterator.html">iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html">Iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html#filter">filter</a></p>
+<pre><code class="language-cairo">fn filter&lt;T, T, P, +core::ops::Fn&lt;P, (@Self::Item,)&gt;[Output: bool], +Destruct&lt;P&gt;, +Destruct&lt;T&gt;, +Destruct&lt;Self::Item&gt;&gt;(self: T, predicate: P) -&gt; <a href="core-iter-adapters-filter-Filter.html">Filter&lt;T, P&gt;</a>
+</code></pre>
 <h3 id="zip"><a class="header" href="#zip">zip</a></h3>
-<p>'Zips up' two iterators into a single iterator of pairs.<code>zip()</code> returns a new iterator that will iterate over two other iterators, returning a tuple where the first element comes from the first iterator, and the second element comes from the second iterator.In other words, it zips two iterators together, into a single one.If either iterator returns <a href="./core-option.html#none"><code>None</code></a>, <a href="%60next%60"><code>next</code></a> from the zipped iterator will return <a href="./core-option.html#none"><code>None</code></a>. If the zipped iterator has no more elements to return then each further attempt to advance it will first try to advance the first iterator at most one time and if it still yielded an item try to advance the second iterator at most one time.  # ExamplesBasic usage:</p>
+<p>'Zips up' two iterators into a single iterator of pairs.
+<code>zip()</code> returns a new iterator that will iterate over two other
+iterators, returning a tuple where the first element comes from the
+first iterator, and the second element comes from the second iterator.
+In other words, it zips two iterators together, into a single one.
+If either iterator returns <a href="./core-option.html#none"><code>None</code></a>, <code>next</code> from the zipped iterator
+will return <a href="./core-option.html#none"><code>None</code></a>.
+If the zipped iterator has no more elements to return then each further attempt to advance
+it will first try to advance the first iterator at most one time and if it still yielded an
+item try to advance the second iterator at most one time.</p>
+<h1 id="examples-12"><a class="header" href="#examples-12">Examples</a></h1>
+<p>Basic usage:</p>
 <pre><code class="language-cairo">let mut iter = array![1, 2, 3].into_iter().zip(array![4, 5, 6].into_iter());
 
 assert_eq!(iter.next(), Some((1, 4)));
@@ -382,7 +501,9 @@ assert_eq!(iter.next(), Some((2, 5)));
 assert_eq!(iter.next(), Some((3, 6)));
 assert_eq!(iter.next(), None);
 </code></pre>
-<p>Since the argument to <code>zip()</code> uses <a href="./core-iter-traits-collect-IntoIterator.html"><code>IntoIterator</code></a>, we can pass anything that can be converted into an <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a>, not just an <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a> itself. For example:</p>
+<p>Since the argument to <code>zip()</code> uses <a href="./core-iter-traits-collect-IntoIterator.html"><code>IntoIterator</code></a>, we can pass
+anything that can be converted into an <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a>, not just an
+<a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a> itself. For example:</p>
 <pre><code class="language-cairo">let mut iter = array![1, 2, 3].into_iter().zip(array![4, 5, 6]);
 
 assert_eq!(iter.next(), Some((1, 4)));
@@ -390,40 +511,54 @@ assert_eq!(iter.next(), Some((2, 5)));
 assert_eq!(iter.next(), Some((3, 6)));
 assert_eq!(iter.next(), None);
 </code></pre>
-<p><a href="%60enumerate%60"><code>enumerate</code></a>: Iterator::enumerate <a href="%60next%60"><code>next</code></a>: Iterator::next</p>
-<p>Fully qualified path: <code>core::iter::traits::iterator::Iterator::zip</code></p>
-<pre><code class="language-rust">fn zip&lt;U, impl UIntoIter: IntoIterator&lt;U&gt;, +Destruct&lt;T&gt;&gt;(
-    self: T, other: U,
-) -&gt; Zip&lt;T, UIntoIter::IntoIter&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-iterator.html">iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html">Iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html#zip">zip</a></p>
+<pre><code class="language-cairo">fn zip&lt;T, T, U, impl UIntoIter: IntoIterator&lt;U&gt;, +Destruct&lt;T&gt;&gt;(self: T, other: U) -&gt; <a href="core-iter-adapters-zip-Zip.html">Zip&lt;T, IntoIter&gt;</a>
+</code></pre>
 <h3 id="collect"><a class="header" href="#collect">collect</a></h3>
-<p>Transforms an iterator into a collection.<code>collect()</code> can take anything iterable, and turn it into a relevant collection. This is one of the more powerful methods in the core library, used in a variety of contexts.The most basic pattern in which <code>collect()</code> is used is to turn one collection into another. You take a collection, call <a href="%60iter%60"><code>iter</code></a> on it, do a bunch of transformations, and then <code>collect()</code> at the end.<code>collect()</code> can also create instances of types that are not typical collections.Because <code>collect()</code> is so general, it can cause problems with type inference. As such, <code>collect()</code> is one of the few times you'll see the syntax affectionately known as the 'turbofish': <code>::&lt;&gt;</code>. This helps the inference algorithm understand specifically which collection you're trying to collect into.  # ExamplesBasic usage:</p>
+<p>Transforms an iterator into a collection.
+<code>collect()</code> can take anything iterable, and turn it into a relevant
+collection. This is one of the more powerful methods in the core
+library, used in a variety of contexts.
+The most basic pattern in which <code>collect()</code> is used is to turn one
+collection into another. You take a collection, call <code>iter</code> on it,
+do a bunch of transformations, and then <code>collect()</code> at the end.
+<code>collect()</code> can also create instances of types that are not typical
+collections.
+Because <code>collect()</code> is so general, it can cause problems with type
+inference. As such, <code>collect()</code> is one of the few times you'll see
+the syntax affectionately known as the 'turbofish': <code>::&lt;&gt;</code>. This
+helps the inference algorithm understand specifically which collection
+you're trying to collect into.</p>
+<h1 id="examples-13"><a class="header" href="#examples-13">Examples</a></h1>
+<p>Basic usage:</p>
 <pre><code class="language-cairo">let doubled: Array&lt;u32&gt; = array![1, 2, 3].into_iter().map(|x| x * 2).collect();
 
 assert_eq!(array![2, 4, 6], doubled);
 </code></pre>
-<p>Note that we needed the <code>: Array&lt;u32&gt;</code> on the left-hand side.Using the 'turbofish' instead of annotating <code>doubled</code>:</p>
+<p>Note that we needed the <code>: Array&lt;u32&gt;</code> on the left-hand side.
+Using the 'turbofish' instead of annotating <code>doubled</code>:</p>
 <pre><code class="language-cairo">let doubled = array![1, 2, 3].into_iter().map(|x| x * 2).collect::&lt;Array&lt;u32&gt;&gt;();
 
 assert_eq!(array![2, 4, 6], doubled);
 </code></pre>
-<p>Because <code>collect()</code> only cares about what you're collecting into, you can still use a partial type hint, <code>_</code>, with the turbofish:</p>
+<p>Because <code>collect()</code> only cares about what you're collecting into, you can
+still use a partial type hint, <code>_</code>, with the turbofish:</p>
 <pre><code class="language-cairo">let doubled = array![1, 2, 3].into_iter().map(|x| x * 2).collect::&lt;Array&lt;_&gt;&gt;();
 
 assert_eq!(array![2, 4, 6], doubled);
 </code></pre>
-<p>Fully qualified path: <code>core::iter::traits::iterator::Iterator::collect</code></p>
-<pre><code class="language-rust">fn collect&lt;
-    B,
-    impl IntoIter: IntoIterator&lt;T&gt;,
-    impl ItemEqual: TypeEqual&lt;IntoIter::Iterator::Item, Self::Item&gt;,
-    +Destruct&lt;IntoIter::IntoIter&gt;,
-    +FromIterator&lt;B, Self::Item&gt;,
-    +Destruct&lt;T&gt;,
-&gt;(
-    self: T,
-) -&gt; B</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-iterator.html">iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html">Iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html#collect">collect</a></p>
+<pre><code class="language-cairo">fn collect&lt;T, T, B, impl IntoIter: IntoIterator&lt;T&gt;, impl ItemEqual: TypeEqual&lt;IntoIter::Iterator::Item, core::iter::traits::iterator::Iterator::&lt;T&gt;::Item&gt;, +Destruct&lt;IntoIter::IntoIter&gt;, +FromIterator&lt;B, Self::Item&gt;, +Destruct&lt;T&gt;&gt;(self: T) -&gt; B
+</code></pre>
 <h3 id="peekable"><a class="header" href="#peekable">peekable</a></h3>
-<p>Creates an iterator which can use the <a href="%60peek%60"><code>peek</code></a> method to look at the next element of the iterator. See its documentation for more information.Note that the underlying iterator is still advanced when <a href="%60peek%60"><code>peek</code></a> is called for the first time: In order to retrieve the next element, <a href="%60next%60"><code>next</code></a> is called on the underlying iterator, hence any side effects (i.e. anything other than fetching the next value) of the <a href="%60next%60"><code>next</code></a> method will occur.  # ExamplesBasic usage:</p>
+<p>Creates an iterator which can use the <code>peek</code> method to look at the next element of the
+iterator. See its documentation for more information.
+Note that the underlying iterator is still advanced when <code>peek</code> is called for the first
+time: In order to retrieve the next element, <code>next</code> is called on the underlying iterator,
+hence any side effects (i.e. anything other than fetching the next value) of the <code>next</code>
+method will occur.</p>
+<h1 id="examples-14"><a class="header" href="#examples-14">Examples</a></h1>
+<p>Basic usage:</p>
 <pre><code class="language-cairo">let mut iter = (1..4_u8).into_iter().peekable();
 
 // peek() lets us see one step into the future
@@ -442,35 +577,60 @@ assert_eq!(iter.next(), Option::Some(3));
 assert_eq!(iter.peek(), Option::None);
 assert_eq!(iter.next(), Option::None);
 </code></pre>
-<p>Fully qualified path: <code>core::iter::traits::iterator::Iterator::peekable</code></p>
-<pre><code class="language-rust">fn peekable(self: T) -&gt; Peekable&lt;T, Self::Item&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-iterator.html">iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html">Iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html#peekable">peekable</a></p>
+<pre><code class="language-cairo">fn peekable&lt;T, T&gt;(self: T) -&gt; <a href="core-iter-adapters-peekable-Peekable.html">Peekable&lt;T, Iterator&lt;T&gt;Item&gt;</a>
+</code></pre>
 <h3 id="take"><a class="header" href="#take">take</a></h3>
-<p>Creates an iterator that yields the first <code>n</code> elements, or fewer if the underlying iterator ends sooner.<code>take(n)</code> yields elements until <code>n</code> elements are yielded or the end of the iterator is reached (whichever happens first). The returned iterator is a prefix of length <code>n</code> if the original iterator contains at least <code>n</code> elements, otherwise it contains all of the (fewer than <code>n</code>) elements of the original iterator.  # ExamplesBasic usage:</p>
+<p>Creates an iterator that yields the first <code>n</code> elements, or fewer
+if the underlying iterator ends sooner.
+<code>take(n)</code> yields elements until <code>n</code> elements are yielded or the end of
+the iterator is reached (whichever happens first).
+The returned iterator is a prefix of length <code>n</code> if the original iterator
+contains at least <code>n</code> elements, otherwise it contains all of the
+(fewer than <code>n</code>) elements of the original iterator.</p>
+<h1 id="examples-15"><a class="header" href="#examples-15">Examples</a></h1>
+<p>Basic usage:</p>
 <pre><code class="language-cairo">let mut iter = array![1, 2, 3].into_iter().take(2);
 
 assert_eq!(iter.next(), Some(1));
 assert_eq!(iter.next(), Some(2));
 assert_eq!(iter.next(), None);
 </code></pre>
-<p>If less than <code>n</code> elements are available, <code>take</code> will limit itself to the size of the underlying iterator:</p>
+<p>If less than <code>n</code> elements are available,
+<code>take</code> will limit itself to the size of the underlying iterator:</p>
 <pre><code class="language-cairo">let mut iter = array![1, 2].into_iter().take(5);
 assert_eq!(iter.next(), Some(1));
 assert_eq!(iter.next(), Some(2));
 assert_eq!(iter.next(), None);
 </code></pre>
-<p>Fully qualified path: <code>core::iter::traits::iterator::Iterator::take</code></p>
-<pre><code class="language-rust">fn take(self: T, n: usize) -&gt; Take&lt;T&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-iterator.html">iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html">Iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html#take">take</a></p>
+<pre><code class="language-cairo">fn take&lt;T, T&gt;(self: T, n: <a href="core-integer-u32.html">u32</a>) -&gt; <a href="core-iter-adapters-take-Take.html">Take&lt;T&gt;</a>
+</code></pre>
 <h3 id="sum"><a class="header" href="#sum">sum</a></h3>
-<p>Sums the elements of an iterator.Takes each element, adds them together, and returns the result.An empty iterator returns the zero value of the type.<code>sum()</code> can be used to sum any type implementing [<code>Sum</code>][<code>core::iter::Sum</code>], including [<code>Option</code>][<code>Option::sum</code>] and [<code>Result</code>][<code>Result::sum</code>].  # PanicsWhen calling <code>sum()</code> and a primitive integer type is being returned, this method will panic if the computation overflows.  # Examples</p>
+<p>Sums the elements of an iterator.
+Takes each element, adds them together, and returns the result.
+An empty iterator returns the zero value of the type.
+<code>sum()</code> can be used to sum any type implementing [<code>Sum</code>][<code>core::iter::Sum</code>],
+including [<code>Option</code>][<code>Option::sum</code>] and [<code>Result</code>][<code>Result::sum</code>].</p>
+<h1 id="panics-2"><a class="header" href="#panics-2">Panics</a></h1>
+<p>When calling <code>sum()</code> and a primitive integer type is being returned, this
+method will panic if the computation overflows.</p>
+<h1 id="examples-16"><a class="header" href="#examples-16">Examples</a></h1>
 <pre><code class="language-cairo">let mut iter = array![1, 2, 3].into_iter();
 let sum: usize = iter.sum();
 
 assert_eq!(sum, 6);
 </code></pre>
-<p>Fully qualified path: <code>core::iter::traits::iterator::Iterator::sum</code></p>
-<pre><code class="language-rust">fn sum&lt;+Destruct&lt;T&gt;, +Destruct&lt;Self::Item&gt;, +Sum&lt;Self::Item&gt;&gt;(self: T) -&gt; Self::Item</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-iterator.html">iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html">Iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html#sum">sum</a></p>
+<pre><code class="language-cairo">fn sum&lt;T, T, +Destruct&lt;T&gt;, +Destruct&lt;Self::Item&gt;, +Sum&lt;Self::Item&gt;&gt;(self: T) -&gt; <a href="core-iter-traits-iterator-Iterator.html">Iterator&lt;T&gt;Item</a>
+</code></pre>
 <h3 id="product"><a class="header" href="#product">product</a></h3>
-<p>Iterates over the entire iterator, multiplying all the elementsAn empty iterator returns the one value of the type.  # PanicsWhen calling <code>product()</code> and a primitive integer type is being returned, this method will panic if the computation overflows.  # Examples</p>
+<p>Iterates over the entire iterator, multiplying all the elements
+An empty iterator returns the one value of the type.</p>
+<h1 id="panics-3"><a class="header" href="#panics-3">Panics</a></h1>
+<p>When calling <code>product()</code> and a primitive integer type is being returned, this
+method will panic if the computation overflows.</p>
+<h1 id="examples-17"><a class="header" href="#examples-17">Examples</a></h1>
 <pre><code class="language-cairo">fn factorial(n: u32) -&gt; u32 {
     (1..=n).into_iter().product()
 }
@@ -478,10 +638,19 @@ assert_eq!(factorial(0), 1);
 assert_eq!(factorial(1), 1);
 assert_eq!(factorial(5), 120);
 </code></pre>
-<p>Fully qualified path: <code>core::iter::traits::iterator::Iterator::product</code></p>
-<pre><code class="language-rust">fn product&lt;+Destruct&lt;T&gt;, +Destruct&lt;Self::Item&gt;, +Product&lt;Self::Item&gt;&gt;(self: T) -&gt; Self::Item</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-iterator.html">iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html">Iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html#product">product</a></p>
+<pre><code class="language-cairo">fn product&lt;T, T, +Destruct&lt;T&gt;, +Destruct&lt;Self::Item&gt;, +Product&lt;Self::Item&gt;&gt;(self: T) -&gt; <a href="core-iter-traits-iterator-Iterator.html">Iterator&lt;T&gt;Item</a>
+</code></pre>
 <h3 id="chain"><a class="header" href="#chain">chain</a></h3>
-<p>Takes two iterators and creates a new iterator over both in sequence.<code>chain()</code> will return a new iterator which will first iterate over values from the first iterator and then over values from the second iterator.In other words, it links two iterators together, in a chain. 🔗Arguments do not have to be of the same type as long as the underlying iterated over items are.  # ExamplesBasic usage:</p>
+<p>Takes two iterators and creates a new iterator over both in sequence.
+<code>chain()</code> will return a new iterator which will first iterate over
+values from the first iterator and then over values from the second
+iterator.
+In other words, it links two iterators together, in a chain. 🔗
+Arguments do not have to be of the same type as long as the underlying iterated
+over items are.</p>
+<h1 id="examples-18"><a class="header" href="#examples-18">Examples</a></h1>
+<p>Basic usage:</p>
 <pre><code class="language-cairo">use core::ops::Range;
 
 let a: Array&lt;u8&gt; = array![7, 8, 9];
@@ -499,7 +668,10 @@ assert_eq!(iter.next(), Option::Some(3));
 assert_eq!(iter.next(), Option::Some(4));
 assert_eq!(iter.next(), Option::None);
 </code></pre>
-<p>Since the argument to <code>chain()</code> uses <a href="./core-iter-traits-collect-IntoIterator.html"><code>IntoIterator</code></a>, we can pass anything that can be converted into an <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a>, not just an <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a> itself. For example, arrays implement <a href="./core-iter-traits-collect-IntoIterator.html"><code>IntoIterator</code></a>, and so can be passed to <code>chain()</code> directly:</p>
+<p>Since the argument to <code>chain()</code> uses <a href="./core-iter-traits-collect-IntoIterator.html"><code>IntoIterator</code></a>, we can pass
+anything that can be converted into an <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a>, not just an
+<a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a> itself. For example, arrays implement
+<a href="./core-iter-traits-collect-IntoIterator.html"><code>IntoIterator</code></a>, and so can be passed to <code>chain()</code> directly:</p>
 <pre><code class="language-cairo">let a = array![1, 2, 3];
 let b = array![4, 5, 6];
 
@@ -513,30 +685,25 @@ assert_eq!(iter.next(), Option::Some(5));
 assert_eq!(iter.next(), Option::Some(6));
 assert_eq!(iter.next(), Option::None);
 </code></pre>
-<p>Fully qualified path: <code>core::iter::traits::iterator::Iterator::chain</code></p>
-<pre><code class="language-rust">fn chain&lt;
-    U,
-    impl IntoIterU: IntoIterator&lt;U&gt;,
-    +TypeEqual&lt;Self::Item, IntoIterU::Iterator::Item&gt;,
-    +Destruct&lt;T&gt;,
-&gt;(
-    self: T, other: U,
-) -&gt; Chain&lt;T, IntoIterU::IntoIter&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-iterator.html">iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html">Iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html#chain">chain</a></p>
+<pre><code class="language-cairo">fn chain&lt;T, T, U, impl IntoIterU: IntoIterator&lt;U&gt;, +TypeEqual&lt;Self::Item, IntoIterU::Iterator::Item&gt;, +Destruct&lt;T&gt;&gt;(self: T, other: U) -&gt; <a href="core-iter-adapters-chain-Chain.html">Chain&lt;T, IntoIter&gt;</a>
+</code></pre>
 <h2 id="trait-types"><a class="header" href="#trait-types">Trait types</a></h2>
 <h3 id="item"><a class="header" href="#item">Item</a></h3>
 <p>The type of the elements being iterated over.</p>
-<p>Fully qualified path: <code>core::iter::traits::iterator::Iterator::Item</code></p>
-<pre><code class="language-rust">type Item;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-iterator.html">iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html">Iterator</a>::<a href="./core-iter-traits-iterator-Iterator.html#item">Item</a></p>
+<pre><code class="language-cairo">type Item;
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-iter-traits-collect-IntoIterator.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-iter-traits-iterator-traits.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-metaprogramming-TypeEqual.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-metaprogramming.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -546,33 +713,17 @@ assert_eq!(iter.next(), Option::None);
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-iter-traits-collect-IntoIterator.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-iter-traits-iterator-traits.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-metaprogramming-TypeEqual.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-metaprogramming.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

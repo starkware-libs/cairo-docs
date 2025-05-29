@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -154,36 +157,40 @@
                     <main>
                         <h1 id="blockinfo"><a class="header" href="#blockinfo">BlockInfo</a></h1>
 <p>Information about the current block.</p>
-<p>Fully qualified path: <code>core::starknet::info::BlockInfo</code></p>
-<pre><code class="language-rust">#[derive(Copy, Drop, Debug, Serde)]
-pub struct BlockInfo {
-    pub block_number: u64,
-    pub block_timestamp: u64,
-    pub sequencer_address: ContractAddress,
-}</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-info.html">info</a>::<a href="./core-starknet-info-BlockInfo.html">BlockInfo</a></p>
+<pre><code class="language-cairo"><span class="boring">[derive(Copy, Drop, Debug, Serde)]
+</span>pub struct BlockInfo {
+    pub block_number: <a href="core-integer-u64.html">u64</a>,
+    pub block_timestamp: <a href="core-integer-u64.html">u64</a>,
+    pub sequencer_address: <a href="core-starknet-contract_address-ContractAddress.html">ContractAddress</a>,
+}
+</code></pre>
 <h2 id="members"><a class="header" href="#members">Members</a></h2>
 <h3 id="block_number"><a class="header" href="#block_number">block_number</a></h3>
 <p>The number, that is, the height, of this block.</p>
-<p>Fully qualified path: <code>core::starknet::info::BlockInfo::block_number</code></p>
-<pre><code class="language-rust">pub block_number: u64</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-info.html">info</a>::<a href="./core-starknet-info-BlockInfo.html">BlockInfo</a>::<a href="./core-starknet-info-BlockInfo.html#block_number">block_number</a></p>
+<pre><code class="language-cairo">pub block_number: <a href="core-integer-u64.html">u64</a>
+</code></pre>
 <h3 id="block_timestamp"><a class="header" href="#block_timestamp">block_timestamp</a></h3>
 <p>The time at which the sequencer began building the block, in seconds since the Unix epoch.</p>
-<p>Fully qualified path: <code>core::starknet::info::BlockInfo::block_timestamp</code></p>
-<pre><code class="language-rust">pub block_timestamp: u64</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-info.html">info</a>::<a href="./core-starknet-info-BlockInfo.html">BlockInfo</a>::<a href="./core-starknet-info-BlockInfo.html#block_timestamp">block_timestamp</a></p>
+<pre><code class="language-cairo">pub block_timestamp: <a href="core-integer-u64.html">u64</a>
+</code></pre>
 <h3 id="sequencer_address"><a class="header" href="#sequencer_address">sequencer_address</a></h3>
 <p>The Starknet address of the sequencer that created the block.</p>
-<p>Fully qualified path: <code>core::starknet::info::BlockInfo::sequencer_address</code></p>
-<pre><code class="language-rust">pub sequencer_address: ContractAddress</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-info.html">info</a>::<a href="./core-starknet-info-BlockInfo.html">BlockInfo</a>::<a href="./core-starknet-info-BlockInfo.html#sequencer_address">sequencer_address</a></p>
+<pre><code class="language-cairo">pub sequencer_address: <a href="core-starknet-contract_address-ContractAddress.html">ContractAddress</a>
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-starknet-info-v2-TxInfo.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-starknet-info-structs.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-starknet-secp256_trait-Signature.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-starknet-constants.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -193,33 +200,17 @@ pub struct BlockInfo {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-starknet-info-v2-TxInfo.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-starknet-info-structs.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-starknet-secp256_trait-Signature.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-starknet-constants.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

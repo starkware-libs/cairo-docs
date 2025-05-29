@@ -1,6 +1,10 @@
 # Neg
 
-The unary negation operator `-`.  # ExamplesAn implementation of `Neg` for `Sign`, which allows the use of `-` to negate its value.
+The unary negation operator `-`.
+# Examples
+
+An implementation of `Neg` for `Sign`, which allows the use of `-` to
+negate its value.
 ```cairo
 #[derive(Copy, Drop, PartialEq)]
 enum Sign {
@@ -27,22 +31,24 @@ assert!(-Sign::Negative == Sign::Positive);
 assert!(-Sign::Zero == Sign::Zero);
 ```
 
-Fully qualified path: `core::traits::Neg`
+Fully qualified path: [core](./core.md)::[traits](./core-traits.md)::[Neg](./core-traits-Neg.md)
 
-<pre><code class="language-rust">pub trait Neg&lt;T&gt;</code></pre>
+<pre><code class="language-cairo">pub trait Neg&lt;T&gt;</code></pre>
 
 ## Trait functions
 
 ### neg
 
-Performs the unary `-` operation.  # Examples
+Performs the unary `-` operation.
+# Examples
+
 ```cairo
 let x: i8 = 1;
 assert!(-x == -1);
 ```
 
-Fully qualified path: `core::traits::Neg::neg`
+Fully qualified path: [core](./core.md)::[traits](./core-traits.md)::[Neg](./core-traits-Neg.md)::[neg](./core-traits-Neg.md#neg-1)
 
-<pre><code class="language-rust">fn neg(a: T) -&gt; T</code></pre>
+<pre><code class="language-cairo">fn neg&lt;T, T&gt;(a: T) -&gt; T</code></pre>
 
 

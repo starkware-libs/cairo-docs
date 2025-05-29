@@ -1,6 +1,15 @@
 # IntoIterator
 
-Conversion into an [`Iterator`](./core-iter-traits-iterator-Iterator.md).By implementing `IntoIterator` for a type, you define how it will be converted to an iterator. This is common for types which describe a collection of some kind.One benefit of implementing `IntoIterator` is that your type will work with Cairo's `for` loop syntax.See also: [`FromIterator`](./core-iter-traits-collect-FromIterator.md).  # ExamplesBasic usage:
+Conversion into an [`Iterator`](./core-iter-traits-iterator-Iterator.md).
+By implementing `IntoIterator` for a type, you define how it will be
+converted to an iterator. This is common for types which describe a
+collection of some kind.
+One benefit of implementing `IntoIterator` is that your type will work
+with Cairo's `for` loop syntax.
+See also: [`FromIterator`](./core-iter-traits-collect-FromIterator.md).
+# Examples
+
+Basic usage:
 ```cairo
 let mut iter = array![1, 2, 3].into_iter();
 
@@ -9,6 +18,7 @@ assert!(Some(2) == iter.next());
 assert!(Some(3) == iter.next());
 assert!(None == iter.next());
 ```
+
 Implementing `IntoIterator` for your type:
 ```cairo
 // A sample collection, that's just a wrapper over `Array<u32>`
@@ -56,15 +66,18 @@ for i in c {
 };
 ```
 
-Fully qualified path: `core::iter::traits::collect::IntoIterator`
+Fully qualified path: [core](./core.md)::[iter](./core-iter.md)::[traits](./core-iter-traits.md)::[collect](./core-iter-traits-collect.md)::[IntoIterator](./core-iter-traits-collect-IntoIterator.md)
 
-<pre><code class="language-rust">pub trait IntoIterator&lt;T&gt;</code></pre>
+<pre><code class="language-cairo">pub trait IntoIterator&lt;T&gt;</code></pre>
 
 ## Trait functions
 
 ### into_iter
 
-Creates an iterator from a value.See the [module-level documentation](./core-iter.md) for more.  # Examples
+Creates an iterator from a value.
+See the [module-level documentation](./core-iter.md) for more.
+# Examples
+
 ```cairo
 let mut iter = array![1, 2, 3].into_iter();
 
@@ -74,9 +87,9 @@ assert_eq!(Some(3), iter.next());
 assert_eq!(None, iter.next());
 ```
 
-Fully qualified path: `core::iter::traits::collect::IntoIterator::into_iter`
+Fully qualified path: [core](./core.md)::[iter](./core-iter.md)::[traits](./core-iter-traits.md)::[collect](./core-iter-traits-collect.md)::[IntoIterator](./core-iter-traits-collect-IntoIterator.md)::[into_iter](./core-iter-traits-collect-IntoIterator.md#into_iter)
 
-<pre><code class="language-rust">fn into_iter(self: T) -&gt; Self::IntoIter</code></pre>
+<pre><code class="language-cairo">fn into_iter&lt;T, T&gt;(self: T) -&gt; <a href="core-iter-traits-collect-IntoIterator.html">IntoIterator&lt;T&gt;IntoIter</a></code></pre>
 
 
 ## Trait types
@@ -85,8 +98,8 @@ Fully qualified path: `core::iter::traits::collect::IntoIterator::into_iter`
 
 The iterator type that will be created.
 
-Fully qualified path: `core::iter::traits::collect::IntoIterator::IntoIter`
+Fully qualified path: [core](./core.md)::[iter](./core-iter.md)::[traits](./core-iter-traits.md)::[collect](./core-iter-traits-collect.md)::[IntoIterator](./core-iter-traits-collect-IntoIterator.md)::[IntoIter](./core-iter-traits-collect-IntoIterator.md#intoiter)
 
-<pre><code class="language-rust">type IntoIter;</code></pre>
+<pre><code class="language-cairo">type IntoIter;</code></pre>
 
 

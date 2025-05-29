@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -154,32 +157,36 @@
                     <main>
                         <h1 id="call"><a class="header" href="#call">Call</a></h1>
 <p>A struct representing a call to a contract.</p>
-<p>Fully qualified path: <code>core::starknet::account::Call</code></p>
-<pre><code class="language-rust">#[derive(Drop, Copy, Serde, Debug)]
-pub struct Call {
-    pub to: ContractAddress,
-    pub selector: felt252,
-    pub calldata: Span&lt;felt252&gt;,
-}</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-account.html">account</a>::<a href="./core-starknet-account-Call.html">Call</a></p>
+<pre><code class="language-cairo"><span class="boring">[derive(Drop, Copy, Serde, Debug)]
+</span>pub struct Call {
+    pub to: <a href="core-starknet-contract_address-ContractAddress.html">ContractAddress</a>,
+    pub selector: <a href="core-felt252.html">felt252</a>,
+    pub calldata: <a href="core-array-Span.html">Span&lt;felt252&gt;</a>,
+}
+</code></pre>
 <h2 id="members"><a class="header" href="#members">Members</a></h2>
 <h3 id="to"><a class="header" href="#to">to</a></h3>
 <p>The address of the contract to call.</p>
-<p>Fully qualified path: <code>core::starknet::account::Call::to</code></p>
-<pre><code class="language-rust">pub to: ContractAddress</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-account.html">account</a>::<a href="./core-starknet-account-Call.html">Call</a>::<a href="./core-starknet-account-Call.html#to">to</a></p>
+<pre><code class="language-cairo">pub to: <a href="core-starknet-contract_address-ContractAddress.html">ContractAddress</a>
+</code></pre>
 <h3 id="selector"><a class="header" href="#selector">selector</a></h3>
 <p>The entry point selector in the called contract.</p>
-<p>Fully qualified path: <code>core::starknet::account::Call::selector</code></p>
-<pre><code class="language-rust">pub selector: felt252</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-account.html">account</a>::<a href="./core-starknet-account-Call.html">Call</a>::<a href="./core-starknet-account-Call.html#selector">selector</a></p>
+<pre><code class="language-cairo">pub selector: <a href="core-felt252.html">felt252</a>
+</code></pre>
 <h3 id="calldata"><a class="header" href="#calldata">calldata</a></h3>
 <p>The calldata to pass to entry point.</p>
-<p>Fully qualified path: <code>core::starknet::account::Call::calldata</code></p>
-<pre><code class="language-rust">pub calldata: Span&lt;felt252&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-account.html">account</a>::<a href="./core-starknet-account-Call.html">Call</a>::<a href="./core-starknet-account-Call.html#calldata">calldata</a></p>
+<pre><code class="language-cairo">pub calldata: <a href="core-array-Span.html">Span&lt;felt252&gt;</a>
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-starknet-eth_address-EthAddress.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-starknet-account-structs.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
@@ -193,7 +200,7 @@ pub struct Call {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-starknet-eth_address-EthAddress.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-starknet-account-structs.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
@@ -204,22 +211,6 @@ pub struct Call {
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

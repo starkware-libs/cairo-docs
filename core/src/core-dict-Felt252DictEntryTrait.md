@@ -2,15 +2,18 @@
 
 Basic trait for the `Felt252DictEntryTrait` type.
 
-Fully qualified path: `core::dict::Felt252DictEntryTrait`
+Fully qualified path: [core](./core.md)::[dict](./core-dict.md)::[Felt252DictEntryTrait](./core-dict-Felt252DictEntryTrait.md)
 
-<pre><code class="language-rust">pub trait Felt252DictEntryTrait&lt;T&gt;</code></pre>
+<pre><code class="language-cairo">pub trait Felt252DictEntryTrait&lt;T&gt;</code></pre>
 
 ## Trait functions
 
 ### finalize
 
-Finalizes the changes made to a dictionary entry and gives back the ownership of the dictionary.  # Examples
+Finalizes the changes made to a dictionary entry and gives back the ownership of the
+dictionary.
+# Examples
+
 ```cairo
 use core::dict::Felt252DictEntryTrait;
 
@@ -27,8 +30,8 @@ assert!(prev_value == a);
 assert!(dict.get(0) == new_value);
 ```
 
-Fully qualified path: `core::dict::Felt252DictEntryTrait::finalize`
+Fully qualified path: [core](./core.md)::[dict](./core-dict.md)::[Felt252DictEntryTrait](./core-dict-Felt252DictEntryTrait.md)::[finalize](./core-dict-Felt252DictEntryTrait.md#finalize)
 
-<pre><code class="language-rust">fn finalize(self: Felt252DictEntry&lt;T&gt;, new_value: T) -&gt; Felt252Dict&lt;T&gt;</code></pre>
+<pre><code class="language-cairo">fn finalize&lt;T, T&gt;(self: Felt252DictEntry&lt;T&gt;, new_value: T) -&gt; <a href="core-dict-Felt252Dict.html">Felt252Dict&lt;T&gt;</a></code></pre>
 
 

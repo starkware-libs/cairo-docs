@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,26 +156,40 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="serde"><a class="header" href="#serde">Serde</a></h1>
-<p>A trait that allows for serializing and deserializing values of any type.The <code>Serde&lt;T&gt;</code> trait defines two core operations: - <code>serialize</code>: Converts a value into a sequence of <code>felt252</code>s - <code>deserialize</code>: Reconstructs a value from a sequence of <code>felt252</code>s  # Examples  ## Simple Types (u8, u16, u32, u64, u128)Simple types are serialized into a single <code>felt252</code>:</p>
+<p>A trait that allows for serializing and deserializing values of any type.
+The <code>Serde&lt;T&gt;</code> trait defines two core operations:</p>
+<ul>
+<li><code>serialize</code>: Converts a value into a sequence of <code>felt252</code>s</li>
+<li><code>deserialize</code>: Reconstructs a value from a sequence of <code>felt252</code>s</li>
+</ul>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
+<h2 id="simple-types-u8-u16-u32-u64-u128"><a class="header" href="#simple-types-u8-u16-u32-u64-u128">Simple Types (u8, u16, u32, u64, u128)</a></h2>
+<p>Simple types are serialized into a single <code>felt252</code>:</p>
 <pre><code class="language-cairo">let value: u8 = 42;
 let mut output: Array&lt;felt252&gt; = array![];
 value.serialize(ref output);
 assert!(output == array![42]); // Single value
 </code></pre>
-<h2 id="compound-types-u256compound-types-may-be-serialized-into-multiple-felt252-values"><a class="header" href="#compound-types-u256compound-types-may-be-serialized-into-multiple-felt252-values">Compound Types (u256)Compound types may be serialized into multiple <code>felt252</code> values:</a></h2>
+<h2 id="compound-types-u256"><a class="header" href="#compound-types-u256">Compound Types (u256)</a></h2>
+<p>Compound types may be serialized into multiple <code>felt252</code> values:</p>
 <pre><code class="language-cairo">let value: u256 = u256 { low: 1, high: 2 };
 let mut output: Array&lt;felt252&gt; = array![];
 value.serialize(ref output);
 assert!(output == array![1, 2]); // Two `felt252`s: low and high
 </code></pre>
-<h1 id="implementing-serde---using-the-derive-macroin-most-cases-you-can-use-the-deriveserde-attribute-to-automatically-generate-the-implementation-for-your-type"><a class="header" href="#implementing-serde---using-the-derive-macroin-most-cases-you-can-use-the-deriveserde-attribute-to-automatically-generate-the-implementation-for-your-type">Implementing <code>Serde</code>  ## Using the <code>Derive</code> MacroIn most cases, you can use the <code>#[derive(Serde)]</code> attribute to automatically generate the implementation for your type:</a></h1>
+<h1 id="implementing-serde"><a class="header" href="#implementing-serde">Implementing <code>Serde</code></a></h1>
+<h2 id="using-the-derive-macro"><a class="header" href="#using-the-derive-macro">Using the <code>Derive</code> Macro</a></h2>
+<p>In most cases, you can use the <code>#[derive(Serde)]</code> attribute to automatically generate the
+implementation for your type:</p>
 <pre><code class="language-cairo"><span class="boring">[derive(Serde)]
 </span>struct Point {
     x: u32,
     y: u32
 }
 </code></pre>
-<h2 id="manual-implementationshould-you-need-to-customize-the-serialization-behavior-for-a-type-in-a-way-that-derive-does-not-support-you-can-implement-the-serde-yourself"><a class="header" href="#manual-implementationshould-you-need-to-customize-the-serialization-behavior-for-a-type-in-a-way-that-derive-does-not-support-you-can-implement-the-serde-yourself">Manual ImplementationShould you need to customize the serialization behavior for a type in a way that derive does not support, you can implement the <code>Serde</code> yourself:</a></h2>
+<h2 id="manual-implementation"><a class="header" href="#manual-implementation">Manual Implementation</a></h2>
+<p>Should you need to customize the serialization behavior for a type in a way that derive does not
+support, you can implement the <code>Serde</code> yourself:</p>
 <pre><code class="language-cairo">impl PointSerde of Serde&lt;Point&gt; {
     fn serialize(self: @Point, ref output: Array&lt;felt252&gt;) {
         output.append((*self.x).into());
@@ -187,37 +204,48 @@ assert!(output == array![1, 2]); // Two `felt252`s: low and high
     }
 }
 </code></pre>
-<p>Fully qualified path: <code>core::serde::Serde</code></p>
-<pre><code class="language-rust">pub trait Serde&lt;T&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-serde.html">serde</a>::<a href="./core-serde-Serde.html">Serde</a></p>
+<pre><code class="language-cairo">pub trait Serde&lt;T&gt;
+</code></pre>
 <h2 id="trait-functions"><a class="header" href="#trait-functions">Trait functions</a></h2>
 <h3 id="serialize"><a class="header" href="#serialize">serialize</a></h3>
-<p>Serializes a value into a sequence of <code>felt252</code>s.  # Examples</p>
+<p>Serializes a value into a sequence of <code>felt252</code>s.</p>
+<h1 id="examples-1"><a class="header" href="#examples-1">Examples</a></h1>
 <pre><code class="language-cairo">let value: u256 = 1;
 let mut serialized: Array&lt;felt252&gt; = array![];
 value.serialize(ref serialized);
 assert!(serialized == array![1, 0]); // `serialized` contains the [low, high] parts of the
-`u256` value ```
-</code></pre>
-<p>Fully qualified path: <code>core::serde::Serde::serialize</code></p>
-<pre><code class="language-rust">fn serialize(self: @T, ref output: Array&lt;felt252&gt;)</code></pre>
-<h3 id="deserialize"><a class="header" href="#deserialize">deserialize</a></h3>
-<p>Deserializes a value from a sequence of <code>felt252</code>s. If the value cannot be deserialized, returns <code>None</code>.  # Examples</p>
-<pre><code class="language-cairo">let mut serialized: Span&lt;felt252&gt; = array![1, 0].span();
+`u256` value ``````
+
+Fully qualified path: [core](./core.md)::[serde](./core-serde.md)::[Serde](./core-serde-Serde.md)::[serialize](./core-serde-Serde.md#serialize)
+
+&lt;pre&gt;&lt;code class="language-cairo"&gt;fn serialize&amp;lt;T, T&amp;gt;(self: @T, ref output: &lt;a href="core-array-Array.html"&gt;Array&amp;lt;felt252&amp;gt;&lt;/a&gt;)&lt;/code&gt;&lt;/pre&gt;
+
+
+<span class="boring">## deserialize
+</span>
+Deserializes a value from a sequence of `felt252`s.
+If the value cannot be deserialized, returns `None`.
+<span class="boring"> Examples
+</span>
+```cairo
+let mut serialized: Span&lt;felt252&gt; = array![1, 0].span();
 let value: u256 = Serde::deserialize(ref serialized).unwrap();
 assert!(value == 1);
 </code></pre>
-<p>Fully qualified path: <code>core::serde::Serde::deserialize</code></p>
-<pre><code class="language-rust">fn deserialize(ref serialized: Span&lt;felt252&gt;) -&gt; Option&lt;T&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-serde.html">serde</a>::<a href="./core-serde-Serde.html">Serde</a>::<a href="./core-serde-Serde.html#deserialize">deserialize</a></p>
+<pre><code class="language-cairo">fn deserialize&lt;T, T&gt;(ref serialized: <a href="core-array-Span.html">Span&lt;felt252&gt;</a>) -&gt; <a href="core-option-Option.html">Option&lt;T&gt;</a>
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-pedersen-PedersenTrait.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-serde-traits.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-poseidon-PoseidonTrait.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-sha256.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -227,33 +255,17 @@ assert!(value == 1);
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-pedersen-PedersenTrait.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-serde-traits.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-poseidon-PoseidonTrait.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-sha256.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

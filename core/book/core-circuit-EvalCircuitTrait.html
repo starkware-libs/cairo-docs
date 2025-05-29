@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,19 +156,33 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="evalcircuittrait"><a class="header" href="#evalcircuittrait">EvalCircuitTrait</a></h1>
-<p>Fully qualified path: <code>core::circuit::EvalCircuitTrait</code></p>
-<pre><code class="language-rust">pub trait EvalCircuitTrait&lt;C&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-circuit.html">circuit</a>::<a href="./core-circuit-EvalCircuitTrait.html">EvalCircuitTrait</a></p>
+<pre><code class="language-cairo">pub trait EvalCircuitTrait&lt;C&gt;
+</code></pre>
 <h2 id="trait-functions"><a class="header" href="#trait-functions">Trait functions</a></h2>
 <h3 id="eval"><a class="header" href="#eval">eval</a></h3>
-<p>Evaluates the circuit with the given modulus.  # Arguments<code>modulus</code> - The modulus to use for arithmetic operations  # ReturnsResult containing either the circuit outputs or a failure indication</p>
-<p>Fully qualified path: <code>core::circuit::EvalCircuitTrait::eval</code></p>
-<pre><code class="language-rust">fn eval(self: CircuitData&lt;C&gt;, modulus: CircuitModulus) -&gt; crate::circuit::EvalCircuitResult&lt;C&gt;</code></pre>
+<p>Evaluates the circuit with the given modulus.</p>
+<h1 id="arguments"><a class="header" href="#arguments">Arguments</a></h1>
+<ul>
+<li><code>modulus</code> - The modulus to use for arithmetic operations</li>
+</ul>
+<h1 id="returns"><a class="header" href="#returns">Returns</a></h1>
+<p>Result containing either the circuit outputs or a failure indication</p>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-circuit.html">circuit</a>::<a href="./core-circuit-EvalCircuitTrait.html">EvalCircuitTrait</a>::<a href="./core-circuit-EvalCircuitTrait.html#eval">eval</a></p>
+<pre><code class="language-cairo">fn eval&lt;C, C&gt;(self: CircuitData&lt;C&gt;, modulus: <a href="core-circuit-CircuitModulus.html">CircuitModulus</a>) -&gt; <a href="core-result-Result.html">Result&lt;CircuitOutputs&lt;C&gt;, (CircuitPartialOutputs&lt;C&gt;, CircuitFailureGuarantee)&gt;</a>
+</code></pre>
 <h3 id="eval_ex"><a class="header" href="#eval_ex">eval_ex</a></h3>
-<p>Evaluates the circuit with an explicit descriptor and modulus.  # Arguments<code>descriptor</code> - The circuit descriptor * <code>modulus</code> - The modulus to use for arithmetic operations  # ReturnsResult containing either the circuit outputs or a failure indication</p>
-<p>Fully qualified path: <code>core::circuit::EvalCircuitTrait::eval_ex</code></p>
-<pre><code class="language-rust">fn eval_ex(
-    self: CircuitData&lt;C&gt;, descriptor: CircuitDescriptor&lt;C&gt;, modulus: CircuitModulus,
-) -&gt; crate::circuit::EvalCircuitResult&lt;C&gt;</code></pre>
+<p>Evaluates the circuit with an explicit descriptor and modulus.</p>
+<h1 id="arguments-1"><a class="header" href="#arguments-1">Arguments</a></h1>
+<ul>
+<li><code>descriptor</code> - The circuit descriptor</li>
+<li><code>modulus</code> - The modulus to use for arithmetic operations</li>
+</ul>
+<h1 id="returns-1"><a class="header" href="#returns-1">Returns</a></h1>
+<p>Result containing either the circuit outputs or a failure indication</p>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-circuit.html">circuit</a>::<a href="./core-circuit-EvalCircuitTrait.html">EvalCircuitTrait</a>::<a href="./core-circuit-EvalCircuitTrait.html#eval_ex">eval_ex</a></p>
+<pre><code class="language-cairo">fn eval_ex&lt;C, C&gt;(self: CircuitData&lt;C&gt;, descriptor: CircuitDescriptor&lt;C&gt;, modulus: <a href="core-circuit-CircuitModulus.html">CircuitModulus</a>) -&gt; <a href="core-result-Result.html">Result&lt;CircuitOutputs&lt;C&gt;, (CircuitPartialOutputs&lt;C&gt;, CircuitFailureGuarantee)&gt;</a>
+</code></pre>
 
                     </main>
 
@@ -175,7 +192,7 @@
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-box-BoxTrait.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-circuit-impls.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -189,29 +206,13 @@
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-box-BoxTrait.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-circuit-impls.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

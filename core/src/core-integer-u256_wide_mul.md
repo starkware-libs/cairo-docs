@@ -1,6 +1,6 @@
 # u256_wide_mul
 
-Fully qualified path: `core::integer::u256_wide_mul`
+Fully qualified path: [core](./core.md)::[integer](./core-integer.md)::[u256_wide_mul](./core-integer-u256_wide_mul.md)
 
-<pre><code class="language-rust">pub fn u256_wide_mul(a: u256, b: u256) -&gt; u512 nopanic</code></pre>
+<pre><code class="language-cairo">pub fn u256_wide_mul(a: <a href="core-integer-u256.html">u256</a>, b: <a href="core-integer-u256.html">u256</a>) -&gt; <a href="core-integer-u512.html">u512</a></code></pre>
 

@@ -1,6 +1,11 @@
 # DerefMut
 
-A trait for dereferencing in mutable contexts.This trait is similar to `Deref` but specifically handles cases where the value accessed is mutable. Despite its name, `DerefMut` does NOT allow modifying the inner value - it only indicates that the container itself is mutable.  # Examples
+A trait for dereferencing in mutable contexts.
+This trait is similar to `Deref` but specifically handles cases where the value
+accessed is mutable. Despite its name, `DerefMut` does NOT allow modifying the
+inner value - it only indicates that the container itself is mutable.
+# Examples
+
 ```cairo
 #[derive(Copy, Drop)]
 struct MutWrapper<T> {
@@ -24,9 +29,9 @@ let y = MutWrapper { value: 42 };
 let val = y.deref_mut(); // Compile error
 ```
 
-Fully qualified path: `core::ops::deref::DerefMut`
+Fully qualified path: [core](./core.md)::[ops](./core-ops.md)::[deref](./core-ops-deref.md)::[DerefMut](./core-ops-deref-DerefMut.md)
 
-<pre><code class="language-rust">pub trait DerefMut&lt;T&gt;</code></pre>
+<pre><code class="language-cairo">pub trait DerefMut&lt;T&gt;</code></pre>
 
 ## Trait functions
 
@@ -34,9 +39,9 @@ Fully qualified path: `core::ops::deref::DerefMut`
 
 Returns the dereferenced value.
 
-Fully qualified path: `core::ops::deref::DerefMut::deref_mut`
+Fully qualified path: [core](./core.md)::[ops](./core-ops.md)::[deref](./core-ops-deref.md)::[DerefMut](./core-ops-deref-DerefMut.md)::[deref_mut](./core-ops-deref-DerefMut.md#deref_mut)
 
-<pre><code class="language-rust">fn deref_mut(ref self: T) -&gt; Self::Target</code></pre>
+<pre><code class="language-cairo">fn deref_mut&lt;T, T&gt;(ref self: T) -&gt; <a href="core-ops-deref-DerefMut.html">DerefMut&lt;T&gt;Target</a></code></pre>
 
 
 ## Trait types
@@ -45,8 +50,8 @@ Fully qualified path: `core::ops::deref::DerefMut::deref_mut`
 
 The type of the dereferenced value.
 
-Fully qualified path: `core::ops::deref::DerefMut::Target`
+Fully qualified path: [core](./core.md)::[ops](./core-ops.md)::[deref](./core-ops-deref.md)::[DerefMut](./core-ops-deref-DerefMut.md)::[Target](./core-ops-deref-DerefMut.md#target)
 
-<pre><code class="language-rust">type Target;</code></pre>
+<pre><code class="language-cairo">type Target;</code></pre>
 
 

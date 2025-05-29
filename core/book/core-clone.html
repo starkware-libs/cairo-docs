@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,12 +156,20 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="clone"><a class="header" href="#clone">clone</a></h1>
-<p>The <code>Clone</code> trait provides the ability to duplicate instances of types that cannot be 'implicitly copied'.In Cairo, some simple types are "implicitly copyable": when you assign them or pass them as arguments, the receiver will get a copy, leaving the original value in place. These types do not require allocation to copy, and are not at risk of accessing un-allocated memory, so the compiler considers them cheap and safe to copy. For other types, copies must be made explicitly, by convention implementing the <a href="./core-clone-Clone.html"><code>Clone</code></a> trait and calling the <a href="%60Clone::clone%60"><code>Clone::clone</code></a> method.  # Examples</p>
+<p>The <code>Clone</code> trait provides the ability to duplicate instances of types that cannot be
+'implicitly copied'.
+In Cairo, some simple types are "implicitly copyable": when you assign them or pass them as
+arguments, the receiver will get a copy, leaving the original value in place. These types do not
+require allocation to copy, and are not at risk of accessing un-allocated memory, so the
+compiler considers them cheap and safe to copy. For other types, copies must be made explicitly,
+by convention implementing the <a href="./core-clone-Clone.html"><code>Clone</code></a> trait and calling the <code>Clone::clone</code> method.</p>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
 <pre><code class="language-cairo">let arr = array![1, 2, 3];
 let cloned_arr = arr.clone();
 assert!(arr == cloned_arr);
 </code></pre>
-<p>You can use the <code>#[derive(Clone)]</code> attribute to automatically generate the implementation for your type:</p>
+<p>You can use the <code>#[derive(Clone)]</code> attribute to automatically generate the
+implementation for your type:</p>
 <pre><code class="language-cairo"><span class="boring">[derive(Clone, Drop)]
 </span>struct Sheep {
    name: ByteArray,
@@ -174,21 +185,21 @@ fn main() {
    let cloned_sheep = dolly.clone();  // Famous cloned sheep!
 }
 </code></pre>
-<p>Fully qualified path: <code>core::clone</code></p>
-<h2 id="traits"><a class="header" href="#traits">Traits</a></h2>
-<ul>
-<li><a href="./core-clone-Clone.html">Clone</a></li>
-</ul>
-
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-clone.html">clone</a></p>
+<h2 id="traits"><a class="header" href="#traits"><a href="./core-clone-traits.html">Traits</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-clone-Clone.html">Clone</a></td><td style="text-align: left">A common trait for the ability to explicitly duplicate an object. Differs from <code>Copy</code>  in that <code>Copy</code>  is implicit and inexpensive, while <code>Clone</code>  is always explicit and may or may not be expensive.<a href="./core-clone-Clone.html">...</a></td></tr>
+</tbody></table>
+</div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-option.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-option-DestructOption.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-ec.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-clone-traits.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -198,33 +209,17 @@ fn main() {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-option.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-option-DestructOption.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-ec.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-clone-traits.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

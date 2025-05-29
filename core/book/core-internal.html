@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,50 +156,36 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="internal"><a class="header" href="#internal">internal</a></h1>
-<p>Fully qualified path: <code>core::internal</code></p>
-<h2 id="structs"><a class="header" href="#structs">Structs</a></h2>
-<ul>
-<li>
-<p><a href="./core-internal-DropWith.html">DropWith</a></p>
-</li>
-<li>
-<p><a href="./core-internal-InferDrop.html">InferDrop</a></p>
-</li>
-<li>
-<p><a href="./core-internal-DestructWith.html">DestructWith</a></p>
-</li>
-<li>
-<p><a href="./core-internal-InferDestruct.html">InferDestruct</a></p>
-</li>
-</ul>
-<h2 id="enums"><a class="header" href="#enums">Enums</a></h2>
-<ul>
-<li>
-<p><a href="./core-internal-OptionRev.html">OptionRev</a></p>
-</li>
-<li>
-<p><a href="./core-internal-LoopResult.html">LoopResult</a></p>
-</li>
-</ul>
-<h2 id="extern-functions"><a class="header" href="#extern-functions">Extern functions</a></h2>
-<ul>
-<li>
-<p><a href="./core-internal-revoke_ap_tracking.html">revoke_ap_tracking</a></p>
-</li>
-<li>
-<p><a href="./core-internal-require_implicit.html">require_implicit</a></p>
-</li>
-</ul>
-
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-internal.html">internal</a></p>
+<h2 id="structs"><a class="header" href="#structs"><a href="./core-internal-structs.html">Structs</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-internal-DropWith.html">DropWith</a></td><td style="text-align: left">Wrapper type to ensure that a type <code>T</code>  is dropped using a specific <code>Drop</code>  impl.<a href="./core-internal-DropWith.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-internal-InferDrop.html">InferDrop</a></td><td style="text-align: left">Helper to have the same interface as <code>DropWith</code>  while inferring the <code>Drop</code>  implementation.<a href="./core-internal-InferDrop.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-internal-DestructWith.html">DestructWith</a></td><td style="text-align: left">Wrapper type to ensure that a type <code>T</code>  is destructed using a specific <code>Destruct</code>  impl.<a href="./core-internal-DestructWith.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-internal-InferDestruct.html">InferDestruct</a></td><td style="text-align: left">Helper to have the same interface as <code>DestructWith</code>  while inferring the <code>Destruct</code> implementation.<a href="./core-internal-InferDestruct.html">...</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="enums"><a class="header" href="#enums"><a href="./core-internal-enums.html">Enums</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-internal-OptionRev.html">OptionRev</a></td><td style="text-align: left">Same as <code>Option</code> , except that the order of the variants is reversed. This is used as the return type of some libfuncs for efficiency reasons.<a href="./core-internal-OptionRev.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-internal-LoopResult.html">LoopResult</a></td><td style="text-align: left">The return type for loops with an early return.<a href="./core-internal-LoopResult.html">...</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="extern-functions"><a class="header" href="#extern-functions"><a href="./core-internal-extern_functions.html">Extern functions</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-internal-revoke_ap_tracking.html">revoke_ap_tracking</a></td><td style="text-align: left"><a href="./core-internal-revoke_ap_tracking.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-internal-require_implicit.html">require_implicit</a></td><td style="text-align: left">Function to enforce that <code>Implicit</code>  is used by a function calling it. Note: This extern function is not mapped to a Sierra function, and all usages of it are removed during compilation.<a href="./core-internal-require_implicit.html">...</a></td></tr>
+</tbody></table>
+</div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-starknet.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-starknet-System.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-zeroable.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-internal-structs.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -206,33 +195,17 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-starknet.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-starknet-System.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-zeroable.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-internal-structs.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 
