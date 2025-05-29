@@ -2,11 +2,9 @@
 
 The `Option<T>` enum representing either `Some(value)` or `None`.
 
-Fully qualified path: `core::option::Option`
+Fully qualified path: [core](./core.md)::[option](./core-option.md)::[Option](./core-option-Option.md)
 
-<pre><code class="language-rust">#[must_use]
-#[derive(Copy, Drop, Debug, Serde, PartialEq)]
-pub enum Option&lt;T&gt; {
+<pre><code class="language-cairo">pub enum Option {
     Some: T,
     None,
 }</code></pre>
@@ -15,15 +13,15 @@ pub enum Option&lt;T&gt; {
 
 ### Some
 
-Fully qualified path: `core::option::Option::Some`
+Fully qualified path: [core](./core.md)::[option](./core-option.md)::[Option](./core-option-Option.md)::[Some](./core-option-Option.md#some)
 
-<pre><code class="language-rust">Some : T</code></pre>
+<pre><code class="language-cairo">Some: T</code></pre>
 
 
 ### None
 
-Fully qualified path: `core::option::Option::None`
+Fully qualified path: [core](./core.md)::[option](./core-option.md)::[Option](./core-option-Option.md)::[None](./core-option-Option.md#none)
 
-<pre><code class="language-rust">None</code></pre>
+<pre><code class="language-cairo">None</code></pre>
 
 

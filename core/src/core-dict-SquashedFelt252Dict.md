@@ -2,7 +2,7 @@
 
 A dictionary in a squashed state. It cannot be mutated anymore.
 
-Fully qualified path: `core::dict::SquashedFelt252Dict`
+Fully qualified path: [core](./core.md)::[dict](./core-dict.md)::[SquashedFelt252Dict](./core-dict-SquashedFelt252Dict.md)
 
-<pre><code class="language-rust">pub extern type SquashedFelt252Dict&lt;T&gt;</code></pre>
+<pre><code class="language-cairo">pub extern type SquashedFelt252Dict&lt;T&gt;;</code></pre>
 

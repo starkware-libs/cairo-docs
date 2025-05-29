@@ -1,10 +1,12 @@
 # emit_event_syscall
 
-Emits an event.  # Arguments`keys` - The keys of the event. * `data` - The data of the event.
+Emits an event.
+# Arguments
 
-Fully qualified path: `core::starknet::syscalls::emit_event_syscall`
+- `keys` - The keys of the event.
+- `data` - The data of the event.
 
-<pre><code class="language-rust">pub extern fn emit_event_syscall(
-    keys: Span&lt;felt252&gt;, data: Span&lt;felt252&gt;,
-) -&gt; SyscallResult&lt;()&gt; implicits(GasBuiltin, System) nopanic;</code></pre>
+Fully qualified path: [core](./core.md)::[starknet](./core-starknet.md)::[syscalls](./core-starknet-syscalls.md)::[emit_event_syscall](./core-starknet-syscalls-emit_event_syscall.md)
+
+<pre><code class="language-cairo">pub extern fn emit_event_syscall(keys: <a href="core-array-Span.html">Span&lt;felt252&gt;</a>, data: <a href="core-array-Span.html">Span&lt;felt252&gt;</a>) -&gt; <a href="core-result-Result.html">Result&lt;(), Array&lt;felt252&gt;&gt;</a> implicits(GasBuiltin, System) nopanic;</code></pre>
 

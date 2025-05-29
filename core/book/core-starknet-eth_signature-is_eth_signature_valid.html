@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,7 +156,20 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="is_eth_signature_valid"><a class="header" href="#is_eth_signature_valid">is_eth_signature_valid</a></h1>
-<p>Validates an Ethereum signature against a message hash and Ethereum address. Similar to <code>verify_eth_signature</code> but returns a <code>Result</code> instead of panicking. Also verifies that <code>r</code> and <code>s</code> components of the signature are in the range <code>[1, N)</code>, where N is the size of the curve.  # Arguments<code>msg_hash</code> - The 32-byte hash of the message that was signed * <code>signature</code> - The Ethereum signature containing <code>r</code>, <code>s</code> components and <code>y_parity</code> * <code>eth_address</code> - The expected Ethereum address of the signer  # ReturnsReturns <code>Ok(())</code> if the signature is valid, or <code>Err(felt252)</code> containing an error message if invalid.  # Examples</p>
+<p>Validates an Ethereum signature against a message hash and Ethereum address.
+Similar to <code>verify_eth_signature</code> but returns a <code>Result</code> instead of panicking.
+Also verifies that <code>r</code> and <code>s</code> components of the signature are in the range <code>[1, N)</code>,
+where N is the size of the curve.</p>
+<h1 id="arguments"><a class="header" href="#arguments">Arguments</a></h1>
+<ul>
+<li><code>msg_hash</code> - The 32-byte hash of the message that was signed</li>
+<li><code>signature</code> - The Ethereum signature containing <code>r</code>, <code>s</code> components and <code>y_parity</code></li>
+<li><code>eth_address</code> - The expected Ethereum address of the signer</li>
+</ul>
+<h1 id="returns"><a class="header" href="#returns">Returns</a></h1>
+<p>Returns <code>Ok(())</code> if the signature is valid, or <code>Err(felt252)</code> containing an error message if
+invalid.</p>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
 <pre><code class="language-cairo">use starknet::eth_address::EthAddress;
 use starknet::eth_signature::is_eth_signature_valid;
 use starknet::secp256_trait::Signature;
@@ -167,10 +183,9 @@ let eth_address: EthAddress = 0x767410c1bb448978bd42b984d7de5970bcaf5c43_u256
     .unwrap();
 assert!(is_eth_signature_valid(msg_hash, Signature { r, s, y_parity }, eth_address).is_ok());
 </code></pre>
-<p>Fully qualified path: <code>core::starknet::eth_signature::is_eth_signature_valid</code></p>
-<pre><code class="language-rust">pub fn is_eth_signature_valid(
-    msg_hash: u256, signature: Signature, eth_address: EthAddress,
-) -&gt; Result&lt;(), felt252&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-eth_signature.html">eth_signature</a>::<a href="./core-starknet-eth_signature-is_eth_signature_valid.html">is_eth_signature_valid</a></p>
+<pre><code class="language-cairo">pub fn is_eth_signature_valid(msg_hash: <a href="core-integer-u256.html">u256</a>, signature: <a href="core-starknet-secp256_trait-Signature.html">Signature</a>, eth_address: <a href="core-starknet-eth_address-EthAddress.html">EthAddress</a>) -&gt; <a href="core-result-Result.html">Result&lt;(), felt252&gt;</a>
+</code></pre>
 
                     </main>
 
@@ -201,22 +216,6 @@ assert!(is_eth_signature_valid(msg_hash, Signature { r, s, y_parity }, eth_addre
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

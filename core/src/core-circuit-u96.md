@@ -2,7 +2,7 @@
 
 A 96-bit unsigned integer type used as the basic building block for multi-limb arithmetic.
 
-Fully qualified path: `core::circuit::u96`
+Fully qualified path: [core](./core.md)::[circuit](./core-circuit.md)::[u96](./core-circuit-u96.md)
 
-<pre><code class="language-rust">pub type u96 = crate::internal::bounded_int::BoundedInt&lt;0, 79228162514264337593543950335&gt;;</code></pre>
+<pre><code class="language-cairo">pub type u96 =     crate::internal::bounded_int::BoundedInt&lt;0, 79228162514264337593543950335&gt;;</code></pre>
 

@@ -2,7 +2,7 @@
 
 General purpose implicits.
 
-Fully qualified path: `core::RangeCheck`
+Fully qualified path: [core](./core.md)::[RangeCheck](./core-RangeCheck.md)
 
-<pre><code class="language-rust">pub extern type RangeCheck</code></pre>
+<pre><code class="language-cairo">pub extern type RangeCheck;</code></pre>
 

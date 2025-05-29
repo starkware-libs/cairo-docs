@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,51 +156,58 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="storage_access"><a class="header" href="#storage_access">storage_access</a></h1>
-<p>Storage access primitives for Starknet contract storage.This module provides abstractions over the system calls for reading from and writing to Starknet contract storage. It includes traits and implementations for storing various data types efficiently.  # Storage ArchitectureStorage addresses range from <code>[0, 2^251)</code> * Base addresses can be combined with offsets, allowing storage of up to 255 values sequentially * Multiple storage domains can be supported, each with its own set of storage space. Currently, only the domain <code>0</code> is supported. Values stored in domain <code>0</code> are committed to Ethereum as part of the state diffs.  # Core Components<a href="./core-starknet-storage_access-StorageAddress.html"><code>StorageAddress</code></a>: Represents a specific storage location * <a href="./core-starknet-storage_access-StorageBaseAddress.html"><code>StorageBaseAddress</code></a>: Base address that can be combined with offsets * <a href="%60Store%3CT%3E%60"><code>Store&lt;T&gt;</code></a>: Core trait for types that can be stored in contract storage * <a href="%60StorePacking%3CT,P%3E%60"><code>StorePacking&lt;T,P&gt;</code></a>: Trait for efficient packing/unpacking of valuesGenerally, you don't need to implement the <a href="./core-starknet-storage_access-Store.html"><code>Store</code></a> trait yourself. Most types of the core library, at the exception of collection types, implement the <a href="./core-starknet-storage_access-Store.html"><code>Store</code></a> trait - and thus, you can derive the <a href="./core-starknet-storage_access-Store.html"><code>Store</code></a> trait for your own types, as long as they don't contain any collections.</p>
-<p>Fully qualified path: <code>core::starknet::storage_access</code></p>
-<h2 id="traits"><a class="header" href="#traits">Traits</a></h2>
+<p>Storage access primitives for Starknet contract storage.
+This module provides abstractions over the system calls for reading from and writing to Starknet
+contract storage. It includes traits and implementations for storing various data types
+efficiently.</p>
+<h1 id="storage-architecture"><a class="header" href="#storage-architecture">Storage Architecture</a></h1>
 <ul>
-<li>
-<p><a href="./core-starknet-storage_access-Store.html">Store</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage_access-StorePacking.html">StorePacking</a></p>
-</li>
+<li>Storage addresses range from <code>[0, 2^251)</code></li>
+<li>Base addresses can be combined with offsets, allowing storage of up to 255 values sequentially</li>
+<li>Multiple storage domains can be supported, each with its own set of storage space.
+Currently, only the domain <code>0</code> is supported. Values stored in domain <code>0</code> are committed to
+Ethereum as part of the state diffs.</li>
 </ul>
-<h2 id="extern-types"><a class="header" href="#extern-types">Extern types</a></h2>
+<h1 id="core-components"><a class="header" href="#core-components">Core Components</a></h1>
 <ul>
-<li>
-<p><a href="./core-starknet-storage_access-StorageAddress.html">StorageAddress</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage_access-StorageBaseAddress.html">StorageBaseAddress</a></p>
-</li>
+<li><a href="./core-starknet-storage_access-StorageAddress.html"><code>StorageAddress</code></a>: Represents a specific storage location</li>
+<li><a href="./core-starknet-storage_access-StorageBaseAddress.html"><code>StorageBaseAddress</code></a>: Base address that can be combined with offsets</li>
+<li><code>Store&lt;T&gt;</code>: Core trait for types that can be stored in contract storage</li>
+<li><code>StorePacking&lt;T,P&gt;</code>: Trait for efficient packing/unpacking of values</li>
 </ul>
-<h2 id="extern-functions"><a class="header" href="#extern-functions">Extern functions</a></h2>
-<ul>
-<li>
-<p><a href="./core-starknet-storage_access-storage_base_address_const.html">storage_base_address_const</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage_access-storage_base_address_from_felt252.html">storage_base_address_from_felt252</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage_access-storage_address_from_base_and_offset.html">storage_address_from_base_and_offset</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage_access-storage_address_from_base.html">storage_address_from_base</a></p>
-</li>
-</ul>
-
+<p>Generally, you don't need to implement the <a href="./core-starknet-storage_access-Store.html"><code>Store</code></a> trait yourself. Most types of the core
+library, at the exception of collection types, implement the <a href="./core-starknet-storage_access-Store.html"><code>Store</code></a> trait - and thus, you can
+derive the <a href="./core-starknet-storage_access-Store.html"><code>Store</code></a> trait for your own types, as long as they don't contain any collections.</p>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-storage_access.html">storage_access</a></p>
+<h2 id="traits"><a class="header" href="#traits"><a href="./core-starknet-storage_access-traits.html">Traits</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-starknet-storage_access-Store.html">Store</a></td><td style="text-align: left">Trait for types that can be stored in Starknet contract storage. The <code>Store</code>  trait enables types to be stored in and retrieved from Starknet's contract storage. Cairo implements <code>Store</code><a href="./core-starknet-storage_access-Store.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage_access-StorePacking.html">StorePacking</a></td><td style="text-align: left">Trait for efficient packing of values into optimized storage representations. This trait enables bit-packing of complex types into simpler storage types to reduce gas costs<a href="./core-starknet-storage_access-StorePacking.html">...</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="extern-types"><a class="header" href="#extern-types"><a href="./core-starknet-storage_access-extern_types.html">Extern types</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-starknet-storage_access-StorageAddress.html">StorageAddress</a></td><td style="text-align: left">Represents the address of a storage value in a Starknet contract. The value range of this type is <code>[0, 2**251)</code> .<a href="./core-starknet-storage_access-StorageAddress.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage_access-StorageBaseAddress.html">StorageBaseAddress</a></td><td style="text-align: left">Represents a base storage address that can be combined with offsets. The value range of this type is <code>[0, 2**251 - 256)</code> .<a href="./core-starknet-storage_access-StorageBaseAddress.html">...</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="extern-functions"><a class="header" href="#extern-functions"><a href="./core-starknet-storage_access-extern_functions.html">Extern functions</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-starknet-storage_access-storage_base_address_const.html">storage_base_address_const</a></td><td style="text-align: left">Returns a <code>StorageBaseAddress</code>  given a constant <code>felt252</code>  value. The value is validated to be in the range <code>[0, 2**251 - 256)</code>  at compile time.<a href="./core-starknet-storage_access-storage_base_address_const.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage_access-storage_base_address_from_felt252.html">storage_base_address_from_felt252</a></td><td style="text-align: left">Returns a <code>StorageBaseAddress</code>  given a <code>felt252</code>  value. Wraps around the value if it is not in the range <code>[0, 2**251 - 256)</code> .<a href="./core-starknet-storage_access-storage_base_address_from_felt252.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage_access-storage_address_from_base_and_offset.html">storage_address_from_base_and_offset</a></td><td style="text-align: left">Sums the base address and the offset to return a storage address.<a href="./core-starknet-storage_access-storage_address_from_base_and_offset.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage_access-storage_address_from_base.html">storage_address_from_base</a></td><td style="text-align: left">Converts a <code>StorageBaseAddress</code>  into a <code>StorageAddress</code> . This should be used through the high-level <code>Into</code>  trait.<a href="./core-starknet-storage_access-storage_address_from_base.html">...</a></td></tr>
+</tbody></table>
+</div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-fmt-into_felt252_based.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-starknet-modules.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-starknet-syscalls.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-starknet-storage_access-traits.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -207,33 +217,17 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-fmt-into_felt252_based.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-starknet-modules.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-starknet-syscalls.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-starknet-storage_access-traits.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

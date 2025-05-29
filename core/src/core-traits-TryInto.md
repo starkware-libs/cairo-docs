@@ -1,6 +1,21 @@
 # TryInto
 
-Simple and safe type conversions that may fail in a controlled way under some circumstances.This is useful when you are doing a type conversion that may trivially succeed but may also need special handling. For example, there is no way to convert an [`i64`](./core-integer-i64.md) into an [`i32`](./core-integer-i32.md) using the [`Into`](./core-traits-Into.md) trait, because an [`i64`](./core-integer-i64.md) may contain a value that an [`i32`](./core-integer-i32.md) cannot represent and so the conversion would lose data.  This might be handled by truncating the [`i64`](./core-integer-i64.md) to an [`i32`](./core-integer-i32.md) or by simply returning [`Bounded::<i32>::MAX`](`Bounded::<i32>::MAX`), or by some other method. The [`Into`](./core-traits-Into.md) trait is intended for perfect conversions, so the `TryInto` trait informs the programmer when a type conversion could go bad and lets them decide how to handle it.  # Generic Implementations[`TryInto`](./core-traits-TryInto.md) is reflexive, which means that `TryInto<T, T>` is implemented - [`TryInto`](./core-traits-TryInto.md) is implemented for all types that implement [`Into`](./core-traits-Into.md)  # ExamplesConverting chess coordinates (like 'e4') into a validated position:
+Simple and safe type conversions that may fail in a controlled way under
+some circumstances.
+This is useful when you are doing a type conversion that may trivially succeed but may also need
+special handling. For example, there is no way to convert an [`i64`](./core-integer-i64.md) into an [`i32`](./core-integer-i32.md) using the
+[`Into`](./core-traits-Into.md) trait, because an [`i64`](./core-integer-i64.md) may contain a value that an [`i32`](./core-integer-i32.md) cannot represent and so
+the conversion would lose data.  This might be handled by truncating the [`i64`](./core-integer-i64.md) to an [`i32`](./core-integer-i32.md)
+or by simply returning `Bounded::<i32>::MAX`, or by some other method. The [`Into`](./core-traits-Into.md) trait
+is intended for perfect conversions, so the `TryInto` trait informs the programmer when a type
+conversion could go bad and lets them decide how to handle it.
+# Generic Implementations
+
+- [`TryInto`](./core-traits-TryInto.md) is reflexive, which means that `TryInto<T, T>` is implemented
+- [`TryInto`](./core-traits-TryInto.md) is implemented for all types that implement [`Into`](./core-traits-Into.md)
+# Examples
+
+Converting chess coordinates (like 'e4') into a validated position:
 ```cairo
 #[derive(Copy, Drop, PartialEq)]
  struct Position {
@@ -41,15 +56,18 @@ assert!(invalid_file == None);
 assert!(invalid_rank == None);
 ```
 
-Fully qualified path: `core::traits::TryInto`
+Fully qualified path: [core](./core.md)::[traits](./core-traits.md)::[TryInto](./core-traits-TryInto.md)
 
-<pre><code class="language-rust">pub trait TryInto&lt;T, S&gt;</code></pre>
+<pre><code class="language-cairo">pub trait TryInto&lt;T, S&gt;</code></pre>
 
 ## Trait functions
 
 ### try_into
 
-Attempts to convert the input type T into the output type S. In the event of a conversion error, returns [`None`](./core-option.md#none).  # Examples
+Attempts to convert the input type T into the output type S.
+In the event of a conversion error, returns [`None`](./core-option.md#none).
+# Examples
+
 ```cairo
 let a: Option<u8> = 1_u16.try_into();
 assert!(a == Some(1));
@@ -57,8 +75,8 @@ let b: Option<u8> = 256_u16.try_into();
 assert!(b == None);
 ```
 
-Fully qualified path: `core::traits::TryInto::try_into`
+Fully qualified path: [core](./core.md)::[traits](./core-traits.md)::[TryInto](./core-traits-TryInto.md)::[try_into](./core-traits-TryInto.md#try_into)
 
-<pre><code class="language-rust">fn try_into(self: T) -&gt; Option&lt;S&gt;</code></pre>
+<pre><code class="language-cairo">fn try_into&lt;T, S, T, S&gt;(self: T) -&gt; <a href="core-option-Option.html">Option&lt;S&gt;</a></code></pre>
 
 

@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>ops::index::IndexView - The Cairo Core Library Docs</title>
+        <title>IndexView - The Cairo Core Library Docs</title>
 
 
         <!-- Custom HTML head -->
@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,7 +156,12 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="indexview"><a class="header" href="#indexview">IndexView</a></h1>
-<p>A trait for indexing operations (<code>container[index]</code>) where the input type is not modified.<code>container[index]</code> is syntactic sugar for <code>container.index(index)</code>.  # ExamplesThe following example implements <code>IndexView</code> on a <code>NucleotideCount</code> container, which can be indexed without modifying the input, enabling individual counts to be retrieved with index syntax.</p>
+<p>A trait for indexing operations (<code>container[index]</code>) where the input type is not modified.
+<code>container[index]</code> is syntactic sugar for <code>container.index(index)</code>.</p>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
+<p>The following example implements <code>IndexView</code> on a <code>NucleotideCount</code> container, which can be
+indexed without modifying the input, enabling individual counts to be retrieved with index
+syntax.</p>
 <pre><code class="language-cairo">use core::ops::IndexView;
 
 <span class="boring">[derive(Copy, Drop)]
@@ -191,28 +199,33 @@ assert!(nucleotide_count[Nucleotide::C] == 9);
 assert!(nucleotide_count[Nucleotide::G] == 10);
 assert!(nucleotide_count[Nucleotide::T] == 12);
 </code></pre>
-<p>Fully qualified path: <code>core::ops::index::IndexView</code></p>
-<pre><code class="language-rust">pub trait IndexView&lt;C, I&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ops.html">ops</a>::<a href="./core-ops-index.html">index</a>::<a href="./core-ops-index-IndexView.html">IndexView</a></p>
+<pre><code class="language-cairo">pub trait IndexView&lt;C, I&gt;
+</code></pre>
 <h2 id="trait-functions"><a class="header" href="#trait-functions">Trait functions</a></h2>
 <h3 id="index"><a class="header" href="#index">index</a></h3>
-<p>Performs the indexing (<code>container[index]</code>) operation.  # PanicsMay panic if the index is out of bounds.</p>
-<p>Fully qualified path: <code>core::ops::index::IndexView::index</code></p>
-<pre><code class="language-rust">fn index(self: @C, index: I) -&gt; Self::Target</code></pre>
+<p>Performs the indexing (<code>container[index]</code>) operation.</p>
+<h1 id="panics"><a class="header" href="#panics">Panics</a></h1>
+<p>May panic if the index is out of bounds.</p>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ops.html">ops</a>::<a href="./core-ops-index.html">index</a>::<a href="./core-ops-index-IndexView.html">IndexView</a>::<a href="./core-ops-index-IndexView.html#index">index</a></p>
+<pre><code class="language-cairo">fn index&lt;C, I, C, I&gt;(self: @C, index: I) -&gt; <a href="core-ops-index-IndexView.html">IndexView&lt;C, I&gt;Target</a>
+</code></pre>
 <h2 id="trait-types"><a class="header" href="#trait-types">Trait types</a></h2>
 <h3 id="target"><a class="header" href="#target">Target</a></h3>
 <p>The returned type after indexing.</p>
-<p>Fully qualified path: <code>core::ops::index::IndexView::Target</code></p>
-<pre><code class="language-rust">type Target;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ops.html">ops</a>::<a href="./core-ops-index.html">index</a>::<a href="./core-ops-index-IndexView.html">IndexView</a>::<a href="./core-ops-index-IndexView.html#target">Target</a></p>
+<pre><code class="language-cairo">type Target;
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-ops-index-Index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-ops-index-traits.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-ops-range-RangeInclusiveTrait.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-ops-index-Index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -222,33 +235,17 @@ assert!(nucleotide_count[Nucleotide::T] == 12);
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-ops-index-Index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-ops-index-traits.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-ops-range-RangeInclusiveTrait.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-ops-index-Index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

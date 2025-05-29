@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,7 +156,16 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="public_key_point_to_eth_address"><a class="header" href="#public_key_point_to_eth_address">public_key_point_to_eth_address</a></h1>
-<p>Converts a public key point to its corresponding Ethereum address.The Ethereum address is calculated by taking the Keccak-256 hash of the public key coordinates and taking the last 20 big-endian bytes.  # Arguments<code>public_key_point</code> - A point on a secp256 curve representing a public key  # ReturnsThe 20-byte Ethereum address derived from the public key  # Examples</p>
+<p>Converts a public key point to its corresponding Ethereum address.
+The Ethereum address is calculated by taking the Keccak-256 hash of the public key coordinates
+and taking the last 20 big-endian bytes.</p>
+<h1 id="arguments"><a class="header" href="#arguments">Arguments</a></h1>
+<ul>
+<li><code>public_key_point</code> - A point on a secp256 curve representing a public key</li>
+</ul>
+<h1 id="returns"><a class="header" href="#returns">Returns</a></h1>
+<p>The 20-byte Ethereum address derived from the public key</p>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
 <pre><code class="language-cairo">use starknet::eth_signature::public_key_point_to_eth_address;
 use starknet::secp256k1::Secp256k1Point;
 use starknet::secp256_trait::Secp256Trait;
@@ -166,15 +178,9 @@ let public_key: Secp256k1Point = Secp256Trait::secp256_ec_get_point_from_x_sysca
 let eth_address = public_key_point_to_eth_address(public_key);
 assert!(eth_address == 0x767410c1bb448978bd42b984d7de5970bcaf5c43.try_into().unwrap());
 </code></pre>
-<p>Fully qualified path: <code>core::starknet::eth_signature::public_key_point_to_eth_address</code></p>
-<pre><code class="language-rust">pub fn public_key_point_to_eth_address&lt;
-    Secp256Point,
-    +Drop&lt;Secp256Point&gt;,
-    +Secp256Trait&lt;Secp256Point&gt;,
-    +Secp256PointTrait&lt;Secp256Point&gt;,
-&gt;(
-    public_key_point: Secp256Point,
-) -&gt; EthAddress</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-eth_signature.html">eth_signature</a>::<a href="./core-starknet-eth_signature-public_key_point_to_eth_address.html">public_key_point_to_eth_address</a></p>
+<pre><code class="language-cairo">pub fn public_key_point_to_eth_address&lt;Secp256Point, +Drop&lt;Secp256Point&gt;, +Secp256Trait&lt;Secp256Point&gt;, +Secp256PointTrait&lt;Secp256Point&gt;&gt;(public_key_point: Secp256Point) -&gt; <a href="core-starknet-eth_address-EthAddress.html">EthAddress</a>
+</code></pre>
 
                     </main>
 
@@ -184,7 +190,7 @@ assert!(eth_address == 0x767410c1bb448978bd42b984d7de5970bcaf5c43.try_into().unw
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-starknet-testing-set_block_number.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-starknet-class_hash.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -198,29 +204,13 @@ assert!(eth_address == 0x767410c1bb448978bd42b984d7de5970bcaf5c43.try_into().unw
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-starknet-testing-set_block_number.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-starknet-class_hash.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

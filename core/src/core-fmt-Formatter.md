@@ -2,11 +2,11 @@
 
 Configuration for formatting.
 
-Fully qualified path: `core::fmt::Formatter`
+Fully qualified path: [core](./core.md)::[fmt](./core-fmt.md)::[Formatter](./core-fmt-Formatter.md)
 
-<pre><code class="language-rust">#[derive(Default, Drop)]
+<pre><code class="language-cairo">#[derive(Default, Drop)]
 pub struct Formatter {
-    pub buffer: ByteArray,
+    pub buffer: <a href="core-byte_array-ByteArray.html">ByteArray</a>,
 }</code></pre>
 
 ## Members
@@ -15,8 +15,8 @@ pub struct Formatter {
 
 The pending result of formatting.
 
-Fully qualified path: `core::fmt::Formatter::buffer`
+Fully qualified path: [core](./core.md)::[fmt](./core-fmt.md)::[Formatter](./core-fmt-Formatter.md)::[buffer](./core-fmt-Formatter.md#buffer)
 
-<pre><code class="language-rust">pub buffer: ByteArray</code></pre>
+<pre><code class="language-cairo">pub buffer: <a href="core-byte_array-ByteArray.html">ByteArray</a></code></pre>
 
 

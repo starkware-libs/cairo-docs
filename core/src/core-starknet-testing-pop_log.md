@@ -1,6 +1,16 @@
 # pop_log
 
-Pop the earliest unpopped logged event for the contract as the requested type.  # Arguments`address` - The contract address from which to pop an event.Should be used when the type of the event is known. Type of the event should be the event defined within the contract. Useful for testing the contract's event emission. May be called multiple times to pop multiple events. If called until `None` is returned, all events have been popped.  # Examples
+Pop the earliest unpopped logged event for the contract as the requested type.
+# Arguments
+
+`address` - The contract address from which to pop an event.
+Should be used when the type of the event is known. Type of the event should be the event
+defined within the contract.
+Useful for testing the contract's event emission.
+May be called multiple times to pop multiple events.
+If called until `None` is returned, all events have been popped.
+# Examples
+
 ```cairo
 #[starknet::contract]
 mod contract {
@@ -30,7 +40,7 @@ fn test_event() {
 }
 ```
 
-Fully qualified path: `core::starknet::testing::pop_log`
+Fully qualified path: [core](./core.md)::[starknet](./core-starknet.md)::[testing](./core-starknet-testing.md)::[pop_log](./core-starknet-testing-pop_log.md)
 
-<pre><code class="language-rust">pub fn pop_log&lt;T, +starknet::Event&lt;T&gt;&gt;(address: ContractAddress) -&gt; Option&lt;T&gt;</code></pre>
+<pre><code class="language-cairo">pub fn pop_log&lt;T, +starknet::Event&lt;T&gt;&gt;(address: <a href="core-starknet-contract_address-ContractAddress.html">ContractAddress</a>) -&gt; <a href="core-option-Option.html">Option&lt;T&gt;</a></code></pre>
 

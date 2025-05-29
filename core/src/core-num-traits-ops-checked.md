@@ -1,6 +1,11 @@
 # checked
 
-Safe arithmetic operations with overflow/underflow checking.This module provides traits for performing arithmetic operations with explicit overflow and underflow protection. These operations return `None` when an overflow or underflow occurs, allowing you to handle these cases gracefully without panicking.  # Examples
+Safe arithmetic operations with overflow/underflow checking.
+This module provides traits for performing arithmetic operations with explicit
+overflow and underflow protection. These operations return `None` when an overflow
+or underflow occurs, allowing you to handle these cases gracefully without panicking.
+# Examples
+
 ```cairo
 use core::num::traits::{CheckedAdd, CheckedSub, CheckedMul};
 
@@ -20,13 +25,13 @@ assert!(c.checked_mul(20) == Some(200));
 assert!(c.checked_mul(30) == None); // Overflow
 ```
 
-Fully qualified path: `core::num::traits::ops::checked`
+Fully qualified path: [core](./core.md)::[num](./core-num.md)::[traits](./core-num-traits.md)::[ops](./core-num-traits-ops.md)::[checked](./core-num-traits-ops-checked.md)
 
-## Traits
 
-- [CheckedAdd](./core-num-traits-ops-checked-CheckedAdd.md)
-
-- [CheckedSub](./core-num-traits-ops-checked-CheckedSub.md)
-
-- [CheckedMul](./core-num-traits-ops-checked-CheckedMul.md)
-
+[Traits](./core-num-traits-ops-checked-traits.md)
+ ---
+| | |
+|:---|:---|
+| [CheckedAdd](./core-num-traits-ops-checked-CheckedAdd.md) | Performs addition that returns `None`  instead of wrapping around on overflow.[...](./core-num-traits-ops-checked-CheckedAdd.md) |
+| [CheckedSub](./core-num-traits-ops-checked-CheckedSub.md) | Performs subtraction that returns `None`  instead of wrapping around on underflow.[...](./core-num-traits-ops-checked-CheckedSub.md) |
+| [CheckedMul](./core-num-traits-ops-checked-CheckedMul.md) | Performs multiplication that returns `None`  instead of wrapping around on underflow or overflow.[...](./core-num-traits-ops-checked-CheckedMul.md) |

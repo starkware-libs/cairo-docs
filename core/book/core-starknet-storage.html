@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,7 +156,20 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="storage"><a class="header" href="#storage">storage</a></h1>
-<p>Storage-related types and traits for Cairo contracts.This module implements the storage system for Starknet contracts, providing high-level abstractions for persistent data storage. It offers a type-safe interface for reading and writing to Starknet storage through the <a href="%60StoragePointerReadAccess%60"><code>StoragePointerReadAccess</code></a> and <a href="%60StoragePointerWriteAccess%60"><code>StoragePointerWriteAccess</code></a> traits, along with useful storage-only collection types like <a href="%60Vec%60"><code>Vec</code></a> and <a href="%60Map%60"><code>Map</code></a>.<a href="%60Vec%60"><code>Vec</code></a>: starknet::storage::vec::Vec <a href="%60Map%60"><code>Map</code></a>: starknet::storage::map::Map  # OverviewThe storage system in Starknet contracts is built on a key-value store where each storage slot is identified by a 251-bit address. The storage system allows interactions with storage using state variables, which are declared inside a <code>Storage</code> struct annotated with the <code>#[storage]</code> attribute. This ensures type-safe storage access and simplifies the process of reading and writing to storage.  # Using the Storage SystemStorage is typically declared using the <code>#[storage]</code> attribute on a struct:</p>
+<p>Storage-related types and traits for Cairo contracts.
+This module implements the storage system for Starknet contracts, providing high-level
+abstractions for persistent data storage. It offers a type-safe interface for reading and
+writing to Starknet storage through the <code>StoragePointerReadAccess</code> and
+<code>StoragePointerWriteAccess</code> traits, along with useful storage-only collection types like
+<a href="./core-starknet-storage-vec-Vec.html"><code>Vec</code></a> and <a href="./core-starknet-storage-map-Map.html"><code>Map</code></a>.</p>
+<h1 id="overview"><a class="header" href="#overview">Overview</a></h1>
+<p>The storage system in Starknet contracts is built on a key-value store where each storage slot
+is identified by a 251-bit address. The storage system allows interactions with storage using
+state variables, which are declared inside a <code>Storage</code> struct annotated with the <code>#[storage]</code>
+attribute. This ensures type-safe storage access and simplifies the process of reading and
+writing to storage.</p>
+<h1 id="using-the-storage-system"><a class="header" href="#using-the-storage-system">Using the Storage System</a></h1>
+<p>Storage is typically declared using the <code>#[storage]</code> attribute on a struct:</p>
 <pre><code class="language-cairo"><span class="boring">[storage]
 </span>struct Storage {
     balance: u256,
@@ -162,14 +178,27 @@
     collection: Vec&lt;u8&gt;,
 }
 </code></pre>
-<p>Any type that implements the <code>Store</code> trait (or it's optimized <code>StorePacked</code> variant) can be used in storage.  This type can simply be derived using <code>#[derive(Store)]</code> - provided that all of the members of the type also implement <code>Store</code>.</p>
+<p>Any type that implements the <code>Store</code> trait (or it's optimized <code>StorePacked</code> variant) can be used
+in storage.  This type can simply be derived using <code>#[derive(Store)]</code> - provided that all of the
+members of the type also implement <code>Store</code>.</p>
 <pre><code class="language-cairo"><span class="boring">[derive(Copy, Default, Drop, Store)]
 </span>struct User {
     name: felt252,
     age: u8,
 }
 </code></pre>
-<p>Interaction with storage is made through a set of traits, depending on the type interacted with:<a href="%60StoragePointerReadAccess%60"><code>StoragePointerReadAccess</code></a> and <a href="%60StoragePointerWriteAccess%60"><code>StoragePointerWriteAccess</code></a> allow for reading and writing storable types. - <a href="%60StorageMapReadAccess%60"><code>StorageMapReadAccess</code></a> and <a href="%60StorageMapWriteAccess%60"><code>StorageMapWriteAccess</code></a> allow for reading and writing to storage <a href="%60Map%60"><code>Map</code></a>s. - <a href="%60StoragePathEntry%60"><code>StoragePathEntry</code></a> allows for accessing a specific entry in a <a href="%60Map%60"><code>Map</code></a>, and can be combined with the <code>StoragePointer</code> traits to read and write in these entries. - <a href="%60VecTrait%60"><code>VecTrait</code></a> and <a href="%60MutableVecTrait%60"><code>MutableVecTrait</code></a> allow for interacting with storage <a href="%60Vec%60"><code>Vec</code></a>s.<a href="%60VecTrait%60"><code>VecTrait</code></a>: starknet::storage::vec::VecTrait <a href="%60MutableVecTrait%60"><code>MutableVecTrait</code></a>: starknet::storage::vec::MutableVecTrait <a href="%60StorageMapReadAccess%60"><code>StorageMapReadAccess</code></a>: starknet::storage::map::StorageMapReadAccess <a href="%60StorageMapWriteAccess%60"><code>StorageMapWriteAccess</code></a>: starknet::storage::map::StorageMapWriteAccess <a href="%60StoragePathEntry%60"><code>StoragePathEntry</code></a>: starknet::storage::map::StoragePathEntry  ## Examples</p>
+<p>Interaction with storage is made through a set of traits, depending on the type interacted
+with:</p>
+<ul>
+<li><code>StoragePointerReadAccess</code> and <code>StoragePointerWriteAccess</code> allow for reading and writing
+storable types.</li>
+<li><a href="./core-starknet-storage-map-StorageMapReadAccess.html"><code>StorageMapReadAccess</code></a> and <a href="./core-starknet-storage-map-StorageMapWriteAccess.html"><code>StorageMapWriteAccess</code></a> allow for reading and writing to
+storage <a href="./core-starknet-storage-map-Map.html"><code>Map</code></a>s.</li>
+<li><a href="./core-starknet-storage-map-StoragePathEntry.html"><code>StoragePathEntry</code></a> allows for accessing a specific entry in a <a href="./core-starknet-storage-map-Map.html"><code>Map</code></a>, and can be combined
+with the <code>StoragePointer</code> traits to read and write in these entries.</li>
+<li><a href="./core-starknet-storage-vec-VecTrait.html"><code>VecTrait</code></a> and <a href="./core-starknet-storage-vec-MutableVecTrait.html"><code>MutableVecTrait</code></a> allow for interacting with storage <a href="./core-starknet-storage-vec-Vec.html"><code>Vec</code></a>s.</li>
+</ul>
+<h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
 <pre><code class="language-cairo">fn use_storage(self: @ContractState) {
     let address = 'address'.try_into().unwrap();
     // Reading values
@@ -188,135 +217,156 @@
     self.collection[index].write(20);
 }
 </code></pre>
-<h1 id="storage-lifecyclewhen-you-access-a-storage-variable-it-goes-through-several-transformationsflattenedstorage-the-starting-point-is-your-contracts-storage-struct-each-member-is-represented-either-as-a-storagebase-or-another-flattenedstorage-for-substoragev0-or-flat-membersstoragebase-for-simple-variables-this-holds-the-sn_keccak-hash-of-the-variable-name-which-becomes-the-storage-address-for-example"><a class="header" href="#storage-lifecyclewhen-you-access-a-storage-variable-it-goes-through-several-transformationsflattenedstorage-the-starting-point-is-your-contracts-storage-struct-each-member-is-represented-either-as-a-storagebase-or-another-flattenedstorage-for-substoragev0-or-flat-membersstoragebase-for-simple-variables-this-holds-the-sn_keccak-hash-of-the-variable-name-which-becomes-the-storage-address-for-example">Storage LifecycleWhen you access a storage variable, it goes through several transformations:FlattenedStorage: The starting point is your contract's storage struct. Each member is represented either as a <code>StorageBase</code> or another <code>FlattenedStorage</code> (for <code>#[substorage(v0)]</code> or <code>#[flat]</code> members).StorageBase: For simple variables, this holds the <code>sn_keccak</code> hash of the variable name, which becomes the storage address. For example:</a></h1>
-<pre><code>#[storage]
-struct Storage {
+<h1 id="storage-lifecycle"><a class="header" href="#storage-lifecycle">Storage Lifecycle</a></h1>
+<p>When you access a storage variable, it goes through several transformations:</p>
+<ol>
+<li>
+<p>FlattenedStorage: The starting point is your contract's storage struct. Each member is
+represented either as a <code>StorageBase</code> or another <code>FlattenedStorage</code> (for <code>#[substorage(v0)]</code>
+or <code>#[flat]</code> members).</p>
+</li>
+<li>
+<p>StorageBase: For simple variables, this holds the <code>sn_keccak</code> hash of the variable name,
+which becomes the storage address. For example:</p>
+</li>
+</ol>
+<pre><code class="language-cairo"><span class="boring">[storage]
+</span>struct Storage {
     balance: u128,  // Stored at sn_keccak('balance')
 }
 </code></pre>
-<p>StoragePath: For complex types, a <code>StoragePath</code> represents an un-finalized path to aspecific entry in storage. For example, a <code>StoragePath</code> for a <code>Map</code> can be updated withspecific keys to point to a specific entry in the map.StoragePointer: The final form, pointing to the actual storage location. For multi-slotvalues (like structs), values are stored sequentially from this address.  # Storage CollectionsCairo's memory collection types, like <a href="%60Felt252Dict%60"><code>Felt252Dict</code></a> and <a href="./core-array-Array.html"><code>Array</code></a>, can not be used in storage.Consequently, any type that contains these types can not be used in storage either.Instead, Cairo has two storage-only collection types: <a href="%60Map%60"><code>Map</code></a> and <a href="%60Vec%60"><code>Vec</code></a>.Instead of storing these memory collections directly, you will need to reflect them intostorage using the <a href="%60Map%60"><code>Map</code></a> and <a href="%60Vec%60"><code>Vec</code></a> types.  # Address CalculationStorage addresses are calculated deterministically:For a single value variable, the address is the <code>sn_keccak</code> hash of the variable name's ASCIIencoding. <code>sn_keccak</code> is Starknet's version of the Keccak-256 hash function, with its outputtruncated to 250 bits.For variables composed of multiple values (tuples, structs, or enums), the base storageaddress is also the <code>sn_keccak</code> hash of the variable name's ASCII encoding. The storage layoutthen varies depending on the specific type. A struct will store its members as a sequence ofprimitive types, while an enum will store its variant index, followed by the members of thevariant.For variables within a storage node, the address is calculated using a chain of hashes thatrepresents the node structure. Given a member <code>m</code> within a storage variable <code>variable_name</code>,the path is computed as <code>h(sn_keccak(variable_name), sn_keccak(m))</code>, where <code>h</code> is the Pedersenhash. For nested storage nodes, this process repeats, creating a hash chain representing thepath to each leaf node. At the leaf node, the storage calculation follows the standard rules forthat variable type.For <a href="%60Map%60"><code>Map</code></a> or <a href="%60Vec%60"><code>Vec</code></a> variables, the address is calculated relative to the storage baseaddress (the <code>sn_keccak</code> hash of the variable name) combined with the mapping keys or vectorindices.See their respective module documentation for more details.</p>
-<p>Fully qualified path: <code>core::starknet::storage</code></p>
-<h2 id="structs"><a class="header" href="#structs">Structs</a></h2>
+<ol start="3">
+<li>
+<p>StoragePath: For complex types, a <code>StoragePath</code> represents an un-finalized path to a
+specific entry in storage. For example, a <code>StoragePath</code> for a <code>Map</code> can be updated with
+specific keys to point to a specific entry in the map.</p>
+</li>
+<li>
+<p>StoragePointer: The final form, pointing to the actual storage location. For multi-slot
+values (like structs), values are stored sequentially from this address.</p>
+</li>
+</ol>
+<h1 id="storage-collections"><a class="header" href="#storage-collections">Storage Collections</a></h1>
+<p>Cairo's memory collection types, like <code>Felt252Dict</code> and <a href="./core-array-Array.html"><code>Array</code></a>, can not be used in storage.
+Consequently, any type that contains these types can not be used in storage either.
+Instead, Cairo has two storage-only collection types: <a href="./core-starknet-storage-map-Map.html"><code>Map</code></a> and <a href="./core-starknet-storage-vec-Vec.html"><code>Vec</code></a>.
+Instead of storing these memory collections directly, you will need to reflect them into
+storage using the <a href="./core-starknet-storage-map-Map.html"><code>Map</code></a> and <a href="./core-starknet-storage-vec-Vec.html"><code>Vec</code></a> types.</p>
+<h1 id="address-calculation"><a class="header" href="#address-calculation">Address Calculation</a></h1>
+<p>Storage addresses are calculated deterministically:</p>
 <ul>
 <li>
-<p><a href="./core-starknet-storage-StoragePointer.html">StoragePointer</a></p>
+<p>For a single value variable, the address is the <code>sn_keccak</code> hash of the variable name's ASCII
+encoding. <code>sn_keccak</code> is Starknet's version of the Keccak-256 hash function, with its output
+truncated to 250 bits.</p>
 </li>
 <li>
-<p><a href="./core-starknet-storage-StoragePointer0Offset.html">StoragePointer0Offset</a></p>
+<p>For variables composed of multiple values (tuples, structs, or enums), the base storage
+address is also the <code>sn_keccak</code> hash of the variable name's ASCII encoding. The storage layout
+then varies depending on the specific type. A struct will store its members as a sequence of
+primitive types, while an enum will store its variant index, followed by the members of the
+variant.</p>
 </li>
 <li>
-<p><a href="./core-starknet-storage-StoragePath.html">StoragePath</a></p>
+<p>For variables within a storage node, the address is calculated using a chain of hashes that
+represents the node structure. Given a member <code>m</code> within a storage variable <code>variable_name</code>,
+the path is computed as <code>h(sn_keccak(variable_name), sn_keccak(m))</code>, where <code>h</code> is the Pedersen
+hash. For nested storage nodes, this process repeats, creating a hash chain representing the
+path to each leaf node. At the leaf node, the storage calculation follows the standard rules for
+that variable type.</p>
 </li>
 <li>
-<p><a href="./core-starknet-storage-PendingStoragePath.html">PendingStoragePath</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-Mutable.html">Mutable</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-map-Map.html">Map</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-storage_base-FlattenedStorage.html">FlattenedStorage</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-storage_base-StorageBase.html">StorageBase</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-vec-Vec.html">Vec</a></p>
+<p>For <a href="./core-starknet-storage-map-Map.html"><code>Map</code></a> or <a href="./core-starknet-storage-vec-Vec.html"><code>Vec</code></a> variables, the address is calculated relative to the storage base
+address (the <code>sn_keccak</code> hash of the variable name) combined with the mapping keys or vector
+indices.
+See their respective module documentation for more details.</p>
 </li>
 </ul>
-<h2 id="traits"><a class="header" href="#traits">Traits</a></h2>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-storage.html">storage</a></p>
+<h2 id="modules"><a class="header" href="#modules"><a href="./core-starknet-storage-modules.html">Modules</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-map.html">map</a></td><td style="text-align: left">Key-value storage mapping implementation for Starknet contracts. This module provides the core mapping functionality used in Starknet smart contracts,<a href="./core-starknet-storage-map.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-storage_base.html">storage_base</a></td><td style="text-align: left">Core abstractions for contract storage management. This module provides the types and traits for handling contract storage internally<a href="./core-starknet-storage-storage_base.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-vec.html">vec</a></td><td style="text-align: left">Vector-like storage collection for persisting data in contract storage. This module provides a vector-like collection that stores elements in contract storage.<a href="./core-starknet-storage-vec.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-storage_node.html">storage_node</a></td><td style="text-align: left">Storage nodes provide a way to structure contract storage data, reflecting their structure in the storage address computation of their members. They are special structs that can contain any<a href="./core-starknet-storage-storage_node.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-sub_pointers.html">sub_pointers</a></td><td style="text-align: left"><a href="./core-starknet-storage-sub_pointers.html">...</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="structs"><a class="header" href="#structs"><a href="./core-starknet-storage-structs.html">Structs</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-StoragePointer.html">StoragePointer</a></td><td style="text-align: left">A pointer to an address in storage, can be used to read and write values, if the generic type supports it (e.g. basic types like <code>felt252</code> ).<a href="./core-starknet-storage-StoragePointer.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-StoragePointer0Offset.html">StoragePointer0Offset</a></td><td style="text-align: left">Same as <code>StoragePointer</code> , but with <code>offset</code>  0, which allows for some optimizations.<a href="./core-starknet-storage-StoragePointer0Offset.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-StoragePath.html">StoragePath</a></td><td style="text-align: left">An intermediate struct to store a hash state, in order to be able to hash multiple values and get the final address. Storage path should have two interfaces, if <code>T</code><a href="./core-starknet-storage-StoragePath.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-PendingStoragePath.html">PendingStoragePath</a></td><td style="text-align: left">A struct for delaying the creation of a storage path, used for lazy evaluation in storage nodes.<a href="./core-starknet-storage-PendingStoragePath.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-Mutable.html">Mutable</a></td><td style="text-align: left">A wrapper around different storage related types, indicating that the instance is mutable, i.e. originally created from a <code>ref</code>  contract state.<a href="./core-starknet-storage-Mutable.html">...</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="traits"><a class="header" href="#traits"><a href="./core-starknet-storage-traits.html">Traits</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-StorageAsPointer.html">StorageAsPointer</a></td><td style="text-align: left">Trait for converting a storage member to a <code>StoragePointer0Offset</code> .<a href="./core-starknet-storage-StorageAsPointer.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-StoragePointerReadAccess.html">StoragePointerReadAccess</a></td><td style="text-align: left">Trait for accessing the values in storage using a <code>StoragePointer</code> .<a href="./core-starknet-storage-StoragePointerReadAccess.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-StoragePointerWriteAccess.html">StoragePointerWriteAccess</a></td><td style="text-align: left">Trait for writing values to storage using a <code>StoragePointer</code> .<a href="./core-starknet-storage-StoragePointerWriteAccess.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-StorageAsPath.html">StorageAsPath</a></td><td style="text-align: left">Trait for creating a new <code>StoragePath</code>  from a storage member.<a href="./core-starknet-storage-StorageAsPath.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-PendingStoragePathTrait.html">PendingStoragePathTrait</a></td><td style="text-align: left">A trait for creating a <code>PendingStoragePath</code>  from a <code>StoragePath</code>  hash state and a key.<a href="./core-starknet-storage-PendingStoragePathTrait.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-StoragePathMutableConversion.html">StoragePathMutableConversion</a></td><td style="text-align: left"><a href="./core-starknet-storage-StoragePathMutableConversion.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-IntoIterRange.html">IntoIterRange</a></td><td style="text-align: left">Trait for turning collection of values into an iterator over a specific range.<a href="./core-starknet-storage-IntoIterRange.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-ValidStorageTypeTrait.html">ValidStorageTypeTrait</a></td><td style="text-align: left">Trait that ensures a type is valid for storage in Starknet contracts. This trait is used to enforce that only specific types, such as those implementing <code>Store</code>  or acting as a <code>StorageNode</code><a href="./core-starknet-storage-ValidStorageTypeTrait.html">...</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="impls"><a class="header" href="#impls"><a href="./core-starknet-storage-impls.html">Impls</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-SubPointersDeref.html">SubPointersDeref</a></td><td style="text-align: left">This makes the sub-pointers members directly accessible from a pointer to the parent struct.<a href="./core-starknet-storage-SubPointersDeref.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-SubPointersMutDeref.html">SubPointersMutDeref</a></td><td style="text-align: left">This makes the sub-pointers members directly accessible from a pointer to the parent struct.<a href="./core-starknet-storage-SubPointersMutDeref.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-StorableStoragePointerReadAccess.html">StorableStoragePointerReadAccess</a></td><td style="text-align: left">Simple implementation of <code>StoragePointerReadAccess</code>  for any type that implements <code>Store</code>  for any offset.<a href="./core-starknet-storage-StorableStoragePointerReadAccess.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-StorageNodeDeref.html">StorageNodeDeref</a></td><td style="text-align: left">This makes the storage node members directly accessible from a path to the parent struct.<a href="./core-starknet-storage-StorageNodeDeref.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-StorageNodeMutDeref.html">StorageNodeMutDeref</a></td><td style="text-align: left">This makes the storage node members directly accessible from a path to the parent struct.<a href="./core-starknet-storage-StorageNodeMutDeref.html">...</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="re-exports"><a class="header" href="#re-exports">Re-exports</a></h2>
 <ul>
 <li>
-<p><a href="./core-starknet-storage-StorageAsPointer.html">StorageAsPointer</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-StoragePointerReadAccess.html">StoragePointerReadAccess</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-StoragePointerWriteAccess.html">StoragePointerWriteAccess</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-StorageAsPath.html">StorageAsPath</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-PendingStoragePathTrait.html">PendingStoragePathTrait</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-IntoIterRange.html">IntoIterRange</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-ValidStorageTypeTrait.html">ValidStorageTypeTrait</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-map-StorageMapReadAccess.html">StorageMapReadAccess</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-map-StorageMapWriteAccess.html">StorageMapWriteAccess</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-map-StoragePathEntry.html">StoragePathEntry</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-storage_base-StorageTrait.html">StorageTrait</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-storage_base-StorageTraitMut.html">StorageTraitMut</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-storage_node-StorageNode.html">StorageNode</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-storage_node-StorageNodeMut.html">StorageNodeMut</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-sub_pointers-SubPointers.html">SubPointers</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-sub_pointers-SubPointersForward.html">SubPointersForward</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-sub_pointers-SubPointersMut.html">SubPointersMut</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-sub_pointers-SubPointersMutForward.html">SubPointersMutForward</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-vec-MutableVecTrait.html">MutableVecTrait</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-vec-VecTrait.html">VecTrait</a></p>
+<h3 id="structs-1"><a class="header" href="#structs-1">Structs</a></h3>
 </li>
 </ul>
-<h2 id="impls"><a class="header" href="#impls">Impls</a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-map-Map.html">Map</a></td><td style="text-align: left">A persistent key-value store in contract storage. This type cannot be instantiated as it is marked with <code>#[phantom]</code> . This is by design: <code>Map</code><a href="./core-starknet-storage-map-Map.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-storage_base-FlattenedStorage.html">FlattenedStorage</a></td><td style="text-align: left">A type that represents a flattened storage, i.e. a storage object which does not have any effect on the path taken into consideration when computing the address of the storage object.<a href="./core-starknet-storage-storage_base-FlattenedStorage.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-storage_base-StorageBase.html">StorageBase</a></td><td style="text-align: left">A struct for holding an address to initialize a storage path with. The members (not direct members, but accessible using <code>deref</code> ) of a contract state are either <code>StorageBase</code>  or <code>FlattenedStorage</code><a href="./core-starknet-storage-storage_base-StorageBase.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-vec-Vec.html">Vec</a></td><td style="text-align: left">Represents a dynamic array in contract storage. This type is zero-sized and cannot be instantiated. Vectors can only be used in storage contexts and manipulated using the associated <code>VecTrait</code> and<a href="./core-starknet-storage-vec-Vec.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-vec-VecIter.html">VecIter</a></td><td style="text-align: left">An iterator struct over a <code>Vec</code>  in storage.<a href="./core-starknet-storage-vec-VecIter.html">...</a></td></tr>
+</tbody></table>
+</div><br>
 <ul>
 <li>
-<p><a href="./core-starknet-storage-SubPointersDeref.html">SubPointersDeref</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-SubPointersMutDeref.html">SubPointersMutDeref</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-StorableStoragePointerReadAccess.html">StorableStoragePointerReadAccess</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-StorageNodeDeref.html">StorageNodeDeref</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-storage-StorageNodeMutDeref.html">StorageNodeMutDeref</a></p>
+<h3 id="traits-1"><a class="header" href="#traits-1">Traits</a></h3>
 </li>
 </ul>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-map-StorageMapReadAccess.html">StorageMapReadAccess</a></td><td style="text-align: left">Provides direct read access to values in a storage <a href="./core-starknet-storage-map-Map.html"><code>Map</code></a> .<a href="./core-starknet-storage-map-StorageMapReadAccess.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-map-StorageMapWriteAccess.html">StorageMapWriteAccess</a></td><td style="text-align: left">Provides direct write access to values in a storage <a href="./core-starknet-storage-map-Map.html"><code>Map</code></a> . Enables directly storing values in the contract's storage at the address of the given key.<a href="./core-starknet-storage-map-StorageMapWriteAccess.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-map-StoragePathEntry.html">StoragePathEntry</a></td><td style="text-align: left">Computes storage paths for accessing <a href="./core-starknet-storage-map-Map.html"><code>Map</code></a>  entries. The storage path combines the variable's base path with the key's hash to create a unique<a href="./core-starknet-storage-map-StoragePathEntry.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-storage_base-StorageTrait.html">StorageTrait</a></td><td style="text-align: left">A trait for creating the struct containing the <code>StorageBase</code>  or <code>FlattenedStorage</code>  of all the members of a contract state.<a href="./core-starknet-storage-storage_base-StorageTrait.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-storage_base-StorageTraitMut.html">StorageTraitMut</a></td><td style="text-align: left">A trait for creating the struct containing the mutable <code>StorageBase</code>  or <code>FlattenedStorage</code>  of all the members of a contract state.<a href="./core-starknet-storage-storage_base-StorageTraitMut.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-storage_node-StorageNode.html">StorageNode</a></td><td style="text-align: left">A trait that given a storage path of a struct, generates the storage node of this struct.<a href="./core-starknet-storage-storage_node-StorageNode.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-storage_node-StorageNodeMut.html">StorageNodeMut</a></td><td style="text-align: left">A mutable version of <code>StorageNode</code> , works the same way, but on <code>Mutable&lt;T&gt;</code> .<a href="./core-starknet-storage-storage_node-StorageNodeMut.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-sub_pointers-SubPointers.html">SubPointers</a></td><td style="text-align: left">Similar to storage node, but for structs which are stored sequentially in the storage. In contrast to storage node, the fields of the struct are just at an offset from the base address of the struct.<a href="./core-starknet-storage-sub_pointers-SubPointers.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-sub_pointers-SubPointersForward.html">SubPointersForward</a></td><td style="text-align: left">A trait for implementing <code>SubPointers</code>  for types which are not a <code>StoragePointer</code> , such as <code>StorageBase</code>  and <code>StoragePath</code> .<a href="./core-starknet-storage-sub_pointers-SubPointersForward.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-sub_pointers-SubPointersMut.html">SubPointersMut</a></td><td style="text-align: left">A mutable version of <code>SubPointers</code> , works the same way, but on <code>Mutable&lt;T&gt;</code> .<a href="./core-starknet-storage-sub_pointers-SubPointersMut.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-sub_pointers-SubPointersMutForward.html">SubPointersMutForward</a></td><td style="text-align: left">A trait for implementing <code>SubPointersMut</code>  for types which are not a <code>StoragePointer</code> , such as <code>StorageBase</code>  and <code>StoragePath</code> .<a href="./core-starknet-storage-sub_pointers-SubPointersMutForward.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-vec-MutableVecTrait.html">MutableVecTrait</a></td><td style="text-align: left">Provides mutable access to elements in a storage <a href="./core-starknet-storage-vec-Vec.html"><code>Vec</code></a> . This trait extends the read functionality with methods to append new elements and modify existing ones.<a href="./core-starknet-storage-vec-MutableVecTrait.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage-vec-VecTrait.html">VecTrait</a></td><td style="text-align: left">Provides read-only access to elements in a storage <a href="./core-starknet-storage-vec-Vec.html"><code>Vec</code></a> . This trait enables retrieving elements and checking the vector's length without<a href="./core-starknet-storage-vec-VecTrait.html">...</a></td></tr>
+</tbody></table>
+</div><br>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-starknet-account.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-starknet-account-AccountContractSafeDispatcherTrait.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-starknet-testing.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-starknet-storage-modules.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -326,33 +376,17 @@ struct Storage {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-starknet-account.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-starknet-account-AccountContractSafeDispatcherTrait.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-starknet-testing.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-starknet-storage-modules.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

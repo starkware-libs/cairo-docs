@@ -1,11 +1,24 @@
 # FromIterator
 
-Conversion from an [`Iterator`](./core-iter-traits-iterator-Iterator.md).By implementing `FromIterator` for a type, you define how it will be created from an iterator. This is common for types which describe a collection of some kind.If you want to create a collection from the contents of an iterator, the [`Iterator::collect()`](`Iterator::collect()`) method is preferred. However, when you need to specify the container type, [`FromIterator::from_iter()`](`FromIterator::from_iter()`) can be more readable than using a turbofish (e.g. `::<Array<_>>()`). See the [`Iterator::collect()`](`Iterator::collect()`) documentation for more examples of its use.See also: [`IntoIterator`](./core-iter-traits-collect-IntoIterator.md).  # ExamplesBasic usage:
+Conversion from an [`Iterator`](./core-iter-traits-iterator-Iterator.md).
+By implementing `FromIterator` for a type, you define how it will be
+created from an iterator. This is common for types which describe a
+collection of some kind.
+If you want to create a collection from the contents of an iterator, the
+`Iterator::collect()` method is preferred. However, when you need to
+specify the container type, `FromIterator::from_iter()` can be more
+readable than using a turbofish (e.g. `::<Array<_>>()`). See the
+`Iterator::collect()` documentation for more examples of its use.
+See also: [`IntoIterator`](./core-iter-traits-collect-IntoIterator.md).
+# Examples
+
+Basic usage:
 ```cairo
 let v = FromIterator::from_iter(0..5_u32);
 
 assert_eq!(v, array![0, 1, 2, 3, 4]);
 ```
+
 Implementing `FromIterator` for your type:
 ```cairo
 use core::metaprogramming::TypeEqual;
@@ -57,15 +70,18 @@ let c = FromIterator::<MyCollection>::from_iter(iter);
 assert_eq!(c.arr, array![0, 1, 2, 3, 4]);
 ```
 
-Fully qualified path: `core::iter::traits::collect::FromIterator`
+Fully qualified path: [core](./core.md)::[iter](./core-iter.md)::[traits](./core-iter-traits.md)::[collect](./core-iter-traits-collect.md)::[FromIterator](./core-iter-traits-collect-FromIterator.md)
 
-<pre><code class="language-rust">pub trait FromIterator&lt;T, A&gt;</code></pre>
+<pre><code class="language-cairo">pub trait FromIterator&lt;T, A&gt;</code></pre>
 
 ## Trait functions
 
 ### from_iter
 
-Creates a value from an iterator.See the [module-level documentation](./core-iter.md) for more.  # Examples
+Creates a value from an iterator.
+See the [module-level documentation](./core-iter.md) for more.
+# Examples
+
 ```cairo
 let iter = (0..5_u32).into_iter();
 
@@ -74,16 +90,8 @@ let v = FromIterator::from_iter(iter);
 assert_eq!(v, array![0, 1, 2, 3, 4]);
 ```
 
-Fully qualified path: `core::iter::traits::collect::FromIterator::from_iter`
+Fully qualified path: [core](./core.md)::[iter](./core-iter.md)::[traits](./core-iter-traits.md)::[collect](./core-iter-traits-collect.md)::[FromIterator](./core-iter-traits-collect-FromIterator.md)::[from_iter](./core-iter-traits-collect-FromIterator.md#from_iter)
 
-<pre><code class="language-rust">fn from_iter&lt;
-    I,
-    impl IntoIter: IntoIterator&lt;I&gt;,
-    +TypeEqual&lt;IntoIter::Iterator::Item, A&gt;,
-    +Destruct&lt;IntoIter::IntoIter&gt;,
-    +Destruct&lt;I&gt;,
-&gt;(
-    iter: I,
-) -&gt; T</code></pre>
+<pre><code class="language-cairo">fn from_iter&lt;T, A, T, A, I, impl IntoIter: IntoIterator&lt;I&gt;, +TypeEqual&lt;IntoIter::Iterator::Item, A&gt;, +Destruct&lt;IntoIter::IntoIter&gt;, +Destruct&lt;I&gt;&gt;(iter: I) -&gt; T</code></pre>
 
 

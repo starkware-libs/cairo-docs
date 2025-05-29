@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,20 +156,25 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="map"><a class="header" href="#map">Map</a></h1>
-<p>A persistent key-value store in contract storage.This type cannot be instantiated as it is marked with <code>#[phantom]</code>. This is by design: <code>Map</code> is a compile-time type that only exists to provide type information for the compiler. It represents a mapping in storage, but the actual storage operations are handled by the <a href="./core-starknet-storage-map-StorageMapReadAccess.html"><code>StorageMapReadAccess</code></a>, <a href="./core-starknet-storage-map-StorageMapWriteAccess.html"><code>StorageMapWriteAccess</code></a>, and <a href="./core-starknet-storage-map-StoragePathEntry.html"><code>StoragePathEntry</code></a> traits.</p>
-<p>Fully qualified path: <code>core::starknet::storage::map::Map</code></p>
-<pre><code class="language-rust">#[phantom]
-pub struct Map&lt;K, V&gt; {}</code></pre>
+<p>A persistent key-value store in contract storage.
+This type cannot be instantiated as it is marked with <code>#[phantom]</code>. This is by design:
+<code>Map</code> is a compile-time type that only exists to provide type information for the compiler.
+It represents a mapping in storage, but the actual storage operations are handled by the
+<a href="./core-starknet-storage-map-StorageMapReadAccess.html"><code>StorageMapReadAccess</code></a>, <a href="./core-starknet-storage-map-StorageMapWriteAccess.html"><code>StorageMapWriteAccess</code></a>, and <a href="./core-starknet-storage-map-StoragePathEntry.html"><code>StoragePathEntry</code></a> traits.</p>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-storage.html">storage</a>::<a href="./core-starknet-storage-map.html">map</a>::<a href="./core-starknet-storage-map-Map.html">Map</a></p>
+<pre><code class="language-cairo"><span class="boring">[phantom]
+</span>pub struct Map&lt;K, V&gt; {}
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-starknet-storage-Mutable.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-starknet-storage-map-structs.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-starknet-storage-storage_base-FlattenedStorage.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-starknet-storage-map-traits.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -176,33 +184,17 @@ pub struct Map&lt;K, V&gt; {}</code></pre>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-starknet-storage-Mutable.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-starknet-storage-map-structs.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-starknet-storage-storage_base-FlattenedStorage.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-starknet-storage-map-traits.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

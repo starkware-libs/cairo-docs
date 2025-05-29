@@ -1,0 +1,309 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>storage_node - The Cairo Core Library Docs</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Cairo Core Library Docs</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="storage_node"><a class="header" href="#storage_node">storage_node</a></h1>
+<p>Storage nodes provide a way to structure contract storage data, reflecting their structure in
+the storage address computation of their members. They are special structs that can contain any
+storable type and are marked with the <code>#[starknet::storage_node]</code> attribute.</p>
+<h1 id="purpose-and-benefits"><a class="header" href="#purpose-and-benefits">Purpose and Benefits</a></h1>
+<p>Storage nodes provide a flexible way to structure storage data by allowing non-sequential
+storage layouts. They allow the creation of storage-only types, that can contain both
+storage-specific types (like <code>Map</code> and <code>Vec</code>) and regular types - so long as these types are
+storable.
+Storage nodes are particularly valuable when defining structs containing phantom types like
+<code>Map</code> and <code>Vec</code>. When a struct is marked with <code>#[starknet::storage_node]</code>, it automatically
+becomes a phantom type.
+While you can declare any struct as a storage node (even those without phantom types), doing so
+will make that struct a phantom type. For structs that don't contain phantom types, it's often
+more appropriate to make them storable using <code>#[derive(Store)]</code>. This alternative approach
+still enables access to individual struct members through <code>SubPointers</code> without imposing the
+phantom type behavior.
+The storage layout differs significantly between these two approaches:</p>
+<ul>
+<li><code>#[derive(Store)]</code>: Members are stored continuously in the same variable space, with a limit
+of 256 field elements.</li>
+<li>Storage node: Each member is stored at a different location. For a storage node member <code>m</code>
+within a storage variable <code>variable_name</code>, the path to that member is computed as
+<code>h(sn_keccak(variable_name), sn_keccak(m))</code>, where <code>h</code> is the Pedersen hash.</li>
+</ul>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
+<p>Here's how to define a storage node:</p>
+<pre><code class="language-cairo"><span class="boring">[starknet::storage_node]
+</span>struct MyStruct {
+   a: felt252,
+   b: Map&lt;felt252, felt252&gt;,
+}
+</code></pre>
+<p>For the struct above, the following storage node struct and impl will be generated:</p>
+<pre><code class="language-cairo">struct MyStructStorageNode {
+    a: PendingStoragePath&lt;felt252&gt;,
+    b: PendingStoragePath&lt;Map&lt;felt252, felt252&gt;&gt;,
+}
+
+impl MyStructStorageNodeImpl of StorageNode&lt;MyStruct&gt; {
+   fn storage_node(self: StoragePath&lt;MyStruct&gt;) -&gt; MyStructStorageNode {
+        MyStructStorageNode {
+           a: PendingStoragePathTrait::new(@self, selector!("a")),
+           b: PendingStoragePathTrait::new(@self, selector!("b")),
+        }
+   }
+}
+</code></pre>
+<p>For a type <code>T</code> that implements <code>StorageNode</code> (e.g. <code>MyStruct</code> in the example above),
+<code>Deref&lt;StoragePath&lt;T&gt;&gt;</code> is implemented as simply calling <code>storage_node</code>, and thus exposing the
+members of the storage node (<code>a</code> and <code>b</code> in the example above).
+For example, given the following storage:</p>
+<pre><code class="language-cairo"><span class="boring">[storage]
+</span>struct Storage {
+    my_struct: MyStruct,
+    a: felt252,
+}
+
+We can access the members of the storage node as follows:
+
+</code></pre>
+<p>fn use_storage(self: @ContractState) {
+let a_value = self.a.read();
+let inner_a_value = self.my_struct.a.read();
+let b_value = self.my_struct.b.entry(42).read();
+}</p>
+<pre><code class="language-cairo">
+<span class="boring"> Flattening Storage Nodes
+</span>
+Storage Nodes members can be annotated with `#[flat]` to flatten the storage hierarchy and not
+use the member name in the computation of the storage address for its fields.
+
+</code></pre>
+<p>#storage
+struct Storage {
+#flat
+my_struct: MyStruct,
+a: felt252,
+}</p>
+<pre><code class="language-cairo">
+When flattened, the storage node's field name (e.g., `my_struct`) doesn't affect storage address
+computation. In the example above, both `self.a` and `self.my_struct.a` will point to the same
+address. Use `#[flat]` with caution as this behavior is rarely intended.
+
+<span class="boring"> Performance Considerations
+</span>
+Storage node members are implemented as `PendingStoragePath` instances, enabling lazy evaluation
+of storage paths. This means storage addresses are only computed for members that are actually
+accessed.```
+
+Fully qualified path: [core](./core.md)::[starknet](./core-starknet.md)::[storage](./core-starknet-storage.md)::[storage_node](./core-starknet-storage-storage_node.md)
+
+
+[Traits](./core-starknet-storage-storage_node-traits.md)
+ ---
+| | |
+|:---|:---|
+| [StorageNode](./core-starknet-storage-storage_node-StorageNode.md) | A trait that given a storage path of a struct, generates the storage node of this struct.[...](./core-starknet-storage-storage_node-StorageNode.md) |
+| [StorageNodeMut](./core-starknet-storage-storage_node-StorageNodeMut.md) | A mutable version of `StorageNode` , works the same way, but on `Mutable&lt;T&gt;` .[...](./core-starknet-storage-storage_node-StorageNodeMut.md) |
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="core-starknet-storage-vec-VecTrait.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="core-starknet-storage-storage_node-traits.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="core-starknet-storage-vec-VecTrait.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="core-starknet-storage-storage_node-traits.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

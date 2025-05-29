@@ -1,6 +1,6 @@
 # SegmentArena
 
-Fully qualified path: `core::SegmentArena`
+Fully qualified path: [core](./core.md)::[SegmentArena](./core-SegmentArena.md)
 
-<pre><code class="language-rust">pub extern type SegmentArena</code></pre>
+<pre><code class="language-cairo">pub extern type SegmentArena;</code></pre>
 

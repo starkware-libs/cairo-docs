@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,7 +156,16 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="fn"><a class="header" href="#fn">Fn</a></h1>
-<p>The version of the call operator that takes a by-snapshot receiver.Instances of <code>Fn</code> can be called repeatedly.<code>Fn</code> is implemented automatically by closures which only whose captured variable are all <code>Copy</code>. Additionally, for any type <code>F</code> that implements <code>Fn</code>, <code>@F</code> implements <code>Fn</code>, too.Since <a href="./core-ops-function-FnOnce.html"><code>FnOnce</code></a> is implemented for all implementers  of <code>Fn</code>, any instance of <code>Fn</code> can be used as a parameter where a <a href="./core-ops-function-FnOnce.html"><code>FnOnce</code></a> is expected.Use <code>Fn</code> as a bound when you want to accept a parameter of function-like type and need to call it repeatedly. If you do not need such strict requirements, use <a href="./core-ops-function-FnOnce.html"><code>FnOnce</code></a> as bounds.  # Examples  ## Calling a closure</p>
+<p>The version of the call operator that takes a by-snapshot receiver.
+Instances of <code>Fn</code> can be called repeatedly.
+<code>Fn</code> is implemented automatically by closures whose captured variables are all <code>Copy</code>.
+Additionally, for any type <code>F</code> that implements <code>Fn</code>, <code>@F</code> implements <code>Fn</code>, too.
+Since <a href="./core-ops-function-FnOnce.html"><code>FnOnce</code></a> is implemented for all implementers  of <code>Fn</code>, any instance of <code>Fn</code> can be used
+as a parameter where a <a href="./core-ops-function-FnOnce.html"><code>FnOnce</code></a> is expected.
+Use <code>Fn</code> as a bound when you want to accept a parameter of function-like type and need to call
+it repeatedly. If you do not need such strict requirements, use <a href="./core-ops-function-FnOnce.html"><code>FnOnce</code></a> as bounds.</p>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
+<h2 id="calling-a-closure"><a class="header" href="#calling-a-closure">Calling a closure</a></h2>
 <pre><code class="language-cairo">let square = |x| x * x;
 assert_eq!(square(5), 25);
 </code></pre>
@@ -165,24 +177,27 @@ assert_eq!(square(5), 25);
 let double = |x| x * 2;
 assert_eq!(call_with_one(double), 2);
 </code></pre>
-<p>Fully qualified path: <code>core::ops::function::Fn</code></p>
-<pre><code class="language-rust">pub trait Fn&lt;T, Args&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ops.html">ops</a>::<a href="./core-ops-function.html">function</a>::<a href="./core-ops-function-Fn.html">Fn</a></p>
+<pre><code class="language-cairo">pub trait Fn&lt;T, Args&gt;
+</code></pre>
 <h2 id="trait-functions"><a class="header" href="#trait-functions">Trait functions</a></h2>
 <h3 id="call"><a class="header" href="#call">call</a></h3>
 <p>Performs the call operation.</p>
-<p>Fully qualified path: <code>core::ops::function::Fn::call</code></p>
-<pre><code class="language-rust">fn call(self: @T, args: Args) -&gt; Self::Output</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ops.html">ops</a>::<a href="./core-ops-function.html">function</a>::<a href="./core-ops-function-Fn.html">Fn</a>::<a href="./core-ops-function-Fn.html#call">call</a></p>
+<pre><code class="language-cairo">fn call&lt;T, Args, T, Args&gt;(self: @T, args: Args) -&gt; <a href="core-ops-function-Fn.html">Fn&lt;T, Args&gt;Output</a>
+</code></pre>
 <h2 id="trait-types"><a class="header" href="#trait-types">Trait types</a></h2>
 <h3 id="output"><a class="header" href="#output">Output</a></h3>
 <p>The returned type after the call operator is used.</p>
-<p>Fully qualified path: <code>core::ops::function::Fn::Output</code></p>
-<pre><code class="language-rust">type Output;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ops.html">ops</a>::<a href="./core-ops-function.html">function</a>::<a href="./core-ops-function-Fn.html">Fn</a>::<a href="./core-ops-function-Fn.html#output">Output</a></p>
+<pre><code class="language-cairo">type Output;
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-ops-deref-DerefMut.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-ops-function-traits.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
@@ -196,7 +211,7 @@ assert_eq!(call_with_one(double), 2);
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-ops-deref-DerefMut.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-ops-function-traits.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
@@ -207,22 +222,6 @@ assert_eq!(call_with_one(double), 2);
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

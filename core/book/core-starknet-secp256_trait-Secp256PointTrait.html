@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,7 +156,10 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="secp256pointtrait"><a class="header" href="#secp256pointtrait">Secp256PointTrait</a></h1>
-<p>A trait for performing operations on Secp256{k/r}1 curve points.Provides operations needed for elliptic curve cryptography, including point addition and scalar multiplication.  # Examples</p>
+<p>A trait for performing operations on Secp256{k/r}1 curve points.
+Provides operations needed for elliptic curve cryptography, including point addition
+and scalar multiplication.</p>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
 <pre><code class="language-cairo">use starknet::SyscallResultTrait;
 use starknet::secp256k1::Secp256k1Point;
 use starknet::secp256_trait::Secp256PointTrait;
@@ -172,21 +178,28 @@ assert!(
 let point = Secp256PointTrait::add(generator, generator);
 let other_point = Secp256PointTrait::mul(generator, 2);
 </code></pre>
-<p>Fully qualified path: <code>core::starknet::secp256_trait::Secp256PointTrait</code></p>
-<pre><code class="language-rust">pub trait Secp256PointTrait&lt;Secp256Point&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-secp256_trait.html">secp256_trait</a>::<a href="./core-starknet-secp256_trait-Secp256PointTrait.html">Secp256PointTrait</a></p>
+<pre><code class="language-cairo">pub trait Secp256PointTrait&lt;Secp256Point&gt;
+</code></pre>
 <h2 id="trait-functions"><a class="header" href="#trait-functions">Trait functions</a></h2>
 <h3 id="get_coordinates"><a class="header" href="#get_coordinates">get_coordinates</a></h3>
 <p>Returns the x and y coordinates of the curve point.</p>
-<p>Fully qualified path: <code>core::starknet::secp256_trait::Secp256PointTrait::get_coordinates</code></p>
-<pre><code class="language-rust">fn get_coordinates(self: Secp256Point) -&gt; SyscallResult&lt;(u256, u256)&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-secp256_trait.html">secp256_trait</a>::<a href="./core-starknet-secp256_trait-Secp256PointTrait.html">Secp256PointTrait</a>::<a href="./core-starknet-secp256_trait-Secp256PointTrait.html#get_coordinates">get_coordinates</a></p>
+<pre><code class="language-cairo">fn get_coordinates&lt;Secp256Point, Secp256Point&gt;(self: Secp256Point) -&gt; <a href="core-result-Result.html">Result&lt;(u256, u256), Array&lt;felt252&gt;&gt;</a>
+</code></pre>
 <h3 id="add"><a class="header" href="#add">add</a></h3>
-<p>Performs elliptic curve point addition.Adds <code>self</code> and <code>other</code> following the curve's addition law and returns the resulting point.</p>
-<p>Fully qualified path: <code>core::starknet::secp256_trait::Secp256PointTrait::add</code></p>
-<pre><code class="language-rust">fn add(self: Secp256Point, other: Secp256Point) -&gt; SyscallResult&lt;Secp256Point&gt;</code></pre>
+<p>Performs elliptic curve point addition.
+Adds <code>self</code> and <code>other</code> following the curve's addition law and returns
+the resulting point.</p>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-secp256_trait.html">secp256_trait</a>::<a href="./core-starknet-secp256_trait-Secp256PointTrait.html">Secp256PointTrait</a>::<a href="./core-starknet-secp256_trait-Secp256PointTrait.html#add">add</a></p>
+<pre><code class="language-cairo">fn add&lt;Secp256Point, Secp256Point&gt;(self: Secp256Point, other: Secp256Point) -&gt; <a href="core-result-Result.html">Result&lt;Secp256Point, Array&lt;felt252&gt;&gt;</a>
+</code></pre>
 <h3 id="mul"><a class="header" href="#mul">mul</a></h3>
-<p>Performs scalar multiplication of a curve point.Multiplies <code>self</code> by the given scalar value.</p>
-<p>Fully qualified path: <code>core::starknet::secp256_trait::Secp256PointTrait::mul</code></p>
-<pre><code class="language-rust">fn mul(self: Secp256Point, scalar: u256) -&gt; SyscallResult&lt;Secp256Point&gt;</code></pre>
+<p>Performs scalar multiplication of a curve point.
+Multiplies <code>self</code> by the given scalar value.</p>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-secp256_trait.html">secp256_trait</a>::<a href="./core-starknet-secp256_trait-Secp256PointTrait.html">Secp256PointTrait</a>::<a href="./core-starknet-secp256_trait-Secp256PointTrait.html#mul">mul</a></p>
+<pre><code class="language-cairo">fn mul&lt;Secp256Point, Secp256Point&gt;(self: Secp256Point, scalar: <a href="core-integer-u256.html">u256</a>) -&gt; <a href="core-result-Result.html">Result&lt;Secp256Point, Array&lt;felt252&gt;&gt;</a>
+</code></pre>
 
                     </main>
 
@@ -196,7 +209,7 @@ let other_point = Secp256PointTrait::mul(generator, 2);
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-starknet-event-Event.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-starknet-secp256k1.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -210,29 +223,13 @@ let other_point = Secp256PointTrait::mul(generator, 2);
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-starknet-event-Event.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-starknet-secp256k1.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

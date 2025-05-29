@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,11 +156,23 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="get_execution_info_syscall"><a class="header" href="#get_execution_info_syscall">get_execution_info_syscall</a></h1>
-<p>Gets information about the currently executing block and the transactions in the block. For a complete description of this information, see [<code>Execution information</code>](<code>Execution information</code>).When an account’s <code>__validate__</code>, <code>__validate_deploy__</code>, or <code>__validate_declare__</code> function calls <code>get_execution_info</code>, the return values for <code>block_timestamp</code> and <code>block_number</code> are modified as follows: * <code>block_timestamp</code> returns the hour, rounded down to the nearest hour. * <code>block_number</code> returns the block number, rounded down to the nearest multiple of 100.  # ReturnsA struct that contains information about the currently executing function, transaction, and block.</p>
-<p>Fully qualified path: <code>core::starknet::syscalls::get_execution_info_syscall</code></p>
-<pre><code class="language-rust">pub extern fn get_execution_info_syscall() -&gt; SyscallResult&lt;
-    Box&lt;starknet::info::ExecutionInfo&gt;,
-&gt; implicits(GasBuiltin, System) nopanic;</code></pre>
+<p>Gets information about the currently executing block and the transactions within it.
+For a complete description of this information, see <code>Execution information</code>.
+When an account’s <code>__validate__</code>, <code>__validate_deploy__</code>, or <code>__validate_declare__</code> function
+calls <code>get_execution_info</code>, the return values for <code>block_timestamp</code> and <code>block_number</code> are
+modified as follows:</p>
+<ul>
+<li><code>block_timestamp</code> returns the hour, rounded down to the nearest hour.</li>
+<li><code>block_number</code> returns the block number, rounded down to the nearest multiple of 100.</li>
+</ul>
+<h1 id="returns"><a class="header" href="#returns">Returns</a></h1>
+<ul>
+<li>A struct that contains information about the currently executing function, transaction, and
+block.</li>
+</ul>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-syscalls.html">syscalls</a>::<a href="./core-starknet-syscalls-get_execution_info_syscall.html">get_execution_info_syscall</a></p>
+<pre><code class="language-cairo">pub extern fn get_execution_info_syscall() -&gt; <a href="core-result-Result.html">Result&lt;Box&lt;ExecutionInfo&gt;, Array&lt;felt252&gt;&gt;</a> implicits(GasBuiltin, System) nopanic;
+</code></pre>
 
                     </main>
 
@@ -188,22 +203,6 @@
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,27 +156,36 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="ecdsa"><a class="header" href="#ecdsa">ecdsa</a></h1>
-<p>Elliptic Curve Digital Signature Algorithm (ECDSA) for the STARK curve.This module provides implementations for ECDSA signature verification and public key recovery specifically tailored for the STARK curve.Curve information: * Curve equation: y² ≡ x³ + α·x + β (mod p) * α = 1 * β = 0x6f21413efbe40de150e596d72f7a8c5609ad26c15c915c1f4cdfcb99cee9e89 * p = 0x0800000000000011000000000000000000000000000000000000000000000001 = 2^251 + 17 * 2^192 + 1 Generator point: * x = 0x1ef15c18599971b7beced415a40f0c7deacfd9b0d1819e03d723d8bc943cfca * y = 0x5668060aa49730b7be4801df46ec62de53ecd11abe43a32873000c36e8dc1f</p>
-<p>Fully qualified path: <code>core::ecdsa</code></p>
-<h2 id="free-functions"><a class="header" href="#free-functions">Free functions</a></h2>
+<p>Elliptic Curve Digital Signature Algorithm (ECDSA) for the STARK curve.
+This module provides implementations for ECDSA signature verification and public key recovery
+specifically tailored for the STARK curve.
+Curve information:</p>
 <ul>
-<li>
-<p><a href="./core-ecdsa-check_ecdsa_signature.html">check_ecdsa_signature</a></p>
-</li>
-<li>
-<p><a href="./core-ecdsa-recover_public_key.html">recover_public_key</a></p>
-</li>
+<li>Curve equation: y² ≡ x³ + α·x + β (mod p)</li>
+<li>α = 1</li>
+<li>β = 0x6f21413efbe40de150e596d72f7a8c5609ad26c15c915c1f4cdfcb99cee9e89</li>
+<li>p = 0x0800000000000011000000000000000000000000000000000000000000000001 = 2^251 + 17 * 2^192 +
+1
+Generator point:</li>
+<li>x = 0x1ef15c18599971b7beced415a40f0c7deacfd9b0d1819e03d723d8bc943cfca</li>
+<li>y = 0x5668060aa49730b7be4801df46ec62de53ecd11abe43a32873000c36e8dc1f</li>
 </ul>
-
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ecdsa.html">ecdsa</a></p>
+<h2 id="free-functions"><a class="header" href="#free-functions"><a href="./core-ecdsa-free_functions.html">Free functions</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-ecdsa-check_ecdsa_signature.html">check_ecdsa_signature</a></td><td style="text-align: left">Verifies an ECDSA signature against a message hash and public key. Note: the verification algorithm implemented by this function slightly deviates from the standard ECDSA.<a href="./core-ecdsa-check_ecdsa_signature.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-ecdsa-recover_public_key.html">recover_public_key</a></td><td style="text-align: left">Recovers the public key from an ECDSA signature and message hash. Given a valid ECDSA signature, the original message hash, and the y-coordinate parity of point<a href="./core-ecdsa-recover_public_key.html">...</a></td></tr>
+</tbody></table>
+</div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-ec.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-ec-ec_point_unwrap.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-integer.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-ecdsa-free_functions.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -183,33 +195,17 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-ec.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-ec-ec_point_unwrap.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-integer.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-ecdsa-free_functions.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

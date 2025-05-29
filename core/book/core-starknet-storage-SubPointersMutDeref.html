@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -154,16 +157,19 @@
                     <main>
                         <h1 id="subpointersmutderef"><a class="header" href="#subpointersmutderef">SubPointersMutDeref</a></h1>
 <p>This makes the sub-pointers members directly accessible from a pointer to the parent struct.</p>
-<p>Fully qualified path: <code>core::starknet::storage::SubPointersMutDeref</code></p>
-<pre><code class="language-rust">pub impl SubPointersMutDeref&lt;T, +SubPointersMut&lt;T&gt;&gt; of core::ops::Deref&lt;StoragePointer&lt;Mutable&lt;T&gt;&gt;&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-storage.html">storage</a>::<a href="./core-starknet-storage-SubPointersMutDeref.html">SubPointersMutDeref</a></p>
+<pre><code class="language-cairo">pub impl SubPointersMutDeref&lt;T, +SubPointersMut&lt;T&gt;&gt; of Deref&lt;<a href="core-starknet-storage-StoragePointer.html">StoragePointer&lt;Mutable&lt;T&gt;&gt;</a>&gt;;
+</code></pre>
 <h2 id="impl-functions"><a class="header" href="#impl-functions">Impl functions</a></h2>
 <h3 id="deref"><a class="header" href="#deref">deref</a></h3>
-<p>Fully qualified path: <code>core::starknet::storage::SubPointersMutDeref::deref</code></p>
-<pre><code class="language-rust">fn deref(self: StoragePointer&lt;Mutable&lt;T&gt;&gt;) -&gt; Self::Target</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-storage.html">storage</a>::<a href="./core-starknet-storage-SubPointersMutDeref.html">SubPointersMutDeref</a>::<a href="./core-starknet-storage-SubPointersMutDeref.html#deref">deref</a></p>
+<pre><code class="language-cairo">fn deref(self: StoragePointer&lt;Mutable&lt;T&gt;&gt;) -&gt; SubPointersType
+</code></pre>
 <h2 id="impl-types"><a class="header" href="#impl-types">Impl types</a></h2>
 <h3 id="target"><a class="header" href="#target">Target</a></h3>
-<p>Fully qualified path: <code>core::starknet::storage::SubPointersMutDeref::Target</code></p>
-<pre><code class="language-rust">type Target = SubPointersMut::&lt;T&gt;::SubPointersType;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-storage.html">storage</a>::<a href="./core-starknet-storage-SubPointersMutDeref.html">SubPointersMutDeref</a>::<a href="./core-starknet-storage-SubPointersMutDeref.html#target">Target</a></p>
+<pre><code class="language-cairo">type Target = SubPointersType;
+</code></pre>
 
                     </main>
 
@@ -194,22 +200,6 @@
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

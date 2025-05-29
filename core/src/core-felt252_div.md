@@ -1,6 +1,10 @@
 # felt252_div
 
-Performs division on `felt252` values in Cairo's finite field. Unlike regular integer division, `felt252` division returns a field element n that satisfies the equation: n * rhs ≡ lhs (mod P), where P is the `felt252` prime.  # Examples
+Performs division on `felt252` values in Cairo's finite field.
+Unlike regular integer division, `felt252` division returns a field element n that satisfies
+the equation: n * rhs ≡ lhs (mod P), where P is the `felt252` prime.
+# Examples
+
 ```cairo
 use core::felt252_div;
 
@@ -13,7 +17,7 @@ assert!(felt252_div(4, 3) ==
 
 ```
 
-Fully qualified path: `core::felt252_div`
+Fully qualified path: [core](./core.md)::[felt252_div](./core-felt252_div.md)
 
-<pre><code class="language-rust">pub extern fn felt252_div(lhs: felt252, rhs: NonZero&lt;felt252&gt;) -&gt; felt252 nopanic;</code></pre>
+<pre><code class="language-cairo">pub extern fn felt252_div(lhs: <a href="core-felt252.html">felt252</a>, rhs: <a href="core-zeroable-NonZero.html">NonZero&lt;felt252&gt;</a>) -&gt; <a href="core-felt252.html">felt252</a> nopanic;</code></pre>
 

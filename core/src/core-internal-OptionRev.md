@@ -1,12 +1,11 @@
 # OptionRev
 
-Same as `Option`, except that the order of the variants is reversed. This is used as the return type of some libfuncs for efficiency reasons.
+Same as `Option`, except that the order of the variants is reversed.
+This is used as the return type of some libfuncs for efficiency reasons.
 
-Fully qualified path: `core::internal::OptionRev`
+Fully qualified path: [core](./core.md)::[internal](./core-internal.md)::[OptionRev](./core-internal-OptionRev.md)
 
-<pre><code class="language-rust">#[must_use]
-#[derive(Copy, Drop, Debug, PartialEq)]
-pub enum OptionRev&lt;T&gt; {
+<pre><code class="language-cairo">pub enum OptionRev {
     None,
     Some: T,
 }</code></pre>
@@ -15,15 +14,15 @@ pub enum OptionRev&lt;T&gt; {
 
 ### None
 
-Fully qualified path: `core::internal::OptionRev::None`
+Fully qualified path: [core](./core.md)::[internal](./core-internal.md)::[OptionRev](./core-internal-OptionRev.md)::[None](./core-internal-OptionRev.md#none)
 
-<pre><code class="language-rust">None</code></pre>
+<pre><code class="language-cairo">None</code></pre>
 
 
 ### Some
 
-Fully qualified path: `core::internal::OptionRev::Some`
+Fully qualified path: [core](./core.md)::[internal](./core-internal.md)::[OptionRev](./core-internal-OptionRev.md)::[Some](./core-internal-OptionRev.md#some)
 
-<pre><code class="language-rust">Some : T</code></pre>
+<pre><code class="language-cairo">Some: T</code></pre>
 
 

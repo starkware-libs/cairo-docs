@@ -1,6 +1,9 @@
 # StorageMapWriteAccess
 
-Provides direct write access to values in a storage [`Map`](./core-starknet-storage-map-Map.md).Enables directly storing values in the contract's storage at the address of the given key.  # Examples
+Provides direct write access to values in a storage [`Map`](./core-starknet-storage-map-Map.md).
+Enables directly storing values in the contract's storage at the address of the given key.
+# Examples
+
 ```cairo
 use starknet::ContractAddress;
 use starknet::storage::{Map, StorageMapWriteAccess, StoragePathEntry};
@@ -19,32 +22,32 @@ fn write_storage(ref self: ContractState, address: ContractAddress) {
 }
 ```
 
-Fully qualified path: `core::starknet::storage::map::StorageMapWriteAccess`
+Fully qualified path: [core](./core.md)::[starknet](./core-starknet.md)::[storage](./core-starknet-storage.md)::[map](./core-starknet-storage-map.md)::[StorageMapWriteAccess](./core-starknet-storage-map-StorageMapWriteAccess.md)
 
-<pre><code class="language-rust">pub trait StorageMapWriteAccess&lt;TMemberState&gt;</code></pre>
+<pre><code class="language-cairo">pub trait StorageMapWriteAccess&lt;TMemberState&gt;</code></pre>
 
 ## Trait functions
 
 ### write
 
-Fully qualified path: `core::starknet::storage::map::StorageMapWriteAccess::write`
+Fully qualified path: [core](./core.md)::[starknet](./core-starknet.md)::[storage](./core-starknet-storage.md)::[map](./core-starknet-storage-map.md)::[StorageMapWriteAccess](./core-starknet-storage-map-StorageMapWriteAccess.md)::[write](./core-starknet-storage-map-StorageMapWriteAccess.md#write)
 
-<pre><code class="language-rust">fn write(self: TMemberState, key: Self::Key, value: Self::Value)</code></pre>
+<pre><code class="language-cairo">fn write&lt;TMemberState, TMemberState&gt;(self: TMemberState, key: Self::Key, value: Self::Value)</code></pre>
 
 
 ## Trait types
 
 ### Key
 
-Fully qualified path: `core::starknet::storage::map::StorageMapWriteAccess::Key`
+Fully qualified path: [core](./core.md)::[starknet](./core-starknet.md)::[storage](./core-starknet-storage.md)::[map](./core-starknet-storage-map.md)::[StorageMapWriteAccess](./core-starknet-storage-map-StorageMapWriteAccess.md)::[Key](./core-starknet-storage-map-StorageMapWriteAccess.md#key)
 
-<pre><code class="language-rust">type Key;</code></pre>
+<pre><code class="language-cairo">type Key;</code></pre>
 
 
 ### Value
 
-Fully qualified path: `core::starknet::storage::map::StorageMapWriteAccess::Value`
+Fully qualified path: [core](./core.md)::[starknet](./core-starknet.md)::[storage](./core-starknet-storage.md)::[map](./core-starknet-storage-map.md)::[StorageMapWriteAccess](./core-starknet-storage-map-StorageMapWriteAccess.md)::[Value](./core-starknet-storage-map-StorageMapWriteAccess.md#value)
 
-<pre><code class="language-rust">type Value;</code></pre>
+<pre><code class="language-cairo">type Value;</code></pre>
 
 

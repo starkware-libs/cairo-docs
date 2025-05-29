@@ -1,0 +1,226 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Modules - The Cairo Core Library Docs</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Cairo Core Library Docs</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="modules"><a class="header" href="#modules"><a href="./core-starknet-modules.html">Modules</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-starknet-storage_access.html">storage_access</a></td><td style="text-align: left">Storage access primitives for Starknet contract storage. This module provides abstractions over the system calls for reading from and writing to Starknet<a href="./core-starknet-storage_access.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls.html">syscalls</a></td><td style="text-align: left">Utilities for interacting with the Starknet OS. Writing smart contracts requires various associated operations, such as calling another contract<a href="./core-starknet-syscalls.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-contract_address.html">contract_address</a></td><td style="text-align: left">The <code>ContractAddress</code>  type represents a Starknet contract address, with a value range of <code>[0, 2**251)</code> . A variable of type <code>ContractAddress</code>  can be created from a <code>felt252</code>  value using the<a href="./core-starknet-contract_address.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-secp256_trait.html">secp256_trait</a></td><td style="text-align: left">Elliptic Curve Digital Signature Algorithm (ECDSA) for Secp256k1 and Secp256r1 curves. This module provides traits and functions for working with ECDSA signatures<a href="./core-starknet-secp256_trait.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-secp256k1.html">secp256k1</a></td><td style="text-align: left">Functions and constructs related to elliptic curve operations on the secp256k1 curve. This module provides functionality for performing operations on the secp256k1 elliptic curve,<a href="./core-starknet-secp256k1.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-secp256r1.html">secp256r1</a></td><td style="text-align: left">Functions and constructs related to elliptic curve operations on the secp256r1 curve. This module provides functionality for performing operations on the NIST P-256 (also known as<a href="./core-starknet-secp256r1.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-eth_address.html">eth_address</a></td><td style="text-align: left">Ethereum address type for working with Ethereum primitives. This module provides the <a href="./core-starknet-eth_address-EthAddress.html"><code>EthAddress</code></a>  type, which is used when interacting with Ethereum<a href="./core-starknet-eth_address.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-eth_signature.html">eth_signature</a></td><td style="text-align: left">Utilities for Ethereum signature verification and address recovery. This module provides functionality for working with Ethereum signatures.<a href="./core-starknet-eth_signature.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-class_hash.html">class_hash</a></td><td style="text-align: left">The <code>ClassHash</code>  type represents a Starknet contract class hash, with a value range of <code>[0, 2**251)</code> . A variable of type <code>ClassHash</code>  can be created from a <code>felt252</code>  value using the<a href="./core-starknet-class_hash.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-event.html">event</a></td><td style="text-align: left">Event handling traits for Starknet smart contracts. This module provides traits for serializing, deserializing and emitting events on Starknet. The <a href="./core-starknet-event-Event.html"><code>Event</code></a><a href="./core-starknet-event.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-account.html">account</a></td><td style="text-align: left">Account module defining the <code>Call</code>  struct and the <a href="./core-starknet-account-AccountContract.html"><code>AccountContract</code></a>  trait. The <code>Call</code><a href="./core-starknet-account.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-storage.html">storage</a></td><td style="text-align: left">Storage-related types and traits for Cairo contracts. This module implements the storage system for Starknet contracts, providing high-level<a href="./core-starknet-storage.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-testing.html">testing</a></td><td style="text-align: left">Testing utilities for Starknet contracts. This module provides functions for testing Starknet contracts. The functions<a href="./core-starknet-testing.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-info.html">info</a></td><td style="text-align: left">Information about the Starknet execution environment. This module provides access to runtime information about the current transaction,<a href="./core-starknet-info.html">...</a></td></tr>
+</tbody></table>
+</div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="core-starknet.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="core-starknet-storage_access.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="core-starknet.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="core-starknet-storage_access.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

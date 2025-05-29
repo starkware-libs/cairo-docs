@@ -2,7 +2,7 @@
 
 The 8-bit signed integer type.
 
-Fully qualified path: `core::integer::i8`
+Fully qualified path: [core](./core.md)::[integer](./core-integer.md)::[i8](./core-integer-i8.md)
 
-<pre><code class="language-rust">pub extern type i8</code></pre>
+<pre><code class="language-cairo">pub extern type i8;</code></pre>
 

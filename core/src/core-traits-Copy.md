@@ -1,6 +1,16 @@
 # Copy
 
-A trait for copying values.By default, variables in Cairo have 'move semantics', meaning they are moved when used. However, types implementing `Copy` have 'copy semantics', allowing the value to be duplicated instead of moved.  # DerivingThis trait can be automatically derived using `#[derive(Copy)]`. Most basic types implement `Copy` by default.  # ExamplesWithout `Copy` (move semantics):
+A trait for copying values.
+By default, variables in Cairo have 'move semantics', meaning they are moved when used.
+However, types implementing `Copy` have 'copy semantics', allowing the value to be
+duplicated instead of moved.
+# Deriving
+
+This trait can be automatically derived using `#[derive(Copy)]`. Most basic types
+implement `Copy` by default.
+# Examples
+
+Without `Copy` (move semantics):
 ```cairo
 #[derive(Drop)]
 struct Point {
@@ -16,6 +26,7 @@ fn main() {
 
 fn foo(p: Point) {}
 ```
+
 With `Copy` (copy semantics):
 ```cairo
 #[derive(Copy, Drop)]
@@ -33,7 +44,7 @@ fn main() {
 fn foo(p: Point) {}
 ```
 
-Fully qualified path: `core::traits::Copy`
+Fully qualified path: [core](./core.md)::[traits](./core-traits.md)::[Copy](./core-traits-Copy.md)
 
-<pre><code class="language-rust">pub trait Copy&lt;T&gt;;</code></pre>
+<pre><code class="language-cairo">pub trait Copy&lt;T&gt;</code></pre>
 

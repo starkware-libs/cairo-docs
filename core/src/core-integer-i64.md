@@ -2,7 +2,7 @@
 
 The 64-bit signed integer type.
 
-Fully qualified path: `core::integer::i64`
+Fully qualified path: [core](./core.md)::[integer](./core-integer.md)::[i64](./core-integer-i64.md)
 
-<pre><code class="language-rust">pub extern type i64</code></pre>
+<pre><code class="language-cairo">pub extern type i64;</code></pre>
 

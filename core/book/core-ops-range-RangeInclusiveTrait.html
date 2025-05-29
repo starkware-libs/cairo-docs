@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,11 +156,13 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="rangeinclusivetrait"><a class="header" href="#rangeinclusivetrait">RangeInclusiveTrait</a></h1>
-<p>Fully qualified path: <code>core::ops::range::RangeInclusiveTrait</code></p>
-<pre><code class="language-rust">pub trait RangeInclusiveTrait&lt;T, +Destruct&lt;T&gt;, +PartialOrd&lt;@T&gt;&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ops.html">ops</a>::<a href="./core-ops-range.html">range</a>::<a href="./core-ops-range-RangeInclusiveTrait.html">RangeInclusiveTrait</a></p>
+<pre><code class="language-cairo">pub trait RangeInclusiveTrait&lt;T, <a href="core-traits-Destruct.html">+Destruct&lt;T&gt;</a><a href="core-traits-PartialOrd.html">+PartialOrd&lt;@T&gt;</a>&gt;
+</code></pre>
 <h2 id="trait-functions"><a class="header" href="#trait-functions">Trait functions</a></h2>
 <h3 id="contains"><a class="header" href="#contains">contains</a></h3>
-<p>Returns <code>true</code> if <code>item</code> is contained in the range.  # Examples</p>
+<p>Returns <code>true</code> if <code>item</code> is contained in the range.</p>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
 <pre><code class="language-cairo">assert!(!(3..=5).contains(@2));
 assert!( (3..=5).contains(@3));
 assert!( (3..=5).contains(@4));
@@ -167,22 +172,25 @@ assert!(!(3..=5).contains(@6));
 assert!( (3..=3).contains(@3));
 assert!(!(3..=2).contains(@3));
 </code></pre>
-<p>Fully qualified path: <code>core::ops::range::RangeInclusiveTrait::contains</code></p>
-<pre><code class="language-rust">fn contains(self: @RangeInclusive&lt;T&gt;, item: @T) -&gt; bool</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ops.html">ops</a>::<a href="./core-ops-range.html">range</a>::<a href="./core-ops-range-RangeInclusiveTrait.html">RangeInclusiveTrait</a>::<a href="./core-ops-range-RangeInclusiveTrait.html#contains">contains</a></p>
+<pre><code class="language-cairo">fn contains&lt;T, +Destruct&lt;T&gt;, +PartialOrd&lt;@T&gt;, T, +Destruct&lt;T&gt;, +PartialOrd&lt;@T&gt;&gt;(self: @RangeInclusive&lt;T&gt;, item: @T) -&gt; <a href="core-bool.html">bool</a>
+</code></pre>
 <h3 id="is_empty"><a class="header" href="#is_empty">is_empty</a></h3>
-<p>Returns <code>true</code> if the range contains no items.  # Examples</p>
+<p>Returns <code>true</code> if the range contains no items.</p>
+<h1 id="examples-1"><a class="header" href="#examples-1">Examples</a></h1>
 <pre><code class="language-cairo">assert!(!(3_u8..=5_u8).is_empty());
 assert!(!(3_u8..=3_u8).is_empty());
 assert!( (3_u8..=2_u8).is_empty());
 </code></pre>
-<p>Fully qualified path: <code>core::ops::range::RangeInclusiveTrait::is_empty</code></p>
-<pre><code class="language-rust">fn is_empty(self: @RangeInclusive&lt;T&gt;) -&gt; bool</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-ops.html">ops</a>::<a href="./core-ops-range.html">range</a>::<a href="./core-ops-range-RangeInclusiveTrait.html">RangeInclusiveTrait</a>::<a href="./core-ops-range-RangeInclusiveTrait.html#is_empty">is_empty</a></p>
+<pre><code class="language-cairo">fn is_empty&lt;T, +Destruct&lt;T&gt;, +PartialOrd&lt;@T&gt;, T, +Destruct&lt;T&gt;, +PartialOrd&lt;@T&gt;&gt;(self: @RangeInclusive&lt;T&gt;) -&gt; <a href="core-bool.html">bool</a>
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-ops-index-IndexView.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-ops-range-traits.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
@@ -196,7 +204,7 @@ assert!( (3_u8..=2_u8).is_empty());
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-ops-index-IndexView.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-ops-range-traits.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
@@ -207,22 +215,6 @@ assert!( (3_u8..=2_u8).is_empty());
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 

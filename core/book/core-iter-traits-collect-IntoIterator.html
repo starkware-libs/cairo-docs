@@ -31,10 +31,11 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -44,8 +45,8 @@
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +60,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +74,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,6 +111,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -153,7 +156,15 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="intoiterator"><a class="header" href="#intoiterator">IntoIterator</a></h1>
-<p>Conversion into an <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a>.By implementing <code>IntoIterator</code> for a type, you define how it will be converted to an iterator. This is common for types which describe a collection of some kind.One benefit of implementing <code>IntoIterator</code> is that your type will work with Cairo's <code>for</code> loop syntax.See also: <a href="./core-iter-traits-collect-FromIterator.html"><code>FromIterator</code></a>.  # ExamplesBasic usage:</p>
+<p>Conversion into an <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a>.
+By implementing <code>IntoIterator</code> for a type, you define how it will be
+converted to an iterator. This is common for types which describe a
+collection of some kind.
+One benefit of implementing <code>IntoIterator</code> is that your type will work
+with Cairo's <code>for</code> loop syntax.
+See also: <a href="./core-iter-traits-collect-FromIterator.html"><code>FromIterator</code></a>.</p>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
+<p>Basic usage:</p>
 <pre><code class="language-cairo">let mut iter = array![1, 2, 3].into_iter();
 
 assert!(Some(1) == iter.next());
@@ -206,11 +217,14 @@ for i in c {
     n += 1;
 };
 </code></pre>
-<p>Fully qualified path: <code>core::iter::traits::collect::IntoIterator</code></p>
-<pre><code class="language-rust">pub trait IntoIterator&lt;T&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-collect.html">collect</a>::<a href="./core-iter-traits-collect-IntoIterator.html">IntoIterator</a></p>
+<pre><code class="language-cairo">pub trait IntoIterator&lt;T&gt;
+</code></pre>
 <h2 id="trait-functions"><a class="header" href="#trait-functions">Trait functions</a></h2>
 <h3 id="into_iter"><a class="header" href="#into_iter">into_iter</a></h3>
-<p>Creates an iterator from a value.See the <a href="./core-iter.html">module-level documentation</a> for more.  # Examples</p>
+<p>Creates an iterator from a value.
+See the <a href="./core-iter.html">module-level documentation</a> for more.</p>
+<h1 id="examples-1"><a class="header" href="#examples-1">Examples</a></h1>
 <pre><code class="language-cairo">let mut iter = array![1, 2, 3].into_iter();
 
 assert_eq!(Some(1), iter.next());
@@ -218,13 +232,15 @@ assert_eq!(Some(2), iter.next());
 assert_eq!(Some(3), iter.next());
 assert_eq!(None, iter.next());
 </code></pre>
-<p>Fully qualified path: <code>core::iter::traits::collect::IntoIterator::into_iter</code></p>
-<pre><code class="language-rust">fn into_iter(self: T) -&gt; Self::IntoIter</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-collect.html">collect</a>::<a href="./core-iter-traits-collect-IntoIterator.html">IntoIterator</a>::<a href="./core-iter-traits-collect-IntoIterator.html#into_iter">into_iter</a></p>
+<pre><code class="language-cairo">fn into_iter&lt;T, T&gt;(self: T) -&gt; <a href="core-iter-traits-collect-IntoIterator.html">IntoIterator&lt;T&gt;IntoIter</a>
+</code></pre>
 <h2 id="trait-types"><a class="header" href="#trait-types">Trait types</a></h2>
 <h3 id="intoiter"><a class="header" href="#intoiter">IntoIter</a></h3>
 <p>The iterator type that will be created.</p>
-<p>Fully qualified path: <code>core::iter::traits::collect::IntoIterator::IntoIter</code></p>
-<pre><code class="language-rust">type IntoIter;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-collect.html">collect</a>::<a href="./core-iter-traits-collect-IntoIterator.html">IntoIterator</a>::<a href="./core-iter-traits-collect-IntoIterator.html#intoiter">IntoIter</a></p>
+<pre><code class="language-cairo">type IntoIter;
+</code></pre>
 
                     </main>
 
@@ -234,7 +250,7 @@ assert_eq!(None, iter.next());
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-iter-traits-iterator-Iterator.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-iter-traits-iterator.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -248,29 +264,13 @@ assert_eq!(None, iter.next());
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-iter-traits-iterator-Iterator.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-iter-traits-iterator.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
 
         </div>
 
-        <!-- Livereload script (if served using the cli tool) -->
-        <script>
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
-            const socket = new WebSocket(wsAddress);
-            socket.onmessage = function (event) {
-                if (event.data === "reload") {
-                    socket.close();
-                    location.reload();
-                }
-            };
-
-            window.onbeforeunload = function() {
-                socket.close();
-            }
-        </script>
 
 
 
