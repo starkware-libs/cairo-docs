@@ -7,11 +7,14 @@ mdbook serve --open
 
 To update the docs:
 
-1. Verify the latest versions of [Scarb](https://github.com/software-mansion/scarb/releases) and [mdBook](https://github.com/rust-lang/mdBook/releases) are installed:
+1. Verify you are using [mdBook's latest version](https://github.com/rust-lang/mdBook/releases) and [Scarb's latest nightly version](https://github.com/software-mansion/scarb-nightlies/releases):
     ```
     scarb --version && mdbook --version
     ```  
-
+    > To use Scarb's latest nightly version, run:
+    > ```
+    > asdf install scarb <nightly_version> && asdf set -u scarb <nightly_version>
+    > ```
 2. Clone the Cairo repository:
     ```
     git clone https://github.com/starkware-libs/cairo.git
