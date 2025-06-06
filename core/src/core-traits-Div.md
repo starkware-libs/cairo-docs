@@ -1,9 +1,14 @@
 # Div
 
-The division operator `/`.Types implementing this trait support the division operation via the `/` operator.  # Examples`Div`isible types:
+The division operator `/`.
+Types implementing this trait support the division operation via the `/` operator.
+# Examples
+
+`Div`isible types:
 ```cairo
 assert!(4_u8 / 2_u8 == 2_u8);
 ```
+
 Implementing `Div` for a type:
 ```cairo
 #[derive(Copy, Drop, PartialEq)]
@@ -27,21 +32,23 @@ let p3 = p1 / p2;
 assert!(p3 == Point { x: 1, y: 2 });
 ```
 
-Fully qualified path: `core::traits::Div`
+Fully qualified path: [core](./core.md)::[traits](./core-traits.md)::[Div](./core-traits-Div.md)
 
-<pre><code class="language-rust">pub trait Div&lt;T&gt;</code></pre>
+<pre><code class="language-cairo">pub trait Div&lt;T&gt;</code></pre>
 
 ## Trait functions
 
 ### div
 
-Performs the `/` operation.  # Examples
+Performs the `/` operation.
+# Examples
+
 ```cairo
 assert!(12 / 2 == 6);
 ```
 
-Fully qualified path: `core::traits::Div::div`
+Fully qualified path: [core](./core.md)::[traits](./core-traits.md)::[Div](./core-traits-Div.md)::[div](./core-traits-Div.md#div-1)
 
-<pre><code class="language-rust">fn div(lhs: T, rhs: T) -&gt; T</code></pre>
+<pre><code class="language-cairo">fn div&lt;T, T&gt;(lhs: T, rhs: T) -&gt; T</code></pre>
 
 

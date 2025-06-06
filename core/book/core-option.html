@@ -31,21 +31,33 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +71,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +85,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,13 +122,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -153,7 +167,21 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="option"><a class="header" href="#option">option</a></h1>
-<p>Optional values.The <a href="./core-option-Option.html"><code>Option</code></a> type represents an optional value: every <a href="./core-option-Option.html"><code>Option</code></a> is either <a href="./core-option.html#some"><code>Some</code></a> and contains a value, or <a href="./core-option.html#none"><code>None</code></a>, and does not. <a href="./core-option-Option.html"><code>Option</code></a> types are very common in Cairo code, as they have a number of uses:Initial values * Return values for functions that are not defined over their entire input range (partial functions) * Return value for otherwise reporting simple errors, where <a href="./core-option.html#none"><code>None</code></a> is returned on error * Optional struct fields * Optional function argumentsOptions are commonly paired with pattern matching to query the presence of a value and take action, always accounting for the <code>None</code> case.</p>
+<p>Optional values.
+The <a href="./core-option-Option.html"><code>Option</code></a> type represents an optional value: every <a href="./core-option-Option.html"><code>Option</code></a> is either <a href="./core-option.html#some"><code>Some</code></a> and
+contains a value, or <a href="./core-option.html#none"><code>None</code></a>, and does not. <a href="./core-option-Option.html"><code>Option</code></a> types are very common in Cairo code, as
+they have a number of uses:</p>
+<ul>
+<li>Initial values</li>
+<li>Return values for functions that are not defined
+over their entire input range (partial functions)</li>
+<li>Return value for otherwise reporting simple errors, where <a href="./core-option.html#none"><code>None</code></a> is
+returned on error</li>
+<li>Optional struct fields</li>
+<li>Optional function arguments</li>
+</ul>
+<p>Options are commonly paired with pattern matching to query the presence of a value and take
+action, always accounting for the <code>None</code> case.</p>
 <pre><code class="language-cairo">fn divide(numerator: u64, denominator: u64) -&gt; Option&lt;u64&gt; {
     if denominator == 0 {
         None
@@ -173,7 +201,12 @@ match result {
     None    =&gt; println!("Cannot divide by 0"),
 }
 </code></pre>
-<h1 id="the-question-mark-operator-similar-to-the-result-type-when-writing-code-that-calls-many-functions-that-return-the-option-type-handling-somenone-can-be-tedious-the-question-mark-operator--hides-some-of-the-boilerplate-of-propagating-values-up-the-call-stackit-replaces-this"><a class="header" href="#the-question-mark-operator-similar-to-the-result-type-when-writing-code-that-calls-many-functions-that-return-the-option-type-handling-somenone-can-be-tedious-the-question-mark-operator--hides-some-of-the-boilerplate-of-propagating-values-up-the-call-stackit-replaces-this">The question mark operator, <code>?</code>Similar to the <a href="./core-result-Result.html"><code>Result</code></a> type, when writing code that calls many functions that return the <a href="./core-option-Option.html"><code>Option</code></a> type, handling <code>Some</code>/<code>None</code> can be tedious. The question mark operator, <code>?</code>, hides some of the boilerplate of propagating values up the call stack.It replaces this:</a></h1>
+<h1 id="the-question-mark-operator-"><a class="header" href="#the-question-mark-operator-">The question mark operator, <code>?</code></a></h1>
+<p>Similar to the <a href="./core-result-Result.html"><code>Result</code></a> type, when writing code that calls many functions that return the
+<a href="./core-option-Option.html"><code>Option</code></a> type, handling <code>Some</code>/<code>None</code> can be tedious. The question mark
+operator, <code>?</code>, hides some of the boilerplate of propagating values
+up the call stack.
+It replaces this:</p>
 <pre><code class="language-cairo">fn add_last_numbers(mut array: Array&lt;u32&gt;) -&gt; Option&lt;u32&gt; {
     let a = array.pop_front();
     let b = array.pop_front();
@@ -190,34 +223,125 @@ match result {
     Some(array.pop_front()? + array.pop_front()?)
  }
 </code></pre>
-<p>It's much nicer!Ending the expression with <code>?</code> will result in the <a href="./core-option.html#some"><code>Some</code></a>'s unwrapped value, unless the result is <a href="./core-option.html#none"><code>None</code></a>, in which case <a href="./core-option.html#none"><code>None</code></a> is returned early from the enclosing function. <code>?</code> can be used in functions that return <a href="./core-option-Option.html"><code>Option</code></a> because of the early return of <a href="./core-option.html#none"><code>None</code></a> that it provides.<a href="./core-option.html#some"><code>Some</code></a>: Some <a href="./core-option.html#none"><code>None</code></a>: None  # Method overviewIn addition to working with pattern matching, <a href="./core-option-Option.html"><code>Option</code></a> provides a wide variety of different methods.  ## Querying the variantThe <a href="%60is_some%60"><code>is_some</code></a> and <a href="%60is_none%60"><code>is_none</code></a> methods return <code>true</code> if the <a href="./core-option-Option.html"><code>Option</code></a> is <a href="./core-option.html#some"><code>Some</code></a> or <a href="./core-option.html#none"><code>None</code></a>, respectively.<a href="%60is_none%60"><code>is_none</code></a>: OptionTrait::is_none <a href="%60is_none_or%60"><code>is_none_or</code></a>: OptionTrait::is_none_or <a href="%60is_some%60"><code>is_some</code></a>: OptionTrait::is_some <a href="%60is_some_and%60"><code>is_some_and</code></a>: OptionTrait::is_some_and  ## Extracting the contained valueThese methods extract the contained value in an <a href="%60Option%3CT%3E%60"><code>Option&lt;T&gt;</code></a> when it is the <a href="./core-option.html#some"><code>Some</code></a> variant. If the <a href="./core-option-Option.html"><code>Option</code></a> is <a href="./core-option.html#none"><code>None</code></a>:<a href="%60expect%60"><code>expect</code></a> panics with a provided custom message * <a href="%60unwrap%60"><code>unwrap</code></a> panics with a generic message * <a href="%60unwrap_or%60"><code>unwrap_or</code></a> returns the provided default value * <a href="%60unwrap_or_default%60"><code>unwrap_or_default</code></a> returns the default value of the type <code>T</code> (which must implement the <a href="./core-traits-Default.html"><code>Default</code></a> trait) * <a href="%60unwrap_or_else%60"><code>unwrap_or_else</code></a> returns the result of evaluating the provided function<a href="%60expect%60"><code>expect</code></a>: OptionTrait::expect <a href="%60unwrap%60"><code>unwrap</code></a>: OptionTrait::unwrap <a href="%60unwrap_or%60"><code>unwrap_or</code></a>: OptionTrait::unwrap_or <a href="%60unwrap_or_default%60"><code>unwrap_or_default</code></a>: OptionTrait::unwrap_or_default <a href="%60unwrap_or_else%60"><code>unwrap_or_else</code></a>: OptionTrait::unwrap_or_else  ## Transforming contained valuesThese methods transform <a href="./core-option-Option.html"><code>Option</code></a> to <a href="./core-result-Result.html"><code>Result</code></a>:<a href="%60ok_or%60"><code>ok_or</code></a> transforms <a href="%60Some(v)%60"><code>Some(v)</code></a> to <a href="%60Ok(v)%60"><code>Ok(v)</code></a>, and <a href="./core-option.html#none"><code>None</code></a> to <a href="%60Err(err)%60"><code>Err(err)</code></a> using the provided default <code>err</code> value. * <a href="%60ok_or_else%60"><code>ok_or_else</code></a> transforms <a href="%60Some(v)%60"><code>Some(v)</code></a> to <a href="%60Ok(v)%60"><code>Ok(v)</code></a>, and <a href="./core-option.html#none"><code>None</code></a> to a value of <a href="./core-result.html#err"><code>Err</code></a> using the provided function<a href="%60Err(err)%60"><code>Err(err)</code></a>: Err <a href="%60Ok(v)%60"><code>Ok(v)</code></a>: Ok <a href="%60Some(v)%60"><code>Some(v)</code></a>: Some <a href="%60ok_or%60"><code>ok_or</code></a>: OptionTrait::ok_or <a href="%60ok_or_else%60"><code>ok_or_else</code></a>: OptionTrait::ok_or_elseThese methods transform the <a href="./core-option.html#some"><code>Some</code></a> variant:<a href="%60map%60"><code>map</code></a> transforms <a href="%60Option%3CT%3E%60"><code>Option&lt;T&gt;</code></a> to <a href="%60Option%3CU%3E%60"><code>Option&lt;U&gt;</code></a> by applying the provided function to the contained value of <a href="./core-option.html#some"><code>Some</code></a> and leaving <a href="./core-option.html#none"><code>None</code></a> values unchangedThese methods transform <a href="%60Option%3CT%3E%60"><code>Option&lt;T&gt;</code></a> to a value of a possibly different type <code>U</code>:<a href="%60map_or%60"><code>map_or</code></a> applies the provided function to the contained value of <a href="./core-option.html#some"><code>Some</code></a>, or returns the provided default value if the <a href="./core-option-Option.html"><code>Option</code></a> is <a href="./core-option.html#none"><code>None</code></a> * <a href="%60map_or_else%60"><code>map_or_else</code></a> applies the provided function to the contained value of <a href="./core-option.html#some"><code>Some</code></a>, or returns the result of evaluating the provided fallback function if the <a href="./core-option-Option.html"><code>Option</code></a> is <a href="./core-option.html#none"><code>None</code></a><a href="%60map_or%60"><code>map_or</code></a>: OptionTrait::map_or <a href="%60map_or_else%60"><code>map_or_else</code></a>: OptionTrait::map_or_else  ## Boolean operatorsThese methods treat the <a href="./core-option-Option.html"><code>Option</code></a> as a boolean value, where <a href="./core-option.html#some"><code>Some</code></a> acts like <a href="%60true%60"><code>true</code></a> and <a href="./core-option.html#none"><code>None</code></a> acts like <a href="%60false%60"><code>false</code></a>. There are two categories of these methods: ones that take an <a href="./core-option-Option.html"><code>Option</code></a> as input, and ones that take a function as input (to be lazily evaluated).The <a href="%60and%60"><code>and</code></a>, <a href="%60or%60"><code>or</code></a>, and <a href="%60xor%60"><code>xor</code></a> methods take another <a href="./core-option-Option.html"><code>Option</code></a> as input, and produce an <a href="./core-option-Option.html"><code>Option</code></a> as output. Only the <a href="%60and%60"><code>and</code></a> method can produce an <a href="%60Option%3CU%3E%60"><code>Option&lt;U&gt;</code></a> value having a different inner type <code>U</code> than <a href="%60Option%3CT%3E%60"><code>Option&lt;T&gt;</code></a>.| method  | self      | input     | output    | |---------|-----------|-----------|-----------| | <a href="%60and%60"><code>and</code></a> | <code>None</code>    | (ignored) | <code>None</code>    | | <a href="%60and%60"><code>and</code></a> | <code>Some(x)</code> | <code>None</code>    | <code>None</code>    | | <a href="%60and%60"><code>and</code></a> | <code>Some(x)</code> | <code>Some(y)</code> | <code>Some(y)</code> | | <a href="%60or%60"><code>or</code></a>  | <code>None</code>    | <code>None</code>    | <code>None</code>    | | <a href="%60or%60"><code>or</code></a>  | <code>None</code>    | <code>Some(y)</code> | <code>Some(y)</code> | | <a href="%60or%60"><code>or</code></a>  | <code>Some(x)</code> | (ignored) | <code>Some(x)</code> | | <a href="%60xor%60"><code>xor</code></a> | <code>None</code>    | <code>None</code>    | <code>None</code>    | | <a href="%60xor%60"><code>xor</code></a> | <code>None</code>    | <code>Some(y)</code> | <code>Some(y)</code> | | <a href="%60xor%60"><code>xor</code></a> | <code>Some(x)</code> | <code>None</code>    | <code>Some(x)</code> | | <a href="%60xor%60"><code>xor</code></a> | <code>Some(x)</code> | <code>Some(y)</code> | <code>None</code>    |<a href="%60and%60"><code>and</code></a>: OptionTrait::and <a href="%60or%60"><code>or</code></a>: OptionTrait::or <a href="%60xor%60"><code>xor</code></a>: OptionTrait::xorThe <a href="%60and_then%60"><code>and_then</code></a> and <a href="%60or_else%60"><code>or_else</code></a> methods take a function as input, and only evaluate the function when they need to produce a new value. Only the <a href="%60and_then%60"><code>and_then</code></a> method can produce an <a href="%60Option%3CU%3E%60"><code>Option&lt;U&gt;</code></a> value having a different inner type <code>U</code> than <a href="%60Option%3CT%3E%60"><code>Option&lt;T&gt;</code></a>.| method       | self      | function input | function result | output    | |--------------|-----------|----------------|-----------------|-----------| | <a href="%60and_then%60"><code>and_then</code></a> | <code>None</code>    | (not provided) | (not evaluated) | <code>None</code>    | | <a href="%60and_then%60"><code>and_then</code></a> | <code>Some(x)</code> | <code>x</code>            | <code>None</code>          | <code>None</code>    | | <a href="%60and_then%60"><code>and_then</code></a> | <code>Some(x)</code> | <code>x</code>            | <code>Some(y)</code>       | <code>Some(y)</code> | | <a href="%60or_else%60"><code>or_else</code></a>  | <code>None</code>    | (not provided) | <code>None</code>          | <code>None</code>    | | <a href="%60or_else%60"><code>or_else</code></a>  | <code>None</code>    | (not provided) | <code>Some(y)</code>       | <code>Some(y)</code> | | <a href="%60or_else%60"><code>or_else</code></a>  | <code>Some(x)</code> | (not provided) | (not evaluated) | <code>Some(x)</code> |<a href="%60and_then%60"><code>and_then</code></a>: OptionTrait::and_then <a href="%60or_else%60"><code>or_else</code></a>: OptionTrait::or_else ## Iterating over <code>Option</code>An <a href="./core-option-Option.html"><code>Option</code></a> can be iterated over. This can be helpful if you need an iterator that is conditionally empty. The iterator will either produce a single value (when the <a href="./core-option-Option.html"><code>Option</code></a> is <a href="./core-option.html#some"><code>Some</code></a>), or produce no values (when the <a href="./core-option-Option.html"><code>Option</code></a> is <a href="./core-option.html#none"><code>None</code></a>). For example, <a href="%60into_iter%60"><code>into_iter</code></a> contains <a href="%60Some(v)%60"><code>Some(v)</code></a> if the <a href="./core-option-Option.html"><code>Option</code></a> is <a href="%60Some(v)%60"><code>Some(v)</code></a>, and <a href="./core-option.html#none"><code>None</code></a> if the <a href="./core-option-Option.html"><code>Option</code></a> is <a href="./core-option.html#none"><code>None</code></a>.</p>
-<p>Fully qualified path: <code>core::option</code></p>
-<h2 id="structs"><a class="header" href="#structs">Structs</a></h2>
+<p>It's much nicer!
+Ending the expression with <code>?</code> will result in the <a href="./core-option.html#some"><code>Some</code></a>'s unwrapped value, unless the
+result is <a href="./core-option.html#none"><code>None</code></a>, in which case <a href="./core-option.html#none"><code>None</code></a> is returned early from the enclosing function.
+<code>?</code> can be used in functions that return <a href="./core-option-Option.html"><code>Option</code></a> because of the
+early return of <a href="./core-option.html#none"><code>None</code></a> that it provides.</p>
+<h1 id="method-overview"><a class="header" href="#method-overview">Method overview</a></h1>
+<p>In addition to working with pattern matching, <a href="./core-option-Option.html"><code>Option</code></a> provides a wide
+variety of different methods.</p>
+<h2 id="querying-the-variant"><a class="header" href="#querying-the-variant">Querying the variant</a></h2>
+<p>The <code>is_some</code> and <code>is_none</code> methods return <code>true</code> if the <a href="./core-option-Option.html"><code>Option</code></a>
+is <a href="./core-option.html#some"><code>Some</code></a> or <a href="./core-option.html#none"><code>None</code></a>, respectively.</p>
+<h2 id="extracting-the-contained-value"><a class="header" href="#extracting-the-contained-value">Extracting the contained value</a></h2>
+<p>These methods extract the contained value in an <code>Option&lt;T&gt;</code> when it
+is the <a href="./core-option.html#some"><code>Some</code></a> variant. If the <a href="./core-option-Option.html"><code>Option</code></a> is <a href="./core-option.html#none"><code>None</code></a>:</p>
 <ul>
-<li><a href="./core-option-OptionIter.html">OptionIter</a></li>
+<li><code>expect</code> panics with a provided custom message</li>
+<li><code>unwrap</code> panics with a generic message</li>
+<li><code>unwrap_or</code> returns the provided default value</li>
+<li><code>unwrap_or_default</code> returns the default value of the type <code>T</code>
+(which must implement the <a href="./core-traits-Default.html"><code>Default</code></a> trait)</li>
+<li><code>unwrap_or_else</code> returns the result of evaluating the provided
+function</li>
 </ul>
-<h2 id="enums"><a class="header" href="#enums">Enums</a></h2>
+<h2 id="transforming-contained-values"><a class="header" href="#transforming-contained-values">Transforming contained values</a></h2>
+<p>These methods transform <a href="./core-option-Option.html"><code>Option</code></a> to <a href="./core-result-Result.html"><code>Result</code></a>:</p>
 <ul>
-<li><a href="./core-option-Option.html">Option</a></li>
+<li><code>ok_or</code> transforms <a href="./core-option.html#some"><code>Some(v)</code></a> to <a href="./core-result.html#ok"><code>Ok(v)</code></a>, and <a href="./core-option.html#none"><code>None</code></a> to
+<a href="./core-result.html#err"><code>Err(err)</code></a> using the provided default <code>err</code> value.</li>
+<li><code>ok_or_else</code> transforms <a href="./core-option.html#some"><code>Some(v)</code></a> to <a href="./core-result.html#ok"><code>Ok(v)</code></a>, and <a href="./core-option.html#none"><code>None</code></a> to
+a value of <a href="./core-result.html#err"><code>Err</code></a> using the provided function</li>
 </ul>
-<h2 id="traits"><a class="header" href="#traits">Traits</a></h2>
+<p>These methods transform the <a href="./core-option.html#some"><code>Some</code></a> variant:</p>
 <ul>
-<li><a href="./core-option-OptionTrait.html">OptionTrait</a></li>
+<li><code>map</code> transforms <code>Option&lt;T&gt;</code> to <code>Option&lt;U&gt;</code> by applying the
+provided function to the contained value of <a href="./core-option.html#some"><code>Some</code></a> and leaving
+<a href="./core-option.html#none"><code>None</code></a> values unchanged</li>
 </ul>
-<h2 id="impls"><a class="header" href="#impls">Impls</a></h2>
+<p>These methods transform <code>Option&lt;T&gt;</code> to a value of a possibly
+different type <code>U</code>:</p>
 <ul>
-<li><a href="./core-option-DestructOption.html">DestructOption</a></li>
+<li><code>map_or</code> applies the provided function to the contained value of
+<a href="./core-option.html#some"><code>Some</code></a>, or returns the provided default value if the <a href="./core-option-Option.html"><code>Option</code></a> is
+<a href="./core-option.html#none"><code>None</code></a></li>
+<li><code>map_or_else</code> applies the provided function to the contained value
+of <a href="./core-option.html#some"><code>Some</code></a>, or returns the result of evaluating the provided
+fallback function if the <a href="./core-option-Option.html"><code>Option</code></a> is <a href="./core-option.html#none"><code>None</code></a></li>
 </ul>
-
+<h2 id="boolean-operators"><a class="header" href="#boolean-operators">Boolean operators</a></h2>
+<p>These methods treat the <a href="./core-option-Option.html"><code>Option</code></a> as a boolean value, where <a href="./core-option.html#some"><code>Some</code></a>
+acts like <code>true</code> and <a href="./core-option.html#none"><code>None</code></a> acts like <code>false</code>. There are two
+categories of these methods: ones that take an <a href="./core-option-Option.html"><code>Option</code></a> as input, and
+ones that take a function as input (to be lazily evaluated).
+The <code>and</code>, <code>or</code>, and <code>xor</code> methods take another <a href="./core-option-Option.html"><code>Option</code></a> as
+input, and produce an <a href="./core-option-Option.html"><code>Option</code></a> as output. Only the <code>and</code> method can
+produce an <code>Option&lt;U&gt;</code> value having a different inner type <code>U</code> than
+<code>Option&lt;T&gt;</code>.</p>
+<div class="table-wrapper"><table><thead><tr><th>method</th><th>self</th><th>input</th><th>output</th></tr></thead><tbody>
+<tr><td><code>and</code></td><td><code>None</code></td><td>(ignored)</td><td><code>None</code></td></tr>
+<tr><td><code>and</code></td><td><code>Some(x)</code></td><td><code>None</code></td><td><code>None</code></td></tr>
+<tr><td><code>and</code></td><td><code>Some(x)</code></td><td><code>Some(y)</code></td><td><code>Some(y)</code></td></tr>
+<tr><td><code>or</code></td><td><code>None</code></td><td><code>None</code></td><td><code>None</code></td></tr>
+<tr><td><code>or</code></td><td><code>None</code></td><td><code>Some(y)</code></td><td><code>Some(y)</code></td></tr>
+<tr><td><code>or</code></td><td><code>Some(x)</code></td><td>(ignored)</td><td><code>Some(x)</code></td></tr>
+<tr><td><code>xor</code></td><td><code>None</code></td><td><code>None</code></td><td><code>None</code></td></tr>
+<tr><td><code>xor</code></td><td><code>None</code></td><td><code>Some(y)</code></td><td><code>Some(y)</code></td></tr>
+<tr><td><code>xor</code></td><td><code>Some(x)</code></td><td><code>None</code></td><td><code>Some(x)</code></td></tr>
+<tr><td><code>xor</code></td><td><code>Some(x)</code></td><td><code>Some(y)</code></td><td><code>None</code></td></tr>
+</tbody></table>
+</div>
+<p>The <code>and_then</code> and <code>or_else</code> methods take a function as input, and
+only evaluate the function when they need to produce a new value. Only
+the <code>and_then</code> method can produce an <code>Option&lt;U&gt;</code> value having a
+different inner type <code>U</code> than <code>Option&lt;T&gt;</code>.</p>
+<div class="table-wrapper"><table><thead><tr><th>method</th><th>self</th><th>function input</th><th>function result</th><th>output</th></tr></thead><tbody>
+<tr><td><code>and_then</code></td><td><code>None</code></td><td>(not provided)</td><td>(not evaluated)</td><td><code>None</code></td></tr>
+<tr><td><code>and_then</code></td><td><code>Some(x)</code></td><td><code>x</code></td><td><code>None</code></td><td><code>None</code></td></tr>
+<tr><td><code>and_then</code></td><td><code>Some(x)</code></td><td><code>x</code></td><td><code>Some(y)</code></td><td><code>Some(y)</code></td></tr>
+<tr><td><code>or_else</code></td><td><code>None</code></td><td>(not provided)</td><td><code>None</code></td><td><code>None</code></td></tr>
+<tr><td><code>or_else</code></td><td><code>None</code></td><td>(not provided)</td><td><code>Some(y)</code></td><td><code>Some(y)</code></td></tr>
+<tr><td><code>or_else</code></td><td><code>Some(x)</code></td><td>(not provided)</td><td>(not evaluated)</td><td><code>Some(x)</code></td></tr>
+</tbody></table>
+</div>
+<h2 id="iterating-over-option"><a class="header" href="#iterating-over-option">Iterating over <code>Option</code></a></h2>
+<p>An <a href="./core-option-Option.html"><code>Option</code></a> can be iterated over. This can be helpful if you need an
+iterator that is conditionally empty. The iterator will either produce
+a single value (when the <a href="./core-option-Option.html"><code>Option</code></a> is <a href="./core-option.html#some"><code>Some</code></a>), or produce no values
+(when the <a href="./core-option-Option.html"><code>Option</code></a> is <a href="./core-option.html#none"><code>None</code></a>). For example, <code>into_iter</code>
+contains <a href="./core-option.html#some"><code>Some(v)</code></a> if the <a href="./core-option-Option.html"><code>Option</code></a> is <a href="./core-option.html#some"><code>Some(v)</code></a>, and <a href="./core-option.html#none"><code>None</code></a> if the
+<a href="./core-option-Option.html"><code>Option</code></a> is <a href="./core-option.html#none"><code>None</code></a>.</p>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-option.html">option</a></p>
+<h2 id="structs"><a class="header" href="#structs"><a href="./core-option-structs.html">Structs</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-option-OptionIter.html">OptionIter</a></td><td style="text-align: left">An iterator over the value in the <a href="./core-option.html#some"><code>Some</code></a>  variant of an <a href="./core-option-Option.html"><code>Option</code></a> . The iterator yields one value if the <a href="./core-option-Option.html"><code>Option</code></a>  is a<a href="./core-option-OptionIter.html">...</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="enums"><a class="header" href="#enums"><a href="./core-option-enums.html">Enums</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-option-Option.html">Option</a></td><td style="text-align: left">The <code>Option&lt;T&gt;</code>  enum representing either <code>Some(value)</code>  or <code>None</code> .<a href="./core-option-Option.html">...</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="traits"><a class="header" href="#traits"><a href="./core-option-traits.html">Traits</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-option-OptionTrait.html">OptionTrait</a></td><td style="text-align: left">A trait for handling <code>Option&lt;T&gt;</code>  related operations.<a href="./core-option-OptionTrait.html">...</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="impls"><a class="header" href="#impls"><a href="./core-option-impls.html">Impls</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-option-DestructOption.html">DestructOption</a></td><td style="text-align: left"><a href="./core-option-DestructOption.html">...</a></td></tr>
+</tbody></table>
+</div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-result.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-result-ResultTrait.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-clone.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-option-structs.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -227,11 +351,11 @@ match result {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-result.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-result-ResultTrait.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-clone.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-option-structs.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

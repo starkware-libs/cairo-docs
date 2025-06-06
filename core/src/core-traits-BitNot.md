@@ -1,6 +1,9 @@
 # BitNot
 
-The bitwise NOT operator `~`.  # ExamplesAn implementation of `BitNot` for a wrapper around `u8`.
+The bitwise NOT operator `~`.
+# Examples
+
+An implementation of `BitNot` for a wrapper around `u8`.
 ```cairo
 use core::traits::BitNot;
 
@@ -19,21 +22,23 @@ assert!(~Wrapper { u8: 0 } == Wrapper { u8 : 255 });
 assert!(~Wrapper { u8: 1 } == Wrapper { u8 : 254 });
 ```
 
-Fully qualified path: `core::traits::BitNot`
+Fully qualified path: [core](./core.md)::[traits](./core-traits.md)::[BitNot](./core-traits-BitNot.md)
 
-<pre><code class="language-rust">pub trait BitNot&lt;T&gt;</code></pre>
+<pre><code class="language-cairo">pub trait BitNot&lt;T&gt;</code></pre>
 
 ## Trait functions
 
 ### bitnot
 
-Performs the `~` operation.  # Examples
+Performs the `~` operation.
+# Examples
+
 ```cairo
 assert!(~1_u8 == 254);
 ```
 
-Fully qualified path: `core::traits::BitNot::bitnot`
+Fully qualified path: [core](./core.md)::[traits](./core-traits.md)::[BitNot](./core-traits-BitNot.md)::[bitnot](./core-traits-BitNot.md#bitnot-1)
 
-<pre><code class="language-rust">fn bitnot(a: T) -&gt; T</code></pre>
+<pre><code class="language-cairo">fn bitnot&lt;T, T&gt;(a: T) -&gt; T</code></pre>
 
 

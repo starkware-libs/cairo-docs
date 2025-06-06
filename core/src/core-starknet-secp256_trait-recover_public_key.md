@@ -1,6 +1,9 @@
 # recover_public_key
 
-Recovers the public key associated with a given signature and message hash.Returns the public key as a point on the curve.  # Examples
+Recovers the public key associated with a given signature and message hash.
+Returns the public key as a point on the curve.
+# Examples
+
 ```cairo
 use starknet::secp256r1::Secp256r1Point;
 use starknet::secp256_trait::{Signature, recover_public_key};
@@ -16,14 +19,14 @@ let signature = Signature {
 let public_key = recover_public_key::<Secp256r1Point>(msg_hash, signature);
 ```
 
-Fully qualified path: `core::starknet::secp256_trait::recover_public_key`
+Fully qualified path: [core](./core.md)::[starknet](./core-starknet.md)::[secp256_trait](./core-starknet-secp256_trait.md)::[recover_public_key](./core-starknet-secp256_trait-recover_public_key.md)
 
-<pre><code class="language-rust">pub fn recover_public_key&lt;
+<pre><code class="language-cairo">pub fn recover_public_key&lt;
     Secp256Point,
     +Drop&lt;Secp256Point&gt;,
     impl Secp256Impl: Secp256Trait&lt;Secp256Point&gt;,
     +Secp256PointTrait&lt;Secp256Point&gt;,
 &gt;(
-    msg_hash: u256, signature: Signature,
-) -&gt; Option&lt;Secp256Point&gt;</code></pre>
+    msg_hash: <a href="core-integer-u256.html">u256</a>, signature: <a href="core-starknet-secp256_trait-Signature.html">Signature</a>,
+) -&gt; <a href="core-option-Option.html">Option&lt;Secp256Point&gt;</a></code></pre>
 

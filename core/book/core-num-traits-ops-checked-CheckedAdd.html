@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>num::traits::ops::checked::CheckedAdd - The Cairo Core Library Docs</title>
+        <title>CheckedAdd - The Cairo Core Library Docs</title>
 
 
         <!-- Custom HTML head -->
@@ -31,21 +31,33 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +71,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +85,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,13 +122,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -153,7 +167,9 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="checkedadd"><a class="header" href="#checkedadd">CheckedAdd</a></h1>
-<p>Performs addition that returns <code>None</code> instead of wrapping around on overflow.  # Examples</p>
+<p>Performs addition that returns <code>None</code> instead of wrapping around on
+overflow.</p>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
 <pre><code class="language-cairo">use core::num::traits::CheckedAdd;
 
 let result = 1_u8.checked_add(2);
@@ -162,23 +178,26 @@ assert!(result == Some(3));
 let result = 255_u8.checked_add(1);
 assert!(result == None); // Overflow
 </code></pre>
-<p>Fully qualified path: <code>core::num::traits::ops::checked::CheckedAdd</code></p>
-<pre><code class="language-rust">pub trait CheckedAdd&lt;T&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-num.html">num</a>::<a href="./core-num-traits.html">traits</a>::<a href="./core-num-traits-ops.html">ops</a>::<a href="./core-num-traits-ops-checked.html">checked</a>::<a href="./core-num-traits-ops-checked-CheckedAdd.html">CheckedAdd</a></p>
+<pre><code class="language-cairo">pub trait CheckedAdd&lt;T&gt;
+</code></pre>
 <h2 id="trait-functions"><a class="header" href="#trait-functions">Trait functions</a></h2>
 <h3 id="checked_add"><a class="header" href="#checked_add">checked_add</a></h3>
-<p>Adds two numbers, checking for overflow. If overflow happens, <code>None</code> is returned.</p>
-<p>Fully qualified path: <code>core::num::traits::ops::checked::CheckedAdd::checked_add</code></p>
-<pre><code class="language-rust">fn checked_add(self: T, v: T) -&gt; Option&lt;T&gt;</code></pre>
+<p>Adds two numbers, checking for overflow. If overflow happens, <code>None</code> is
+returned.</p>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-num.html">num</a>::<a href="./core-num-traits.html">traits</a>::<a href="./core-num-traits-ops.html">ops</a>::<a href="./core-num-traits-ops-checked.html">checked</a>::<a href="./core-num-traits-ops-checked-CheckedAdd.html">CheckedAdd</a>::<a href="./core-num-traits-ops-checked-CheckedAdd.html#checked_add">checked_add</a></p>
+<pre><code class="language-cairo">fn checked_add&lt;T, T&gt;(self: T, v: T) -&gt; <a href="core-option-Option.html">Option&lt;T&gt;</a>
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-num-traits-bounded-Bounded.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-num-traits-ops-checked-traits.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-num-traits-ops-checked-CheckedMul.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-num-traits-ops-checked-CheckedSub.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -188,11 +207,11 @@ assert!(result == None); // Overflow
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-num-traits-bounded-Bounded.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-num-traits-ops-checked-traits.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-num-traits-ops-checked-CheckedMul.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-num-traits-ops-checked-CheckedSub.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

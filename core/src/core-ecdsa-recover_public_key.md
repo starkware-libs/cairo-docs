@@ -1,6 +1,21 @@
 # recover_public_key
 
-Recovers the public key from an ECDSA signature and message hash.Given a valid ECDSA signature, the original message hash, and the y-coordinate parity of point R, this function recovers the signer's public key. This is useful in scenarios where you need to verify a message has been signed by a specific public key.  # Arguments * `message_hash` - The hash of the signed message * `signature_r` - The r component of the ECDSA signature (x-coordinate of point R) * `signature_s` - The s component of the ECDSA signature * `y_parity` - The parity of the y-coordinate of point R (`true` for odd, `false` for even)  # Returns Returns `Some(public_key)` containing the x-coordinate of the recovered public key point if the signature is valid, `None` otherwise.  # Examples
+Recovers the public key from an ECDSA signature and message hash.
+Given a valid ECDSA signature, the original message hash, and the y-coordinate parity of point
+R, this function recovers the signer's public key. This is useful in scenarios where you need to
+verify a message has been signed by a specific public key.
+# Arguments
+
+- `message_hash` - The hash of the signed message
+- `signature_r` - The r component of the ECDSA signature (x-coordinate of point R)
+- `signature_s` - The s component of the ECDSA signature
+- `y_parity` - The parity of the y-coordinate of point R (`true` for odd, `false` for even)
+# Returns
+
+Returns `Some(public_key)` containing the x-coordinate of the recovered public key point if
+the signature is valid, `None` otherwise.
+# Examples
+
 ```cairo
 use core::ecdsa::recover_public_key;
 
@@ -13,9 +28,9 @@ assert!(
 )
 ```
 
-Fully qualified path: `core::ecdsa::recover_public_key`
+Fully qualified path: [core](./core.md)::[ecdsa](./core-ecdsa.md)::[recover_public_key](./core-ecdsa-recover_public_key.md)
 
-<pre><code class="language-rust">pub fn recover_public_key(
-    message_hash: felt252, signature_r: felt252, signature_s: felt252, y_parity: bool,
-) -&gt; Option&lt;felt252&gt;</code></pre>
+<pre><code class="language-cairo">pub fn recover_public_key(
+    message_hash: <a href="core-felt252.html">felt252</a>, signature_r: <a href="core-felt252.html">felt252</a>, signature_s: <a href="core-felt252.html">felt252</a>, y_parity: <a href="core-bool.html">bool</a>,
+) -&gt; <a href="core-option-Option.html">Option&lt;felt252&gt;</a></code></pre>
 

@@ -31,21 +31,33 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +71,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +85,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,13 +122,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -153,7 +167,14 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="default"><a class="header" href="#default">Default</a></h1>
-<p>A trait for giving a type a useful default value.Cairo implements <code>Default</code> for various primitives types.  # DerivableThis trait can be used with <code>#[derive]</code> if all of the type's fields implement <code>Default</code>. When <code>derive</code>d, it will use the default value for each field's type.  ## <code>enum</code>sWhen using <code>#[derive(Default)]</code> on an <code>enum</code>, you need to choose which unit variant will be default. You do this by placing the <code>#[default]</code> attribute on the variant.</p>
+<p>A trait for giving a type a useful default value.
+Cairo implements <code>Default</code> for various primitives types.</p>
+<h1 id="derivable"><a class="header" href="#derivable">Derivable</a></h1>
+<p>This trait can be used with <code>#[derive]</code> if all of the type's fields implement
+<code>Default</code>. When <code>derive</code>d, it will use the default value for each field's type.</p>
+<h2 id="enums"><a class="header" href="#enums"><code>enum</code>s</a></h2>
+<p>When using <code>#[derive(Default)]</code> on an <code>enum</code>, you need to choose which unit variant will be
+default. You do this by placing the <code>#[default]</code> attribute on the variant.</p>
 <pre><code class="language-cairo"><span class="boring">[derive(Default)]
 </span>enum Kind {
 <span class="boring">    [default]
@@ -162,7 +183,11 @@
     C,
 }
 </code></pre>
-<p>You can even use the <code>#[default]</code> attribute even on non-unit variants, provided that the associated type implements <code>Default</code>.  # How can I implement <code>Default</code>?Provide an implementation for the <code>default()</code> method that returns the value of your type that should be the default:</p>
+<p>You can even use the <code>#[default]</code> attribute even on non-unit variants, provided that the
+associated type implements <code>Default</code>.</p>
+<h1 id="how-can-i-implement-default"><a class="header" href="#how-can-i-implement-default">How can I implement <code>Default</code>?</a></h1>
+<p>Provide an implementation for the <code>default()</code> method that returns the value of
+your type that should be the default:</p>
 <pre><code class="language-cairo"><span class="boring">[derive(Copy, Drop)]
 </span>enum Kind {
     A,
@@ -174,18 +199,29 @@ impl DefaultKind of Default&lt;Kind&gt; {
     fn default() -&gt; Kind { Kind::A }
 }
 </code></pre>
-<h1 id="examplesderivedrop-default-partialeqderivedrop-default-partialeq-struct-someoptions-foo-i32bar-u32assertdefaultdefault--someoptions--foo-0-bar-0-"><a class="header" href="#examplesderivedrop-default-partialeqderivedrop-default-partialeq-struct-someoptions-foo-i32bar-u32assertdefaultdefault--someoptions--foo-0-bar-0-">Examples#[derive(Drop, Default, PartialEq)](derive(Drop, Default, PartialEq)) struct SomeOptions {foo: i32,bar: u32,}assert!(Default::default() == SomeOptions { foo: 0, bar: 0 });</a></h1>
-<p>Fully qualified path: <code>core::traits::Default</code></p>
-<pre><code class="language-rust">pub trait Default&lt;T&gt;</code></pre>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
+<p>#derive(Drop, Default, PartialEq)
+struct SomeOptions {
+foo: i32,
+bar: u32,
+}
+assert!(Default::default() == SomeOptions { foo: 0, bar: 0 });</p>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-traits.html">traits</a>::<a href="./core-traits-Default.html">Default</a></p>
+<pre><code class="language-cairo">pub trait Default&lt;T&gt;
+</code></pre>
 <h2 id="trait-functions"><a class="header" href="#trait-functions">Trait functions</a></h2>
 <h3 id="default-1"><a class="header" href="#default-1">default</a></h3>
-<p>Returns the "default value" for a type.Default values are often some kind of initial value, identity value, or anything else that may make sense as a default.  # Examples</p>
+<p>Returns the "default value" for a type.
+Default values are often some kind of initial value, identity value, or anything else that
+may make sense as a default.</p>
+<h1 id="examples-1"><a class="header" href="#examples-1">Examples</a></h1>
 <pre><code class="language-cairo">let i: i8 = Default::default();
 let (x, y): (Option&lt;ByteArray&gt;, u64) = Default::default();
 let (a, b, (c, d)): (i32, u32, (bool, bool)) = Default::default();
 </code></pre>
-<p>Fully qualified path: <code>core::traits::Default::default</code></p>
-<pre><code class="language-rust">fn default() -&gt; T</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-traits.html">traits</a>::<a href="./core-traits-Default.html">Default</a>::<a href="./core-traits-Default.html#default-1">default</a></p>
+<pre><code class="language-cairo">fn default&lt;T, T&gt;() -&gt; T
+</code></pre>
 
                     </main>
 

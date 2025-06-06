@@ -31,21 +31,33 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +71,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +85,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,13 +122,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -153,63 +167,43 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="syscalls"><a class="header" href="#syscalls">syscalls</a></h1>
-<p>Utilities for interacting with the Starknet OS.Writing smart contracts requires various associated operations, such as calling another contract or accessing the contract’s storage, that standalone programs do not require. Cairo supports these operations by using system calls.System calls enable a contract to require services from the Starknet OS. You can use system calls in a function to get information that depends on the broader state of Starknet, such as the current timestamp of the address of the caller, but also to modify the state of Starknet by, for example, storing values in a contract's storage or deploying new contracts.</p>
-<p>Fully qualified path: <code>core::starknet::syscalls</code></p>
-<h2 id="extern-functions"><a class="header" href="#extern-functions">Extern functions</a></h2>
-<ul>
-<li>
-<p><a href="./core-starknet-syscalls-call_contract_syscall.html">call_contract_syscall</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-syscalls-deploy_syscall.html">deploy_syscall</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-syscalls-emit_event_syscall.html">emit_event_syscall</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-syscalls-get_block_hash_syscall.html">get_block_hash_syscall</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-syscalls-get_execution_info_syscall.html">get_execution_info_syscall</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-syscalls-get_execution_info_v2_syscall.html">get_execution_info_v2_syscall</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-syscalls-library_call_syscall.html">library_call_syscall</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-syscalls-send_message_to_l1_syscall.html">send_message_to_l1_syscall</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-syscalls-storage_read_syscall.html">storage_read_syscall</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-syscalls-storage_write_syscall.html">storage_write_syscall</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-syscalls-replace_class_syscall.html">replace_class_syscall</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-syscalls-get_class_hash_at_syscall.html">get_class_hash_at_syscall</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-syscalls-keccak_syscall.html">keccak_syscall</a></p>
-</li>
-<li>
-<p><a href="./core-starknet-syscalls-sha256_process_block_syscall.html">sha256_process_block_syscall</a></p>
-</li>
-</ul>
-
+<p>Utilities for interacting with the Starknet OS.
+Writing smart contracts requires various associated operations, such as calling another contract
+or accessing the contract’s storage, that standalone programs do not require. Cairo supports
+these operations by using system calls.
+System calls enable a contract to require services from the Starknet OS. You can use system
+calls in a function to get information that depends on the broader state of Starknet, such as
+the current timestamp or the address of the caller, but also to modify the state of Starknet by,
+for example, storing values in a contract's storage or deploying new contracts.</p>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-syscalls.html">syscalls</a></p>
+<h2 id="extern-functions"><a class="header" href="#extern-functions"><a href="./core-starknet-syscalls-extern_functions.html">Extern functions</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-call_contract_syscall.html">call_contract_syscall</a></td><td style="text-align: left">Calls a given contract.<a href="./core-starknet-syscalls-call_contract_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-deploy_syscall.html">deploy_syscall</a></td><td style="text-align: left">Deploys a new instance of a previously declared class.<a href="./core-starknet-syscalls-deploy_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-emit_event_syscall.html">emit_event_syscall</a></td><td style="text-align: left">Emits an event.<a href="./core-starknet-syscalls-emit_event_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-get_block_hash_syscall.html">get_block_hash_syscall</a></td><td style="text-align: left">Returns the hash of the block with the given number.<a href="./core-starknet-syscalls-get_block_hash_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-get_execution_info_syscall.html">get_execution_info_syscall</a></td><td style="text-align: left">Gets information about the currently executing block and the transactions within it. For a complete description of this information, see <code>Execution information</code> . When an account’s <code>__validate__</code> ,<a href="./core-starknet-syscalls-get_execution_info_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-get_execution_info_v2_syscall.html">get_execution_info_v2_syscall</a></td><td style="text-align: left">Gets information about the current execution, version 2. This syscall should not be called directly. Instead, use <code>starknet::info::get_execution_info</code> .<a href="./core-starknet-syscalls-get_execution_info_v2_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-library_call_syscall.html">library_call_syscall</a></td><td style="text-align: left">Calls the requested function in any previously declared class.<a href="./core-starknet-syscalls-library_call_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-send_message_to_l1_syscall.html">send_message_to_l1_syscall</a></td><td style="text-align: left">Sends a message to L1.<a href="./core-starknet-syscalls-send_message_to_l1_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-storage_read_syscall.html">storage_read_syscall</a></td><td style="text-align: left">Gets the value of a key in the storage of the calling contract.<a href="./core-starknet-syscalls-storage_read_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-storage_write_syscall.html">storage_write_syscall</a></td><td style="text-align: left">Sets the value of a key in the storage of the calling contract.<a href="./core-starknet-syscalls-storage_write_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-replace_class_syscall.html">replace_class_syscall</a></td><td style="text-align: left">Replaces the class hash of the current contract, instantly modifying its entrypoints. The new class becomes effective only after the current function call completes.<a href="./core-starknet-syscalls-replace_class_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-get_class_hash_at_syscall.html">get_class_hash_at_syscall</a></td><td style="text-align: left">Gets the class hash of the contract at the given address.<a href="./core-starknet-syscalls-get_class_hash_at_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-keccak_syscall.html">keccak_syscall</a></td><td style="text-align: left">Computes the keccak of the input.<a href="./core-starknet-syscalls-keccak_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-sha256_process_block_syscall.html">sha256_process_block_syscall</a></td><td style="text-align: left">Computes the next SHA-256 state of the input with the given state.<a href="./core-starknet-syscalls-sha256_process_block_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-meta_tx_v0_syscall.html">meta_tx_v0_syscall</a></td><td style="text-align: left">Invokes the given entry point as a v0 meta transaction.<a href="./core-starknet-syscalls-meta_tx_v0_syscall.html">...</a></td></tr>
+</tbody></table>
+</div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-starknet-storage_access.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-starknet-storage_access-storage_address_from_base.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-starknet-contract_address.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-starknet-syscalls-extern_functions.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -219,11 +213,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-starknet-storage_access.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-starknet-storage_access-storage_address_from_base.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-starknet-contract_address.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-starknet-syscalls-extern_functions.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

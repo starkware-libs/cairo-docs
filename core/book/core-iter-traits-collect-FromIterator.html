@@ -31,21 +31,33 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +71,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +85,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,13 +122,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -153,7 +167,18 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="fromiterator"><a class="header" href="#fromiterator">FromIterator</a></h1>
-<p>Conversion from an <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a>.By implementing <code>FromIterator</code> for a type, you define how it will be created from an iterator. This is common for types which describe a collection of some kind.If you want to create a collection from the contents of an iterator, the <a href="%60Iterator::collect()%60"><code>Iterator::collect()</code></a> method is preferred. However, when you need to specify the container type, <a href="%60FromIterator::from_iter()%60"><code>FromIterator::from_iter()</code></a> can be more readable than using a turbofish (e.g. <code>::&lt;Array&lt;_&gt;&gt;()</code>). See the <a href="%60Iterator::collect()%60"><code>Iterator::collect()</code></a> documentation for more examples of its use.See also: <a href="./core-iter-traits-collect-IntoIterator.html"><code>IntoIterator</code></a>.  # ExamplesBasic usage:</p>
+<p>Conversion from an <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a>.
+By implementing <code>FromIterator</code> for a type, you define how it will be
+created from an iterator. This is common for types which describe a
+collection of some kind.
+If you want to create a collection from the contents of an iterator, the
+<code>Iterator::collect()</code> method is preferred. However, when you need to
+specify the container type, <code>FromIterator::from_iter()</code> can be more
+readable than using a turbofish (e.g. <code>::&lt;Array&lt;_&gt;&gt;()</code>). See the
+<code>Iterator::collect()</code> documentation for more examples of its use.
+See also: <a href="./core-iter-traits-collect-IntoIterator.html"><code>IntoIterator</code></a>.</p>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
+<p>Basic usage:</p>
 <pre><code class="language-cairo">let v = FromIterator::from_iter(0..5_u32);
 
 assert_eq!(v, array![0, 1, 2, 3, 4]);
@@ -207,19 +232,26 @@ let c = FromIterator::&lt;MyCollection&gt;::from_iter(iter);
 
 assert_eq!(c.arr, array![0, 1, 2, 3, 4]);
 </code></pre>
-<p>Fully qualified path: <code>core::iter::traits::collect::FromIterator</code></p>
-<pre><code class="language-rust">pub trait FromIterator&lt;T, A&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-collect.html">collect</a>::<a href="./core-iter-traits-collect-FromIterator.html">FromIterator</a></p>
+<pre><code class="language-cairo">pub trait FromIterator&lt;T, A&gt;
+</code></pre>
 <h2 id="trait-functions"><a class="header" href="#trait-functions">Trait functions</a></h2>
 <h3 id="from_iter"><a class="header" href="#from_iter">from_iter</a></h3>
-<p>Creates a value from an iterator.See the <a href="./core-iter.html">module-level documentation</a> for more.  # Examples</p>
+<p>Creates a value from an iterator.
+See the <a href="./core-iter.html">module-level documentation</a> for more.</p>
+<h1 id="examples-1"><a class="header" href="#examples-1">Examples</a></h1>
 <pre><code class="language-cairo">let iter = (0..5_u32).into_iter();
 
 let v = FromIterator::from_iter(iter);
 
 assert_eq!(v, array![0, 1, 2, 3, 4]);
 </code></pre>
-<p>Fully qualified path: <code>core::iter::traits::collect::FromIterator::from_iter</code></p>
-<pre><code class="language-rust">fn from_iter&lt;
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a>::<a href="./core-iter-traits.html">traits</a>::<a href="./core-iter-traits-collect.html">collect</a>::<a href="./core-iter-traits-collect-FromIterator.html">FromIterator</a>::<a href="./core-iter-traits-collect-FromIterator.html#from_iter">from_iter</a></p>
+<pre><code class="language-cairo">fn from_iter&lt;
+    T,
+    A,
+    T,
+    A,
     I,
     impl IntoIter: IntoIterator&lt;I&gt;,
     +TypeEqual&lt;IntoIter::Iterator::Item, A&gt;,
@@ -227,7 +259,8 @@ assert_eq!(v, array![0, 1, 2, 3, 4]);
     +Destruct&lt;I&gt;,
 &gt;(
     iter: I,
-) -&gt; T</code></pre>
+) -&gt; T
+</code></pre>
 
                     </main>
 

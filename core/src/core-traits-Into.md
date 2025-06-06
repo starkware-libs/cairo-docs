@@ -1,6 +1,13 @@
 # Into
 
-A value-to-value conversion that consumes the input value.Note: This trait must not fail. If the conversion can fail, use [`TryInto`](./core-traits-TryInto.md).  # Generic Implementations[`Into`](./core-traits-Into.md) is reflexive, which means that `Into<T, T>` is implemented  # ExamplesConverting from RGB components to a packed color value:
+A value-to-value conversion that consumes the input value.
+Note: This trait must not fail. If the conversion can fail, use [`TryInto`](./core-traits-TryInto.md).
+# Generic Implementations
+
+- [`Into`](./core-traits-Into.md) is reflexive, which means that `Into<T, T>` is implemented
+# Examples
+
+Converting from RGB components to a packed color value:
 ```cairo
 #[derive(Copy, Drop, PartialEq)]
 struct Color {
@@ -23,22 +30,24 @@ let orange: Color = (255_u8, 128_u8, 0_u8).into();
 assert!(orange == Color { value: 0x00FF8000_u32 });
 ```
 
-Fully qualified path: `core::traits::Into`
+Fully qualified path: [core](./core.md)::[traits](./core-traits.md)::[Into](./core-traits-Into.md)
 
-<pre><code class="language-rust">pub trait Into&lt;T, S&gt;</code></pre>
+<pre><code class="language-cairo">pub trait Into&lt;T, S&gt;</code></pre>
 
 ## Trait functions
 
 ### into
 
-Converts the input type T into the output type S.  # Examples
+Converts the input type T into the output type S.
+# Examples
+
 ```cairo
 let a: u8 = 1;
 let b: u16 = a.into();
 ```
 
-Fully qualified path: `core::traits::Into::into`
+Fully qualified path: [core](./core.md)::[traits](./core-traits.md)::[Into](./core-traits-Into.md)::[into](./core-traits-Into.md#into-1)
 
-<pre><code class="language-rust">fn into(self: T) -&gt; S</code></pre>
+<pre><code class="language-cairo">fn into&lt;T, S, T, S&gt;(self: T) -&gt; S</code></pre>
 
 

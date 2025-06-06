@@ -1,9 +1,13 @@
 # Sub
 
-The subtraction operator `-`.  # Examples`Sub`tractable types:
+The subtraction operator `-`.
+# Examples
+
+`Sub`tractable types:
 ```cairo
 assert!(3_u8 - 2_u8 == 1_u8);
 ```
+
 Implementing `Sub` for a type:
 ```cairo
 #[derive(Copy, Drop, PartialEq)]
@@ -27,21 +31,23 @@ let p3 = p1 - p2;
 assert!(p3 == Point { x: 1, y: 3 });
 ```
 
-Fully qualified path: `core::traits::Sub`
+Fully qualified path: [core](./core.md)::[traits](./core-traits.md)::[Sub](./core-traits-Sub.md)
 
-<pre><code class="language-rust">pub trait Sub&lt;T&gt;</code></pre>
+<pre><code class="language-cairo">pub trait Sub&lt;T&gt;</code></pre>
 
 ## Trait functions
 
 ### sub
 
-Performs the `-` operation.  # Examples
+Performs the `-` operation.
+# Examples
+
 ```cairo
 assert!(12 - 1 == 11);
 ```
 
-Fully qualified path: `core::traits::Sub::sub`
+Fully qualified path: [core](./core.md)::[traits](./core-traits.md)::[Sub](./core-traits-Sub.md)::[sub](./core-traits-Sub.md#sub-1)
 
-<pre><code class="language-rust">fn sub(lhs: T, rhs: T) -&gt; T</code></pre>
+<pre><code class="language-cairo">fn sub&lt;T, T&gt;(lhs: T, rhs: T) -&gt; T</code></pre>
 
 

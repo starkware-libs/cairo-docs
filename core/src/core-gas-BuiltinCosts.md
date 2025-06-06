@@ -2,8 +2,7 @@
 
 Type representing the table of the costs of the different builtin usages.
 
-Fully qualified path: `core::gas::BuiltinCosts`
+Fully qualified path: [core](./core.md)::[gas](./core-gas.md)::[BuiltinCosts](./core-gas-BuiltinCosts.md)
 
-<pre><code class="language-rust">#[cfg(not(gas: &quot;disabled&quot;))]
-pub extern type BuiltinCosts</code></pre>
+<pre><code class="language-cairo">pub extern type BuiltinCosts;</code></pre>
 

@@ -1,6 +1,10 @@
 # Secp256PointTrait
 
-A trait for performing operations on Secp256{k/r}1 curve points.Provides operations needed for elliptic curve cryptography, including point addition and scalar multiplication.  # Examples
+A trait for performing operations on Secp256{k/r}1 curve points.
+Provides operations needed for elliptic curve cryptography, including point addition
+and scalar multiplication.
+# Examples
+
 ```cairo
 use starknet::SyscallResultTrait;
 use starknet::secp256k1::Secp256k1Point;
@@ -21,9 +25,9 @@ let point = Secp256PointTrait::add(generator, generator);
 let other_point = Secp256PointTrait::mul(generator, 2);
 ```
 
-Fully qualified path: `core::starknet::secp256_trait::Secp256PointTrait`
+Fully qualified path: [core](./core.md)::[starknet](./core-starknet.md)::[secp256_trait](./core-starknet-secp256_trait.md)::[Secp256PointTrait](./core-starknet-secp256_trait-Secp256PointTrait.md)
 
-<pre><code class="language-rust">pub trait Secp256PointTrait&lt;Secp256Point&gt;</code></pre>
+<pre><code class="language-cairo">pub trait Secp256PointTrait&lt;Secp256Point&gt;</code></pre>
 
 ## Trait functions
 
@@ -31,26 +35,35 @@ Fully qualified path: `core::starknet::secp256_trait::Secp256PointTrait`
 
 Returns the x and y coordinates of the curve point.
 
-Fully qualified path: `core::starknet::secp256_trait::Secp256PointTrait::get_coordinates`
+Fully qualified path: [core](./core.md)::[starknet](./core-starknet.md)::[secp256_trait](./core-starknet-secp256_trait.md)::[Secp256PointTrait](./core-starknet-secp256_trait-Secp256PointTrait.md)::[get_coordinates](./core-starknet-secp256_trait-Secp256PointTrait.md#get_coordinates)
 
-<pre><code class="language-rust">fn get_coordinates(self: Secp256Point) -&gt; SyscallResult&lt;(u256, u256)&gt;</code></pre>
+<pre><code class="language-cairo">fn get_coordinates&lt;Secp256Point, Secp256Point&gt;(
+    self: Secp256Point,
+) -&gt; <a href="core-result-Result.html">Result&lt;(u256, u256), Array&lt;felt252&gt;&gt;</a></code></pre>
 
 
 ### add
 
-Performs elliptic curve point addition.Adds `self` and `other` following the curve's addition law and returns the resulting point.
+Performs elliptic curve point addition.
+Adds `self` and `other` following the curve's addition law and returns
+the resulting point.
 
-Fully qualified path: `core::starknet::secp256_trait::Secp256PointTrait::add`
+Fully qualified path: [core](./core.md)::[starknet](./core-starknet.md)::[secp256_trait](./core-starknet-secp256_trait.md)::[Secp256PointTrait](./core-starknet-secp256_trait-Secp256PointTrait.md)::[add](./core-starknet-secp256_trait-Secp256PointTrait.md#add)
 
-<pre><code class="language-rust">fn add(self: Secp256Point, other: Secp256Point) -&gt; SyscallResult&lt;Secp256Point&gt;</code></pre>
+<pre><code class="language-cairo">fn add&lt;Secp256Point, Secp256Point&gt;(
+    self: Secp256Point, other: Secp256Point,
+) -&gt; <a href="core-result-Result.html">Result&lt;Secp256Point, Array&lt;felt252&gt;&gt;</a></code></pre>
 
 
 ### mul
 
-Performs scalar multiplication of a curve point.Multiplies `self` by the given scalar value.
+Performs scalar multiplication of a curve point.
+Multiplies `self` by the given scalar value.
 
-Fully qualified path: `core::starknet::secp256_trait::Secp256PointTrait::mul`
+Fully qualified path: [core](./core.md)::[starknet](./core-starknet.md)::[secp256_trait](./core-starknet-secp256_trait.md)::[Secp256PointTrait](./core-starknet-secp256_trait-Secp256PointTrait.md)::[mul](./core-starknet-secp256_trait-Secp256PointTrait.md#mul)
 
-<pre><code class="language-rust">fn mul(self: Secp256Point, scalar: u256) -&gt; SyscallResult&lt;Secp256Point&gt;</code></pre>
+<pre><code class="language-cairo">fn mul&lt;Secp256Point, Secp256Point&gt;(
+    self: Secp256Point, scalar: <a href="core-integer-u256.html">u256</a>,
+) -&gt; <a href="core-result-Result.html">Result&lt;Secp256Point, Array&lt;felt252&gt;&gt;</a></code></pre>
 
 

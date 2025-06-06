@@ -2,11 +2,9 @@
 
 `bool` enum representing either `false` or `true`.
 
-Fully qualified path: `core::bool`
+Fully qualified path: [core](./core.md)::[bool](./core-bool.md)
 
-<pre><code class="language-rust">#[derive(Copy, Drop, Default)]
-pub enum bool {
-    #[default]
+<pre><code class="language-cairo">pub enum bool {
     False,
     True,
 }</code></pre>
@@ -15,16 +13,15 @@ pub enum bool {
 
 ### False
 
-Fully qualified path: `core::bool::False`
+Fully qualified path: [core](./core.md)::[bool](./core-bool.md)::[False](./core-bool.md#false)
 
-<pre><code class="language-rust">#[default]
-False</code></pre>
+<pre><code class="language-cairo">False</code></pre>
 
 
 ### True
 
-Fully qualified path: `core::bool::True`
+Fully qualified path: [core](./core.md)::[bool](./core-bool.md)::[True](./core-bool.md#true)
 
-<pre><code class="language-rust">True</code></pre>
+<pre><code class="language-cairo">True</code></pre>
 
 

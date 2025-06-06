@@ -31,21 +31,33 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +71,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +85,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,13 +122,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -153,43 +167,45 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="fmt"><a class="header" href="#fmt">fmt</a></h1>
-<p>Functionality for formatting values.The main components of this module are:<code>Error</code>: A type representing formatting errors. - <code>Formatter</code>: A struct that holds the configuration and buffer for formatting. - <code>Display</code>: A trait for standard formatting using the empty format ("{}"). - <code>Debug</code>: A trait for debug formatting using the empty format ("{:?}"). - <code>LowerHex</code>: A trait for hex formatting in lower case.The module includes implementations of the <a href="%60Display%60"><code>Display</code></a>, <a href="%60Debug%60"><code>Debug</code></a> and <a href="%60LowerHex%60"><code>LowerHex</code></a> traits for various types.</p>
-<p>Fully qualified path: <code>core::fmt</code></p>
-<h2 id="modules"><a class="header" href="#modules">Modules</a></h2>
+<p>Functionality for formatting values.
+The main components of this module are:</p>
 <ul>
-<li><a href="./core-fmt-into_felt252_based.html">into_felt252_based</a></li>
+<li><code>Error</code>: A type representing formatting errors.</li>
+<li><code>Formatter</code>: A struct that holds the configuration and buffer for formatting.</li>
+<li><code>Display</code>: A trait for standard formatting using the empty format ("{}").</li>
+<li><code>Debug</code>: A trait for debug formatting using the empty format ("{:?}").</li>
+<li><code>LowerHex</code>: A trait for hex formatting in lower case.</li>
 </ul>
-<h2 id="structs"><a class="header" href="#structs">Structs</a></h2>
-<ul>
-<li>
-<p><a href="./core-fmt-Error.html">Error</a></p>
-</li>
-<li>
-<p><a href="./core-fmt-Formatter.html">Formatter</a></p>
-</li>
-</ul>
-<h2 id="traits"><a class="header" href="#traits">Traits</a></h2>
-<ul>
-<li>
-<p><a href="./core-fmt-Display.html">Display</a></p>
-</li>
-<li>
-<p><a href="./core-fmt-Debug.html">Debug</a></p>
-</li>
-<li>
-<p><a href="./core-fmt-LowerHex.html">LowerHex</a></p>
-</li>
-</ul>
-
+<p>The module includes implementations of the <code>Display</code>, <code>Debug</code> and <code>LowerHex</code> traits for
+various types.</p>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-fmt.html">fmt</a></p>
+<h2 id="modules"><a class="header" href="#modules"><a href="./core-fmt-modules.html">Modules</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-fmt-into_felt252_based.html">into_felt252_based</a></td><td style="text-align: left">Implementations for <code>Debug</code>  and <code>LowerHex</code>  for types that can be converted into <code>felt252</code>  using the <code>Into</code>  trait.<a href="./core-fmt-into_felt252_based.html">...</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="structs"><a class="header" href="#structs"><a href="./core-fmt-structs.html">Structs</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-fmt-Error.html">Error</a></td><td style="text-align: left">Dedicated type for representing formatting errors.<a href="./core-fmt-Error.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-fmt-Formatter.html">Formatter</a></td><td style="text-align: left">Configuration for formatting.<a href="./core-fmt-Formatter.html">...</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="traits"><a class="header" href="#traits"><a href="./core-fmt-traits.html">Traits</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-fmt-Display.html">Display</a></td><td style="text-align: left">A trait for standard formatting, using the empty format ("{}").<a href="./core-fmt-Display.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-fmt-Debug.html">Debug</a></td><td style="text-align: left">A trait for debug formatting, using the empty format ("{:?}").<a href="./core-fmt-Debug.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-fmt-LowerHex.html">LowerHex</a></td><td style="text-align: left">A trait for hex formatting in lower case, using the empty format ("{:x}").<a href="./core-fmt-LowerHex.html">...</a></td></tr>
+</tbody></table>
+</div>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-debug.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-debug-print_byte_array_as_string.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-starknet.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-fmt-modules.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -199,11 +215,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-debug.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-debug-print_byte_array_as_string.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-starknet.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-fmt-modules.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

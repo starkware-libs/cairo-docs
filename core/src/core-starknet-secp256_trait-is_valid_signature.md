@@ -1,6 +1,8 @@
 # is_valid_signature
 
-Checks whether a signature is valid given a public key point and a message hash.  # Examples
+Checks whether a signature is valid given a public key point and a message hash.
+# Examples
+
 ```cairo
 use starknet::SyscallResultTrait;
 use starknet::secp256r1::Secp256r1Point;
@@ -19,14 +21,14 @@ let public_key = Secp256Trait::secp256_ec_new_syscall(
 assert!(is_valid_signature::<Secp256r1Point>(msg_hash, r, s, public_key));
 ```
 
-Fully qualified path: `core::starknet::secp256_trait::is_valid_signature`
+Fully qualified path: [core](./core.md)::[starknet](./core-starknet.md)::[secp256_trait](./core-starknet-secp256_trait.md)::[is_valid_signature](./core-starknet-secp256_trait-is_valid_signature.md)
 
-<pre><code class="language-rust">pub fn is_valid_signature&lt;
+<pre><code class="language-cairo">pub fn is_valid_signature&lt;
     Secp256Point,
     +Drop&lt;Secp256Point&gt;,
     impl Secp256Impl: Secp256Trait&lt;Secp256Point&gt;,
     +Secp256PointTrait&lt;Secp256Point&gt;,
 &gt;(
-    msg_hash: u256, r: u256, s: u256, public_key: Secp256Point,
-) -&gt; bool</code></pre>
+    msg_hash: <a href="core-integer-u256.html">u256</a>, r: <a href="core-integer-u256.html">u256</a>, s: <a href="core-integer-u256.html">u256</a>, public_key: Secp256Point,
+) -&gt; <a href="core-bool.html">bool</a></code></pre>
 

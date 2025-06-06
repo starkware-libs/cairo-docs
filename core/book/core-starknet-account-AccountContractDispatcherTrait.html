@@ -31,21 +31,33 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +71,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +85,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,13 +122,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -153,21 +167,33 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="accountcontractdispatchertrait"><a class="header" href="#accountcontractdispatchertrait">AccountContractDispatcherTrait</a></h1>
-<p>Fully qualified path: <code>core::starknet::account::AccountContractDispatcherTrait</code></p>
-<pre><code class="language-rust">pub trait AccountContractDispatcherTrait&lt;T&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-account.html">account</a>::<a href="./core-starknet-account-AccountContractDispatcherTrait.html">AccountContractDispatcherTrait</a></p>
+<pre><code class="language-cairo">pub trait AccountContractDispatcherTrait&lt;T&gt;
+</code></pre>
 <h2 id="trait-functions"><a class="header" href="#trait-functions">Trait functions</a></h2>
 <h3 id="validate_declare"><a class="header" href="#validate_declare"><strong>validate_declare</strong></a></h3>
-<p>An entry point that is called to check if the account is willing to pay for the declaration of the class with the given hash. The entry point should return <code>starknet::VALIDATED</code> if the account is willing to pay for the declaration.</p>
-<p>Fully qualified path: <code>core::starknet::account::AccountContractDispatcherTrait::__validate_declare__</code></p>
-<pre><code class="language-rust">fn __validate_declare__(self: T, class_hash: felt252) -&gt; felt252</code></pre>
+<p>An entry point that is called to check if the account is willing to pay for the declaration
+of the class with the given hash.
+The entry point should return <code>starknet::VALIDATED</code> if the account is willing to pay
+for the declaration.</p>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-account.html">account</a>::<a href="./core-starknet-account-AccountContractDispatcherTrait.html">AccountContractDispatcherTrait</a>::<a href="./core-starknet-account-AccountContractDispatcherTrait.html#__validate_declare__"><strong>validate_declare</strong></a></p>
+<pre><code class="language-cairo">fn __validate_declare__&lt;T, T&gt;(self: T, class_hash: <a href="core-felt252.html">felt252</a>) -&gt; <a href="core-felt252.html">felt252</a>
+</code></pre>
 <h3 id="validate"><a class="header" href="#validate"><strong>validate</strong></a></h3>
-<p>An entry point that is called to check if the account is willing to pay for executing a given set of calls. The entry point should return <code>starknet::VALIDATED</code> if the account is willing to pay for the execution, in which case <code>__execute__</code> will be called on the same set of calls.</p>
-<p>Fully qualified path: <code>core::starknet::account::AccountContractDispatcherTrait::__validate__</code></p>
-<pre><code class="language-rust">fn __validate__(self: T, calls: Array&lt;Call&gt;) -&gt; felt252</code></pre>
+<p>An entry point that is called to check if the account is willing to pay for
+executing a given set of calls.
+The entry point should return <code>starknet::VALIDATED</code> if the account is willing to pay
+for the execution, in which case <code>__execute__</code> will be called on the same set of calls.</p>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-account.html">account</a>::<a href="./core-starknet-account-AccountContractDispatcherTrait.html">AccountContractDispatcherTrait</a>::<a href="./core-starknet-account-AccountContractDispatcherTrait.html#__validate__"><strong>validate</strong></a></p>
+<pre><code class="language-cairo">fn __validate__&lt;T, T&gt;(self: T, calls: <a href="core-array-Array.html">Array&lt;Call&gt;</a>) -&gt; <a href="core-felt252.html">felt252</a>
+</code></pre>
 <h3 id="execute"><a class="header" href="#execute"><strong>execute</strong></a></h3>
-<p>An entry point that is called to execute a given set of calls. This entry point should block the deprecated v0 invoke transactions as they do not go through the <code>__validate__</code> entry point.</p>
-<p>Fully qualified path: <code>core::starknet::account::AccountContractDispatcherTrait::__execute__</code></p>
-<pre><code class="language-rust">fn __execute__(self: T, calls: Array&lt;Call&gt;) -&gt; Array&lt;Span&lt;felt252&gt;&gt;</code></pre>
+<p>An entry point that is called to execute a given set of calls.
+This entry point should block the deprecated v0 invoke transactions as they do not go
+through the <code>__validate__</code> entry point.</p>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-starknet.html">starknet</a>::<a href="./core-starknet-account.html">account</a>::<a href="./core-starknet-account-AccountContractDispatcherTrait.html">AccountContractDispatcherTrait</a>::<a href="./core-starknet-account-AccountContractDispatcherTrait.html#__execute__"><strong>execute</strong></a></p>
+<pre><code class="language-cairo">fn __execute__&lt;T, T&gt;(self: T, calls: <a href="core-array-Array.html">Array&lt;Call&gt;</a>) -&gt; <a href="core-array-Array.html">Array&lt;Span&lt;felt252&gt;&gt;</a>
+</code></pre>
 
                     </main>
 

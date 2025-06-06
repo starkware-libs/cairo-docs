@@ -1,15 +1,17 @@
 # Sqrt
 
-A trait for computing the square root of a number.  # Examples
+A trait for computing the square root of a number.
+# Examples
+
 ```cairo
 use core::num::traits::Sqrt;
 
 assert!(9_u8.sqrt() == 3);
 ```
 
-Fully qualified path: `core::num::traits::ops::sqrt::Sqrt`
+Fully qualified path: [core](./core.md)::[num](./core-num.md)::[traits](./core-num-traits.md)::[ops](./core-num-traits-ops.md)::[sqrt](./core-num-traits-ops-sqrt.md)::[Sqrt](./core-num-traits-ops-sqrt-Sqrt.md)
 
-<pre><code class="language-rust">pub trait Sqrt&lt;T&gt;</code></pre>
+<pre><code class="language-cairo">pub trait Sqrt&lt;T&gt;</code></pre>
 
 ## Trait functions
 
@@ -17,9 +19,9 @@ Fully qualified path: `core::num::traits::ops::sqrt::Sqrt`
 
 Computes the square root of a number.
 
-Fully qualified path: `core::num::traits::ops::sqrt::Sqrt::sqrt`
+Fully qualified path: [core](./core.md)::[num](./core-num.md)::[traits](./core-num-traits.md)::[ops](./core-num-traits-ops.md)::[sqrt](./core-num-traits-ops-sqrt.md)::[Sqrt](./core-num-traits-ops-sqrt-Sqrt.md)::[sqrt](./core-num-traits-ops-sqrt-Sqrt.md#sqrt-1)
 
-<pre><code class="language-rust">fn sqrt(self: T) -&gt; Self::Target</code></pre>
+<pre><code class="language-cairo">fn sqrt&lt;T, T&gt;(self: T) -&gt; <a href="core-num-traits-ops-sqrt-Sqrt.html">Sqrt&lt;T&gt;Target</a></code></pre>
 
 
 ## Trait types
@@ -28,8 +30,8 @@ Fully qualified path: `core::num::traits::ops::sqrt::Sqrt::sqrt`
 
 The type of the result of the square root operation.
 
-Fully qualified path: `core::num::traits::ops::sqrt::Sqrt::Target`
+Fully qualified path: [core](./core.md)::[num](./core-num.md)::[traits](./core-num-traits.md)::[ops](./core-num-traits-ops.md)::[sqrt](./core-num-traits-ops-sqrt.md)::[Sqrt](./core-num-traits-ops-sqrt-Sqrt.md)::[Target](./core-num-traits-ops-sqrt-Sqrt.md#target)
 
-<pre><code class="language-rust">type Target;</code></pre>
+<pre><code class="language-cairo">type Target;</code></pre>
 
 

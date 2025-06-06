@@ -1,65 +1,84 @@
 # EcStateImpl
 
-Fully qualified path: `core::ec::EcStateImpl`
+Fully qualified path: [core](./core.md)::[ec](./core-ec.md)::[EcStateImpl](./core-ec-EcStateImpl.md)
 
-<pre><code class="language-rust">pub impl EcStateImpl of EcStateTrait</code></pre>
+<pre><code class="language-cairo">pub impl EcStateImpl of EcStateTrait;</code></pre>
 
 ## Impl functions
 
 ### init
 
-Initializes an EC computation with the zero point.  # Examples
+Initializes an EC computation with the zero point.
+# Examples
+
 ```cairo
 let mut state = EcStateTrait::init();
 ```
 
-Fully qualified path: `core::ec::EcStateImpl::init`
+Fully qualified path: [core](./core.md)::[ec](./core-ec.md)::[EcStateImpl](./core-ec-EcStateImpl.md)::[init](./core-ec-EcStateImpl.md#init)
 
-<pre><code class="language-rust">fn init() -&gt; EcState nopanic</code></pre>
+<pre><code class="language-cairo">fn init() -&gt; <a href="core-ec-EcState.html">EcState</a></code></pre>
 
 
 ### add
 
-Adds a point to the computation.  # Arguments`p` - The non-zero point to add
+Adds a point to the computation.
+# Arguments
 
-Fully qualified path: `core::ec::EcStateImpl::add`
+- `p` - The non-zero point to add
 
-<pre><code class="language-rust">fn add(ref self: EcState, p: NonZeroEcPoint) nopanic</code></pre>
+Fully qualified path: [core](./core.md)::[ec](./core-ec.md)::[EcStateImpl](./core-ec-EcStateImpl.md)::[add](./core-ec-EcStateImpl.md#add)
+
+<pre><code class="language-cairo">fn add(ref self: <a href="core-ec-EcState.html">EcState</a>, p: <a href="core-zeroable-NonZero.html">NonZero&lt;EcPoint&gt;</a>)</code></pre>
 
 
 ### sub
 
-Subtracts a point to the computation.  # Arguments`p` - The non-zero point to subtract
+Subtracts a point to the computation.
+# Arguments
 
-Fully qualified path: `core::ec::EcStateImpl::sub`
+- `p` - The non-zero point to subtract
 
-<pre><code class="language-rust">fn sub(ref self: EcState, p: NonZeroEcPoint)</code></pre>
+Fully qualified path: [core](./core.md)::[ec](./core-ec.md)::[EcStateImpl](./core-ec-EcStateImpl.md)::[sub](./core-ec-EcStateImpl.md#sub)
+
+<pre><code class="language-cairo">fn sub(ref self: <a href="core-ec-EcState.html">EcState</a>, p: <a href="core-zeroable-NonZero.html">NonZero&lt;EcPoint&gt;</a>)</code></pre>
 
 
 ### add_mul
 
-Adds the product `p * scalar` to the state.  # Arguments`scalar` - The scalar to multiply the point by * `p` - The non-zero point to multiply and add
+Adds the product `p * scalar` to the state.
+# Arguments
 
-Fully qualified path: `core::ec::EcStateImpl::add_mul`
+- `scalar` - The scalar to multiply the point by
+- `p` - The non-zero point to multiply and add
 
-<pre><code class="language-rust">fn add_mul(ref self: EcState, scalar: felt252, p: NonZeroEcPoint) nopanic</code></pre>
+Fully qualified path: [core](./core.md)::[ec](./core-ec.md)::[EcStateImpl](./core-ec-EcStateImpl.md)::[add_mul](./core-ec-EcStateImpl.md#add_mul)
+
+<pre><code class="language-cairo">fn add_mul(ref self: <a href="core-ec-EcState.html">EcState</a>, scalar: <a href="core-felt252.html">felt252</a>, p: <a href="core-zeroable-NonZero.html">NonZero&lt;EcPoint&gt;</a>)</code></pre>
 
 
 ### finalize_nz
 
-Finalizes the EC computation and returns the result as a non-zero point.  # Returns`Option<NonZeroEcPoint>` - The resulting point, or None if the result is the zero point  # PanicsPanics if the result is the point at infinity.
+Finalizes the EC computation and returns the result as a non-zero point.
+# Returns
 
-Fully qualified path: `core::ec::EcStateImpl::finalize_nz`
+- `Option<NonZeroEcPoint>` - The resulting point, or None if the result is the zero point
+# Panics
 
-<pre><code class="language-rust">fn finalize_nz(self: EcState) -&gt; Option&lt;NonZeroEcPoint&gt; nopanic</code></pre>
+Panics if the result is the point at infinity.
+
+Fully qualified path: [core](./core.md)::[ec](./core-ec.md)::[EcStateImpl](./core-ec-EcStateImpl.md)::[finalize_nz](./core-ec-EcStateImpl.md#finalize_nz)
+
+<pre><code class="language-cairo">fn finalize_nz(self: <a href="core-ec-EcState.html">EcState</a>) -&gt; <a href="core-option-Option.html">Option&lt;NonZero&lt;EcPoint&gt;&gt;</a></code></pre>
 
 
 ### finalize
 
-Finalizes the EC computation and returns the result.Returns the zero point if the computation results in the point at infinity.
+Finalizes the EC computation and returns the result.
+Returns the zero point if the computation results in the point at infinity.
 
-Fully qualified path: `core::ec::EcStateImpl::finalize`
+Fully qualified path: [core](./core.md)::[ec](./core-ec.md)::[EcStateImpl](./core-ec-EcStateImpl.md)::[finalize](./core-ec-EcStateImpl.md#finalize)
 
-<pre><code class="language-rust">fn finalize(self: EcState) -&gt; EcPoint</code></pre>
+<pre><code class="language-cairo">fn finalize(self: <a href="core-ec-EcState.html">EcState</a>) -&gt; <a href="core-ec-EcPoint.html">EcPoint</a></code></pre>
 
 

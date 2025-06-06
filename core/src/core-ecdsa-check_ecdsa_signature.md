@@ -1,6 +1,23 @@
 # check_ecdsa_signature
 
-Verifies an ECDSA signature against a message hash and public key.Note: the verification algorithm implemented by this function slightly deviates from the standard ECDSA. While this does not allow to create valid signatures if one does not possess the private key, it means that the signature algorithm used should be modified accordingly. This function validates that `s` and `r` are not 0 or equal to the curve order, but does not check that `r, s < stark_curve::ORDER`, which should be checked by the caller.  # Arguments * `message_hash` - The hash of the signed message * `public_key` - The x-coordinate of the signer's public key point on the STARK curve * `signature_r` - The r component of the ECDSA signature (x-coordinate of point R) * `signature_s` - The s component of the ECDSA signature  # Returns Returns `true` if the signature is valid, `false` otherwise.  # Examples
+Verifies an ECDSA signature against a message hash and public key.
+Note: the verification algorithm implemented by this function slightly deviates from the
+standard ECDSA.
+While this does not allow to create valid signatures if one does not possess the private key,
+it means that the signature algorithm used should be modified accordingly.
+This function validates that `s` and `r` are not 0 or equal to the curve order,
+but does not check that `r, s < stark_curve::ORDER`, which should be checked by the caller.
+# Arguments
+
+- `message_hash` - The hash of the signed message
+- `public_key` - The x-coordinate of the signer's public key point on the STARK curve
+- `signature_r` - The r component of the ECDSA signature (x-coordinate of point R)
+- `signature_s` - The s component of the ECDSA signature
+# Returns
+
+Returns `true` if the signature is valid, `false` otherwise.
+# Examples
+
 ```cairo
 use core::ecdsa::check_ecdsa_signature;
 
@@ -11,9 +28,9 @@ let s = 0x23a9747ed71abc5cb956c0df44ee8638b65b3e9407deade65de62247b8fd77;
 assert!(check_ecdsa_signature(message_hash, pubkey, r, s));
 ```
 
-Fully qualified path: `core::ecdsa::check_ecdsa_signature`
+Fully qualified path: [core](./core.md)::[ecdsa](./core-ecdsa.md)::[check_ecdsa_signature](./core-ecdsa-check_ecdsa_signature.md)
 
-<pre><code class="language-rust">pub fn check_ecdsa_signature(
-    message_hash: felt252, public_key: felt252, signature_r: felt252, signature_s: felt252,
-) -&gt; bool</code></pre>
+<pre><code class="language-cairo">pub fn check_ecdsa_signature(
+    message_hash: <a href="core-felt252.html">felt252</a>, public_key: <a href="core-felt252.html">felt252</a>, signature_r: <a href="core-felt252.html">felt252</a>, signature_s: <a href="core-felt252.html">felt252</a>,
+) -&gt; <a href="core-bool.html">bool</a></code></pre>
 

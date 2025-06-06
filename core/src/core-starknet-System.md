@@ -1,6 +1,6 @@
 # System
 
-Fully qualified path: `core::starknet::System`
+Fully qualified path: [core](./core.md)::[starknet](./core-starknet.md)::[System](./core-starknet-System.md)
 
-<pre><code class="language-rust">pub extern type System</code></pre>
+<pre><code class="language-cairo">pub extern type System;</code></pre>
 

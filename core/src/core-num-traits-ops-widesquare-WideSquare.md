@@ -1,6 +1,11 @@
 # WideSquare
 
-A trait for a type that can be squared to produce a wider type.This trait enables squaring operations where the result type has double the bit width of the input type, preventing overflow in cases where the result would exceed the input type's maximum value.  # Examples
+A trait for a type that can be squared to produce a wider type.
+This trait enables squaring operations where the result type has double
+the bit width of the input type, preventing overflow in cases where the
+result would exceed the input type's maximum value.
+# Examples
+
 ```cairo
 use core::num::traits::WideSquare;
 
@@ -9,9 +14,9 @@ let result: u16 = a.wide_square();
 assert!(result == 256);
 ```
 
-Fully qualified path: `core::num::traits::ops::widesquare::WideSquare`
+Fully qualified path: [core](./core.md)::[num](./core-num.md)::[traits](./core-num-traits.md)::[ops](./core-num-traits-ops.md)::[widesquare](./core-num-traits-ops-widesquare.md)::[WideSquare](./core-num-traits-ops-widesquare-WideSquare.md)
 
-<pre><code class="language-rust">pub trait WideSquare&lt;T&gt;</code></pre>
+<pre><code class="language-cairo">pub trait WideSquare&lt;T&gt;</code></pre>
 
 ## Trait functions
 
@@ -19,9 +24,9 @@ Fully qualified path: `core::num::traits::ops::widesquare::WideSquare`
 
 Calculates the square, producing a wider type.
 
-Fully qualified path: `core::num::traits::ops::widesquare::WideSquare::wide_square`
+Fully qualified path: [core](./core.md)::[num](./core-num.md)::[traits](./core-num-traits.md)::[ops](./core-num-traits-ops.md)::[widesquare](./core-num-traits-ops-widesquare.md)::[WideSquare](./core-num-traits-ops-widesquare-WideSquare.md)::[wide_square](./core-num-traits-ops-widesquare-WideSquare.md#wide_square)
 
-<pre><code class="language-rust">fn wide_square(self: T) -&gt; Self::Target</code></pre>
+<pre><code class="language-cairo">fn wide_square&lt;T, T&gt;(self: T) -&gt; <a href="core-num-traits-ops-widesquare-WideSquare.html">WideSquare&lt;T&gt;Target</a></code></pre>
 
 
 ## Trait types
@@ -30,8 +35,8 @@ Fully qualified path: `core::num::traits::ops::widesquare::WideSquare::wide_squa
 
 The type of the result of the square.
 
-Fully qualified path: `core::num::traits::ops::widesquare::WideSquare::Target`
+Fully qualified path: [core](./core.md)::[num](./core-num.md)::[traits](./core-num-traits.md)::[ops](./core-num-traits-ops.md)::[widesquare](./core-num-traits-ops-widesquare.md)::[WideSquare](./core-num-traits-ops-widesquare-WideSquare.md)::[Target](./core-num-traits-ops-widesquare-WideSquare.md#target)
 
-<pre><code class="language-rust">type Target;</code></pre>
+<pre><code class="language-cairo">type Target;</code></pre>
 
 

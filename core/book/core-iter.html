@@ -31,21 +31,33 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +71,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +85,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,13 +122,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -153,13 +167,54 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="iter"><a class="header" href="#iter">iter</a></h1>
-<p>Composable external iteration.If you've found yourself with a collection of some kind, and needed to perform an operation on the elements of said collection, you'll quickly run into 'iterators'. Iterators are heavily used in idiomatic code, so it's worth becoming familiar with them.Before explaining more, let's talk about how this module is structured:  # OrganizationThis module is largely organized by type:<a href="Traits">Traits</a> are the core portion: these traits define what kind of iterators exist and what you can do with them. The methods of these traits are worth putting some extra study time into. * <a href="Functions">Functions</a> provide some helpful ways to create some basic iterators. * <a href="Structs">Structs</a> are often the return types of the various methods on this module's traits. You'll usually want to look at the method that creates the <code>struct</code>, rather than the <code>struct</code> itself. For more detail about why, see '<a href="#implementing-iterator">Implementing Iterator</a>'.<a href="Traits">Traits</a>: #traits <a href="Functions">Functions</a>: #functions <a href="Structs">Structs</a>: #structsThat's it! Let's dig into iterators.  # IteratorThe heart and soul of this module is the <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a> trait. The core of <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a> looks like this:</p>
+<p>Composable external iteration.
+If you've found yourself with a collection of some kind, and needed to
+perform an operation on the elements of said collection, you'll quickly run
+into 'iterators'. Iterators are heavily used in idiomatic code, so
+it's worth becoming familiar with them.
+Before explaining more, let's talk about how this module is structured:</p>
+<h1 id="organization"><a class="header" href="#organization">Organization</a></h1>
+<p>This module is largely organized by type:</p>
+<ul>
+<li>Traits are the core portion: these traits define what kind of iterators
+exist and what you can do with them. The methods of these traits are worth
+putting some extra study time into.</li>
+<li>Functions provide some helpful ways to create some basic iterators.</li>
+<li>Structs are often the return types of the various methods on this
+module's traits. You'll usually want to look at the method that creates
+the <code>struct</code>, rather than the <code>struct</code> itself. For more detail about why,
+see 'Implementing Iterator'.</li>
+</ul>
+<p>That's it! Let's dig into iterators.</p>
+<h1 id="iterator"><a class="header" href="#iterator">Iterator</a></h1>
+<p>The heart and soul of this module is the <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a> trait. The core of
+<a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a> looks like this:</p>
 <pre><code class="language-cairo">trait Iterator {
     type Item;
     fn next(ref self) -&gt; Option&lt;Self::Item&gt;;
 }
 </code></pre>
-<p>An iterator has a method, <a href="%60next%60"><code>next</code></a>, which when called, returns an <a href="./core-option-Option.html">Option</a><Item>. Calling <a href="%60next%60"><code>next</code></a> will return <a href="%60Some(Item)%60"><code>Some(Item)</code></a> as long as there are elements, and once they've all been exhausted, will return <code>None</code> to indicate that iteration is finished.<a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a>'s full definition includes a number of other methods as well, but they are default methods, built on top of <a href="%60next%60"><code>next</code></a>, and so you get them for free.Iterators are also composable, and it's common to chain them together to do more complex forms of processing. See the <a href="#adapters">Adapters</a> section below for more details.<a href="%60Some(Item)%60"><code>Some(Item)</code></a>: Some <a href="%60next%60"><code>next</code></a>: Iterator::next  # Forms of iterationThere is currently only one common method which can create iterators from a collection:<code>into_iter()</code>, which iterates over <code>T</code>.  # Implementing IteratorCreating an iterator of your own involves two steps: creating a <code>struct</code> to hold the iterator's state, and then implementing <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a> for that <code>struct</code>. This is why there are so many <code>struct</code>s in this module: there is one for each iterator and iterator adapter.Let's make an iterator named <code>Counter</code> which counts from <code>1</code> to <code>5</code>:</p>
+<p>An iterator has a method, <code>next</code>, which when called, returns an
+<a href="./core-option-Option.html">Option</a><Item>. Calling <code>next</code> will return <a href="./core-option.html#some"><code>Some(Item)</code></a> as long as
+there are elements, and once they've all been exhausted, will return <code>None</code> to
+indicate that iteration is finished.
+<a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a>'s full definition includes a number of other methods as well,
+but they are default methods, built on top of <code>next</code>, and so you get
+them for free.
+Iterators are also composable, and it's common to chain them together to do
+more complex forms of processing. See the Adapters section
+below for more details.</p>
+<h1 id="forms-of-iteration"><a class="header" href="#forms-of-iteration">Forms of iteration</a></h1>
+<p>There is currently only one common method which can create iterators from a collection:</p>
+<ul>
+<li><code>into_iter()</code>, which iterates over <code>T</code>.</li>
+</ul>
+<h1 id="implementing-iterator"><a class="header" href="#implementing-iterator">Implementing Iterator</a></h1>
+<p>Creating an iterator of your own involves two steps: creating a <code>struct</code> to
+hold the iterator's state, and then implementing <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a> for that <code>struct</code>.
+This is why there are so many <code>struct</code>s in this module: there is one for
+each iterator and iterator adapter.
+Let's make an iterator named <code>Counter</code> which counts from <code>1</code> to <code>5</code>:</p>
 <pre><code class="language-cairo">// First, the struct:
 
 /// An iterator which counts from one to five
@@ -209,14 +264,26 @@ assert!(counter.next() == Some(4));
 assert!(counter.next() == Some(5));
 assert!(counter.next() == None);
 </code></pre>
-<p>Calling <a href="%60next%60"><code>next</code></a> this way gets repetitive. Cairo has a construct which can call <a href="%60next%60"><code>next</code></a> on your iterator, until it reaches <code>None</code>. Let's go over that next.  # <code>for</code> loops and <code>IntoIterator</code>Cairo's <code>for</code> loop syntax is actually sugar for iterators. Here's a basic example of <code>for</code>:</p>
+<p>Calling <code>next</code> this way gets repetitive. Cairo has a construct which can
+call <code>next</code> on your iterator, until it reaches <code>None</code>. Let's go over that
+next.</p>
+<h1 id="for-loops-and-intoiterator"><a class="header" href="#for-loops-and-intoiterator"><code>for</code> loops and <code>IntoIterator</code></a></h1>
+<p>Cairo's <code>for</code> loop syntax is actually sugar for iterators. Here's a basic
+example of <code>for</code>:</p>
 <pre><code class="language-cairo">let values = array![1, 2, 3, 4, 5];
 
 for x in values {
     println!("{x}");
 }
 </code></pre>
-<p>This will print the numbers one through five, each on their own line. But you'll notice something here: we never called anything on our array to produce an iterator. What gives?There's a trait in the core library for converting something into an iterator: <a href="./core-iter-traits-collect-IntoIterator.html"><code>IntoIterator</code></a>. This trait has one method, <a href="%60into_iter%60"><code>into_iter</code></a>, which converts the thing implementing <a href="./core-iter-traits-collect-IntoIterator.html"><code>IntoIterator</code></a> into an iterator. Let's take a look at that <code>for</code> loop again, and what the compiler converts it into:</p>
+<p>This will print the numbers one through five, each on their own line. But
+you'll notice something here: we never called anything on our array to
+produce an iterator. What gives?
+There's a trait in the core library for converting something into an
+iterator: <a href="./core-iter-traits-collect-IntoIterator.html"><code>IntoIterator</code></a>. This trait has one method, <code>into_iter</code>,
+which converts the thing implementing <a href="./core-iter-traits-collect-IntoIterator.html"><code>IntoIterator</code></a> into an iterator.
+Let's take a look at that <code>for</code> loop again, and what the compiler converts
+it into:</p>
 <pre><code class="language-cairo">let values = array![1, 2, 3, 4, 5];
 
 for x in values {
@@ -241,45 +308,69 @@ for x in values {
     result
 }
 </code></pre>
-<p>First, we call <code>into_iter()</code> on the value. Then, we match on the iterator that returns, calling <a href="%60next%60"><code>next</code></a> over and over until we see a <code>None</code>. At that point, we <code>break</code> out of the loop, and we're done iterating.There's one more subtle bit here: the core library contains an interesting implementation of <a href="./core-iter-traits-collect-IntoIterator.html"><code>IntoIterator</code></a>:</p>
+<p>First, we call <code>into_iter()</code> on the value. Then, we match on the iterator
+that returns, calling <code>next</code> over and over until we see a <code>None</code>. At
+that point, we <code>break</code> out of the loop, and we're done iterating.
+There's one more subtle bit here: the core library contains an
+interesting implementation of <a href="./core-iter-traits-collect-IntoIterator.html"><code>IntoIterator</code></a>:</p>
 <pre><code class="language-ignore (only-for-syntax-highlight)">impl IteratorIntoIterator&lt;T, +Iterator&lt;T&gt;&gt; of IntoIterator&lt;T&gt;
 </code></pre>
-<p>In other words, all <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a>s implement <a href="./core-iter-traits-collect-IntoIterator.html"><code>IntoIterator</code></a>, by just returning themselves. This means two things:If you're writing an <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a>, you can use it with a <code>for</code> loop. 2. If you're creating a collection, implementing <a href="./core-iter-traits-collect-IntoIterator.html"><code>IntoIterator</code></a> for it will allow your collection to be used with the <code>for</code> loop.  # AdaptersFunctions which take an <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a> and return another <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a> are often called 'iterator adapters', as they're a form of the 'adapter pattern'.Common iterators adapters include <a href="%60map%60"><code>map</code></a>, <a href="%60enumerate%60"><code>enumerate</code></a> and <a href="%60zip%60"><code>zip</code></a>.<a href="%60map%60"><code>map</code></a>: Iterator::map <a href="%60enumerate%60"><code>enumerate</code></a>: Iterator::enumerate <a href="%60zip%60"><code>zip</code></a>: Iterator::zip  # LazinessIterators (and iterator <a href="#adapters">adapters</a>) are lazy. This means that just creating an iterator doesn't do a whole lot. Nothing really happens until you call <a href="%60next%60"><code>next</code></a>. This is sometimes a source of confusion when creating an iterator solely for its side effects. For example, the <a href="%60map%60"><code>map</code></a> method calls a closure on each element it iterates over:</p>
+<p>In other words, all <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a>s implement <a href="./core-iter-traits-collect-IntoIterator.html"><code>IntoIterator</code></a>, by just
+returning themselves. This means two things:</p>
+<ol>
+<li>If you're writing an <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a>, you can use it with a <code>for</code> loop.</li>
+<li>If you're creating a collection, implementing <a href="./core-iter-traits-collect-IntoIterator.html"><code>IntoIterator</code></a> for it
+will allow your collection to be used with the <code>for</code> loop.</li>
+</ol>
+<h1 id="adapters"><a class="header" href="#adapters">Adapters</a></h1>
+<p>Functions which take an <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a> and return another <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a> are
+often called 'iterator adapters', as they're a form of the 'adapter
+pattern'.
+Common iterators adapters include <code>map</code>, <code>enumerate</code> and <code>zip</code>.</p>
+<h1 id="laziness"><a class="header" href="#laziness">Laziness</a></h1>
+<p>Iterators (and iterator adapters) are lazy. This means that
+just creating an iterator doesn't do a whole lot. Nothing really happens
+until you call <code>next</code>. This is sometimes a source of confusion when
+creating an iterator solely for its side effects. For example, the <code>map</code>
+method calls a closure on each element it iterates over:</p>
 <pre><code class="language-cairo">let v = array![1, 2, 3, 4, 5];
 let _ = v.into_iter().map(|x| println!("{x}"));
 </code></pre>
-<p>This will not print any values, as we only created an iterator, rather than using it. The compiler will warn us about this kind of behavior:</p>
+<p>This will not print any values, as we only created an iterator, rather than
+using it. The compiler will warn us about this kind of behavior:</p>
 <pre><code class="language-text">Unhandled `#[must_use]` type
 </code></pre>
-<p>Fully qualified path: <code>core::iter</code></p>
-<h2 id="traits"><a class="header" href="#traits">Traits</a></h2>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-iter.html">iter</a></p>
+<h2 id="modules"><a class="header" href="#modules"><a href="./core-iter-modules.html">Modules</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-iter-adapters.html">adapters</a></td><td style="text-align: left"><a href="./core-iter-adapters.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-iter-traits.html">traits</a></td><td style="text-align: left"><a href="./core-iter-traits.html">...</a></td></tr>
+</tbody></table>
+</div>
+<h2 id="re-exports"><a class="header" href="#re-exports">Re-exports</a></h2>
 <ul>
 <li>
-<p><a href="./core-iter-adapters-peekable-PeekableTrait.html">PeekableTrait</a></p>
-</li>
-<li>
-<p><a href="./core-iter-traits-collect-Extend.html">Extend</a></p>
-</li>
-<li>
-<p><a href="./core-iter-traits-collect-FromIterator.html">FromIterator</a></p>
-</li>
-<li>
-<p><a href="./core-iter-traits-collect-IntoIterator.html">IntoIterator</a></p>
-</li>
-<li>
-<p><a href="./core-iter-traits-iterator-Iterator.html">Iterator</a></p>
+<h3 id="traits"><a class="header" href="#traits">Traits</a></h3>
 </li>
 </ul>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-iter-adapters-peekable-PeekableTrait.html">PeekableTrait</a></td><td style="text-align: left"><a href="./core-iter-adapters-peekable-PeekableTrait.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-iter-traits-collect-Extend.html">Extend</a></td><td style="text-align: left">Extend a collection with the contents of an iterator. Iterators produce a series of values, and collections can also be thought of as a series of values. The <code>Extend</code><a href="./core-iter-traits-collect-Extend.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-iter-traits-collect-FromIterator.html">FromIterator</a></td><td style="text-align: left">Conversion from an <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a> . By implementing <code>FromIterator</code>  for a type, you define how it will be<a href="./core-iter-traits-collect-FromIterator.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-iter-traits-collect-IntoIterator.html">IntoIterator</a></td><td style="text-align: left">Conversion into an <a href="./core-iter-traits-iterator-Iterator.html"><code>Iterator</code></a> . By implementing <code>IntoIterator</code>  for a type, you define how it will be<a href="./core-iter-traits-collect-IntoIterator.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-iter-traits-iterator-Iterator.html">Iterator</a></td><td style="text-align: left">A trait for dealing with iterators. This is the main iterator trait. For more about the concept of iterators generally, please see the <a href="./core-iter.html">module-level documentation</a><a href="./core-iter-traits-iterator-Iterator.html">...</a></td></tr>
+</tbody></table>
+</div><br>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="core-string.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-string-StringLiteral.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-metaprogramming.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-iter-modules.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -289,11 +380,11 @@ let _ = v.into_iter().map(|x| println!("{x}"));
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="core-string.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-string-StringLiteral.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-metaprogramming.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-iter-modules.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

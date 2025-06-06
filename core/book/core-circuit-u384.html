@@ -31,21 +31,33 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +71,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +85,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,13 +122,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -154,37 +168,42 @@
                     <main>
                         <h1 id="u384"><a class="header" href="#u384">u384</a></h1>
 <p>A 384-bit unsigned integer, used for circuit values.</p>
-<p>Fully qualified path: <code>core::circuit::u384</code></p>
-<pre><code class="language-rust">#[derive(Copy, Drop, Debug, PartialEq)]
-pub struct u384 {
-    pub limb0: u96,
-    pub limb1: u96,
-    pub limb2: u96,
-    pub limb3: u96,
-}</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-circuit.html">circuit</a>::<a href="./core-circuit-u384.html">u384</a></p>
+<pre><code class="language-cairo"><span class="boring">[derive(Copy, Drop, Debug, PartialEq)]
+</span>pub struct u384 {
+    pub limb0: <a href="core-internal-bounded_int-BoundedInt.html">BoundedInt&lt;0, 79228162514264337593543950335&gt;</a>,
+    pub limb1: <a href="core-internal-bounded_int-BoundedInt.html">BoundedInt&lt;0, 79228162514264337593543950335&gt;</a>,
+    pub limb2: <a href="core-internal-bounded_int-BoundedInt.html">BoundedInt&lt;0, 79228162514264337593543950335&gt;</a>,
+    pub limb3: <a href="core-internal-bounded_int-BoundedInt.html">BoundedInt&lt;0, 79228162514264337593543950335&gt;</a>,
+}
+</code></pre>
 <h2 id="members"><a class="header" href="#members">Members</a></h2>
 <h3 id="limb0"><a class="header" href="#limb0">limb0</a></h3>
 <p>The least significant 96 bits</p>
-<p>Fully qualified path: <code>core::circuit::u384::limb0</code></p>
-<pre><code class="language-rust">pub limb0: u96</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-circuit.html">circuit</a>::<a href="./core-circuit-u384.html">u384</a>::<a href="./core-circuit-u384.html#limb0">limb0</a></p>
+<pre><code class="language-cairo">pub limb0: <a href="core-internal-bounded_int-BoundedInt.html">BoundedInt&lt;0, 79228162514264337593543950335&gt;</a>
+</code></pre>
 <h3 id="limb1"><a class="header" href="#limb1">limb1</a></h3>
 <p>Bits 96-191</p>
-<p>Fully qualified path: <code>core::circuit::u384::limb1</code></p>
-<pre><code class="language-rust">pub limb1: u96</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-circuit.html">circuit</a>::<a href="./core-circuit-u384.html">u384</a>::<a href="./core-circuit-u384.html#limb1">limb1</a></p>
+<pre><code class="language-cairo">pub limb1: <a href="core-internal-bounded_int-BoundedInt.html">BoundedInt&lt;0, 79228162514264337593543950335&gt;</a>
+</code></pre>
 <h3 id="limb2"><a class="header" href="#limb2">limb2</a></h3>
 <p>Bits 192-287</p>
-<p>Fully qualified path: <code>core::circuit::u384::limb2</code></p>
-<pre><code class="language-rust">pub limb2: u96</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-circuit.html">circuit</a>::<a href="./core-circuit-u384.html">u384</a>::<a href="./core-circuit-u384.html#limb2">limb2</a></p>
+<pre><code class="language-cairo">pub limb2: <a href="core-internal-bounded_int-BoundedInt.html">BoundedInt&lt;0, 79228162514264337593543950335&gt;</a>
+</code></pre>
 <h3 id="limb3"><a class="header" href="#limb3">limb3</a></h3>
 <p>The most significant 96 bits</p>
-<p>Fully qualified path: <code>core::circuit::u384::limb3</code></p>
-<pre><code class="language-rust">pub limb3: u96</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-circuit.html">circuit</a>::<a href="./core-circuit-u384.html">u384</a>::<a href="./core-circuit-u384.html#limb3">limb3</a></p>
+<pre><code class="language-cairo">pub limb3: <a href="core-internal-bounded_int-BoundedInt.html">BoundedInt&lt;0, 79228162514264337593543950335&gt;</a>
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="structs.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="core-circuit-structs.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
@@ -198,7 +217,7 @@ pub struct u384 {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="structs.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="core-circuit-structs.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 

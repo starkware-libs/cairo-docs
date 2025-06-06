@@ -1,0 +1,254 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Extern functions - The Cairo Core Library Docs</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">The Cairo Core Library Docs</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="extern-functions"><a class="header" href="#extern-functions"><a href="./core-starknet-syscalls-extern_functions.html">Extern functions</a></a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"></th><th style="text-align: left"></th></tr></thead><tbody>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-call_contract_syscall.html">call_contract_syscall</a></td><td style="text-align: left">Calls a given contract.<a href="./core-starknet-syscalls-call_contract_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-deploy_syscall.html">deploy_syscall</a></td><td style="text-align: left">Deploys a new instance of a previously declared class.<a href="./core-starknet-syscalls-deploy_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-emit_event_syscall.html">emit_event_syscall</a></td><td style="text-align: left">Emits an event.<a href="./core-starknet-syscalls-emit_event_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-get_block_hash_syscall.html">get_block_hash_syscall</a></td><td style="text-align: left">Returns the hash of the block with the given number.<a href="./core-starknet-syscalls-get_block_hash_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-get_execution_info_syscall.html">get_execution_info_syscall</a></td><td style="text-align: left">Gets information about the currently executing block and the transactions within it. For a complete description of this information, see <code>Execution information</code> . When an account’s <code>__validate__</code> ,<a href="./core-starknet-syscalls-get_execution_info_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-get_execution_info_v2_syscall.html">get_execution_info_v2_syscall</a></td><td style="text-align: left">Gets information about the current execution, version 2. This syscall should not be called directly. Instead, use <code>starknet::info::get_execution_info</code> .<a href="./core-starknet-syscalls-get_execution_info_v2_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-library_call_syscall.html">library_call_syscall</a></td><td style="text-align: left">Calls the requested function in any previously declared class.<a href="./core-starknet-syscalls-library_call_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-send_message_to_l1_syscall.html">send_message_to_l1_syscall</a></td><td style="text-align: left">Sends a message to L1.<a href="./core-starknet-syscalls-send_message_to_l1_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-storage_read_syscall.html">storage_read_syscall</a></td><td style="text-align: left">Gets the value of a key in the storage of the calling contract.<a href="./core-starknet-syscalls-storage_read_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-storage_write_syscall.html">storage_write_syscall</a></td><td style="text-align: left">Sets the value of a key in the storage of the calling contract.<a href="./core-starknet-syscalls-storage_write_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-replace_class_syscall.html">replace_class_syscall</a></td><td style="text-align: left">Replaces the class hash of the current contract, instantly modifying its entrypoints. The new class becomes effective only after the current function call completes.<a href="./core-starknet-syscalls-replace_class_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-get_class_hash_at_syscall.html">get_class_hash_at_syscall</a></td><td style="text-align: left">Gets the class hash of the contract at the given address.<a href="./core-starknet-syscalls-get_class_hash_at_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-keccak_syscall.html">keccak_syscall</a></td><td style="text-align: left">Computes the keccak of the input.<a href="./core-starknet-syscalls-keccak_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-sha256_process_block_syscall.html">sha256_process_block_syscall</a></td><td style="text-align: left">Computes the next SHA-256 state of the input with the given state.<a href="./core-starknet-syscalls-sha256_process_block_syscall.html">...</a></td></tr>
+<tr><td style="text-align: left"><a href="./core-starknet-syscalls-meta_tx_v0_syscall.html">meta_tx_v0_syscall</a></td><td style="text-align: left">Invokes the given entry point as a v0 meta transaction.<a href="./core-starknet-syscalls-meta_tx_v0_syscall.html">...</a></td></tr>
+</tbody></table>
+</div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="core-starknet-syscalls.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="core-starknet-syscalls-call_contract_syscall.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="core-starknet-syscalls.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="core-starknet-syscalls-call_contract_syscall.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

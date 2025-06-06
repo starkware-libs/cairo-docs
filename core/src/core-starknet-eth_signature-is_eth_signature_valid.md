@@ -1,6 +1,20 @@
 # is_eth_signature_valid
 
-Validates an Ethereum signature against a message hash and Ethereum address. Similar to `verify_eth_signature` but returns a `Result` instead of panicking. Also verifies that `r` and `s` components of the signature are in the range `[1, N)`, where N is the size of the curve.  # Arguments`msg_hash` - The 32-byte hash of the message that was signed * `signature` - The Ethereum signature containing `r`, `s` components and `y_parity` * `eth_address` - The expected Ethereum address of the signer  # ReturnsReturns `Ok(())` if the signature is valid, or `Err(felt252)` containing an error message if invalid.  # Examples
+Validates an Ethereum signature against a message hash and Ethereum address.
+Similar to `verify_eth_signature` but returns a `Result` instead of panicking.
+Also verifies that `r` and `s` components of the signature are in the range `[1, N)`,
+where N is the size of the curve.
+# Arguments
+
+- `msg_hash` - The 32-byte hash of the message that was signed
+- `signature` - The Ethereum signature containing `r`, `s` components and `y_parity`
+- `eth_address` - The expected Ethereum address of the signer
+# Returns
+
+Returns `Ok(())` if the signature is valid, or `Err(felt252)` containing an error message if
+invalid.
+# Examples
+
 ```cairo
 use starknet::eth_address::EthAddress;
 use starknet::eth_signature::is_eth_signature_valid;
@@ -16,9 +30,9 @@ let eth_address: EthAddress = 0x767410c1bb448978bd42b984d7de5970bcaf5c43_u256
 assert!(is_eth_signature_valid(msg_hash, Signature { r, s, y_parity }, eth_address).is_ok());
 ```
 
-Fully qualified path: `core::starknet::eth_signature::is_eth_signature_valid`
+Fully qualified path: [core](./core.md)::[starknet](./core-starknet.md)::[eth_signature](./core-starknet-eth_signature.md)::[is_eth_signature_valid](./core-starknet-eth_signature-is_eth_signature_valid.md)
 
-<pre><code class="language-rust">pub fn is_eth_signature_valid(
-    msg_hash: u256, signature: Signature, eth_address: EthAddress,
-) -&gt; Result&lt;(), felt252&gt;</code></pre>
+<pre><code class="language-cairo">pub fn is_eth_signature_valid(
+    msg_hash: <a href="core-integer-u256.html">u256</a>, signature: <a href="core-starknet-secp256_trait-Signature.html">Signature</a>, eth_address: <a href="core-starknet-eth_address-EthAddress.html">EthAddress</a>,
+) -&gt; <a href="core-result-Result.html">Result&lt;(), felt252&gt;</a></code></pre>
 

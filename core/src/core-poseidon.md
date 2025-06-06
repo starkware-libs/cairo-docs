@@ -1,6 +1,12 @@
 # poseidon
 
-Poseidon hash related traits implementations and functions.This module provides cryptographic hash functions based on the Poseidon permutation.The Poseidon hash function is an arithmetic-friendly hash function optimized for use in zero-knowledge proof systems. This module implements the Poseidon hash using a sponge construction for arbitrary-length inputs.  # Examples
+Poseidon hash related traits implementations and functions.
+This module provides cryptographic hash functions based on the Poseidon permutation.
+The Poseidon hash function is an arithmetic-friendly hash function optimized for use in
+zero-knowledge proof systems. This module implements the Poseidon hash using a sponge
+construction for arbitrary-length inputs.
+# Examples
+
 ```cairo
 use core::hash::HashStateTrait;
 use core::poseidon::PoseidonTrait;
@@ -16,29 +22,41 @@ state = state.update(2);
 let hash = state.finalize();
 ```
 
-Fully qualified path: `core::poseidon`
+Fully qualified path: [core](./core.md)::[poseidon](./core-poseidon.md)
 
-## Free functions
 
-- [poseidon_hash_span](./core-poseidon-poseidon_hash_span.md)
+[Free functions](./core-poseidon-free_functions.md)
+ ---
+| | |
+|:---|:---|
+| [poseidon_hash_span](./core-poseidon-poseidon_hash_span.md) | Computes the Poseidon hash on the given span input. Applies the sponge construction to digest many elements. To distinguish between use cases, the capacity element is initialized to 0.[...](./core-poseidon-poseidon_hash_span.md) |
 
-## Structs
+[Structs](./core-poseidon-structs.md)
+ ---
+| | |
+|:---|:---|
+| [HashState](./core-poseidon-HashState.md) | State for Poseidon hash.[...](./core-poseidon-HashState.md) |
 
-- [HashState](./core-poseidon-HashState.md)
+[Traits](./core-poseidon-traits.md)
+ ---
+| | |
+|:---|:---|
+| [PoseidonTrait](./core-poseidon-PoseidonTrait.md) | [...](./core-poseidon-PoseidonTrait.md) |
 
-## Traits
+[Impls](./core-poseidon-impls.md)
+ ---
+| | |
+|:---|:---|
+| [PoseidonImpl](./core-poseidon-PoseidonImpl.md) | A trait for creating a new Poseidon hash state.[...](./core-poseidon-PoseidonImpl.md) |
 
-- [PoseidonTrait](./core-poseidon-PoseidonTrait.md)
+[Extern types](./core-poseidon-extern_types.md)
+ ---
+| | |
+|:---|:---|
+| [Poseidon](./core-poseidon-Poseidon.md) | [...](./core-poseidon-Poseidon.md) |
 
-## Impls
-
-- [PoseidonImpl](./core-poseidon-PoseidonImpl.md)
-
-## Extern types
-
-- [Poseidon](./core-poseidon-Poseidon.md)
-
-## Extern functions
-
-- [hades_permutation](./core-poseidon-hades_permutation.md)
-
+[Extern functions](./core-poseidon-extern_functions.md)
+ ---
+| | |
+|:---|:---|
+| [hades_permutation](./core-poseidon-hades_permutation.md) | [...](./core-poseidon-hades_permutation.md) |

@@ -31,21 +31,33 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +71,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +85,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,13 +122,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -153,7 +167,20 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="felt252dictvalue"><a class="header" href="#felt252dictvalue">Felt252DictValue</a></h1>
-<p>A trait that must be implemented for any type that will be stored as a value in a <code>Felt252Dict</code>.When working with dictionaries in Cairo, we need a way to represent "empty" or "uninitialized" slots. This trait provides a zero-like default value that is returned when accessing a key that hasn't been explicitly set.  # Why is this needed?The <code>Felt252Dict</code> implementation needs to handle cases where a key hasn't been assigned a value yet. Instead of using <code>Option</code> or similar constructs, it uses a zero-like value specific to each type.This trait is only implemented for primitive scalar types and <code>Nullable&lt;T&gt;</code>. It cannot be implemented manually. Instead, if you want to use a custom type as a value in a dictionary, you can wrap your type in a <a href="./core-nullable-Nullable.html"><code>Nullable</code></a>, which implements <code>Felt252DictValue</code> for any wrapped type.  # Examples</p>
+<p>A trait that must be implemented for any type that will be stored as a value in a <code>Felt252Dict</code>.
+When working with dictionaries in Cairo, we need a way to represent "empty" or "uninitialized"
+slots. This trait provides a zero-like default value that is returned when accessing a key
+that hasn't been explicitly set.</p>
+<h1 id="why-is-this-needed"><a class="header" href="#why-is-this-needed">Why is this needed?</a></h1>
+<p>The <code>Felt252Dict</code> implementation needs to handle cases where a key hasn't been assigned a value
+yet.
+Instead of using <code>Option</code> or similar constructs, it uses a zero-like value specific to each
+type.
+This trait is only implemented for primitive scalar types and <code>Nullable&lt;T&gt;</code>. It cannot be
+implemented manually.
+Instead, if you want to use a custom type as a value in a dictionary, you can wrap your type in
+a <a href="./core-nullable-Nullable.html"><code>Nullable</code></a>, which implements <code>Felt252DictValue</code> for any wrapped type.</p>
+<h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
 <pre><code class="language-cairo">use core::dict::Felt252Dict;
 
 <span class="boring">[derive(Copy, Drop, Default)]
@@ -172,13 +199,16 @@
  let maybe_counter: Nullable&lt;Counter&gt; = counters.get(123);
  assert!(maybe_counter.deref_or(Default::default()).value == 0);
 </code></pre>
-<p>Fully qualified path: <code>core::traits::Felt252DictValue</code></p>
-<pre><code class="language-rust">pub trait Felt252DictValue&lt;T&gt;</code></pre>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-traits.html">traits</a>::<a href="./core-traits-Felt252DictValue.html">Felt252DictValue</a></p>
+<pre><code class="language-cairo">pub trait Felt252DictValue&lt;T&gt;
+</code></pre>
 <h2 id="trait-functions"><a class="header" href="#trait-functions">Trait functions</a></h2>
 <h3 id="zero_default"><a class="header" href="#zero_default">zero_default</a></h3>
-<p>Returns the default value for this type when used in a <code>Felt252Dict</code>. This value should be logically equivalent to zero or an "empty" state.</p>
-<p>Fully qualified path: <code>core::traits::Felt252DictValue::zero_default</code></p>
-<pre><code class="language-rust">fn zero_default() -&gt; T nopanic</code></pre>
+<p>Returns the default value for this type when used in a <code>Felt252Dict</code>.
+This value should be logically equivalent to zero or an "empty" state.</p>
+<p>Fully qualified path: <a href="./core.html">core</a>::<a href="./core-traits.html">traits</a>::<a href="./core-traits-Felt252DictValue.html">Felt252DictValue</a>::<a href="./core-traits-Felt252DictValue.html#zero_default">zero_default</a></p>
+<pre><code class="language-cairo">fn zero_default&lt;T, T&gt;() -&gt; T
+</code></pre>
 
                     </main>
 
@@ -188,7 +218,7 @@
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-boolean-BoolTrait.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-boolean.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -202,7 +232,7 @@
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-boolean-BoolTrait.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-boolean.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

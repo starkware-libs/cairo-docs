@@ -31,21 +31,33 @@
         <!-- Custom theme stylesheets -->
 
 
-        <!-- Provide site root to javascript -->
+        <!-- Provide site root and default themes to javascript -->
         <script>
-            var path_to_root = "";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
     </head>
     <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
     <div id="body-container">
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                var theme = localStorage.getItem('mdbook-theme');
-                var sidebar = localStorage.getItem('mdbook-sidebar');
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -59,7 +71,8 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            var theme;
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
@@ -72,8 +85,8 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var sidebar = null;
-            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -109,13 +122,14 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
                         </ul>
-                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
                             <i class="fa fa-search"></i>
                         </button>
                     </div>
@@ -153,7 +167,12 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="fnonce"><a class="header" href="#fnonce">FnOnce</a></h1>
-<p>The version of the call operator that takes a by-value receiver.Instances of <code>FnOnce</code> can be called, but might not be callable multiple times. Because of this, if the only thing known about a type is that it implements <code>FnOnce</code>, it can only be called once.<code>FnOnce</code> is implemented automatically by closures that might consume captured variables.</p>
+<p>The version of the call operator that takes a by-value receiver.
+Instances of <code>FnOnce</code> can be called, but might not be callable multiple
+times. Because of this, if the only thing known about a type is that it
+implements <code>FnOnce</code>, it can only be called once.
+<code>FnOnce</code> is implemented automatically by closures that might consume captured
+variables.</p>
 <pre><code class="language-cairo"><span class="boring"> Examples
 </span>
 fn consume_with_relish&lt;
@@ -173,20 +192,35 @@ fn consume_with_relish&lt;
   let x: ByteArray = "x";
   let consume_and_return_x = || x;
   consume_with_relish(consume_and_return_x);
-  // `consume_and_return_x` can no longer be invoked at this point
+  // `consume_and_return_x` can no longer be invoked at this point```
+
+Fully qualified path: [core](./core.md)::[ops](./core-ops.md)::[function](./core-ops-function.md)::[FnOnce](./core-ops-function-FnOnce.md)
+
+&lt;pre&gt;&lt;code class="language-cairo"&gt;pub trait FnOnce&amp;lt;T, Args&amp;gt;&lt;/code&gt;&lt;/pre&gt;
+
+<span class="boring"># Trait functions
+</span>
+<span class="boring">## call
+</span>
+Performs the call operation.
+
+Fully qualified path: [core](./core.md)::[ops](./core-ops.md)::[function](./core-ops-function.md)::[FnOnce](./core-ops-function-FnOnce.md)::[call](./core-ops-function-FnOnce.md#call)
+
+&lt;pre&gt;&lt;code class="language-cairo"&gt;fn call&amp;lt;T, Args, T, Args&amp;gt;(self: T, args: Args) -&amp;gt; &lt;a href="core-ops-function-FnOnce.html"&gt;FnOnce&amp;lt;T, Args&amp;gt;Output&lt;/a&gt;&lt;/code&gt;&lt;/pre&gt;
+
+
+<span class="boring"># Trait types
+</span>
+<span class="boring">## Output
+</span>
+The returned type after the call operator is used.
+
+Fully qualified path: [core](./core.md)::[ops](./core-ops.md)::[function](./core-ops-function.md)::[FnOnce](./core-ops-function-FnOnce.md)::[Output](./core-ops-function-FnOnce.md#output)
+
+&lt;pre&gt;&lt;code class="language-cairo"&gt;type Output;&lt;/code&gt;&lt;/pre&gt;
+
+
 </code></pre>
-<p>Fully qualified path: <code>core::ops::function::FnOnce</code></p>
-<pre><code class="language-rust">pub trait FnOnce&lt;T, Args&gt;</code></pre>
-<h2 id="trait-functions"><a class="header" href="#trait-functions">Trait functions</a></h2>
-<h3 id="call"><a class="header" href="#call">call</a></h3>
-<p>Performs the call operation.</p>
-<p>Fully qualified path: <code>core::ops::function::FnOnce::call</code></p>
-<pre><code class="language-rust">fn call(self: T, args: Args) -&gt; Self::Output</code></pre>
-<h2 id="trait-types"><a class="header" href="#trait-types">Trait types</a></h2>
-<h3 id="output"><a class="header" href="#output">Output</a></h3>
-<p>The returned type after the call operator is used.</p>
-<p>Fully qualified path: <code>core::ops::function::FnOnce::Output</code></p>
-<pre><code class="language-rust">type Output;</code></pre>
 
                     </main>
 
@@ -196,7 +230,7 @@ fn consume_with_relish&lt;
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="core-ops-index-Index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="core-panics.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -210,7 +244,7 @@ fn consume_with_relish&lt;
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="core-ops-index-Index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="core-panics.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

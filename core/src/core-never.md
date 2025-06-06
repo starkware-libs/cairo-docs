@@ -1,6 +1,6 @@
 # never
 
-Fully qualified path: `core::never`
+Fully qualified path: [core](./core.md)::[never](./core-never.md)
 
-<pre><code class="language-rust">pub enum never {}</code></pre>
+<pre><code class="language-cairo">pub enum never {}</code></pre>
 
