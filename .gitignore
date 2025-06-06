@@ -1,7 +1,0 @@
-/.vscode/
-build/
-public_html/
-/.idea/
-node_modules/
-.DS_Store
-ui/ui-bundle.zip

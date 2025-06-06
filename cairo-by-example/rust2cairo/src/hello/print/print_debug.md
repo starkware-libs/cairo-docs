@@ -1,6 +1,6 @@
 # Debug
 
-`fmt::Debug` in Cairo is identical to [Rust](https://doc.rust-lang.org/rust-by-example/hello/print/print_debug.html):
+This is the Cairo adaptation of [Rust By Example's _Debug_ chapter](https://doc.rust-lang.org/rust-by-example/print_debug.html):
 
 ```cairo,editable
 {{#include ../../../listings/hello/print/print_debug/src/lib.cairo}}

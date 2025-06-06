@@ -1,6 +1,6 @@
 # Display
 
-`fmt::Display` in Cairo is identical to [Rust](https://doc.rust-lang.org/rust-by-example/hello/print/print_display.html):
+This is the Cairo adaptation of [Rust By Example's _Display_ chapter](https://doc.rust-lang.org/rust-by-example/hello.html):
 
 ```cairo, editable
 {{#include ../../../listings/hello/print/print_display/src/lib.cairo:main}}

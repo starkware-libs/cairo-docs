@@ -1,6 +1,8 @@
 # Comments
 
-The same comment varieties supported in [Rust]((https://doc.rust-lang.org/rust-by-example/hello.html)) are supported in Cairo, except for regular block comments:
+This is the Cairo adaptation of [Chapter 1.1 of Rust By Example](https://doc.rust-lang.org/rust-by-example/hello/comment.html):
+
+> Note: Cairo does not support regular block comments
 
 ```cairo,editable
 {{#include ../../listings/hello/comment/src/lib.cairo}}

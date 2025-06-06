@@ -1,10 +1,12 @@
 # Formatted print
 
-Printing in Cairo is handled similarly to [Rust](https://doc.rust-lang.org/rust-by-example/hello/print.html), except:
+This is the Cairo adaptation of [Chapter 1.2 of Rust By Example](https://doc.rust-lang.org/rust-by-example/hello/print.html):
 
-- [`macros`][macros] are defined in [`core::fmt`][fmt] instead of `std::fmt`
-- `format!` writes formatted text to [`ByteArray`][bytearray] instead of `String`
-- `eprint!` and `eprintln!` are not supported
+
+> Note:
+> - [`macros`][macros] are defined in [`core::fmt`][fmt] instead of `std::fmt`
+> - `format!` writes formatted text to [`ByteArray`][bytearray] instead of `String`
+> - `eprint!` and `eprintln!` are not supported
 
 ```cairo,editable
 {{#include ../../listings/hello/print/src/lib.cairo}}

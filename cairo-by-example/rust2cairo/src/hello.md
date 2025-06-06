@@ -1,26 +1,10 @@
 # Hello World
 
-The source code of the traditional Hello World program in Cairo is identical to the one in [Rust](https://doc.rust-lang.org/rust-by-example/hello.html):
+This is the Cairo adaptation of [Chapter 1 of Rust By Example](https://doc.rust-lang.org/rust-by-example/hello.html):
 
 ```cairo,editable
 {{#include ../listings/hello/hello/src/lib.cairo}}
 ```
-
-<!-- `println!` is a [_macro_][macros] that prints text to the
-console.
-
-A compiled program can be generated using the Cairo compiler through Scarb: `scarb build`.
-
-```bash
-$ scarb build
-```
-
-`scarb build` will produce a `hello` binary that can be executed.
-`scarb cairo-run` will run the program.
-
-```bash
-$ scarb cairo-run
-``` -->
 
 ### Activity
 

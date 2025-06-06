@@ -1,6 +1,9 @@
 # Testcase: List
 
-Implementing `fmt::Display` for a structure where the elements must each be handled sequentially in Cairo is similar to [Rust](https://doc.rust-lang.org/rust-by-example/hello/print/print_display/testcase_list.html), except that the `?` operator does not work inside loops. Instead, you can `break` with the `Err` value to exit the loop, and use the `?` operator on the returned value:
+This is the Cairo adaptation of [Chapter 1.2.2.1 of Rust By Example](https://doc.rust-lang.org/rust-by-example/hello/print/print_display/testcase_list.html):
+
+
+>  In Cairo, the `?` operator does not work inside loops. Instead, you can `break` with the `Err` value to exit the loop, and use the `?` operator on the returned value.
 
 ```cairo
 {{#include ../../../../listings/hello/print/testcase_list/src/lib.cairo}}

@@ -1,8 +1,8 @@
 # Formatting
 
-Specifying formatting via a format string in Cairo is similar to [Rust](https://doc.rust-lang.org/rust-by-example/hello/print/fmt.html), except that the `{:o}` string is not supported:
+This is the Cairo adaptation of [Rust By Example's _Formatting_ chapter](https://doc.rust-lang.org/rust-by-example/print/fmt.html):
 
-<!-- > You can view a full list of formatting traits and their argument types in the [`core::fmt` documentation][fmt_traits]. -->
+> Cairo does not support the `{:o}` string
 
 ```cairo,editable
 {{#include ../../../listings/hello/print/fmt/src/lib.cairo}}
