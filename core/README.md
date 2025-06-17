@@ -39,3 +39,9 @@ To update the docs:
     ```
     mdbook build
     ```
+
+7. Replace `highlight.js` in the new book:
+    ```
+    cp highlight.js book/highlight.js
+    ```
+
